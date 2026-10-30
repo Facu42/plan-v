@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-30)
 
+30/10 · Cursor · Landing de Nutridash para nutricionistas en `/nutricionistas` (`nutricionistas/index.html`), rama `work/landing-nutridash`. La página de pacientes sigue en `/pacientes`. Precios de Arranque, Pro y Consultorio, sin prueba y sin testimonios. No se tocó producción.
+
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
 

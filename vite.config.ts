@@ -1,8 +1,11 @@
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
-// Página pública aparte: /pacientes (pacientes.html), sin sesión ni app.
-const PUBLIC_ROUTES: Record<string, string> = { '/pacientes': '/pacientes/index.html' };
+// Páginas públicas aparte, sin sesión ni app: /pacientes y /nutricionistas.
+const PUBLIC_ROUTES: Record<string, string> = {
+  '/pacientes': '/pacientes.html',
+  '/nutricionistas': '/nutricionistas/index.html',
+};
 const publicRoutes = {
   name: 'plan-v-public-routes',
   configureServer(server: { middlewares: { use: (fn: (req: { url?: string }, res: unknown, next: () => void) => void) => void } }) {
@@ -18,7 +21,11 @@ export default defineConfig({
   plugins: [publicRoutes],
   build: {
     rollupOptions: {
-      input: { main: resolve(__dirname, 'index.html') },
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        pacientes: resolve(__dirname, 'pacientes.html'),
+        nutricionistas: resolve(__dirname, 'nutricionistas/index.html'),
+      },
     },
   },
   server: {

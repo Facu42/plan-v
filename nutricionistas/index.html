@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#143028" />
+    <title>Nutridash para nutricionistas</title>
+    <meta name="description" content="Nutridash es la app de tu consultorio. El panel resume a cada paciente y sugiere qué mirar. Ellas tienen el menú, la lista de compras, los recordatorios y las fotos de las comidas." />
+    <meta property="og:title" content="Nutridash para nutricionistas" />
+    <meta property="og:description" content="El panel de tu consultorio y la app de tus pacientes, en un solo lugar." />
+    <meta property="og:image" content="/landing/consultorio.jpg" />
+    <link rel="icon" href="/icons/icon-192.png" />
+  </head>
+  <body class="nd">
+    <a class="nd-skip" href="#contenido">Ir al contenido</a>
+
+    <header class="nd-bar">
+      <a class="nd-mark" href="/nutricionistas">Nutridash</a>
+      <nav class="nd-nav" aria-label="Secciones">
+        <a href="#panel">Tu panel</a>
+        <a href="#app">La app</a>
+        <a href="#precios">Precios</a>
+      </nav>
+      <a class="nd-go" href="/">Crear mi consultorio</a>
+    </header>
+
+    <main id="contenido">
+      <section class="nd-hero" aria-labelledby="hero-titulo">
+        <div class="nd-hero__copy">
+          <h1 id="hero-titulo">El panel lee la semana de cada paciente antes de la consulta.</h1>
+          <p class="nd-lead">Nutridash es la app de tu consultorio. Resume lo que pasó, te sugiere qué mirar, y cada paciente tiene su menú, la lista de compras, los recordatorios y las fotos de las comidas.</p>
+          <div class="nd-actions">
+            <a class="nd-go" href="/">Crear mi consultorio</a>
+            <a class="nd-text" href="#precios">Ver precios</a>
+          </div>
+          <p class="nd-aside">No hay período de prueba. El precio está en esta página, antes de crear la cuenta.</p>
+        </div>
+
+        <aside class="nd-sheet" aria-label="Ejemplo de lo que muestra el panel. No es una paciente real.">
+          <p class="nd-sheet__label">Ejemplo. No es una paciente real.</p>
+          <h2>Antes de que entre</h2>
+          <ol>
+            <li>
+              <span>Resumen</span>
+              <p>Hay fotos de comidas y un día de la semana sin registro.</p>
+            </li>
+            <li>
+              <span>Para mirar</span>
+              <p>La lista de compras quedó a medias. Mañana el turno es por videollamada.</p>
+            </li>
+            <li>
+              <span>Comentario</span>
+              <p>Dejale una nota en el hilo. Ella la lee en su app, no en el chat del teléfono.</p>
+            </li>
+          </ol>
+        </aside>
+      </section>
+
+      <section class="nd-block" id="panel" aria-labelledby="panel-titulo">
+        <div class="nd-block__intro">
+          <h2 id="panel-titulo">Tu panel</h2>
+          <p class="nd-lead">Un lugar para preparar la consulta. La inteligencia artificial propone. Vos confirmás.</p>
+        </div>
+        <div class="nd-panel">
+          <figure>
+            <img src="/landing/consultorio.jpg" alt="Consultorio con escritorio, plantas y luz de día. La foto es ilustrativa." width="1696" height="960" />
+          </figure>
+          <ul class="nd-points">
+            <li>
+              <h3>Resumen de cada paciente</h3>
+              <p>La IA junta la semana y sugiere acciones. Nada se confirma solo: lo revisás vos.</p>
+            </li>
+            <li>
+              <h3>Seguimiento</h3>
+              <p>Comidas, mensajes y lo que falta mirar quedan en la misma ficha.</p>
+            </li>
+            <li>
+              <h3>Videollamadas</h3>
+              <p>El turno queda en la agenda y el enlace de la llamada queda en ese turno.</p>
+            </li>
+            <li>
+              <h3>Comentarios</h3>
+              <p>Le escribís en el hilo de la app. No se mezcla con WhatsApp.</p>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="nd-block" id="app" aria-labelledby="app-titulo">
+        <div class="nd-block__intro">
+          <h2 id="app-titulo">La app de tu paciente</h2>
+          <p class="nd-lead">Ella entra con el enlace que le mandás. No se registra por su cuenta.</p>
+        </div>
+        <ul class="nd-apps">
+          <li>
+            <h3>Menú</h3>
+            <p>La semana que publicaste, con las recetas, en el celular.</p>
+          </li>
+          <li>
+            <h3>Lista de compras</h3>
+            <p>Sale de ese menú. La tilda en el súper.</p>
+          </li>
+          <li>
+            <h3>Recordatorios</h3>
+            <p>El celular le avisa la consulta y lo que quedó pendiente en la app.</p>
+          </li>
+          <li>
+            <h3>Fotos y macros</h3>
+            <p>Saca una foto y Nutridash estima los macros. La estimación queda en revisión hasta que la confirmás o la ajustás.</p>
+          </li>
+        </ul>
+        <p class="nd-aside">Si sos paciente, tu página es <a href="/pacientes">Nutridash para pacientes</a>. El enlace te lo manda tu nutricionista.</p>
+      </section>
+
+      <section class="nd-block" id="precios" aria-labelledby="precios-titulo">
+        <div class="nd-block__intro">
+          <h2 id="precios-titulo">Tres planes. Sin período de prueba.</h2>
+          <p class="nd-lead">Los precios son en pesos, por mes. Si pagás el año junto, son 12 meses con 20% menos.</p>
+        </div>
+
+        <div class="nd-cycles" role="group" aria-label="Cómo pagar">
+          <button type="button" data-cycle="mes" aria-pressed="true">Por mes</button>
+          <button type="button" data-cycle="ano" aria-pressed="false">Por año, 20% menos</button>
+        </div>
+
+        <table class="nd-prices">
+          <caption>Planes de Nutridash para el consultorio</caption>
+          <thead>
+            <tr>
+              <th scope="col">Plan</th>
+              <th scope="col">Precio</th>
+              <th scope="col">Incluye</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">Arranque</th>
+              <td>
+                <strong data-mes>$24.900</strong>
+                <strong data-ano>$239.040</strong>
+                <span data-mes>por mes</span>
+                <span data-ano>por año, equivale a $19.920 por mes</span>
+              </td>
+              <td>Hasta 25 pacientes activos. Una nutricionista.</td>
+            </tr>
+            <tr>
+              <th scope="row">Pro</th>
+              <td>
+                <strong data-mes>$49.900</strong>
+                <strong data-ano>$479.040</strong>
+                <span data-mes>por mes</span>
+                <span data-ano>por año, equivale a $39.920 por mes</span>
+              </td>
+              <td>Hasta 120 pacientes activos. Una nutricionista.</td>
+            </tr>
+            <tr>
+              <th scope="row">Consultorio</th>
+              <td>
+                <strong data-mes>$89.900</strong>
+                <strong data-ano>$863.040</strong>
+                <span data-mes>por mes</span>
+                <span data-ano>por año, equivale a $71.920 por mes</span>
+              </td>
+              <td>Pacientes activos sin tope. Hasta tres nutricionistas.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="nd-fine">Paciente activo es quien tuvo actividad en los últimos 30 días. Crear la ficha también ocupa un lugar durante esos 30 días.</p>
+        <p class="nd-fine">Las primeras 30 nutricionistas tienen 40% de descuento durante 12 meses: Arranque $14.940 por mes o $179.280 al año, Pro $29.940 o $359.280, Consultorio $53.940 o $647.280. Ese 40% no se suma al 20% del pago anual. Se usa uno o el otro.</p>
+      </section>
+
+      <section class="nd-block nd-start" aria-labelledby="empezar-titulo">
+        <h2 id="empezar-titulo">Cómo empezar</h2>
+        <ol>
+          <li>
+            <h3>Creás tu consultorio</h3>
+            <p>Desde la misma entrada de la app, como nutricionista.</p>
+          </li>
+          <li>
+            <h3>Invitás con un enlace</h3>
+            <p>Cada paciente abre el suyo. No tiene que buscar la app en una tienda.</p>
+          </li>
+          <li>
+            <h3>Ves la semana</h3>
+            <p>Ella tiene el menú. Vos llegás a la consulta con el resumen.</p>
+          </li>
+        </ol>
+        <div class="nd-actions">
+          <a class="nd-go" href="/">Crear mi consultorio</a>
+          <a class="nd-text" href="/">Ya tengo cuenta</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="nd-foot">
+      <p class="nd-mark">Nutridash</p>
+      <p>Hecha en Argentina, junto a la Lic. Verónica Trenti.</p>
+      <p>La foto del consultorio es ilustrativa. Las estimaciones de las fotos de comida son orientativas y no reemplazan tu indicación.</p>
+      <nav aria-label="Legales y pacientes">
+        <a href="/legal/privacidad.html">Privacidad</a>
+        <a href="/legal/terminos.html">Términos</a>
+        <a href="/pacientes">Para pacientes</a>
+      </nav>
+    </footer>
+
+    <script type="module" src="/src/landing/nutricionistas.ts"></script>
+  </body>
+</html>
