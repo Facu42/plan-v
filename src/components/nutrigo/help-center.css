@@ -27,4 +27,4 @@
 
 #pv-panel-v29 .help-dialog footer .sp{flex:1}
 /* El contenedor anterior de CRM redefine estas tintas; Ayuda hereda las del shell v29. */
-#pv-panel-v29 #pv-panel:has(#s-ayuda){--ink:inherit;--ink2:inherit}
+#pv-panel-v29 #pv-panel:has(#s-ayuda){--ink:inherit;--ink2:inherit;--line:inherit;--line2:inherit}

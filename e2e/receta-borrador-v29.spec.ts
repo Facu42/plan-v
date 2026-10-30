@@ -1,0 +1,43 @@
+import { test, expect } from '@playwright/test';
+import { enterDemo } from './helpers';
+test('agrega una receta al borrador conservando comidas y plan publicado',async({page})=>{
+ await enterDemo(page,'/crm/plan?planes=recetas');
+ await page.locator('.side a[href="/crm/plan"]').first().click();
+ await expect(page.locator('.r29-table')).toBeVisible();
+ await page.locator('.side a[href="/crm/plan?planes=recetas"]').click();
+ await expect(page.locator('#pwrap.pv2')).toBeVisible();
+ const before=(await(await page.request.get('/api/patients/pat-sofia/plans?audience=pro')).json()).plan;
+ const title=`Receta borrador ${Date.now()}`;
+ const created=await page.request.post('/api/recipes',{data:{id:crypto.randomUUID(),title,yield_portions:1,steps:['Cocinar y servir'],items:[{name:'Arroz',quantity:100,unit:'g'}],nutrient_source:''}});
+ expect(created.ok()).toBeTruthy();const recipe=(await created.json()).recipe;
+ expect((await page.request.post(`/api/recipes/${recipe.id}/publish`,{data:{expected_version:recipe.current.version,expected_revision:recipe.current.revision}})).ok()).toBeTruthy();
+ await enterDemo(page,'/crm/plan?planes=recetas');
+ await page.getByRole('searchbox',{name:'Buscar recetas',exact:true}).fill(title);
+ await page.locator('.prc').filter({hasText:title}).click();
+ await page.getByRole('button',{name:/Agregar al plan de/}).click();
+ const modal=page.getByRole('dialog');
+ await modal.getByLabel('Paciente',{exact:true}).selectOption('pat-sofia');
+ await modal.getByLabel('Día',{exact:true}).fill(before.current.period_start);
+ await modal.getByLabel('Comida',{exact:true}).selectOption('Almuerzo');
+ await modal.getByLabel(/Reemplazar la comida existente/).check();
+ await modal.getByRole('button',{name:'Agregar al borrador',exact:true}).click();
+ await expect(modal).not.toBeVisible();
+ const after=(await(await page.request.get('/api/patients/pat-sofia/plans?audience=pro')).json()).plan;
+ expect(after.current.status).toBe('draft');expect(after.published).toEqual(before.published);
+ expect(after.current.items.find((x:{for_date:string;slot:string})=>x.for_date===before.current.period_start&&x.slot==='Almuerzo').recipe_id).toBe(recipe.id);
+ const preserved=before.current.items.filter((x:{for_date:string;slot:string})=>x.for_date!==before.current.period_start||x.slot!=='Almuerzo');
+ for(const original of preserved) expect(after.current.items.find((x:{for_date:string;slot:string})=>x.for_date===original.for_date&&x.slot===original.slot)).toMatchObject({free_text:original.free_text,public_note:original.public_note});
+});
+
+test('las dos pestañas se pueden usar en móvil de 390 sin desborde horizontal',async({page})=>{
+ await page.setViewportSize({width:390,height:844});
+ await enterDemo(page,'/crm/plan');
+ await page.locator('#pview').getByRole('button',{name:'Recetas',exact:true}).click();
+ await expect(page.locator('#pwrap.pv2')).toBeVisible();
+ expect(await page.locator('#pv-panel-v29').evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBeTruthy();
+ await page.screenshot({path:'/tmp/planv-recetas-v29-mobile.png',fullPage:true});
+ await page.locator('#pview').getByRole('button',{name:'Equivalencias',exact:true}).click();
+ await expect(page.getByRole('heading',{name:'Calculadora de equivalencias',exact:true})).toBeVisible();
+ expect(await page.locator('#pv-panel-v29').evaluate(el=>el.scrollWidth<=el.clientWidth+1)).toBeTruthy();
+ await page.screenshot({path:'/tmp/planv-equivalencias-v29-mobile.png',fullPage:true});
+});

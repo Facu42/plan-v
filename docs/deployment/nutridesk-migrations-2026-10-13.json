@@ -157,6 +157,11 @@
       "version": "20261029120000",
       "file": "20261029120000_scheduled_messages.sql",
       "sha256": "c3837dac464022b4011487b0669d25e3521e3482e843b3e393f77fc1463a6a86"
+    },
+    {
+      "version": "20261029195500",
+      "file": "20261029195500_nutrition_exchange_visibility.sql",
+      "sha256": "b7cc4f98ca5fffcb7fcc3664b655059a4b04a6856f34ee2c3920cb6305dfccc8"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

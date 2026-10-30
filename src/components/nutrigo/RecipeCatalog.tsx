@@ -204,6 +204,13 @@ export function useRecipeCatalog(patientId: string) {
   function quickAiDraft() { if (!canLeaveWorkspace()) return; setPath('ai'); setEditing(null); setError(''); setStatus(''); }
   function submitAi(event: FormEvent) { event.preventDefault(); generateAiProposal(description.trim()); }
 
+  // El cajón v29 confirma antes de iniciar su animación de cierre. Este cierre separado
+  // evita una segunda pregunta; el lock conserva la protección si se inicia una escritura.
+  function closeEditorAfterConfirmation() {
+    if (lock.current) return;
+    setEditing(null); setPath(null); if (!pendingAiJob) setDescription('');
+  }
+
   return {
     patientId, recipes, source, imageGeneration, error, status, busy, editing, path, description, assigning, day, slot, aiProgress, pendingAiJob, aiWarnings, foods, foodsError, foodsLoading,
     reloadFoods: () => setFoodsAttempt(value => value + 1),
@@ -218,7 +225,8 @@ export function useRecipeCatalog(patientId: string) {
     startNew: () => { if (!canLeaveWorkspace()) return; setPath('choose'); setEditing(null); setAiWarnings([]); setStatus(''); setError(''); },
     chooseManual: () => { if (!canLeaveWorkspace()) return; const draft = emptyDraft(); setPath('manual'); setEditing(draft); setAiWarnings([]); setEditorBaseline(JSON.stringify(draft)); },
     chooseAi: () => { if (!canLeaveWorkspace()) return; setPath('ai'); setEditing(null); },
-    closeEditor: () => { if (!canLeaveWorkspace()) return; setEditing(null); setPath(null); if (!pendingAiJob) setDescription(''); },
+    closeEditor: () => { if (!canLeaveWorkspace()) return; closeEditorAfterConfirmation(); },
+    closeEditorAfterConfirmation,
     startEdit: (recipe: ProfessionalRecipe) => { if (!canLeaveWorkspace()) return; openStored(recipe); setAiWarnings([]); setPath('manual'); setStatus(''); setError(''); },
     publish: (recipe: ProfessionalRecipe) => {
       if (editing?.id === recipe.id && JSON.stringify(editing) !== editorBaseline) { setError('Guardá y revisá los cambios de esta receta antes de publicar.'); return; }

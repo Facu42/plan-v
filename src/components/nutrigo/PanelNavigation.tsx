@@ -51,8 +51,8 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
         { label: 'Pedidos de cambio', href: '/crm/plan?planes=pedidos' },
       ] },
       { label: 'Alimentos', glyph: 'fork', href: '/crm/alimentos' },
-      { label: 'Recetas', glyph: 'fork', href: '/crm/biblioteca?biblioteca=recetas' },
-      { label: 'Equivalencias', glyph: 'swap', href: '/crm/desarrollo?modulo=equivalencias' },
+      { label: 'Recetas', glyph: 'fork', href: '/crm/plan?planes=recetas' },
+      { label: 'Equivalencias', glyph: 'swap', href: '/crm/plan?planes=equivalencias' },
       { label: 'Modelos', glyph: 'copy', href: '/crm/modelos' },
     ] },
     { title: 'Recursos', items: [

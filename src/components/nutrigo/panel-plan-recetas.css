@@ -1,0 +1,9 @@
+/* La foto puede faltar en los datos reales; conserva el espacio de pImg sin inventarla. */
+#pv-panel-v29 #s-planes .pr-sin-foto { background:var(--app); color:var(--ink3); padding:16px; }
+/* El editor existente conserva cantidades, referencias de alimentos y revisión nutricional. */
+#pv-panel-v29 #act .recipe-form { font:inherit; color:var(--ink); }
+#pv-panel-v29 #act .recipe-form label { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+#pv-panel-v29 #act .recipe-form :is(input,select,textarea) { font:inherit; color:var(--ink); background:var(--app); border:1px solid var(--line2); border-radius:10px; padding:10px 12px; width:100%; }
+#pv-panel-v29 #act .recipe-form textarea { min-height:84px; resize:vertical; }
+#pv-panel-v29 #act .recipe-form fieldset { border:0; margin:0; padding:0; min-width:0; }
+#pv-panel-v29 #act .recipe-form footer { display:flex; gap:8px; margin-top:16px; }

@@ -2,7 +2,7 @@ import type { Patient } from '../../types';
 import { eachIsoDate, planWeekIndex, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 
 /** Lo que la parte 1 muestra. El editor y el asistente quedan para las partes 2 y 3. */
-export type VistaPlanes = 'lista' | 'plan' | 'plantillas' | 'equivalencias';
+export type VistaPlanes = 'lista' | 'plan' | 'recetas' | 'plantillas' | 'equivalencias';
 export type EstadoPlan = 'Sin plan' | 'Borrador' | 'Por vencer' | 'Publicado';
 export type FiltroPlanes = 'todos' | 'publicados' | 'borradores' | 'por-vencer' | 'sin-plan';
 export type OrdenPlanes = 'nombre' | 'atencion';

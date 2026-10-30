@@ -1,3 +1,8 @@
+import { canLeaveWorkspace } from './unsaved-changes';
+import { PanelPlanRecetas } from './PanelPlanRecetas';
+import { PanelPlanEquivalencias } from './PanelPlanEquivalencias';
+import { PanelPlanAgregarReceta } from './PanelPlanAgregarReceta';
+import type { ProfessionalRecipe } from '../../types/recipes';
 import { CatalogoPlantillas } from './PanelPlanReutilizar';
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { plansApi } from '../../api/plans';
@@ -21,9 +26,11 @@ function Encabezado({ titulo, meta }: { titulo: string; meta?: string }) {
 
 export function PanelPlanesVista({
   vista, nombre, filas, consulta, orden, filtro, aviso, error, tareas,
-  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar,   onEditor, onAsistente, onArmar, onReintentar, editor = null, armar = null, plantillas = null, creando = false, asistenteAbierto = false,
+  onVista, onRecetas, onConsulta, onOrden, onFiltro, onLimpiar,   onEditor, onAsistente, onArmar, onReintentar, editor = null, armar = null, plantillas = null, recetas = null, equivalencias = null, creando = false, asistenteAbierto = false,
 }: {
   editor?: ReactNode;
+  recetas?: ReactNode;
+  equivalencias?: ReactNode;
   plantillas?: ReactNode;
   vista: VistaPlanes;
   nombre: string;
@@ -55,15 +62,16 @@ export function PanelPlanesVista({
     <nav id="pview" className="tabs" role="navigation" aria-label="Secciones de Planes">
       <button type="button" className={!creando && vista === 'lista' ? 'on' : undefined} aria-current={!creando && vista === 'lista' ? 'page' : 'false'} onClick={() => onVista('lista')}>Todos los planes</button>
       <button type="button" className={!creando && vista === 'plan' ? 'on' : undefined} aria-current={!creando && vista === 'plan' ? 'page' : 'false'} onClick={() => onVista('plan')}>Plan de {nombre}</button>
-      <button type="button" onClick={onRecetas}>Recetas</button>
+      <button type="button" className={vista === 'recetas' ? 'on' : undefined} aria-current={vista === 'recetas' ? 'page' : 'false'} onClick={onRecetas}>Recetas</button>
       <button type="button" className={vista === 'plantillas' ? 'on' : undefined} aria-current={vista === 'plantillas' ? 'page' : 'false'} onClick={() => onVista('plantillas')}>Plantillas</button>
       <button type="button" className={vista === 'equivalencias' ? 'on' : undefined} aria-current={vista === 'equivalencias' ? 'page' : 'false'} onClick={() => onVista('equivalencias')}>Equivalencias</button>
     </nav>
-    <div id="pwrap" className={creando ? 'pv5' : vista === 'plan' ? 'pe-dia' : undefined}>
+    <div id="pwrap" className={creando ? 'pv5' : vista === 'plan' ? 'pe-dia' : vista === 'recetas' ? 'pv2' : vista === 'equivalencias' ? 'pv4' : undefined}>
       {aviso ? <p className="mhelp" role="status">{aviso}</p> : null}
       {creando ? armar : vista === 'plan' ? editor : null}
       {vista === 'plantillas' ? plantillas : null}
-      {vista === 'equivalencias' ? <section className="fxp"><Encabezado titulo="Equivalencias" /><p className="mhelp">Próximamente. La calculadora de equivalencias sigue en su módulo.</p></section> : null}
+      {vista === 'recetas' ? recetas : null}
+      {vista === 'equivalencias' ? equivalencias : null}
       {vista === 'lista' && !creando ? <div className="fx">
         <div className="c">
           <section className="fxp g">
@@ -125,14 +133,18 @@ export function PanelPlanesVista({
   </div>;
 }
 
-export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false, onOpen, onHeader }: {
+export function PanelPlanes({ patients, selectedId = '', initialVista, enfocarPedidos = false, onOpen, onHeader }: {
   patients: Patient[];
   selectedId?: string;
+  initialVista?: string;
   enfocarPedidos?: boolean;
   onOpen: (href: string) => void;
   onHeader?: (actions: ReactNode) => void;
 }) {
-  const [vista, setVista] = useState<VistaPlanes>('lista');
+  const [vista, setVista] = useState<VistaPlanes>(initialVista === 'recetas' || initialVista === 'equivalencias' ? initialVista : 'lista');
+  const [recetasHeader, setRecetasHeader] = useState<ReactNode>(null);
+  const [recetaParaPlan, setRecetaParaPlan] = useState<ProfessionalRecipe | null>(null);
+  useEffect(() => { setVista(initialVista === 'recetas' || initialVista === 'equivalencias' ? initialVista : 'lista'); setCreando(false); setAsistenteAbierto(false); }, [initialVista]);
   const [editorId, setEditorId] = useState(selectedId);
   const [consulta, setConsulta] = useState('');
   const [orden, setOrden] = useState<OrdenPlanes>('nombre');
@@ -262,6 +274,8 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
   const planAbierto = editorId ? cargados[editorId] : undefined;
   const enEditor = vista === 'plan' && Boolean(planAbierto);
   useEffect(() => {
+    if (vista === 'recetas') { onHeader?.(recetasHeader); return; }
+    if (vista === 'equivalencias') { onHeader?.(null); return; }
     if (creando) {
       onHeader?.(<button className="chip" type="button" onClick={volverAlPlan}>Volver al plan</button>);
       return;
@@ -282,7 +296,7 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       <button className="chip" type="button" onClick={() => abrirArmar()}><PanelV29Icon name="spark" size={13} />Armar con IA</button>
       <button className="cta" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />{alta}</button>
     </>);
-  }, [onHeader, alta, abrirNuevo, abrirArmar, volverAlPlan, enEditor, planAbierto, vista, creando]);
+  }, [onHeader, alta, abrirNuevo, abrirArmar, volverAlPlan, enEditor, planAbierto, vista, creando, recetasHeader]);
   useEffect(() => () => onHeader?.(null), [onHeader]);
 
   const filas = patients.map(persona => (persona.id in cargados)
@@ -292,17 +306,20 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
   const idEditor = editorId || pacienteDe();
   const personaEditor = patients.find(persona => persona.id === idEditor);
   const personaArmar = patients.find(persona => persona.id === (pacienteArmar || idEditor));
-  return <PanelPlanesVista
+  return <><PanelPlanesVista
     vista={vista} nombre={primerNombrePlanes(patients, idEditor || selectedId)} filas={filas} consulta={consulta} orden={orden} filtro={filtro}
     aviso={aviso} error={error} tareas={proximasAcciones(filas)}
     onVista={siguiente => {
+      if (!canLeaveWorkspace()) return;
       setAviso('');
       setCreando(false);
       setAsistenteAbierto(false);
       if (siguiente === 'plan') abrirEditor(idEditor);
       else setVista(siguiente);
     }}
-    onRecetas={() => onOpen('/crm/biblioteca?biblioteca=recetas')}
+    onRecetas={() => { if (!canLeaveWorkspace()) return; setCreando(false); setAsistenteAbierto(false); setVista('recetas'); }}
+    recetas={<PanelPlanRecetas pacienteId={idEditor} pacientes={patients} onHeader={setRecetasHeader} onAgregarAlPlan={setRecetaParaPlan} />}
+    equivalencias={<PanelPlanEquivalencias pacienteId={idEditor} onOpenPlan={() => abrirEditor(idEditor)} />}
     onConsulta={setConsulta} onOrden={setOrden} onFiltro={setFiltro}
     onLimpiar={() => { setConsulta(''); setFiltro('todos'); }}
     onEditor={abrirEditor} onAsistente={abrirAsistente} onArmar={() => abrirArmar()} onReintentar={() => setReintento(valor => valor + 1)}
@@ -345,5 +362,5 @@ export function PanelPlanes({ patients, selectedId = '', enfocarPedidos = false,
       propuestaLista={propuestaLista}
       onPropuestaTomada={() => setPropuestaLista(null)}
     /> : null}
-  />;
+  />{recetaParaPlan && <PanelPlanAgregarReceta receta={recetaParaPlan} pacientes={patients} pacienteId={idEditor} hoy={hoy} onClose={() => setRecetaParaPlan(null)} onSaved={plan => { setCargados(prev => ({ ...prev, [plan.patient_id]: plan })); setRecetaParaPlan(null); abrirEditor(plan.patient_id); setAviso('Receta agregada al borrador. Revisá antes de publicar.'); }} />}</>;
 }

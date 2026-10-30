@@ -1,3 +1,4 @@
+import { PatientPlanExchanges } from '../../../components/nutrigo/PatientPlanExchanges';
 import { foodQuantityUnit } from '../../../types/foods';
 import { useEffect,useState,type ReactNode,type UIEvent } from 'react';
 import { FramePair } from '../FramePair';
@@ -163,7 +164,7 @@ export function NutrigoPlan({patient,onNavigate,onSignOut,query=''}:ScreenProps)
         <label className="flex flex-col gap-[4px]">Buscar en el plan<input type="search" value={search} onChange={event=>setSearch(event.target.value)} className="rounded-[8px] border border-[#e1e1e2] p-[10px]"/></label>
         <label className="flex items-center gap-[8px]"><input type="checkbox" checked={hideEmpty} onChange={event=>setHideEmpty(event.target.checked)}/>Mostrar sólo días con comidas indicadas</label>
         {extras.length>0&&<section aria-label="Colaciones y extras"><h3 className="font-['Poppins:SemiBold']">Colaciones y extras</h3>{extras.map(item=><p key={item.id}>{shortDate(item.for_date)} · {mealSlotLabel(item.slot,plan?.meal_times,plan?.meal_labels)}: {itemTitle(item)}{(item.components||planRecipe(item))&&<button type="button" className="ml-[8px] underline" onClick={()=>{setOptions(false);item.components?setMeal(item):setChosen(item);}}>Ver detalle</button>}</p>)}</section>}
-        {plan?.nutrition&&<AiPlanNutritionSummary nutrition={plan.nutrition}/>}
+        <PatientPlanExchanges key={patient.id} patientId={patient.id}/>{plan?.nutrition&&<AiPlanNutritionSummary nutrition={plan.nutrition}/>}
         <button type="button" className="mcp-action" onClick={()=>{setOptions(false);onNavigate('compras');}}>Ver la lista de compras</button>
       </div>
     </FigmaRecordDialog>}
