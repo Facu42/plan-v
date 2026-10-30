@@ -1,4 +1,4 @@
-30/10 · Cursor · Landing pública de Nutridash para nutricionistas en `work/landing-nutridash`, dirección `/nutricionistas`. `/pacientes` sigue siendo la página para pacientes. Sin producción ni merge.
+30/10 · Cursor · Landing pública de Nutridash para nutricionistas en `work/landing-nutridash`, dirección `/nutricionistas`. Usa el mismo diseño que `/pacientes` y el texto apunta al consultorio. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, rama `work/cobro-suscripciones-mp`. No es el cobro a la paciente. Bandera apagada. Migración `20261030120000_platform_billing.sql` escrita y sin aplicar en producción. [Nota](cobro-plataforma.md).
 
@@ -52,7 +52,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
-| Landing pública de Nutridash para nutricionistas | Cursor | `work/landing-nutridash`, `/nutricionistas` | Página del consultorio con precios reales. `/pacientes` no se reemplazó. Sin producción ni merge |
+| Landing pública de Nutridash para nutricionistas | Cursor | `work/landing-nutridash`, `/nutricionistas` | Mismo diseño que la página de pacientes. El texto y los botones hablan al consultorio. Sin producción ni merge |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
