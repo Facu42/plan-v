@@ -20,9 +20,17 @@ function initialEntrada(): EntryEntrada {
   }
 }
 
-export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
+export function LoginScreen({
+  darkMode,
+  onToggleTheme,
+  initialMode = 'login',
+}: {
+  darkMode: boolean;
+  onToggleTheme: () => void;
+  initialMode?: 'login' | 'signup';
+}) {
   const { signIn, signUp, enterDemoMode, loading, demoAllowed, googleAvailable, signInWithGoogle } = useAuth();
-  const [mode, setMode] = useState<'login' | 'signup' | 'recover'>('login');
+  const [mode, setMode] = useState<'login' | 'signup' | 'recover'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
