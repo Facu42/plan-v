@@ -164,7 +164,7 @@ describe('deploy contract', () => {
       { source: '/api/public/billing/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/billing/:path*' },
       { source: '/consultorio/:path*', destination: '/index.html' },
       { source: '/equipo', destination: '/index.html' },
-      { source: '/pacientes', destination: '/pacientes.html' },
+      { source: '/pacientes', destination: '/pacientes/index.html' },
       { source: '/nutricionistas', destination: '/nutricionistas/index.html' },
       { source: '/admin', destination: '/index.html' },
       { source: '/app', destination: '/index.html' },
