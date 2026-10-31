@@ -130,6 +130,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **31/10 · Cursor · Bienvenida Nutridash** · Rama `work/login-nutridash`, desde `origin/main`. Recibimiento a pantalla completa (foto de comida, logo recortado sin fondo, Empezar / Iniciar sesión). El formulario de auth no cambia. Invitación pendiente salta la bienvenida. PR en borrador, sin merge ni producción.
+
 - **30/10 · Cursor · Cobro de Nutridash con Mercado Pago** · Rama `work/cobro-suscripciones-mp`. Le cobra a la nutricionista con el token de la plataforma. No toca el cobro a la paciente. Arranque 24.900 / Pro 49.900 / Consultorio 89.900. Fotos de IA: 150, 600 y sin tope. Sin prueba. 7 días de gracia y después solo lectura para la nutri; la paciente no pierde el acceso. Paciente activa: movimiento en 30 días. El 40% de fundadora no se suma al 20% anual. Variables en Railway, sin valores en el repo. Migración sin aplicar en producción. [Nota](cobro-plataforma.md).
 
 - **29/10 · Codex · Recetas y Equivalencias dentro de Planes** · Pedido de Facundo para corregir los puntos 1 y 2 de la revisión de main. Rama `work/recetas-equivalencias-v29`; copia de HTML/CSS v29 y APIs existentes. Detalle del punto 4 en `docs/panel-nutri-rediseno/diferencias-estilos-v29.md`. Sin cambios de base. Implementación y cuatro e2e locales aprobados; 25 tests específicos, tipos y compilación aprobados. Suite general sin completar en 180 s: HOLD para merge. [Informe](panel-nutri-rediseno/recetas-equivalencias-v29.md).
