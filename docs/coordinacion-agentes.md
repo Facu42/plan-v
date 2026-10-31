@@ -138,6 +138,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **31/10 · Cursor · Rebase #245 sobre main** · `work/login-nutridash` rebased sobre `origin/main` (`fb5cb9bb`). El signed-auth del CI fallaba en el navegador (`wait input[placeholder="Email"]`), no en los 30 tests de PostgREST. El pin conserva `placeholder="Email"`, `.entry-actions` y las dos entradas de #239. Auth sin cambios. Sin merge ni producción.
+
 - **31/10 · Cursor · Login estilo pin dental** · Mismo [PR #245](https://github.com/Facu42/plan-v/pull/245). Una sola pantalla: mail/contraseña, Entrar, Google, Apple (UI lista, sin auth), olvidé y crear cuenta. Visual con el panel real en un celular, escudo y tarjeta azul. Auth sin cambios. Sin merge ni producción.
 
 - **31/10 · Cursor · Bienvenida Nutridash, pulido** · Mismo [PR #245](https://github.com/Facu42/plan-v/pull/245). Oficio MotionSites sobre el recibimiento (cristal, tipografía, entrada, grano). Copia: «Una vida más sana». Auth sin cambios. Sin merge ni producción.
