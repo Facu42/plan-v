@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-30)
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · Recordatorios al teléfono para comer, tomar agua y dormir, configurables en Avisos de la paciente. Empiezan apagados. Migración `20261031180000_habit_reminders` sin aplicar. Rama `work/recordatorios-push`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 

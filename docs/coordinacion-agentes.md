@@ -50,6 +50,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Recordatorios de comer, agua y dormir | Cursor | `work/recordatorios-push` | La paciente los prende y elige el horario en Avisos. Empiezan apagados. El aviso al teléfono no lleva datos de salud. Migración sin aplicar. Sin producción ni merge |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
@@ -110,6 +111,7 @@ visto bueno de Facundo.
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 | `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261030120000_platform_billing` | Cursor | Cobro de Nutridash a la nutri. Escrita el 30/10. Sin aplicar. Hace falta la frase de Facundo |
+| `20261031180000_habit_reminders` | Cursor | Recordatorios de comer, agua y dormir. Escrita el 31/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261020143000_patient_fee_checkouts` | Cursor | Escrita el 19/10, en `cursor/pago-mensual-unico`. Sin aplicar. Hace falta la frase de Facundo |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -129,6 +131,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **31/10 · Cursor · Recordatorios para comer, tomar agua y dormir** · Rama `work/recordatorios-push`. La paciente los configura en Avisos: tres horarios de comida, cada cuántas horas el agua y una hora para dormir. Empiezan apagados. El teléfono recibe un texto corto, sin datos de salud, si los avisos push ya están activos. La tabla nueva no se aplicó en producción.
 
 - **30/10 · Cursor · Cobro de Nutridash con Mercado Pago** · Rama `work/cobro-suscripciones-mp`. Le cobra a la nutricionista con el token de la plataforma. No toca el cobro a la paciente. Arranque 24.900 / Pro 49.900 / Consultorio 89.900. Fotos de IA: 150, 600 y sin tope. Sin prueba. 7 días de gracia y después solo lectura para la nutri; la paciente no pierde el acceso. Paciente activa: movimiento en 30 días. El 40% de fundadora no se suma al 20% anual. Variables en Railway, sin valores en el repo. Migración sin aplicar en producción. [Nota](cobro-plataforma.md).
 
