@@ -8,7 +8,7 @@ import { isAllowedPage } from './app-location';
 
 describe('Equipo y Ajustes v29', () => {
   it('ofrece rutas propias y conserva selección de enlaces anteriores', () => {
-    const items = panelNavGroups([], 0, false).flatMap(g => g.items);
+    const items = panelNavGroups([], 0).flatMap(g => g.items);
     expect(items.find(x => x.label === 'Ajustes')?.href).toBe('/crm/ajustes');
     expect(items.find(x => x.label === 'Equipo')?.href).toBe('/crm/equipo');
     expect(panelNavCurrent('/crm/ajustes', '/crm/desarrollo?modulo=configuracion')).toBe(true);

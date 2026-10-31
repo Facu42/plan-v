@@ -10,20 +10,20 @@ describe('menú profesional', () => {
     expect(panelNavCurrent('/crm/desarrollo', '/crm/desarrollo?modulo=configuracion')).toBe(false);
     expect(panelNavCurrent('/crm/plan?editor=1', '/crm/plan')).toBe(false);
     expect(panelNavCurrent('/crm/plan?editor=1', '/crm/plan?editor=1&paciente=pat-sofia')).toBe(true);
-    const planes = panelNavGroups([], 0, false).flatMap(grupo => grupo.items).find(item => item.label === 'Planes')!;
+    const planes = panelNavGroups([], 0).flatMap(grupo => grupo.items).find(item => item.label === 'Planes')!;
     expect(planes.children!.find(hijo => hijo.label === 'Armar o editar')!.href).toBe('/crm/plan?editor=1');
   });
   it('usa los conteos de la cartera y conserva la ausencia de datos', () => {
     const patients = [{ id: 'a', has_account: false }, { id: 'b', archived_at: '2026-10-01' }] as Patient[];
-    const groups = panelNavGroups(patients, 3, false);
+    const groups = panelNavGroups(patients, 3);
     expect(groups.map(g => g.title)).toEqual(['Gestión', 'Acompañamiento', 'Plan', 'Recursos', 'Cuenta']);
     const children = groups[0].items.find(i => i.label === 'Pacientes')!.children!;
     expect(children.map(c => c.count)).toEqual([1, undefined, 1, 1]);
     expect(groups.flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(false);
-    expect(panelNavGroups([], 0, true).flatMap(g => g.items).some(i => i.href === '/crm/servicio')).toBe(true);
+    expect(groups.flatMap(g => g.items).some(i => i.label === 'Panel del servicio')).toBe(false);
   });
   it('deja el contador común de Pacientes antes que el naranja de Seguimiento', () => {
-    const items = panelNavGroups([], 0, false).flatMap(group => group.items);
+    const items = panelNavGroups([], 0).flatMap(group => group.items);
     const pacientes = items.find(item => item.label === 'Pacientes')!;
     const seguimiento = items.find(item => item.label === 'Seguimiento')!;
     expect(pacientes.count).toBe(0);
