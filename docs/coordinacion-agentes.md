@@ -50,6 +50,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Términos y privacidad: papeles de Nutridash | Cursor | `work/legal-nutridash` | Nutridash (Facundo) responsable de la plataforma; la nutricionista, de sus pacientes; Nutridash encargado (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Sin producción ni merge |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
@@ -129,6 +130,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **31/10 · Cursor · Términos y privacidad** · Rama `work/legal-nutridash`. El responsable de la plataforma es Nutridash (Facundo). La nutricionista es la responsable de los datos de sus pacientes y Nutridash es el encargado del tratamiento (artículo 25 de la Ley 25.326). El CUIT, el domicilio y el mail quedaron en [COMPLETAR]. Hay una nota de que falta la revisión de un abogado. Quien ya había aceptado la versión anterior va a tener que aceptar esta. Sin producción ni merge.
 
 - **30/10 · Cursor · Cobro de Nutridash con Mercado Pago** · Rama `work/cobro-suscripciones-mp`. Le cobra a la nutricionista con el token de la plataforma. No toca el cobro a la paciente. Arranque 24.900 / Pro 49.900 / Consultorio 89.900. Fotos de IA: 150, 600 y sin tope. Sin prueba. 7 días de gracia y después solo lectura para la nutri; la paciente no pierde el acceso. Paciente activa: movimiento en 30 días. El 40% de fundadora no se suma al 20% anual. Variables en Railway, sin valores en el repo. Migración sin aplicar en producción. [Nota](cobro-plataforma.md).
 

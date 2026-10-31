@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-30)
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · Términos y privacidad: Nutridash (Facundo) es el responsable de la plataforma, la nutricionista de sus pacientes y Nutridash el encargado del tratamiento (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Rama `work/legal-nutridash`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
