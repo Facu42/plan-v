@@ -1,6 +1,9 @@
 import { integrationAvailability } from './scheduling/providers.js';
 import {registerSchedulingRoutes} from './scheduling/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
+import { registerPlatformBillingRoutes } from './billing-platform/routes.js';
+import { createPlatformReadOnlyGuard } from './billing-platform/guard.js';
+import { assertCanAdd } from './billing-platform/limits.js';
 import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
 import {registerDocumentOrganizerRoutes} from './document-organizer/routes.js';
 import {registerCommunicationChannelRoutes} from './communications/channel-routes.js';
@@ -229,6 +232,7 @@ app.use('/api/*', authMiddleware);
 app.use('/api/*', securityLimits.protected);
 const ownService = createOwnServiceCache((userId) => loadOwnService(userId));
 app.use('/api/*', createServiceReadOnlyGuard(ownService.get, ownService.clear));
+app.use('/api/*', createPlatformReadOnlyGuard());
 app.use('/api/*', async (c, next) => {
   await next();
   if (!['/api/health','/api/ready'].includes(c.req.path)) persistDemoState();
@@ -333,6 +337,7 @@ registerAjustesRoutes(app);
 registerClinicalWorkspaceRoutes(app);
 registerPortfolioRoutes(app);
 registerPatientSubscriptionRoutes(app);
+registerPlatformBillingRoutes(app);
 registerSchedulingRoutes(app);
 registerSchedulingTeamRoutes(app);
 registerDocumentOrganizerRoutes(app);
@@ -373,6 +378,7 @@ app.post('/api/patients', async (c) => {
       return c.json({ error: 'Prohibido' }, 403);
     }
     try {
+      await assertCanAdd(actor.nutritionistId, 'patient', 1);
       const created = await sb.sbCreatePatient({
         nutritionistId: actor.nutritionistId,
         name: parsedBody.data.name,
@@ -442,6 +448,10 @@ app.patch('/api/patients/:id/archive', async (c) => {
   if ('userId' in auth && isSupabaseEnabled()) {
     if (!await authorizePatient(auth.userId, patientId, 'archive_patient')) {
       return c.json({ error: 'Prohibido' }, 403);
+    }
+    if (!parsedBody.data.archived) {
+      const actor = await sb.sbGetActor(auth.userId);
+      if (actor?.role === 'nutri') await assertCanAdd(actor.nutritionistId, 'patient', 1);
     }
     const { error } = await getRequestDb().rpc('set_patient_archived', {
       target: patientId,
@@ -712,6 +722,14 @@ app.post('/api/nutritionist/setup', async (c) => {
   }
 });
 
+app.get('/api/nutritionist/setup', async (c) => {
+  const auth = c.get('auth');
+  if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ error: 'Requires Supabase auth' }, 400);
+  if (await sb.sbGetProfileRole(auth.userId) !== 'nutri') return c.json({ error: 'Prohibido' }, 403);
+  const nutritionistId = await sb.sbGetNutritionistId(auth.userId);
+  return c.json({ nutritionist_id: nutritionistId, setup_complete: Boolean(nutritionistId) });
+});
+
 // PV-47: alta propia de nutricionistas. El registro público sigue naciendo como
 // paciente (el rol nunca viene del cliente); con la cuenta ya verificada, quien
 // eligió "Soy nutricionista" abre su consultorio vacío. RLS la aísla: sólo ve
@@ -761,7 +779,7 @@ app.post('/api/invites/:id/send', async (c) => {
         event_type: 'invite_sent',
         client_id: inviteId.data,
         subject: `Invitación enviada · ${invite.email}`,
-        body: 'La invitación quedó en el buzón in-app de Plan V; no se envió un mail real.',
+        body: 'La invitación quedó en el buzón in-app de Nutridash; no se envió un mail real.',
         kind: 'invite',
       }, true);
       return c.json({ invite: sent, source: 'supabase' });
@@ -1281,13 +1299,18 @@ if (isMainModule) {
     // Solo presencia y formato, nunca valores: sirve para saber por qué una conexión figura como no disponible.
     const e = process.env, has = (k: string) => String(Boolean(e[k]?.trim()));
     let keyOk = false; try { keyOk = Buffer.from(e.SCHEDULING_TOKEN_KEY ?? '', 'base64').length === 32; } catch { keyOk = false; }
+    const bookingSecretOk = (e.SCHEDULING_BOOKING_SECRET?.trim().length ?? 0) >= 32;
     writeOpsLog('info', 'integrations_config', {
       sched_key: has('SCHEDULING_TOKEN_KEY'), sched_key_32b: String(keyOk),
+      booking_secret: has('SCHEDULING_BOOKING_SECRET'), booking_secret_32c: String(bookingSecretOk),
       mp_client_id: has('MP_SCHEDULING_CLIENT_ID'), mp_client_id_digits: String(/^\d+$/.test(e.MP_SCHEDULING_CLIENT_ID ?? '')),
       mp_client_secret: has('MP_SCHEDULING_CLIENT_SECRET'), mp_webhook_secret: has('MP_SCHEDULING_WEBHOOK_SECRET'),
       base_url: has('SCHEDULING_PUBLIC_BASE_URL'), base_url_expected: String(e.SCHEDULING_PUBLIC_BASE_URL === 'https://plan-v-eight.vercel.app'),
       mp_available: String(integrationAvailability().mercadopago),
     });
+    if ((config.mode === 'staging' || config.mode === 'production') && !bookingSecretOk) {
+      writeOpsLog('warn', 'booking_secret_missing', { mode: config.mode });
+    }
   }
   serve({ fetch: app.fetch, port, hostname: demoState ? '127.0.0.1' : '0.0.0.0' });
   // Sólo la demo local en memoria: nunca con datos reales ni en producción.

@@ -46,12 +46,17 @@ export function PanelFichaConsultas({ patient, now, professionalName, datos, onS
   useEffect(() => {
     const control = new AbortController();
     setCargado(false); setError('');
+    plansApi.published(patient.id, control.signal).then(res => { if (!control.signal.aborted) setVence(res.plan?.period_end ?? null); }).catch(() => { if (!control.signal.aborted) setVence(null); });
+    if (!datos.care && !datos.careError) return () => control.abort();
+    if (!datos.canCare) {
+      setVista(VACIO); setTurnos([]); setCargado(true);
+      return () => control.abort();
+    }
     Promise.all([consultationsApi.list(patient.id, true, 0, control.signal), consultationsApi.completions(patient.id, 0, 50, control.signal)])
       .then(([lista, cierres]) => { if (!control.signal.aborted) { setVista(lista); setTurnos(cierres.appointments); setCargado(true); } })
       .catch(fallo => { if (!control.signal.aborted) { setError(careErrorMessage(fallo)); setCargado(true); } });
-    plansApi.published(patient.id, control.signal).then(res => { if (!control.signal.aborted) setVence(res.plan?.period_end ?? null); }).catch(() => { if (!control.signal.aborted) setVence(null); });
     return () => control.abort();
-  }, [patient.id, revision]);
+  }, [patient.id, revision, datos.care, datos.careError, datos.canCare]);
 
   useEffect(() => {
     const refrescar = () => setRevision(n => n + 1);

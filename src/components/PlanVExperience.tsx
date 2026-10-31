@@ -25,6 +25,7 @@ import { canUseDemoRoleSwitch, shouldShowNutrigo } from './design-entry';
 import { PwaChrome } from '../pwa/PwaChrome';
 import { LoadingScreen } from './shared/AppStatus';
 import { isAdminPath } from './nutrigo/app-location';
+import { isPublicSlug, publicSlugFromPath } from '../types/public-slug';
 
 const AdminCrm = lazy(() => import('./nutrigo/admin-crm/AdminCrm').then(({ AdminCrm }) => ({ default: AdminCrm })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
@@ -36,7 +37,7 @@ const SubscriptionPreview = import.meta.env.DEV
 export function PlanVExperience() {
   const path=typeof window==='undefined'?'':window.location.pathname;
   const subscriptionReturn=/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/suscripcion\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/?$/i.exec(path);
-  const publicSlug=subscriptionReturn?.[1]??/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/?$/.exec(path)?.[1];
+  const publicSlug=subscriptionReturn?.[1]??publicSlugFromPath(path);
   const teamPath=/^\/equipo\/?$/.test(path);
   const { session, demoMode, passwordRecovery, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
@@ -57,6 +58,16 @@ export function PlanVExperience() {
     writeThemePreference(typeof window === 'undefined' ? null : window.localStorage, theme);
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
+
+  // La ruta corta es la dirección preferida; /consultorio/<slug> sigue funcionando como enlace histórico.
+  useEffect(() => {
+    if (!publicSlug || subscriptionReturn || typeof document === 'undefined') return;
+    const link = document.createElement('link');
+    link.rel = 'canonical';
+    link.href = new URL(isPublicSlug(publicSlug) ? `/${encodeURIComponent(publicSlug)}` : `/consultorio/${encodeURIComponent(publicSlug)}`, window.location.origin).href;
+    document.head.appendChild(link);
+    return () => { link.remove(); };
+  }, [publicSlug, subscriptionReturn?.[2]]);
 
   useEffect(() => {
     if(publicSlug||teamPath){reset();return;}

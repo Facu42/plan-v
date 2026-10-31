@@ -12,7 +12,7 @@ import { ConsultationSharedNotes } from './ConsultationNotes';
 import { NutritionExchanges } from './NutritionExchanges';
 
 
-import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import type { MealLog } from '../../types';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
@@ -132,7 +132,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   });
   const patients = useAppStore((s) => s.patients);
   const addPatient = useAppStore((s) => s.addPatient);
-  const activePatients = filterShowroomPatients(patients);
+  const activePatients = useMemo(() => filterShowroomPatients(patients), [patients]);
   const demoSwitch = allowRoleSwitch && !lockedRole;
   const initialLocation = typeof window === 'undefined'
     ? { role: (lockedRole ?? 'patient') as AppRole, page: 'inicio' as ShowroomPage }

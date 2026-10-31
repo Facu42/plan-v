@@ -14,6 +14,7 @@ import { toPatientMealAnalysis, toPatientSelfMealLog, toPatientSelfView, type Pa
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { TEXT_ONLY_ERROR, TEXT_ONLY_MEAL_NOTE } from './text-only.js';
+import { reserveAiPhoto } from '../billing-platform/limits.js';
 
 const access = {
   getActor: sb.sbGetActor,
@@ -97,7 +98,17 @@ export function registerDiaryRoutes(app: Hono) {
       await requireCareConsent(patientId, persistent, 'ai_meal_analysis');
       if (persistent) await requireCareConsent(patientId, true, 'meal_photo');
     }
-    const aiAllowed = hasPhoto || (await currentCareConsents(patientId, persistent)).consented.includes('ai_meal_analysis');
+    let aiAllowed = hasPhoto || (await currentCareConsents(patientId, persistent)).consented.includes('ai_meal_analysis');
+    let photoNote = TEXT_ONLY_MEAL_NOTE;
+    let photoCode = TEXT_ONLY_ERROR;
+    if (hasPhoto && persistent && aiAllowed) {
+      const resource = await sb.sbGetPatientResource(patientId);
+      if (resource && !(await reserveAiPhoto(resource.nutritionistId))) {
+        aiAllowed = false;
+        photoNote = 'Llegaste al límite de fotos de tu plan este mes. La comida quedó registrada.';
+        photoCode = 'PLAN_PHOTO_LIMIT';
+      }
+    }
 
     let photoPath: string | null = null;
     if (persistent && preview) {
@@ -122,15 +133,15 @@ export function registerDiaryRoutes(app: Hono) {
           foods: [],
           macros: null,
           confidence: 0,
-          note_for_nutri: TEXT_ONLY_MEAL_NOTE,
-          error_code: TEXT_ONLY_ERROR,
+          note_for_nutri: photoNote,
+          error_code: photoCode,
         }, persistent);
       }
       analysis = {
         foods: log.foods,
         macros: log.macros,
         confidence: log.confidence,
-        note_for_nutri: log.note_for_nutri || TEXT_ONLY_MEAL_NOTE,
+        note_for_nutri: log.note_for_nutri || photoNote,
       };
     } else {
       const skipAnalysis = saved.duplicate && saved.log.analysis_status === 'succeeded';

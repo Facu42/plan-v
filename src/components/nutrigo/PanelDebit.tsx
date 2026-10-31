@@ -138,6 +138,10 @@ export function usePanelDebit(patients: { id: string; name: string }[]) {
 
   const reload = useCallback(async () => {
     const [planRows, next] = await Promise.all([subscriptionsApi.plans(), subscriptionsApi.list()]);
+    if (planRows.enabled === false || next.enabled === false) {
+      setEnabled(false);
+      return;
+    }
     setPlans(planRows.plans.filter(plan => plan.status === 'active'));
     setList(next);
     setEnabled(true);
@@ -148,6 +152,10 @@ export function usePanelDebit(patients: { id: string; name: string }[]) {
     void Promise.all([subscriptionsApi.plans(), subscriptionsApi.list(), schedulingApi.workspace(0, controller.signal).catch(() => null)])
       .then(([planRows, next, workspace]) => {
         if (controller.signal.aborted) return;
+        if (planRows.enabled === false || next.enabled === false) {
+          setEnabled(false);
+          return;
+        }
         setPlans(planRows.plans.filter(plan => plan.status === 'active'));
         setList(next);
         setMercadoPago(Boolean(workspace && 'connections' in workspace && workspace.connections.mercadopago));

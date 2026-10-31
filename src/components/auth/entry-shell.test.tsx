@@ -6,6 +6,7 @@ import calendar from '../../features/nutrigo/source/84-1666.json';
 import messages from '../../features/nutrigo/source/84-2565.json';
 import insights from '../../features/nutrigo/source/263-6588.json';
 import { EntryStatus } from './entry-shell';
+import { EntryStage } from './entry-stage';
 import pieces from './entry-source.json';
 import { LoginScreen } from './LoginScreen';
 
@@ -61,6 +62,26 @@ describe('pantalla de ingreso', () => {
     expect(html).not.toContain('New Message');
     expect(html).not.toContain('Search anything');
     expect(html).not.toContain('f08ac.svg');
+  });
+
+  it('muestra las dos entradas y la escena de pacientes por defecto', () => {
+    auth.loading = false;
+    const html = renderToStaticMarkup(<LoginScreen darkMode={false} onToggleTheme={vi.fn()} />);
+    expect(html).toContain('entry-screen--split');
+    expect(html).toContain('Soy paciente');
+    expect(html).toContain('Soy nutricionista');
+    expect(html).toContain('Tu plan, tu nutri y tu progreso, en un lugar.');
+    expect(html).toContain('data-entrada="paciente"');
+    expect(html).toContain('Entrá a tu plan y a tu progreso.');
+    expect(html).not.toContain('Tipo de cuenta');
+  });
+
+  it('la escena de nutricionistas habla de las funciones del panel', () => {
+    const html = renderToStaticMarkup(<EntryStage entrada="nutri" />);
+    expect(html).toContain('Tu consultorio, simple.');
+    expect(html).toContain('Tu agenda se ordena sola');
+    expect(html).toContain('Cobros y avisos en automático.');
+    expect(html).not.toMatch(/kilos|bajá de peso|adelgaz/i);
   });
 
   it('la cuenta sin vincular usa la misma tarjeta y el botón verde', () => {
