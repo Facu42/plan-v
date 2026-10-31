@@ -138,6 +138,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **31/10 · Cursor · Bienvenida Nutridash, pulido** · Mismo [PR #245](https://github.com/Facu42/plan-v/pull/245). Oficio MotionSites sobre el recibimiento (cristal, tipografía, entrada, grano). Copia: «Una vida más sana». Auth sin cambios. Sin merge ni producción.
+
 - **31/10 · Cursor · Bienvenida Nutridash** · Rama `work/login-nutridash`, desde `origin/main`. Recibimiento a pantalla completa (foto de comida, logo recortado sin fondo, Empezar / Iniciar sesión). El formulario de auth no cambia. Invitación pendiente salta la bienvenida. PR en borrador, sin merge ni producción.
 
 - **31/10 · Cursor · Centro de mando en `/admin` (HOLD)** · `/admin` deja el CRM de ejemplo y pasa a ser el centro de mando: Resumen, Nutris, Pacientes, Cobros, Salud y Seguridad, con datos reales de solo lectura (conteos y cuentas; nunca clínicos). Seis GET nuevos bajo `/api/admin/centro/*` protegidos por admin + aal2 aunque MFA_ENFORCE esté apagado. Pipeline, Bandeja y Automatizaciones no se muestran. Sin migraciones. Pruebas de los archivos tocados 46/46 y tipos en verde; fire test: sumar 1 a nutris activas hizo fallar dos pruebas, se revirtió. Flujos: login/admin con sesión real ⚠️; contratos de los seis GET ✅. [PR #252](https://github.com/Facu42/plan-v/pull/252), reemplaza #246. Veredicto HOLD hasta el ok de Facundo. Sin producción.

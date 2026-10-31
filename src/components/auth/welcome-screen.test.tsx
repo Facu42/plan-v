@@ -25,7 +25,8 @@ describe('pantalla de bienvenida', () => {
     expect(html).toContain('nutridash-mark');
     expect(html).toContain('>Nutridash<');
     expect(html).toContain('Mejores hábitos.');
-    expect(html).toContain('Una vos más sana.');
+    expect(html).toContain('Una vida más sana.');
+    expect(html).not.toContain('Una vos más sana.');
     expect(html).toContain('>Empezar<');
     expect(html).toContain('Iniciar sesión');
     expect(html).not.toContain('nutridash-logo-256');
