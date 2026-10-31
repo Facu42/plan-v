@@ -1,9 +1,9 @@
 import { resolve } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
-// Páginas públicas aparte, sin sesión ni app. /pacientes es la exportada con el video.
+// Páginas públicas aparte, sin sesión ni app: /pacientes y /nutricionistas.
 const PUBLIC_ROUTES: Record<string, string> = {
-  '/pacientes': '/pacientes/index.html',
+  '/pacientes': '/pacientes.html',
   '/nutricionistas': '/nutricionistas/index.html',
 };
 const publicRoutes = {
@@ -21,7 +21,11 @@ export default defineConfig({
   plugins: [publicRoutes],
   build: {
     rollupOptions: {
-      input: { main: resolve(__dirname, 'index.html') },
+      input: {
+        main: resolve(__dirname, 'index.html'),
+        pacientes: resolve(__dirname, 'pacientes.html'),
+        nutricionistas: resolve(__dirname, 'nutricionistas/index.html'),
+      },
     },
   },
   server: {

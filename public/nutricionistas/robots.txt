@@ -1,4 +1,0 @@
-User-Agent: *
-Allow: /
-
-Sitemap: https://plan-v-eight.vercel.app/nutricionistas/sitemap.xml

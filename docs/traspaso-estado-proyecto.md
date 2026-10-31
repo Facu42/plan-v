@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-30)
 
-31/10 · Cursor · `/nutricionistas` es una copia de la landing real de pacientes, la del video que se abre al hacer scroll. Mismos componentes y mismo movimiento. El texto le habla a la nutricionista. `/pacientes` sigue igual. No se tocó producción.
+30/10 · Cursor · `/nutricionistas` es la landing de pacientes con el mismo orden de secciones y las mismas fotos. El texto le habla a la nutricionista. `/pacientes` sigue igual. No se tocó producción.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
