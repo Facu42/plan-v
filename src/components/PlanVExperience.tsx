@@ -7,7 +7,7 @@ import { lazy, Suspense, useEffect, useState } from 'react';
 
 const PatientApp = lazy(() => import('./patient/PatientApp').then(({ PatientApp }) => ({ default: PatientApp })));
 const CrmDashboard = lazy(() => import('./crm/CrmDashboard').then(({ CrmDashboard }) => ({ default: CrmDashboard })));
-import { LoginScreen } from './auth/LoginScreen';
+import { AuthEntry } from './auth/WelcomeScreen';
 import { PasswordResetScreen } from './auth/PasswordResetScreen';
 import { ConsentScreen } from './auth/ConsentScreen';
 import { MfaScreen } from './auth/MfaScreen';
@@ -123,7 +123,7 @@ export function PlanVExperience() {
   }
 
   if (!session && !demoMode) {
-    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><LoginScreen darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
+    return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><AuthEntry darkMode={darkMode} onToggleTheme={toggleTheme} /></div>;
   }
 
   if (session && mfa.step === 'checking') {
