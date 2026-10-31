@@ -1,0 +1,131 @@
+/*
+ * Lado oscuro del ingreso de Nutridash (dos entradas: pacientes y nutris).
+ * El archivo de Nutrigo no dibuja el ingreso: la escena y la letra salen del plan aprobado
+ * (letra del tablero de la nutri, colores del tablero). El formulario de al lado sigue siendo
+ * de piezas del archivo. Las escenas son SVG animados con CSS, 12 s en bucle; con
+ * «reducir movimiento» queda quieta en la última (el tablero / los cobros).
+ */
+.entry-screen--split {
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  place-items: stretch;
+  padding: 0;
+  background: #FFFFFF;
+}
+.entry-pane { display: grid; place-items: center; padding: 32px clamp(16px, 4vw, 48px); background: #FFFFFF; min-width: 0; }
+.entry-screen--split .entry-card { width: min(100%, 380px); padding: 0; background: transparent; box-shadow: none; }
+.plan-v-app.dark .entry-screen--split,
+.plan-v-app.dark .entry-pane { background: #24262E; }
+
+.entry-stage {
+  --es-font: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", system-ui, "Segoe UI", sans-serif;
+  --es-paper: #FAFAF5;
+  --es-lima: #C2E66E;
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  overflow: hidden;
+  padding: clamp(20px, 3vw, 40px);
+  color: var(--es-paper);
+  background: #141519;
+  font-family: var(--es-font);
+  -webkit-font-smoothing: antialiased;
+}
+.entry-stage-glow {
+  position: absolute;
+  inset: auto -20% -40% -20%;
+  height: 70%;
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(194, 230, 110, 0.18), transparent);
+}
+.entry-stage-logo { position: relative; z-index: 2; height: 32px; width: auto; align-self: flex-start; }
+.entry-stage-scene { position: relative; z-index: 1; display: grid; flex: 1; min-height: 0; place-items: center; }
+.entry-stage-scene svg { width: 100%; height: 100%; max-height: 460px; }
+.entry-stage-copy { position: relative; z-index: 2; display: grid; gap: 8px; }
+.entry-stage-copy h2 { margin: 0; max-width: 18ch; font-size: clamp(26px, 3.4vw, 44px); font-weight: 650; line-height: 1.04; letter-spacing: -0.035em; text-wrap: balance; }
+.entry-stage-phrases { position: relative; height: 1.5em; font-size: clamp(14px, 1.3vw, 17px); color: #A3A6AD; }
+.entry-stage-phrases span { position: absolute; inset: 0; opacity: 0; animation: es-phrase 12s infinite; }
+.entry-stage-phrases span:nth-child(2) { animation-delay: 3s; }
+.entry-stage-phrases span:nth-child(3) { animation-delay: 6s; }
+.entry-stage-phrases span:nth-child(4) { animation-delay: 9s; }
+.entry-stage-feats { position: relative; z-index: 2; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.entry-stage-feats li { padding: 4px 10px; border: 1px solid #3A3D45; border-radius: 999px; color: #A3A6AD; font-size: 11px; font-weight: 600; animation: es-feat 12s infinite; }
+.entry-stage-feats li:nth-child(2) { animation-delay: 3s; }
+.entry-stage-feats li:nth-child(3) { animation-delay: 6s; }
+.entry-stage-feats li:nth-child(4) { animation-delay: 9s; }
+@keyframes es-phrase { 0% { opacity: 0; transform: translateY(8px); } 4%, 21% { opacity: 1; transform: none; } 25%, 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes es-feat { 0%, 24% { background: #C2E66E; color: #141519; border-color: #C2E66E; } 25%, 100% { background: transparent; color: #A3A6AD; border-color: #3A3D45; } }
+
+/* Escenas */
+.entry-stage .sA, .entry-stage .sB, .entry-stage .sC, .entry-stage .sD { transform-box: view-box; transform-origin: 50% 50%; animation: 12s infinite both; }
+.entry-stage .sA { animation-name: es-a; }
+.entry-stage .sB { animation-name: es-b; }
+.entry-stage .sC { animation-name: es-c; }
+.entry-stage .sD { animation-name: es-d; }
+@keyframes es-a { 0%, 20% { opacity: 1; transform: none; } 27% { opacity: 0; transform: scale(0.82); } 96% { opacity: 0; transform: scale(1.05); } 100% { opacity: 1; transform: none; } }
+@keyframes es-b { 0%, 21% { opacity: 0; transform: scale(1.15); } 28%, 45% { opacity: 1; transform: none; } 52%, 100% { opacity: 0; transform: translateY(16px); } }
+@keyframes es-c { 0%, 46% { opacity: 0; } 53%, 70% { opacity: 1; } 77%, 100% { opacity: 0; } }
+@keyframes es-d { 0%, 71% { opacity: 0; transform: scale(0.9); } 78%, 95% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.entry-stage .ring { stroke-dasharray: 0 100; animation: es-ring 12s infinite; }
+.entry-stage .ring.r2 { animation-name: es-ring2; }
+.entry-stage .ring.r3 { animation-name: es-ring3; }
+@keyframes es-ring { 0%, 23% { stroke-dasharray: 0 100; } 33%, 100% { stroke-dasharray: 44 56; } }
+@keyframes es-ring2 { 0%, 26% { stroke-dasharray: 0 100; } 36%, 100% { stroke-dasharray: 31 69; } }
+@keyframes es-ring3 { 0%, 29% { stroke-dasharray: 0 100; } 39%, 100% { stroke-dasharray: 21 79; } }
+.entry-stage .bar { transform-box: fill-box; transform-origin: 50% 100%; animation: es-bar 12s infinite; }
+@keyframes es-bar { 0%, 49% { transform: scaleY(0); } 58%, 100% { transform: scaleY(1); } }
+.entry-stage .bar:nth-of-type(2) { animation-delay: 0.12s; }
+.entry-stage .bar:nth-of-type(3) { animation-delay: 0.24s; }
+.entry-stage .bar:nth-of-type(4) { animation-delay: 0.36s; }
+.entry-stage .bar:nth-of-type(5) { animation-delay: 0.48s; }
+.entry-stage .bar:nth-of-type(6) { animation-delay: 0.6s; }
+.entry-stage .bar:nth-of-type(7) { animation-delay: 0.72s; }
+.entry-stage .dot { transform-box: fill-box; transform-origin: 50% 50%; animation: es-dot 12s infinite; }
+@keyframes es-dot { 0%, 47% { transform: translateY(-40px) scale(1); opacity: 1; } 55% { transform: translateY(0) scale(0.25); opacity: 0; } 100% { opacity: 0; } }
+.entry-stage .row { animation: es-row 12s infinite both; }
+.entry-stage .row.r2 { animation-delay: 0.25s; }
+.entry-stage .row.r3 { animation-delay: 0.5s; }
+.entry-stage .row.r4 { animation-delay: 0.75s; }
+.entry-stage .sD .row { animation-name: es-row-d; }
+@keyframes es-row { 0% { opacity: 0; transform: translateX(-14px); } 5%, 100% { opacity: 1; transform: none; } }
+@keyframes es-row-d { 0%, 74% { opacity: 0; transform: translateY(10px); } 80%, 100% { opacity: 1; transform: none; } }
+.entry-stage .line { stroke-dasharray: 0 100; animation: es-line 12s infinite; }
+@keyframes es-line { 0%, 26% { stroke-dasharray: 0 100; } 40%, 100% { stroke-dasharray: 100 0; } }
+.entry-stage .cell { transform-box: fill-box; transform-origin: 50% 50%; animation: es-cell 12s infinite both; }
+.entry-stage .cell.c2 { animation-delay: 0.15s; }
+.entry-stage .cell.c3 { animation-delay: 0.3s; }
+.entry-stage .cell.c4 { animation-delay: 0.45s; }
+.entry-stage .cell.c5 { animation-delay: 0.6s; }
+.entry-stage .cell.c6 { animation-delay: 0.75s; }
+.entry-stage .cell.c7 { animation-delay: 0.9s; }
+.entry-stage .cell.c8 { animation-delay: 1.05s; }
+@keyframes es-cell { 0%, 50% { opacity: 0; transform: scale(0.4); } 55%, 100% { opacity: 1; transform: none; } }
+
+@media (max-width: 860px) {
+  .entry-screen--split { grid-template-columns: 1fr; }
+  .entry-stage { gap: 10px; padding: 20px 16px 18px; }
+  .entry-stage-scene svg { max-height: 190px; }
+  .entry-stage-copy h2 { font-size: 26px; }
+  .entry-stage-phrases { height: 3.1em; }
+  .entry-stage-feats { display: none; }
+  .entry-pane { align-items: start; padding: 24px 16px 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .entry-stage .sA, .entry-stage .sB, .entry-stage .sC, .entry-stage .ring, .entry-stage .bar, .entry-stage .dot,
+  .entry-stage .row, .entry-stage .line, .entry-stage .cell, .entry-stage .entry-stage-phrases span, .entry-stage-feats li { animation: none !important; }
+  .entry-stage .sD { animation: none !important; opacity: 1; }
+  .entry-stage .sA, .entry-stage .sB, .entry-stage .sC, .entry-stage .dot { opacity: 0; }
+  .entry-stage .line { stroke-dasharray: 100 0; }
+  .entry-stage .ring { stroke-dasharray: 44 56; }
+  .entry-stage .ring.r2 { stroke-dasharray: 31 69; }
+  .entry-stage .ring.r3 { stroke-dasharray: 21 79; }
+  .entry-stage-phrases span { opacity: 0; }
+  .entry-stage-phrases span:last-child { opacity: 1; }
+}
+
+/* En la pantalla partida el logo vive en el lado oscuro; la tarjeta solo conserva el tema. */
+.entry-screen--split .entry-logo { display: none; }
+.entry-screen--split .entry-head { justify-content: flex-end; min-height: 0; }
+.plan-v-app.dark .entry-screen--split .entry-card { background: transparent; box-shadow: none; }
