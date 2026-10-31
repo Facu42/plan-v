@@ -7,7 +7,6 @@ import { buildServiceRows, daysLeftText, replaceNutritionist, serviceEventLabel 
 import { NutritionistPanel, ServicioScreen } from './ShowroomServicio';
 import { isAllowedPage, resolveAppLocation } from './app-location';
 import { PRO_MORE, PRO_SURFACES, proMore, proSurfaces } from './showroom-nav';
-import { PAGE_LABELS } from './ShowroomPanels';
 
 const TODAY = '2026-09-30';
 const nutri = (over: Partial<ServiceNutritionist> & { id: string }): ServiceNutritionist => ({
@@ -55,6 +54,14 @@ describe('Pantalla Panel del servicio', () => {
     expect(html).toContain('value="20000"');
     expect(html).not.toContain('Cobrado este mes');
   });
+  it('respeta la sección controlada desde /admin y conserva los valores reales del tablero', () => {
+    const html = renderToStaticMarkup(<ServicioScreen board={board} onBoard={vi.fn()} today={TODAY} tab="precio" onTab={vi.fn()} />);
+    expect(html).toContain('aria-labelledby="svc-tab-precio"');
+    expect(html).toContain('value="20000"');
+    expect(html).toContain('value="30"');
+    expect(html).not.toContain('Cobrado este mes');
+    expect(html).not.toContain('Guardar configuración demo');
+  });
   it('el detalle ofrece pago con el precio cargado, prueba, excepciones e historial', () => {
     const html = renderToStaticMarkup(<ServicioScreen board={board} onBoard={vi.fn()} today={TODAY} initialSelectedId="ana" />);
     expect(html).toContain('Servicio de Ana Gómez');
@@ -101,18 +108,16 @@ describe('Cliente del Panel del servicio', () => {
 });
 
 describe('Navegación del Panel del servicio', () => {
-  it('oculta la entrada del menú si no es administrador y la suma si lo es', () => {
-    expect(proSurfaces(false)).toBe(PRO_SURFACES);
-    expect(proMore(false)).toBe(PRO_MORE);
-    expect(proSurfaces(false).some((tab) => tab.id === 'servicio')).toBe(false);
-    expect(proSurfaces(true)[PRO_SURFACES.length]).toMatchObject({ id: 'servicio', label: 'Panel del servicio', icon: 'wallet' });
-    expect(proMore(true).some((tab) => tab.id === 'servicio')).toBe(true);
+  it('no incluye el Panel del servicio en la navegación de la nutricionista', () => {
+    expect(proSurfaces()).toBe(PRO_SURFACES);
+    expect(proMore()).toBe(PRO_MORE);
+    expect([...proSurfaces(), ...proMore()].map((tab) => tab.id)).not.toContain('servicio');
   });
-  it('la ruta existe sólo para el nutricionista y /admin la abre', () => {
-    expect(isAllowedPage('pro', 'servicio')).toBe(true);
+  it('no enruta /admin ni /crm/servicio al CRM de la nutricionista', () => {
+    expect(isAllowedPage('pro', 'servicio')).toBe(false);
     expect(isAllowedPage('patient', 'servicio')).toBe(false);
-    expect(PAGE_LABELS.servicio).toBe('Panel del servicio');
-    expect(resolveAppLocation({ pathname: '/admin' })).toMatchObject({ role: 'pro', page: 'servicio', path: '/crm/servicio' });
+    expect(resolveAppLocation({ pathname: '/admin' })).toMatchObject({ page: 'inicio' });
+    expect(resolveAppLocation({ pathname: '/crm/servicio' })).toMatchObject({ role: 'pro', page: 'inicio', path: '/crm/inicio' });
     expect(resolveAppLocation({ pathname: '/admin', lockedRole: 'patient' })).toMatchObject({ role: 'patient', page: 'inicio' });
     expect(resolveAppLocation({ pathname: '/app/servicio' }).page).toBe('inicio');
   });

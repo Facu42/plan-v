@@ -70,7 +70,7 @@ export function SubscriptionPreview() {
     {shell && <aside className="nv-sidebar" aria-label="Consultorio">
       <button className="pn-mobile-close" type="button" aria-label="Cerrar navegación"><X size={18} aria-hidden="true" /></button>
       <a className="nv-brand" href="/crm/inicio"><Mark /><span>Nutridash<small>Tu consultorio</small></span></a>
-      <PanelNavigation patients={[]} unread={0} admin={false} current={current} collapsed={false} onOpen={noop} />
+      <PanelNavigation patients={[]} unread={0} current={current} collapsed={false} onOpen={noop} />
       <div className="pn-sidebar-account"><span className="nv-user-avatar" aria-hidden="true">VT</span><span className="pn-nav-label"><strong>Verónica Trenti</strong><small>Nutricionista</small></span></div>
     </aside>}
     <div className="nv-workspace">

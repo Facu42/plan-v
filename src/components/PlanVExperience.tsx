@@ -12,6 +12,7 @@ import { PasswordResetScreen } from './auth/PasswordResetScreen';
 import { ConsentScreen } from './auth/ConsentScreen';
 import { MfaScreen } from './auth/MfaScreen';
 import { useMfaGate } from '../context/useMfaGate';
+import { mfaEnforcedForPath } from '../context/mfa';
 import { EntryStatus } from './auth/entry-shell';
 import { hasCurrentLegalAcceptance } from '../legal';
 import { useAuth } from '../context/AuthContext';
@@ -26,7 +27,7 @@ import { LoadingScreen } from './shared/AppStatus';
 import { isAdminPath } from './nutrigo/app-location';
 import { isPublicSlug, publicSlugFromPath } from '../types/public-slug';
 
-const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
+const AdminCrm = lazy(() => import('./nutrigo/admin-crm/AdminCrm').then(({ AdminCrm }) => ({ default: AdminCrm })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 const StandaloneWorkspace = lazy(() => import('./nutrigo/StandaloneWorkspace').then(({ StandaloneWorkspace }) => ({ default: StandaloneWorkspace })));
 const SubscriptionPreview = import.meta.env.DEV
@@ -50,7 +51,7 @@ export function PlanVExperience() {
   // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
   const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
   const sessionUserId=session?.user.id??null;
-  const mfa = useMfaGate(session, isNutri || isAdminPath(path), !authLoading && !passwordRecovery);
+  const mfa = useMfaGate(session, isNutri || isAdminPath(path), !authLoading && !passwordRecovery, mfaEnforcedForPath(path));
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
@@ -151,13 +152,12 @@ export function PlanVExperience() {
 
   if(teamPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace darkMode={darkMode} onSignOut={()=>void signOut()}/></Suspense>;}
 
-  // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
-  // no hace falta ser nutricionista ni paciente.
+  // /admin: centro de mando con datos reales de solo lectura.
   if (session && isAdminPath(window.location.pathname)) {
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
         <PwaChrome />
-        <AdminConsole darkMode={darkMode} onToggleTheme={toggleTheme} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
+        <AdminCrm adminName={profile?.full_name || undefined} />
       </Suspense>
     );
   }
