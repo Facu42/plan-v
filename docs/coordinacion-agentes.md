@@ -50,6 +50,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Monitoreo y eventos | Cursor | `work/monitoreo-errores` | Sentry apagado hasta que existan SENTRY_DSN y VITE_SENTRY_DSN. Eventos: ingreso, alta, plan publicado, mensaje enviado y errores. Sin datos de salud. Sin producción ni merge |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Motion del panel v29 | Cursor | `cursor/motion-panel-v29-e2b6`, [PR #193](https://github.com/Facu42/plan-v/pull/193) | Pastilla, entrada `fin`, panel `#act` y aviso `#atoast` con los tiempos del boceto. 3.409 pruebas aprobadas y dos omitidas. [Nota y paso 10](panel-nutri-rediseno/motion-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
 | Equipo y Ajustes v29 | Cursor, sobre el avance de Codex (se cortó sin cuota) | `cursor/equipo-ajustes-v29-70bc`, [PR #192](https://github.com/Facu42/plan-v/pull/192) | Pantallas del boceto con datos reales donde hay API y «Próximamente» en permisos, registro, plantillas y Brevo. 3.403 pruebas aprobadas, dos omitidas y cuatro e2e. [Informe y paso 10](panel-nutri-rediseno/equipo-ajustes-v29.md). HOLD por ok visual. Sin producción, migración ni merge |
@@ -129,6 +130,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **31/10 · Cursor · Monitoreo de errores y eventos** · Rama `work/monitoreo-errores`. Si no hay clave de Sentry, no se manda nada. Con la clave, avisa errores de la app y del servidor, y cuenta ingreso, alta, plan publicado y mensaje enviado. No manda mails ni datos de salud. Las claves las carga Facundo; no están en el repo.
 
 - **30/10 · Cursor · Cobro de Nutridash con Mercado Pago** · Rama `work/cobro-suscripciones-mp`. Le cobra a la nutricionista con el token de la plataforma. No toca el cobro a la paciente. Arranque 24.900 / Pro 49.900 / Consultorio 89.900. Fotos de IA: 150, 600 y sin tope. Sin prueba. 7 días de gracia y después solo lectura para la nutri; la paciente no pierde el acceso. Paciente activa: movimiento en 30 días. El 40% de fundadora no se suma al 20% anual. Variables en Railway, sin valores en el repo. Migración sin aplicar en producción. [Nota](cobro-plataforma.md).
 

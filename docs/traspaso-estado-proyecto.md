@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-30)
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · Monitoreo de errores y eventos básicos, apagado hasta que Facundo cargue SENTRY_DSN y VITE_SENTRY_DSN. Rama `work/monitoreo-errores`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
