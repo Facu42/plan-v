@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-30)
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · Pulido del alta de nutricionista en `work/pulido-alta-nutri`: el primer setup no espera el mail de Auth; el consultorio abre con 30 días de prueba; plantillas de confirmación, clave y magic link en castellano Nutridash listas para cargar. Sin producción ni migraciones.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
