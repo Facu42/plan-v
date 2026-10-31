@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideMfaStep, mfaEnforcedInApp } from './mfa';
+import { decideMfaStep, mfaEnforcedForPath, mfaEnforcedInApp } from './mfa';
 
 const base = { currentLevel: 'aal1', verifiedFactors: 0, requiredForAccount: true, enforced: true };
 
@@ -20,5 +20,10 @@ describe('decideMfaStep', () => {
   it('el interruptor del frente es VITE_MFA_ENFORCE=1', () => {
     expect(mfaEnforcedInApp({})).toBe(false);
     expect(mfaEnforcedInApp({ VITE_MFA_ENFORCE: '1' })).toBe(true);
+  });
+  it('/admin pide el segundo paso aunque el interruptor esté apagado', () => {
+    expect(mfaEnforcedForPath('/admin', {})).toBe(true);
+    expect(mfaEnforcedForPath('/crm/inicio', {})).toBe(false);
+    expect(mfaEnforcedForPath('/crm/inicio', { VITE_MFA_ENFORCE: '1' })).toBe(true);
   });
 });
