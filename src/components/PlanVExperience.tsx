@@ -25,7 +25,7 @@ import { PwaChrome } from '../pwa/PwaChrome';
 import { LoadingScreen } from './shared/AppStatus';
 import { isAdminPath } from './nutrigo/app-location';
 
-const AdminConsole = lazy(() => import('./nutrigo/AdminConsole').then(({ AdminConsole }) => ({ default: AdminConsole })));
+const AdminCrm = lazy(() => import('./nutrigo/admin-crm/AdminCrm').then(({ AdminCrm }) => ({ default: AdminCrm })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
 const StandaloneWorkspace = lazy(() => import('./nutrigo/StandaloneWorkspace').then(({ StandaloneWorkspace }) => ({ default: StandaloneWorkspace })));
 const SubscriptionPreview = import.meta.env.DEV
@@ -140,13 +140,13 @@ export function PlanVExperience() {
 
   if(teamPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace darkMode={darkMode} onSignOut={()=>void signOut()}/></Suspense>;}
 
-  // /admin: pantalla propia del administrador del servicio. La base confirma si la cuenta lo es;
-  // no hace falta ser nutricionista ni paciente.
+  // /admin: el CRM Nutridash completo, con el Panel del servicio real adentro.
+  // La base confirma si la cuenta es administradora (dentro de la vista del servicio).
   if (session && isAdminPath(window.location.pathname)) {
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
         <PwaChrome />
-        <AdminConsole darkMode={darkMode} onToggleTheme={toggleTheme} onSignOut={() => signOut()} userName={profile?.full_name || undefined} />
+        <AdminCrm adminName={profile?.full_name || undefined} />
       </Suspense>
     );
   }
