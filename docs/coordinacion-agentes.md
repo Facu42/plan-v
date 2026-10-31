@@ -138,6 +138,8 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **31/10 · Cursor · Login estilo pin dental** · Mismo [PR #245](https://github.com/Facu42/plan-v/pull/245). Una sola pantalla: mail/contraseña, Entrar, Google, Apple (UI lista, sin auth), olvidé y crear cuenta. Visual con el panel real en un celular, escudo y tarjeta azul. Auth sin cambios. Sin merge ni producción.
+
 - **31/10 · Cursor · Bienvenida Nutridash, pulido** · Mismo [PR #245](https://github.com/Facu42/plan-v/pull/245). Oficio MotionSites sobre el recibimiento (cristal, tipografía, entrada, grano). Copia: «Una vida más sana». Auth sin cambios. Sin merge ni producción.
 
 - **31/10 · Cursor · Bienvenida Nutridash** · Rama `work/login-nutridash`, desde `origin/main`. Recibimiento a pantalla completa (foto de comida, logo recortado sin fondo, Empezar / Iniciar sesión). El formulario de auth no cambia. Invitación pendiente salta la bienvenida. PR en borrador, sin merge ni producción.

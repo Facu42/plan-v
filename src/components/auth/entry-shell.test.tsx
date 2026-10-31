@@ -38,22 +38,20 @@ describe('piezas de ingreso', () => {
 });
 
 describe('pantalla de ingreso', () => {
-  it('muestra el ingreso con las piezas del archivo y sin el estilo viejo ni la demo', () => {
+  it('muestra el ingreso pin con todas las opciones y sin el estilo viejo ni la demo', () => {
     auth.loading = false;
     auth.demoAllowed = false;
     auth.googleAvailable = false;
     const html = renderToStaticMarkup(<LoginScreen darkMode={false} onToggleTheme={vi.fn()} />);
-    expect(html).toContain('mcp-nutrigo');
-    expect(html).toContain('data-name="Logo"');
+    expect(html).toContain('login-pin');
     expect(html).toContain('>Nutridash<');
-    expect(html).toContain('Iniciar sesión');
-    expect(html).toContain('data-name="Segmented Button"');
-    expect(html).toContain('data-node-id="217:6464"');
-    expect(html).toContain('>Entrar<');
-    expect(html).toContain('data-name="Input-search"');
-    expect(html).toContain('data-node-id="2:4491"');
-    expect(html).toContain('data-node-id="207:7100"');
-    expect(html).toContain('bg-[#c2e66e]');
+    expect(html).toContain('Entrar');
+    expect(html).toContain('Continuar con Google');
+    expect(html).toContain('Continuar con Apple');
+    expect(html).toContain('Olvidé mi contraseña');
+    expect(html).toContain('Crear cuenta');
+    expect(html).toContain('placeholder="Email"');
+    expect(html).toContain('entry-actions');
     expect(html).not.toContain('Continuar en modo demo');
     expect(html).not.toContain('Instalar Nutridash');
     expect(html).not.toContain('auth-card');
@@ -62,18 +60,20 @@ describe('pantalla de ingreso', () => {
     expect(html).not.toContain('New Message');
     expect(html).not.toContain('Search anything');
     expect(html).not.toContain('f08ac.svg');
+    expect(html).not.toContain('mcp-nutrigo');
   });
 
-  it('muestra las dos entradas y la escena de pacientes por defecto', () => {
+  it('muestra las dos entradas y el copy de pacientes por defecto', () => {
     auth.loading = false;
     const html = renderToStaticMarkup(<LoginScreen darkMode={false} onToggleTheme={vi.fn()} />);
-    expect(html).toContain('entry-screen--split');
+    expect(html).toContain('login-pin');
     expect(html).toContain('Soy paciente');
     expect(html).toContain('Soy nutricionista');
-    expect(html).toContain('Tu plan, tu nutri y tu progreso, en un lugar.');
-    expect(html).toContain('data-entrada="paciente"');
     expect(html).toContain('Entrá a tu plan y a tu progreso.');
+    expect(html).toContain('placeholder="Email"');
+    expect(html).toContain('entry-actions');
     expect(html).not.toContain('Tipo de cuenta');
+    expect(html).not.toContain('entry-screen--split');
   });
 
   it('la escena de nutricionistas habla de las funciones del panel', () => {
