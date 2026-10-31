@@ -40,7 +40,7 @@ export function PanelPublicPageView({ config, published, pageUrl, connections, s
       <section className="p5-card"><header><h3>Perfil</h3></header>
         <label>Nombre<input value={page.title} maxLength={100} required onChange={event => setPage({ title: event.target.value })} /></label>
         <label>Presentación<textarea maxLength={1200} value={page.bio} onChange={event => setPage({ bio: event.target.value })} /></label>
-        <label>Dirección del link<span className="p5-slug">planv.app/<input aria-label="Dirección del link" value={page.slug} pattern="[a-z0-9][a-z0-9-]{2,59}" onChange={event => setPage({ slug: event.target.value })} /></span></label>
+        <label>Dirección del link<span className="p5-slug">nutridash.app/<input aria-label="Dirección del link" value={page.slug} pattern="[a-z0-9][a-z0-9-]{2,59}" onChange={event => setPage({ slug: event.target.value })} /></span></label>
         <label>Dónde atendés<input value={page.location} maxLength={200} onChange={event => setPage({ location: event.target.value })} /></label>
         <label>Contacto público<input value={page.contact} maxLength={150} onChange={event => setPage({ contact: event.target.value })} /></label>
         <label>Imagen pública<input type="url" placeholder="https://" value={page.logo_url} onChange={event => setPage({ logo_url: event.target.value })} /></label>
@@ -96,7 +96,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const [servicio, setServicio] = useState(0);
   const [cajon, setCajon] = useState<{ cual: CajonPublica; id: string | null } | null>(null);
   const loadPlans = () => {
-    subscriptionsApi.plans().then(result => setPlans(result.plans.filter(plan => plan.status === 'active'))).catch(error => {
+    subscriptionsApi.plans().then(result => setPlans(result.enabled === false ? null : result.plans.filter(plan => plan.status === 'active'))).catch(error => {
       if (error instanceof ApiError && error.status === 404) setPlans(null);
       else setPlanNotice(friendlyError(error));
     });
@@ -106,7 +106,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const loaded = Boolean(scheduling.snapshot);
   useUnsavedChanges(Boolean(draft), scheduling.busy);
   const published = Boolean(scheduling.snapshot?.profile.config.page.enabled);
-  const pageUrl = published ? bookingHref(typeof window === 'undefined' ? 'https://plan.v' : window.location.origin, scheduling.snapshot?.profile.config.page.slug ?? config.page.slug) : '';
+  const pageUrl = published ? bookingHref(typeof window === 'undefined' ? 'https://nutridash.app' : window.location.origin, scheduling.snapshot?.profile.config.page.slug ?? config.page.slug) : '';
   const mercadoPago = Boolean(scheduling.snapshot?.connections.mercadopago);
   const publish = () => {
     if (!/^[a-z0-9][a-z0-9-]{2,59}$/.test(config.page.slug)) { scheduling.setStatus('La dirección usa minúsculas, números y guiones.'); return; }

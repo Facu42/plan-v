@@ -26,6 +26,10 @@ if (mode === 'staging' || mode === 'production') {
     console.error(`Incomplete ${mode} secrets: ${missing.join(', ')}`);
     process.exit(1);
   }
+  const bookingSecret = String(process.env.SCHEDULING_BOOKING_SECRET || '').trim();
+  if (bookingSecret.length < 32) {
+    console.warn(`Warning (${mode}): SCHEDULING_BOOKING_SECRET is missing or shorter than 32 characters; publishing the public booking page will return 501.`);
+  }
 }
 
 console.log(`Secret boundary ok (${mode || 'unset'}).`);
