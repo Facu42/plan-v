@@ -1,3 +1,5 @@
+30/10 · Codex · Corregido en `work/fix-403-nutri` el bloqueo MFA del alta profesional: setup propio accesible durante el bootstrap y bandeja previa al segundo factor solo para un consultorio todavía vacío. Pacientes, otros roles, consultorios con pacientes y el resto de la API conservan el 403. Diagnóstico de producción limitado a SQL de solo lectura; sin migraciones, escrituras remotas, merge ni publicación.
+
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, rama `work/cobro-suscripciones-mp`. No es el cobro a la paciente. Bandera apagada. Migración `20261030120000_platform_billing.sql` escrita y sin aplicar en producción. [Nota](cobro-plataforma.md).
 
 29/10 · Codex · Cierre autorizado de #233: main 4b29bce incorporado; subida de ampliación completada. Auditoría de CI detectó aviso nuevo en Vite6.4.4; parche oficial6.4.5 exacto, sin cambios transitivos. Auditoría0/build/tipos y revisión independientes aprobados; sigue CI nueva antes de la migración de visibilidad autorizada y merge.

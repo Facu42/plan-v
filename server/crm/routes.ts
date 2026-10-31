@@ -10,6 +10,7 @@ import { loadPatientQuickPreview, loadPatientRowPreview } from './patient-previe
 import { z } from 'zod';
 import { loadPatientMealPage,patientMealQuerySchema } from './patient-meals.js';
 import { addPatientTag, listPatientTags, listTagGroups, patientTagBodySchema, removePatientTag } from './patient-tags.js';
+import { MFA_REQUIRED_MESSAGE } from '../security/mfa.js';
 
 export function registerCrmRoutes(app: Hono) {
   app.get('/api/crm/patients/:id/meals',async c=>{
@@ -78,6 +79,9 @@ export function registerCrmRoutes(app: Hono) {
     const parsed = workQueueQuerySchema.safeParse(c.req.query());
     if (!parsed.success) throw new CareError(400, 'Revisá el paciente, el tipo de pendiente y la página solicitada.');
     const scope = await resolveWorkScope('userId' in auth ? auth.userId : null, persistent);
+    if (c.get('preMfaProfessional') && scope.patients.length > 0) {
+      throw new CareError(403, MFA_REQUIRED_MESSAGE);
+    }
     if (parsed.data.patient_id && !scope.patients.some(patient => patient.id === parsed.data.patient_id)) {
       throw new CareError(403, 'Ese paciente no pertenece a tu consultorio.');
     }
