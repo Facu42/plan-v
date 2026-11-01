@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {isGoogleBusinessUrl} from '../lib/google-review';
 import {PUBLIC_SLUG_PATTERN, isReservedPublicSlug} from './public-slug';
 const time=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const timestamp=z.iso.datetime({offset:true});
@@ -20,6 +21,7 @@ export const pageExtrasSchema=z.object({
  service_notes:z.record(z.uuid(),z.object({instructions:z.string().trim().max(400),who:z.enum(['any','patients']),insurer:z.boolean()}).strict()).optional(),
  intake:z.array(z.object({text:z.string().trim().min(1).max(100),on:z.boolean()}).strict()).max(12).optional(),
  notices:z.object({confirm:z.boolean(),unconfirmed:z.boolean(),reopen:z.boolean(),review:z.boolean()}).partial().strict().optional(),
+ google_business_url:z.union([z.literal(''),z.string().trim().max(300).refine(value=>isGoogleBusinessUrl(value),'Usá un link https de Google para pedir la reseña.')]).optional(),
 }).strict();
 export type PageExtras=z.infer<typeof pageExtrasSchema>;
 export const PUBLIC_MODALIDADES=['presencial','online','ambas'] as const;

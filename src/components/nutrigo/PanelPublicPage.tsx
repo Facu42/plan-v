@@ -8,6 +8,9 @@ import { ApiError } from '../../api/error';
 import { friendlyError } from '../../lib/error-messages';
 import type { SubscriptionPlan } from '../../types/subscriptions';
 import { isPublicSlug } from '../../types/public-slug';
+import { googleReviewLink, reviewRequestText } from '../../lib/google-review';
+import { schedulingApi } from '../../api/scheduling';
+import { useAppStore } from '../../store/useAppStore';
 import { Icon } from '../shared/Icon';
 import { PlanForm } from './PanelDebit';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
@@ -98,6 +101,8 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const [servicio, setServicio] = useState(0);
   const [cajon, setCajon] = useState<{ cual: CajonPublica; id: string | null } | null>(null);
   const [marcaLogo, setMarcaLogo] = useState('');
+  const [pacienteId, setPacienteId] = useState('');
+  const pacientes = useAppStore(state => state.patients).map(paciente => ({ id: paciente.id, name: paciente.name }));
   const loadPlans = () => {
     subscriptionsApi.plans().then(result => setPlans(result.enabled === false ? null : result.plans.filter(plan => plan.status === 'active'))).catch(error => {
       if (error instanceof ApiError && error.status === 404) setPlans(null);
@@ -168,6 +173,20 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
       onCopiar={copy} onDescargarQr={downloadQr} onAviso={setAviso} onDia={setDia}
       onRecordatorios={() => { const next = { ...config, reminders_enabled: config.reminders_enabled === false }; setDraft(next); void scheduling.save(next, next.reminders_enabled ? 'Recordatorio de 24 h prendido.' : 'Recordatorio de 24 h apagado.').then(ok => { if (ok) setDraft(null); }); }}
       onReservar={onAgenda ?? (() => setVista(2))} onReintentar={() => void scheduling.load()}
+      reviewLink={googleReviewLink(config.page_extras?.google_business_url ?? '') ?? ''}
+      pacientes={pacientes} pacienteId={pacienteId} onPaciente={setPacienteId}
+      onPedirResena={() => {
+        const link = googleReviewLink(config.page_extras?.google_business_url ?? '');
+        if (!link) { scheduling.setStatus('Cargá en Editar perfil un link https de Google (g.page o el de reseña).'); return; }
+        const text = reviewRequestText(link);
+        if (!pacienteId) {
+          void navigator.clipboard.writeText(text).then(() => scheduling.setStatus('Texto de reseña copiado. Elegí una paciente para mandarlo por el chat.')).catch(() => scheduling.setStatus(text));
+          return;
+        }
+        void schedulingApi.askReview(pacienteId).then(result => {
+          scheduling.setStatus(result.delivered === 'chat' ? 'Pedido de reseña mandado por el chat.' : 'No se mandó: la paciente se dio de baja o apagó los avisos.');
+        }).catch(error => scheduling.setStatus(friendlyError(error)));
+      }}
       onConfirmar={id => { const reserva = scheduling.snapshot?.bookings.find(item => item.id === id); if (reserva) void scheduling.confirm(reserva, reserva.patient_id ?? ''); }}
       onNuevoPlan={plans ? () => { setPlanNotice(''); setEditor('nuevo'); } : undefined}
       onPlan={plans ? (plan, visible) => { subscriptionsApi.updatePlan(plan.id, { expected_revision: plan.revision, public_visible: visible }).then(loadPlans).catch(error => setPlanNotice(friendlyError(error))); } : undefined}

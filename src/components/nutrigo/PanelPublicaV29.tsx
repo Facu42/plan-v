@@ -71,6 +71,8 @@ type Props = {
   onServicio: (indice: number) => void; onCajon: (cajon: CajonPublica, id?: string) => void; onQuitarServicio: (id: string) => void; onDuplicarServicio: (id: string) => void;
   onCopiar: () => void; onDescargarQr: () => void; onRecordatorios: () => void; onAviso: (aviso: AvisoReserva, activo: boolean) => void; onDia: (dia: number, activo: boolean) => void;
   onReservar: () => void; onReintentar: () => void; onConfirmar: (id: string) => void;
+  onPedirResena: () => void; reviewLink: string;
+  pacientes?: { id: string; name: string }[]; pacienteId?: string; onPaciente?: (id: string) => void;
   onNuevoPlan?: () => void; onPlan?: (plan: SubscriptionPlan, visible: boolean) => void; conexiones?: ReactNode;
 };
 
@@ -177,7 +179,10 @@ export function PanelPublicaV29(p: Props) {
         {obras.length ? <ListaObras obras={obras} /> : <SinObras />}
       </FxPanel>
       <FxPanel titulo="Opiniones" meta="0 verificadas" derecha={<span className="pubask">Pedir después del turno <Interruptor etiqueta="Pedir opinión después del turno" activo={extras?.notices?.review === true} onCambiar={() => p.onAviso('review', extras?.notices?.review !== true)} /></span>} grande>
+        <p className="sxsub">{p.reviewLink ? `Link de reseña: ${p.reviewLink}` : 'Cargá el link de Google Business en Editar perfil.'}</p>
         <p className="sxsub">Todavía no hay opiniones de pacientes. Cuando el pedido esté activo, las verificadas van a aparecer acá.</p>
+        {p.pacientes?.length ? <label className="sxsub">Mandar a<select aria-label="Paciente para la reseña" value={p.pacienteId ?? ''} onChange={event => p.onPaciente?.(event.target.value)}><option value="">Solo copiar el texto</option>{p.pacientes.map(paciente => <option key={paciente.id} value={paciente.id}>{paciente.name}</option>)}</select></label> : null}
+        <button type="button" className="sbtn cbtn" onClick={p.onPedirResena}>Pedir reseña</button>
       </FxPanel>
     </div>
     <div className="c"><FxPanel titulo="Así la ve una paciente nueva" meta="" derecha={<button className="lnk" type="button" onClick={() => p.onCajon('abrir')}>Abrir <PanelV29Icon name="chev" size={11} /></button>} grande clase="pubprev"><Celular config={config} publicados={config.types} marcaLogo={p.marcaLogo} /></FxPanel></div>

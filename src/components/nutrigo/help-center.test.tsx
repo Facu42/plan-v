@@ -13,6 +13,7 @@ describe('Centro de ayuda v29', () => {
     expect(filterGuides('conciliación', 'todas').map(g => g.title)).toContain('Agenda y cobranzas');
     expect(filterGuides('zzzz', 'todas')).toEqual([]);
     expect(filterGuides('slug', 'todas').map(g => g.slug)).toContain('alta');
+    expect(filterGuides('reseña', 'todas').map(g => g.slug)).toContain('resenas-google');
     expect(HELP_START.every(slug => guideBySlug(slug))).toBe(true);
   });
   it('combina tema y búsqueda y conserva destinos del panel', () => {
