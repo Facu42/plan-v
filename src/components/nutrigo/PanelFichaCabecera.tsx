@@ -5,6 +5,7 @@ import { homeDay } from '../../lib/panel-home';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PanelBellContext } from './PanelBocetoShell';
 import { secureMeetUrl } from './ShowroomConsultations';
+import { EmbeddedVideoCall } from './EmbeddedVideoCall';
 import { estadoDe, pacienteDesde, ultimoRegistro } from './pacientes-presentacion';
 import { intakeMissingItems } from './intake-review';
 import { FICHA_SOLAPAS, avanceDeIngreso, type ConteoSolapa, type SolapaFicha } from './ficha-presentacion';
@@ -49,6 +50,7 @@ export function PanelFichaCabecera({ patient, now, datos, etiquetasPropias = nul
         <button className="ibtn" type="button" onClick={onEdit} aria-label={`Editar datos de ${patient.name}`}><PanelV29Icon name="pen" /></button>
         {bell}
         {llamada ? <a className="cta" href={llamada} target="_blank" rel="noopener noreferrer"><PanelV29Icon name="play" />Iniciar consulta</a> : <button className="cta" type="button" onClick={onConsulta}><PanelV29Icon name="play" />Iniciar consulta</button>}
+        {patient.appointment?.channel === 'video' ? <EmbeddedVideoCall /> : null}
       </div>
     </div>
     {editando && onGuardarEtiquetas ? <FichaEtiquetas nombre={patient.name.split(' ')[0] ?? patient.name} actuales={propias.map(t => t.label)} onGuardar={onGuardarEtiquetas} onClose={() => setEditando(false)} /> : null}

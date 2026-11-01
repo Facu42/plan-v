@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · SEO de la página /slug, pedido de reseña de Google y una prueba de videollamada apagada, en `cursor/seo-resenas-videollamada-6508`. El mapa del sitio solo lista páginas publicadas. Meet sigue siendo el enlace. Sin producción, sin gasto y sin tocar #244 ni #245. Comparación en [videollamada-embebida.md](videollamada-embebida.md).
+
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 
