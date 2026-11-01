@@ -202,6 +202,11 @@
       "version": "20261031235550",
       "file": "20261031235550_security_definer_grants.sql",
       "sha256": "28cff8a42def3292d28c928f982447342223ea33073579d3a1d93193f58bd314"
+    },
+    {
+      "version": "20261101230000",
+      "file": "20261101230000_consultation_session_visible.sql",
+      "sha256": "ae56cc6084f3966b9d8b3ce34ebb392dcfb0fcf0fa34048690ab2655a934d320"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

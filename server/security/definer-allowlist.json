@@ -54,6 +54,7 @@
   "public.consultation_completion_list(uuid, integer, integer)",
   "public.consultation_enqueue_chunk(uuid, uuid, jsonb)",
   "public.consultation_list_tasks(uuid)",
+  "public.consultation_session_visible(uuid)",
   "public.correct_own_meal(jsonb)",
   "public.correct_own_measurement(jsonb)",
   "public.create_organization(text, text)",
