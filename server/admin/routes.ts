@@ -5,7 +5,8 @@ import * as repo from './repository.js';
 import * as accounts from './accounts.js';
 import { demoAiCheck, runAiCheck } from './ai-check.js';
 import { runFullAiCheck } from './ai-check-full.js';
-import { MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
+import { MFA_REQUIRED_MESSAGE, tokenAal } from '../security/mfa.js';
+import * as centro from './centro.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -62,7 +63,8 @@ async function requireAdmin(c: Context): Promise<boolean> {
     return false;
   }
   if (!await repo.isAdmin(true)) throw new repo.CareError(403, 'No tenés permiso para esta acción.');
-  if (mfaEnforced() && tokenAal(c.req.header('Authorization')) !== 'aal2') throw new repo.CareError(403, MFA_REQUIRED_MESSAGE);
+  // El centro de mando pide el segundo paso siempre, aunque MFA_ENFORCE esté apagado.
+  if (tokenAal(c.req.header('Authorization')) !== 'aal2') throw new repo.CareError(403, MFA_REQUIRED_MESSAGE);
   return true;
 }
 
@@ -82,6 +84,31 @@ export function registerAdminRoutes(app: Hono) {
   app.get('/api/admin/service', async (c) => {
     const persistent = await requireAdmin(c);
     return c.json({ board: await repo.getBoard(persistent), source: source(persistent) });
+  });
+
+  app.get('/api/admin/centro/resumen', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ resumen: await centro.loadResumen(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/centro/nutris', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ nutris: await centro.loadNutris(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/centro/pacientes', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ pacientes: await centro.loadPacientes(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/centro/cobros', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ cobros: await centro.loadCobros(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/centro/salud', async (c) => {
+    await requireAdmin(c);
+    return c.json({ salud: await centro.loadSalud(), source: source(isSupabaseEnabled()) });
+  });
+  app.get('/api/admin/centro/seguridad', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ seguridad: await centro.loadSeguridad(persistent), source: source(persistent) });
   });
 
   app.put('/api/admin/service/settings', async (c) => {

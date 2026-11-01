@@ -42,14 +42,14 @@ export function reportTelemetry(input: {
   send?: TelemetrySend;
 }): boolean {
   const target = parseSentryDsn(input.dsn);
-  if (!target || !input.send) return false;
-  const event = scrubTelemetry(input.event) || 'app.event';
+  if (!target || !input.send || !TELEMETRY_EVENTS.includes(input.event as TelemetryEvent)) return false;
+  const event = input.event;
   const body = JSON.stringify({
     event_id: randomId(),
     timestamp: (input.now ?? new Date()).toISOString(),
     platform: 'javascript',
-    level: event === 'client.error' ? 'error' : 'info',
-    message: input.message ? scrubTelemetry(input.message) : event,
+    level: event === 'client.error' || event === 'server.error' ? 'error' : 'info',
+    message: event,
     tags: { event },
     environment: 'nutridash',
   });

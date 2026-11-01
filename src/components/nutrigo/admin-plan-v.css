@@ -1,0 +1,114 @@
+/* Estilo del prototipo para /admin: solo presentación; los datos y permisos
+   siguen siendo los del panel real. */
+.nv-app.nv-admin {
+  --adm-bg: #f6f2e9;
+  --adm-card: #fff;
+  --adm-line: #e7e0d2;
+  --adm-soft: #fcfaf5;
+  --adm-ink: #14231d;
+  --adm-muted: #69766e;
+  --adm-faint: #858f88;
+  --adm-italic: #1d7a51;
+  --adm-accent: #1d7a51;
+  --adm-accent-soft: #eef7d5;
+  --adm-on-accent: #fff;
+  --adm-slice-2: #c2e66e;
+  --adm-slice-3: #eeb04a;
+  --adm-slice-4: #a9b1aa;
+  --adm-warn: #c6852c;
+  --adm-bad: #d8674f;
+  grid-template-columns: 252px minmax(0, 1fr);
+}
+.nv-app.nv-admin.nv-dark {
+  --adm-bg: #151d19;
+  --adm-card: #202b25;
+  --adm-line: #34443a;
+  --adm-soft: #29382e;
+  --adm-ink: #f5f4e9;
+  --adm-muted: #b3c0b6;
+  --adm-faint: #92a399;
+  --adm-italic: #c2e66e;
+  --adm-accent: #c2e66e;
+  --adm-accent-soft: #344b2d;
+  --adm-on-accent: #14231d;
+  --adm-slice-2: #a5c95e;
+  --adm-slice-3: #eeb04a;
+  --adm-slice-4: #64796a;
+}
+.nv-app.nv-admin .nv-admin-rail {
+  align-items: stretch;
+  padding: 24px 16px 18px;
+  gap: 0;
+  border: 0;
+  background: #083a30;
+  color: #f9f6ee;
+}
+.nv-app.nv-admin .nv-admin-brand {
+  width: auto;
+  height: auto;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #f9f6ee;
+  text-decoration: none;
+}
+.nv-app.nv-admin .nv-admin-brand:hover { background: transparent; transform: none; }
+.nv-app.nv-admin .nv-admin-brand img, .nv-app.nv-admin .nv-admin-brand svg { width: 42px; height: 42px; border-radius: 12px; }
+.nv-admin .nv-admin-brand-copy { display: flex; flex-direction: column; gap: 3px; }
+.nv-admin .nv-admin-brand-copy strong { font-size: 18px; font-weight: 600; letter-spacing: -.03em; }
+.nv-admin .nv-admin-brand-copy small { color: #b4c9b9; font-size: 10px; letter-spacing: .05em; }
+.nv-app.nv-admin .nv-admin-rail-links { margin-top: 26px; padding-top: 0; border: 0; }
+.nv-admin .nv-admin-rail-label { margin: 0 10px 8px; color: #9bb8a6; font-size: 10px; letter-spacing: .1em; text-transform: uppercase; }
+.nv-app.nv-admin .nv-admin-rail-link { display: flex; align-items: center; gap: 11px; width: 100%; min-height: 40px; padding: 0 12px; color: #c3d7c8; font-size: 12px; text-align: left; }
+.nv-app.nv-admin .nv-admin-rail-link:hover, .nv-app.nv-admin .nv-admin-rail-link[aria-current=page] { background: rgba(194, 230, 110, .14); border-color: transparent; color: #f5f8e9; transform: none; }
+.nv-app.nv-admin .nv-admin-theme { color: #c3d7c8; }
+.nv-app.nv-admin .nv-admin-bar { padding: 34px 30px 4px; }
+.nv-app.nv-admin .nv-admin-bar h1 { font-size: clamp(36px, 3.4vw, 52px); }
+.nv-app.nv-admin .nv-admin-title p { font-family: var(--adm-sans); font-size: 13px; line-height: 1.5; color: var(--adm-muted); }
+.nv-app.nv-admin .nv-admin-title p em { font-style: normal; }
+.nv-app.nv-admin .nv-admin-main { max-width: 1560px; padding: 22px 30px 56px; }
+.nv-app.nv-admin .svc-head { margin-bottom: 16px; }
+.nv-app.nv-admin .svc-head p { color: var(--adm-muted); }
+.nv-app.nv-admin .svc-tabpanel { padding-top: 20px; }
+.nv-app.nv-admin .svc-tabs { max-width: 100%; overflow-x: auto; }
+.nv-app.nv-admin .svc-tabs button { flex: 0 0 auto; }
+.nv-app.nv-admin .svc-tabs button[aria-selected=true] { color: var(--adm-accent); }
+.nv-app.nv-admin .cbz-stat,
+.nv-app.nv-admin .adm-chart-card,
+.nv-app.nv-admin .cbz-directory,
+.nv-app.nv-admin .nv-card,
+.nv-app.nv-admin .cbz-panel { border-radius: 16px; box-shadow: 0 1px 2px rgba(20, 35, 29, .04); }
+.nv-app.nv-admin .cbz-stat { min-height: 108px; padding: 18px 20px; }
+.nv-app.nv-admin .cbz-stat dt { font-size: 12px; }
+.nv-app.nv-admin .cbz-stat dd { font-size: clamp(28px, 3vw, 36px); letter-spacing: -.045em; }
+.nv-app.nv-admin .cbz-stat:first-child { background: #083a30; border-color: #083a30; }
+.nv-app.nv-admin .cbz-stat:first-child dt { color: #c1d8c5; }
+.nv-app.nv-admin .cbz-stat:first-child dd { color: #f9f6ee; }
+.nv-app.nv-admin .adm-chart-card { padding: 22px; }
+.nv-app.nv-admin .adm-chart-card header h3,
+.nv-app.nv-admin .cbz-directory h2,
+.nv-app.nv-admin .nv-card h2 { font-size: 16px; letter-spacing: -.02em; }
+.nv-app.nv-admin .adm-big { font-family: var(--adm-serif); font-size: 42px; font-weight: 400; }
+.nv-app.nv-admin .adm-avatar { border-radius: 10px; background: var(--adm-accent-soft); }
+.nv-app.nv-admin .adm-table th { color: var(--adm-muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.nv-app.nv-admin .adm-table td { border-bottom-color: var(--adm-line); }
+.nv-app.nv-admin .nv-button:not(.nv-soft):not(.nv-ghost) { box-shadow: 0 2px 7px rgba(8, 58, 48, .15); }
+.nv-app.nv-admin .nv-admin-rail-link:focus-visible { outline-color: #c2e66e; }
+@media (prefers-reduced-motion: reduce) {
+  .nv-app.nv-admin .cbz-stat,
+  .nv-app.nv-admin .adm-chart-card,
+  .nv-app.nv-admin .adm-table tbody tr { animation: none; transition: none; }
+}
+@media (max-width: 720px) {
+  .nv-app.nv-admin { grid-template-columns: minmax(0, 1fr); }
+  .nv-app.nv-admin .nv-admin-rail { position: static; height: auto; padding: 12px 16px; flex-direction: row; align-items: center; gap: 10px; }
+  .nv-app.nv-admin .nv-admin-rail-links { margin: 0; flex: 1; overflow-x: auto; flex-direction: row; }
+  .nv-admin .nv-admin-rail-label, .nv-admin .nv-admin-brand-copy, .nv-app.nv-admin .nv-admin-rail-link span { display: none; }
+  .nv-app.nv-admin .nv-admin-rail-link { width: 36px; min-width: 36px; justify-content: center; padding: 0; }
+  .nv-app.nv-admin .nv-admin-brand img, .nv-app.nv-admin .nv-admin-brand svg { width: 34px; height: 34px; }
+  .nv-app.nv-admin .nv-admin-rail-gap { display: none; }
+  .nv-app.nv-admin .nv-admin-bar { padding: 24px 16px 4px; }
+  .nv-app.nv-admin .nv-admin-main { padding: 18px 16px 48px; }
+  .nv-app.nv-admin .cbz-stat { min-height: 94px; padding: 14px; }
+  .nv-app.nv-admin .adm-chart-card { padding: 18px; }
+}

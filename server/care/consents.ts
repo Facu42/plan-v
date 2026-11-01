@@ -17,7 +17,7 @@ export async function currentCareConsents(patientId: string, persistent: boolean
 export async function requireCareConsent(patientId: string, persistent: boolean, purpose: ConsentPurpose) {
   const bundle = await currentCareConsents(patientId, persistent);
   if (!bundle.consented.includes(purpose)) {
-    throw new CareError(403, `Activá el permiso «${CONSENT_CATALOG.find((item) => item.purpose === purpose)?.title}» antes de continuar.`);
+    throw new CareError(403, `La paciente todavía no activó el permiso «${CONSENT_CATALOG.find((item) => item.purpose === purpose)?.title}». Debe habilitarlo desde su app en Mi ficha → Mis datos y permisos antes de continuar.`);
   }
   return bundle;
 }

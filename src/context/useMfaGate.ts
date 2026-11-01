@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { decideMfaStep, mfaEnforcedInApp, type MfaStep } from './mfa';
 
 /** Consulta a Supabase en qué nivel está la sesión y cuántos códigos tiene dados de alta. */
-export function useMfaGate(session: Session | null, requiredForAccount: boolean, ready: boolean) {
+export function useMfaGate(session: Session | null, requiredForAccount: boolean, ready: boolean, enforced = mfaEnforcedInApp()) {
   const userId = session?.user.id ?? null;
   const [step, setStep] = useState<MfaStep>(userId && supabase ? 'checking' : null);
 
@@ -19,13 +19,13 @@ export function useMfaGate(session: Session | null, requiredForAccount: boolean,
         currentLevel: level.data?.currentLevel ?? null,
         verifiedFactors: factors.data?.totp.length ?? 0,
         requiredForAccount,
-        enforced: mfaEnforcedInApp(),
+        enforced,
       }));
     } catch {
       // Si Supabase no responde, no dejamos pasar a quien tendría que verificar: el servidor igual lo frena.
       setStep(null);
     }
-  }, [userId, requiredForAccount]);
+  }, [userId, requiredForAccount, enforced]);
 
   useEffect(() => {
     if (!ready) return;

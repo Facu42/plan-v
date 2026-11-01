@@ -12,7 +12,7 @@ import {registerCommunicationChannelRoutes} from './channel-routes.js';
 import {MailDeliveryError} from '../mail/transport.js';
 import {apiHeaders} from '../security/http.js';
 const clinic='00000000-0000-4000-a000-000000000001',item='00000000-0000-4000-a000-000000000002',token='00000000-0000-4000-a000-000000000003';
-const config={provider:'gmail' as const,user:'example@gmail.com',password:'abcdefghijklmnop',senderName:'Plan V',host:'smtp.gmail.com' as const,port:465 as const,secure:true as const};
+const config={provider:'gmail' as const,user:'example@gmail.com',password:'abcdefghijklmnop',senderName:'Nutridash',host:'smtp.gmail.com' as const,port:465 as const,secure:true as const};
 beforeEach(()=>{mocks.rpc.mockReset();mocks.from.mockReset();mocks.mail.mockReset();mocks.whatsapp.mockReset();mocks.scope.mockReset();vi.stubEnv('MAIL_ENABLED','false');vi.stubEnv('WHATSAPP_ENABLED','false');});afterEach(()=>vi.unstubAllEnvs());
 function claim(allowed=true){mocks.rpc.mockImplementation(async(name:string)=>({error:null,data:name==='ops_claim_delivery'?{token,channel:'email',kind:'broadcast',email:'patient@example.test',template:EMAIL_TEMPLATES[0].id,template_hash:EMAIL_TEMPLATES[0].hash}:name==='ops_check_delivery'?allowed:true}));}
 describe('cola de comunicaciones sin entregas inventadas',()=>{

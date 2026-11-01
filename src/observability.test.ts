@@ -13,13 +13,13 @@ describe('monitoreo apagado hasta que haya clave', () => {
     expect(send).not.toHaveBeenCalled();
   });
 
-  it('con DSN manda el nombre del evento y saca el mail', () => {
+  it('con DSN manda solo el evento permitido y descarta todo texto libre', () => {
     const send = vi.fn();
     expect(parseSentryDsn(DSN)?.store).toBe('https://o0.ingest.sentry.io/api/12345/store/');
     expect(reportTelemetry({
       dsn: DSN,
       event: 'message.sent',
-      message: 'listo ana@correo.com',
+      message: 'Ana Pérez, diabetes, peso 70 kg, ana@correo.com',
       now: new Date('2026-10-31T12:00:00Z'),
       send,
     })).toBe(true);
@@ -29,7 +29,14 @@ describe('monitoreo apagado hasta que haya clave', () => {
     expect(key).toBe('abc123');
     expect(body).toContain('message.sent');
     expect(body).not.toContain('ana@correo.com');
-    expect(body).toContain('[mail]');
+    expect(JSON.parse(body).message).toBe('message.sent');
+    for (const dato of ['Ana', 'diabetes', '70 kg', '[mail]']) expect(body).not.toContain(dato);
     expect(scrubTelemetry('a@b.com')).toBe('[mail]');
   });
+});
+
+it('rechaza eventos desconocidos con datos personales antes del envío', () => {
+  const send = vi.fn();
+  expect(reportTelemetry({ dsn: DSN, event: 'Ana Pérez diabetes', send })).toBe(false);
+  expect(send).not.toHaveBeenCalled();
 });

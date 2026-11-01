@@ -273,30 +273,33 @@ export function PanelPlanes({ patients, selectedId = '', initialVista, enfocarPe
   const alta = etiquetaAlta(vista);
   const planAbierto = editorId ? cargados[editorId] : undefined;
   const enEditor = vista === 'plan' && Boolean(planAbierto);
+  const estadoPlanAbierto = planAbierto?.current.status;
+  const accionesHeader = useRef({ abrirNuevo, abrirArmar, abrirEditor, volverAlPlan });
+  accionesHeader.current = { abrirNuevo, abrirArmar, abrirEditor, volverAlPlan };
   useEffect(() => {
     if (vista === 'recetas') { onHeader?.(recetasHeader); return; }
     if (vista === 'equivalencias') { onHeader?.(null); return; }
     if (creando) {
-      onHeader?.(<button className="chip" type="button" onClick={volverAlPlan}>Volver al plan</button>);
+      onHeader?.(<button className="chip" type="button" onClick={() => accionesHeader.current.volverAlPlan()}>Volver al plan</button>);
       return;
     }
     if (vista === 'plantillas') {
-      onHeader?.(<button className="cta" type="button" onClick={() => { abrirEditor(); setAviso('Abrí un plan y elegí Guardar como plantilla.'); }}><PanelV29Icon name="plus" size={13} />{alta}</button>);
+      onHeader?.(<button className="cta" type="button" onClick={() => { accionesHeader.current.abrirEditor(); setAviso('Abrí un plan y elegí Guardar como plantilla.'); }}><PanelV29Icon name="plus" size={13} />{alta}</button>);
       return;
     }
     if (enEditor) {
-      const etiqueta = planAbierto?.current.status === 'published' ? 'Ver entrega' : 'Revisar y publicar';
+      const etiqueta = estadoPlanAbierto === 'published' ? 'Ver entrega' : 'Revisar y publicar';
       onHeader?.(<>
-        <button className="chip" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />Nuevo plan</button>
+        <button className="chip" type="button" onClick={() => accionesHeader.current.abrirNuevo()}><PanelV29Icon name="plus" size={13} />Nuevo plan</button>
         <button className="cta" type="button" onClick={() => setPublicarPedido(valor => valor + 1)}><PanelV29Icon name="check" size={13} />{etiqueta}</button>
       </>);
       return;
     }
     onHeader?.(<>
-      <button className="chip" type="button" onClick={() => abrirArmar()}><PanelV29Icon name="spark" size={13} />Armar con IA</button>
-      <button className="cta" type="button" onClick={abrirNuevo}><PanelV29Icon name="plus" size={13} />{alta}</button>
+      <button className="chip" type="button" onClick={() => accionesHeader.current.abrirArmar()}><PanelV29Icon name="spark" size={13} />Armar con IA</button>
+      <button className="cta" type="button" onClick={() => accionesHeader.current.abrirNuevo()}><PanelV29Icon name="plus" size={13} />{alta}</button>
     </>);
-  }, [onHeader, alta, abrirNuevo, abrirArmar, volverAlPlan, enEditor, planAbierto, vista, creando, recetasHeader]);
+  }, [onHeader, alta, enEditor, estadoPlanAbierto, vista, creando, recetasHeader]);
   useEffect(() => () => onHeader?.(null), [onHeader]);
 
   const filas = patients.map(persona => (persona.id in cargados)

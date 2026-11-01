@@ -53,9 +53,9 @@ export function ModeToggle({ value, onChange }: { value: CaptureMode; onChange: 
   );
 }
 
-type PhotoDropProps = { preview: string | null; blocked: boolean; onFile: (file: File) => void; onClear: () => void };
+type PhotoDropProps = { preview: string | null; blocked: boolean; onFile: (file: File) => void; onClear: () => void; onEnablePhoto?: () => void; enablingPhoto?: boolean };
 
-export function PhotoDrop({ preview, blocked, onFile, onClear }: PhotoDropProps) {
+export function PhotoDrop({ preview, blocked, onFile, onClear, onEnablePhoto, enablingPhoto }: PhotoDropProps) {
   const gallery = useRef<HTMLInputElement>(null);
   const camera = useRef<HTMLInputElement>(null);
   const pickButton = useRef<HTMLButtonElement>(null);
@@ -112,6 +112,11 @@ export function PhotoDrop({ preview, blocked, onFile, onClear }: PhotoDropProps)
             <button type="button" className="mlm-chip-btn" disabled={blocked} onClick={() => camera.current?.click()}><Icon name="camera" size={16} />Sacar foto</button>
             <button ref={pickButton} type="button" className="mlm-chip-btn" disabled={blocked} onClick={() => gallery.current?.click()}><Icon name="plus" size={16} />Elegir foto</button>
           </div>
+          {blocked && onEnablePhoto && (
+            <button type="button" className="mlm-chip-btn" disabled={Boolean(enablingPhoto)} onClick={onEnablePhoto}>
+              {enablingPhoto ? 'Activando permiso…' : 'Activar permiso de fotos ahora'}
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -152,12 +157,18 @@ export function ConsentGroup({ blocked, children }: { blocked: boolean; children
 type CaptureViewProps = {
   draft: Draft; error: string | null; photoBlocked: boolean; aiBlocked: boolean; consent: ReactNode;
   onChange: (patch: Partial<Draft>) => void; onFile: (file: File) => void; onAnalyze: () => void;
+  onEnableConsent?: (purposes: Array<'meal_photo' | 'ai_meal_analysis'>) => void;
+  enablingConsent?: boolean;
 };
 
-export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, onChange, onFile, onAnalyze }: CaptureViewProps) {
+export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, onChange, onFile, onAnalyze, onEnableConsent, enablingConsent }: CaptureViewProps) {
   const isPhoto = draft.mode === 'photo';
   const textWithoutAi = !isPhoto && aiBlocked;
   const ready = isPhoto ? Boolean(draft.photoPreview || draft.description.trim()) : Boolean(draft.description.trim());
+  const missingPhotoConsents: Array<'meal_photo' | 'ai_meal_analysis'> = [
+    ...(photoBlocked ? ['meal_photo' as const] : []),
+    ...(aiBlocked ? ['ai_meal_analysis' as const] : []),
+  ];
   return (
     <>
       <div className="mlm-scroll">
@@ -169,7 +180,14 @@ export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, on
         <div className="mlm-panel" key={draft.mode}>
           {isPhoto ? (
             <>
-              <PhotoDrop preview={draft.photoPreview} blocked={photoBlocked} onFile={onFile} onClear={() => onChange({ photoPreview: null })} />
+              <PhotoDrop
+                preview={draft.photoPreview}
+                blocked={photoBlocked}
+                onFile={onFile}
+                onClear={() => onChange({ photoPreview: null })}
+                onEnablePhoto={photoBlocked && onEnableConsent ? () => onEnableConsent(missingPhotoConsents) : undefined}
+                enablingPhoto={enablingConsent}
+              />
               <input
                 className="mlm-input" aria-label="Detalle opcional de la comida" placeholder="Detalle opcional (ej: con aceite de oliva)"
                 maxLength={MAX_TEXT} value={draft.description} onChange={(e) => onChange({ description: e.target.value })}
@@ -193,6 +211,22 @@ export function CaptureView({ draft, error, photoBlocked, aiBlocked, consent, on
       <footer className="mlm-foot">
         <div className="mlm-feedback">{error && <p className="mlm-error">{error}</p>}</div>
         {isPhoto && aiBlocked && <p className="mlm-hint" id="mlm-ai-hint">Activá el permiso de análisis con IA, arriba, para continuar.</p>}
+        {isPhoto && missingPhotoConsents.length > 0 && onEnableConsent && (
+          <button
+            type="button"
+            className="mlm-chip-btn"
+            disabled={Boolean(enablingConsent)}
+            onClick={() => onEnableConsent(missingPhotoConsents)}
+          >
+            {enablingConsent
+              ? 'Activando permiso…'
+              : photoBlocked && aiBlocked
+                ? 'Activar permisos de foto e IA ahora'
+                : photoBlocked
+                  ? 'Activar permiso de fotos ahora'
+                  : 'Activar permiso de análisis con IA ahora'}
+          </button>
+        )}
         {textWithoutAi && <p className="mlm-hint" id="mlm-text-hint">Sin el permiso de IA guardamos tu descripción. Si lo activás arriba, estimamos alimentos y macros.</p>}
         <button className="mlm-cta" type="button" data-ready={ready} onClick={onAnalyze} disabled={isPhoto && aiBlocked} aria-describedby={isPhoto && aiBlocked ? 'mlm-ai-hint' : textWithoutAi ? 'mlm-text-hint' : undefined}>
           <Icon name={textWithoutAi ? 'edit' : 'sparkle'} size={18} />{textWithoutAi ? 'Registrar comida' : 'Analizar con IA'}
