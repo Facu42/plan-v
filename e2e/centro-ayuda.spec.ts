@@ -15,6 +15,8 @@ test('Ayuda: filtros, búsqueda en pasos/error, selección y enlace anterior', a
   await page.getByRole('button', { name: 'Buscar', exact: true }).click();
   await expect(help.getByRole('heading', { name: 'Importar una cartera' })).toBeVisible();
   await page.getByLabel('Buscar una guía').fill('conciliación');
+  // Cobros y Agenda comparten este término; elegimos la guía cuyo detalle comprobamos.
+  await help.getByRole('button', { name: 'Ver Agenda y cobranzas', exact: true }).click();
   await expect(help.getByRole('heading', { name: 'Agenda y cobranzas' })).toBeVisible();
   await page.getByLabel('Buscar una guía').fill('texto inexistente');
   await expect(help.getByText('No encontramos una guía con ese texto.')).toBeVisible();
@@ -22,6 +24,7 @@ test('Ayuda: filtros, búsqueda en pasos/error, selección y enlace anterior', a
   await page.getByRole('button', { name: 'La más consultada' }).click();
   await expect(help.getByRole('status')).toContainText('Todavía no hay medición');
   await page.getByLabel('Buscar una guía').fill('');
+  await help.getByRole('button', { name: 'Ver Mensajes y avisos', exact: true }).click();
   await help.getByRole('button', { name: 'Abrir apartado', exact: true }).click();
   await expect(page).toHaveURL(/\/crm\/mensajes/);
 });
