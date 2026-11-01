@@ -22,7 +22,7 @@ describe('audio final válido para el servidor sin perder muestras',()=>{
  it('conserva el final menor a0,1s de un archivo de30s y un fragmento',async()=>{
   const samples=new Float32Array(30*48000+2400);samples[samples.length-1]=0.5;
   audioContext(samples);
-  const result=await decodeUploadedConsultation({size:100,arrayBuffer:async()=>new ArrayBuffer(1)} as File);
+  const result=await decodeUploadedConsultation({size:100,arrayBuffer:async()=>new ArrayBuffer(1)} as File,async()=>true);
   expect(result).toHaveLength(2);
   expect(decodeConsultationWav(result[1]).durationSeconds).toBeGreaterThanOrEqual(0.1);
   expect(new DataView(result[1].buffer).getInt16(44+2399*2,true)).toBeGreaterThan(0);
@@ -33,12 +33,30 @@ describe('audio final válido para el servidor sin perder muestras',()=>{
   const stream={getAudioTracks:()=>[track],getTracks:()=>[track]};
   vi.stubGlobal('navigator',{mediaDevices:{getDisplayMedia:async()=>stream,getUserMedia:async()=>stream}});
   vi.stubGlobal('window',{AudioContext:Context});vi.stubGlobal('MediaStream',class{});
-  const output=vi.fn();const capture=await prepareConsultationCapture(output,vi.fn(),vi.fn());
+  const output=vi.fn();const capture=await prepareConsultationCapture(output,vi.fn(),vi.fn(),async()=>true);
   capture.begin();processor.onaudioprocess!({inputBuffer:{getChannelData:()=>new Float32Array(4096).fill(0.25)}});await capture.stop();
   expect(output).toHaveBeenCalledTimes(1);
   const wav=output.mock.calls[0][0] as Uint8Array;
   expect(decodeConsultationWav(wav).durationSeconds).toBeGreaterThanOrEqual(0.1);
   expect(new DataView(wav.buffer).getInt16(44+4095*2,true)).toBeGreaterThan(0);
   expect(track.stop).toHaveBeenCalled();expect(vi.getTimerCount()).toBe(0);
+ });
+});
+
+describe('consentimiento registrado antes de usar el audio',()=>{
+ it.each(['ausente','retirado','consulta fallida'])('no pide micrófono ni pantalla con permiso %s',async scenario=>{
+  const getDisplayMedia=vi.fn(),getUserMedia=vi.fn();
+  vi.stubGlobal('navigator',{mediaDevices:{getDisplayMedia,getUserMedia}});
+  vi.stubGlobal('window',{AudioContext:class{}});
+  const authorize=scenario==='ausente'?undefined:async()=>{if(scenario==='consulta fallida')throw Error('offline');return false;};
+  await expect(prepareConsultationCapture(vi.fn(),vi.fn(),vi.fn(),authorize)).rejects.toThrow();
+  expect(getDisplayMedia).not.toHaveBeenCalled();expect(getUserMedia).not.toHaveBeenCalled();
+ });
+ it.each(['ausente','retirado','consulta fallida'])('no lee ni decodifica un archivo con permiso %s',async scenario=>{
+  const arrayBuffer=vi.fn(async()=>new ArrayBuffer(1)),Context=vi.fn();
+  vi.stubGlobal('AudioContext',Context);
+  const authorize=scenario==='ausente'?undefined:async()=>{if(scenario==='consulta fallida')throw Error('offline');return false;};
+  await expect(decodeUploadedConsultation({size:100,arrayBuffer} as unknown as File,authorize)).rejects.toThrow();
+  expect(arrayBuffer).not.toHaveBeenCalled();expect(Context).not.toHaveBeenCalled();
  });
 });

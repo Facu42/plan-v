@@ -69,6 +69,15 @@ describe('createPushNotifier', () => {
     expect(send.mock.calls.map(call => (call[0] as StoredSubscription).endpoint)).not.toContain('https://fcm.googleapis.com/ajeno');
   });
 
+  it('campaña revalida la baja antes de cada teléfono y usa solo la plantilla revisada',async()=>{
+    let allowed=true;const send=vi.fn(async(_subscription:StoredSubscription,_payload:string)=>{allowed=false;});
+    const {store}=memoryStore([{...PHONE,user_id:'u1'},{...PHONE,endpoint:'https://web.push.apple.com/segundo',user_id:'u1'}]);
+    const payload={title:'Aviso del consultorio',body:'Entrá a Nutridash.',url:'/app/mensajes',tag:'campaign:test'};
+    const notifier=createPushNotifier({config:()=>pushConfig(CONFIG),store:()=>store,send});
+    expect(await notifier.notifyPatient('p1','message',async()=>allowed,payload)).toBe(1);
+    expect(send).toHaveBeenCalledTimes(1);expect(JSON.parse(send.mock.calls[0][1] as string)).toEqual(payload);
+  });
+
   it('borra el teléfono que ya no existe y sigue con los demás', async () => {
     const gone = Object.assign(new Error('gone'), { statusCode: 410 });
     const send = vi.fn().mockRejectedValueOnce(gone).mockResolvedValueOnce(undefined);

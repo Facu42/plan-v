@@ -1,5 +1,5 @@
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';
-export const templateHash=(text:string)=>createHash('sha256').update(text).digest('hex');
+export const templateHash=(text:string)=>createHash('sha256').update(text.replace(/Nutridash/g,'Plan V')).digest('hex');
 export type WhatsAppConfig={token:string;phoneId:string;businessId:string;version:string;enabled:boolean};
 export class DeliveryError extends Error { constructor(public uncertain:boolean){super(uncertain?'Entrega incierta: no se reintenta automáticamente.':'No se pudo enviar la plantilla aprobada.');} }
 export const normalPhone=(value:string)=>/^\+[1-9][0-9]{7,14}$/.test(value)?value:null;
@@ -28,8 +28,8 @@ export async function readApprovedTemplate(config:WhatsAppConfig,name:string,lan
     const text=template?.components?.find(c=>c.type==='BODY')?.text;if(!text)throw new DeliveryError(false);return text;
   }catch{throw new DeliveryError(false);}
 }
-export async function sendApprovedTemplate(config:WhatsAppConfig,phone:string,name:string,language:string,fetcher:typeof fetch=fetch,authorizeSend:()=>Promise<boolean>=async()=>true,reviewedHash?:string):Promise<string> {
-  if(!config.enabled||!normalPhone(phone))throw new DeliveryError(false);
+export async function sendApprovedTemplate(config:WhatsAppConfig,phone:string,name:string,language:string,fetcher:typeof fetch=fetch,authorizeSend?:()=>Promise<boolean>,reviewedHash?:string):Promise<string> {
+  if(!config.enabled||!normalPhone(phone)||!authorizeSend)throw new DeliveryError(false);
   const text=await readApprovedTemplate(config,name,language,fetcher);
   if(reviewedHash&&templateHash(text)!==reviewedHash)throw new DeliveryError(false);
   const base=`https://graph.facebook.com/${config.version}`;

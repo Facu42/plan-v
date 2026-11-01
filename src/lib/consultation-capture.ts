@@ -13,7 +13,12 @@ function encodeSegment(samples:Float32Array,sampleRate:number):Uint8Array {
 }
 export type AudioPresence={microphone:boolean;remote:boolean;microphone_level:number;remote_level:number};
 export type ConsultationCapture={sources:AudioPresence;begin():void;stop():Promise<void>;dispose():void};
-export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,index:number)=>void,onSources:(presence:AudioPresence)=>void,onInterruption:()=>void):Promise<ConsultationCapture> {
+async function requireRecordedConsent(authorize?:()=>Promise<boolean>) {
+ let allowed=false;try{allowed=await authorize?.()===true;}catch{/* Fail closed if the saved permission cannot be read. */}
+ if(!allowed)throw new Error('La paciente debe activar los permisos de grabación e IA antes de continuar.');
+}
+export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,index:number)=>void,onSources:(presence:AudioPresence)=>void,onInterruption:()=>void,authorize?:()=>Promise<boolean>):Promise<ConsultationCapture> {
+ await requireRecordedConsent(authorize);
  if(!navigator.mediaDevices?.getDisplayMedia||!navigator.mediaDevices?.getUserMedia||!window.AudioContext)throw new Error('Este navegador no permite grabar la videollamada. Cargá un audio o una transcripción.');
  let mic:MediaStream|undefined,tab:MediaStream|undefined,ctx:AudioContext|undefined;let timer:ReturnType<typeof setInterval>|undefined;let disposed=false,started=false;
  const clean=()=>{disposed=true;if(timer)clearInterval(timer);mic?.getTracks().forEach(t=>t.stop());tab?.getTracks().forEach(t=>t.stop());if(ctx&&ctx.state!=='closed')void ctx.close().catch(()=>undefined);};
@@ -37,7 +42,8 @@ export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,ind
 }
 
 /** Supported codecs are decoded locally, then split into independently valid WAV files. */
-export async function decodeUploadedConsultation(file:File):Promise<Uint8Array[]> {
+export async function decodeUploadedConsultation(file:File,authorize?:()=>Promise<boolean>):Promise<Uint8Array[]> {
+ await requireRecordedConsent(authorize);
  if(file.size>20*1024*1024)throw new Error('El audio supera 20 MB. Dividilo antes de cargarlo.');
  const ctx=new AudioContext();
  try{const decoded=await ctx.decodeAudioData(await file.arrayBuffer());if(decoded.duration>3*3600)throw new Error('El audio supera tres horas.');const mono=new Float32Array(decoded.length);for(let c=0;c<decoded.numberOfChannels;c++){const channel=decoded.getChannelData(c);for(let i=0;i<mono.length;i++)mono[i]+=channel[i]/decoded.numberOfChannels;}const step=Math.floor(decoded.sampleRate*30),chunks:Uint8Array[]=[];for(let i=0;i<mono.length;i+=step)chunks.push(encodeSegment(mono.subarray(i,Math.min(i+step,mono.length)),decoded.sampleRate));return chunks;}
