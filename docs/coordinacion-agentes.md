@@ -59,6 +59,7 @@ visto bueno de Facundo.
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
 | Flecha de plegar el menú del panel | Cursor | `work/fix-sidebar-toggle` | Con el menú abierto la flecha quedaba cortada por la barra. Ahora se ve abierta y plegada, con el círculo del boceto v29. Sin producción ni merge |
+| Términos y privacidad: papeles de Nutridash | Cursor | `work/legal-nutridash` | Nutridash (Verónica Trenti) responsable de la plataforma; la nutricionista, de sus pacientes; Nutridash encargado (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Sin producción ni merge |
 | Centro de mando en `/admin` | Cursor | `work/admin-centro-de-mando`, [PR #252](https://github.com/Facu42/plan-v/pull/252) | `/admin` muestra Resumen, Nutris, Pacientes, Cobros, Salud y Seguridad con datos reales de solo lectura. Sale Pipeline, Bandeja y Automatizaciones (datos de ejemplo). MFA aal2 obligatorio aunque MFA_ENFORCE esté apagado. Reemplaza #246. Sin migraciones ni producción |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Bloqueantes del piloto simulado | Codex, autorizado por Facundo el 30/10 | `work/fix-bloqueantes-piloto` | 7 puntos resueltos: 501 agenda settings, 501 /api/team, consentimientos IA/foto, bucle React Planes, 403 UX historial, modal nuevo turno sin paciente preseleccionada, rebrand visible. Checks y sweep limpios. PR en draft, sin merge ni producción |
@@ -141,9 +142,14 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **01/11 · Codex · Integración mecánica de #248** · Incorporado `origin/main` `10c957d2` en la rama de legal; conflictos únicamente en coordinación y traspaso, conservando main y rama. Sin cambios manuales de código, sin merge de PR ni producción.
+
 - **01/11 · Codex · Destrabe autorizado de #247** · Merge de `origin/main` fb5cb9bb en `work/fix-sidebar-toggle`, conservando ambas partes del conflicto documental. Se conservaron la corrección de la flecha y las entradas de coordinación de main. 2 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
 
 - **31/10 · Cursor · Flecha de plegar el menú** · Rama `work/fix-sidebar-toggle`. Con el menú abierto, la barra recortaba la flecha (queda a caballo del borde) y no se veía. Ahora la barra abierta la deja afuera del recorte, el ícono usa el color del texto y sigue el lugar del boceto v29. Plegada queda adentro del riel. En el celular sigue oculta: ahí se abre el menú desde arriba. Sin producción ni merge.
+- **01/11 · Codex · Destrabe autorizado de #248** · Merge de `origin/main` fb5cb9bb en `work/legal-nutridash`, conservando ambas partes del conflicto documental. Términos y privacidad a nombre de Verónica Trenti. Cláusula explícita de encargado art. 25: instrucciones, confidencialidad, seguridad, no cesión, devolución/destrucción, subencargados Supabase/Railway/Vercel y transferencia internacional. Se conserva el test de aceptación original de main. 9 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
+
+- **31/10 · Cursor · Términos y privacidad** · Rama `work/legal-nutridash`. El responsable de la plataforma es Nutridash (Verónica Trenti). La nutricionista es la responsable de los datos de sus pacientes y Nutridash es el encargado del tratamiento (artículo 25 de la Ley 25.326). El CUIT, el domicilio y el mail quedaron en [COMPLETAR]. Hay una nota de que falta la revisión de un abogado. Quien ya había aceptado la versión anterior va a tener que aceptar esta. Sin producción ni merge.
 
 - **31/10 · Cursor · Centro de mando en `/admin` (HOLD)** · `/admin` deja el CRM de ejemplo y pasa a ser el centro de mando: Resumen, Nutris, Pacientes, Cobros, Salud y Seguridad, con datos reales de solo lectura (conteos y cuentas; nunca clínicos). Seis GET nuevos bajo `/api/admin/centro/*` protegidos por admin + aal2 aunque MFA_ENFORCE esté apagado. Pipeline, Bandeja y Automatizaciones no se muestran. Sin migraciones. Pruebas de los archivos tocados 46/46 y tipos en verde; fire test: sumar 1 a nutris activas hizo fallar dos pruebas, se revirtió. Flujos: login/admin con sesión real ⚠️; contratos de los seis GET ✅. [PR #252](https://github.com/Facu42/plan-v/pull/252), reemplaza #246. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 
