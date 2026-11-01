@@ -3,6 +3,7 @@ import {getRequestDb,privilegedDb} from '../db/supabase-client.js';
 import {CareError} from '../care/errors.js';
 import {registerDemoState} from '../demo/state.js';
 import {getStore,getPatient,createPatient,setAppointment,DEMO_NUTRITIONIST_ID} from '../store.js';
+import {isPublicSlug} from '../../src/types/public-slug.js';
 import {schedulingDefaultSettings,type SchedulingSettings,type SchedulingBooking,type PublicBookingInput,type BookingChange,type PublicBookingReceipt,type SchedulingInterval,type PublicSchedulingPage} from '../../src/types/scheduling.js';
 import {publicPageProfile} from '../../src/lib/public-page-profile.js';
 import {getNutritionSettings} from '../nutrition-capabilities/repository.js';
@@ -36,6 +37,23 @@ async function brandPhoto(nid:string,persistent:boolean):Promise<string>{
     const logo=r.data&&typeof (r.data as {payload?:{brand?:{logo?:unknown}}}).payload?.brand?.logo==='string'?(r.data as {payload:{brand:{logo:string}}}).payload.brand.logo:'';
     return logo.startsWith('data:image/')?logo:'';
   }catch{return '';}
+}
+/** Slugs publicados. No devuelve fichas, notas ni el id del consultorio. */
+export async function publishedSlugs(persistent:boolean):Promise<string[]>{
+  if(!persistent)return [...profiles.values()].filter(p=>p.config.page.enabled&&isPublicSlug(p.slug)).map(p=>p.slug).sort();
+  const slugs:string[]=[];
+  for(let offset=0;offset<5000;offset+=200){
+    const r=await privilegedDb().from('scheduling_profiles').select('slug,config').order('slug').range(offset,offset+199);
+    schedulingDbError(r.error);
+    const rows=r.data??[];
+    for(const row of rows){
+      const config=row.config as SchedulingSettings|undefined;
+      const slug=String(row.slug??'');
+      if(config?.page?.enabled&&isPublicSlug(slug))slugs.push(slug);
+    }
+    if(rows.length<200)break;
+  }
+  return slugs;
 }
 export async function publicPage(p:Profile,persistent:boolean):Promise<PublicSchedulingPage>{
   const [status,photo]=await Promise.all([connectionStatuses(p.nutritionist_id,persistent),p.config.page.logo_url.startsWith('https://')?Promise.resolve(''):brandPhoto(p.nutritionist_id,persistent)]);

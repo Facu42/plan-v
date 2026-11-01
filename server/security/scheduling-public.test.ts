@@ -11,6 +11,9 @@ describe('integración de reserva pública', () => {
     expect(decision('/api/public/scheduling/oauth/google')).toEqual({kind:'public'});
     expect(decision('/api/public/communications/email-unsubscribe')).toEqual({kind:'public'});
     expect(decision('/api/public/support')).toEqual({kind:'public'});
+    expect(decision('/api/public/seo/sitemap.xml')).toEqual({kind:'public'});
+    expect(decision('/api/public/seo/ana-ok')).toEqual({kind:'public'});
+    expect(decision('/api/public/seo-evil/x')).toEqual({kind:'unauthorized'});
     expect(decision('/api/public/communications/email-unsubscribe-evil')).toEqual({kind:'unauthorized'});
     for (const path of ['/api/scheduling','/api/public/scheduling-evil/x','/api/public/team','/api/team','/api/patients']) {
       expect(decision(path),path).toEqual({kind:'unauthorized'});
