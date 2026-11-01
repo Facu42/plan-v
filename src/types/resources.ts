@@ -76,7 +76,7 @@ const LICENSE_OPERATIONAL = {
   license_kind: 'internal_operational' as const,
   license_note: 'Texto original de Nutridash. Sin imagen de terceros ni URL remota.',
   cover_url: null,
-  author_name: 'Plan V',
+  author_name: 'Nutridash',
   reviewed_at: '2026-09-16T12:00:00.000Z',
   published: true,
 };
@@ -214,7 +214,7 @@ const LICENSE_CLINICAL = {
   license_kind: 'placeholder' as const,
   license_note: 'Artículo revisado de Nutridash. Portada ilustrativa local; no hay imagen licenciada remota.',
   cover_url: null,
-  author_name: 'Equipo editorial Plan V',
+  author_name: 'Equipo editorial Nutridash',
   reviewed_at: '2026-09-16T15:00:00.000Z',
   published: true,
 };

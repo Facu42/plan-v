@@ -4,6 +4,21 @@ import { useAuth } from '../../context/AuthContext';
 import { pendingInviteIdFromLocation } from '../../context/invite-link';
 import { PRIVACY_URL, TERMS_URL } from '../../legal';
 import { EntryButton, EntryChrome, EntryField, EntrySegments } from './entry-shell';
+import { EntryStage, type EntryEntrada } from './entry-stage';
+
+const ENTRADA_KEY = 'nutridash.entrada';
+
+/** La entrada sale del enlace (?entrada=nutri), después de lo último que eligió en este navegador. */
+function initialEntrada(): EntryEntrada {
+  if (typeof window === 'undefined') return 'paciente';
+  const fromLink = new URLSearchParams(window.location.search).get('entrada');
+  if (fromLink === 'nutri' || fromLink === 'paciente') return fromLink;
+  try {
+    return window.localStorage.getItem(ENTRADA_KEY) === 'nutri' ? 'nutri' : 'paciente';
+  } catch {
+    return 'paciente';
+  }
+}
 
 export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; onToggleTheme: () => void }) {
   const { signIn, signUp, enterDemoMode, loading, demoAllowed, googleAvailable, signInWithGoogle } = useAuth();
@@ -11,7 +26,8 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [professional, setProfessional] = useState(false);
+  const [entrada, setEntrada] = useState<EntryEntrada>('paciente');
+  const professional = entrada === 'nutri';
   const [acceptedLegal, setAcceptedLegal] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -21,8 +37,16 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    setInvitePending(Boolean(pendingInviteIdFromLocation(window.location.search, window.sessionStorage.getItem('planv.pendingInvite'))));
+    const invited = Boolean(pendingInviteIdFromLocation(window.location.search, window.sessionStorage.getItem('planv.pendingInvite')));
+    setInvitePending(invited);
+    setEntrada(invited ? 'paciente' : initialEntrada());
   }, []);
+
+  const chooseEntrada = (next: EntryEntrada) => {
+    setEntrada(next);
+    setError(null);
+    try { window.localStorage.setItem(ENTRADA_KEY, next); } catch { /* sin almacenamiento: la elección vale solo para esta visita */ }
+  };
 
   const submit = async () => {
     setError(null);
@@ -86,7 +110,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
   const subtitle = mode === 'login'
     ? (invitePending
       ? 'Entrá con el email invitado. La cuenta tiene que estar verificada para vincularte.'
-      : 'Accedé a tu panel o app de paciente.')
+      : professional ? 'Entrá a tu panel de consultorio.' : 'Entrá a tu plan y a tu progreso.')
     : mode === 'signup'
       ? (professional
         ? 'Creás tu consultorio y después invitás a tus pacientes con un enlace.'
@@ -94,18 +118,15 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
       : 'Ingresá el email de la cuenta. No vamos a decir si el correo existe o no.';
 
   return (
-    <EntryChrome title={title} subtitle={subtitle} darkMode={darkMode} onToggleTheme={onToggleTheme}>
+    <EntryChrome title={title} subtitle={subtitle} darkMode={darkMode} onToggleTheme={onToggleTheme} stage={<EntryStage entrada={entrada} />}>
+      <EntrySegments label="¿Quién entra?" options={[
+        { id: 'paciente', label: 'Soy paciente', active: !professional, onClick: () => chooseEntrada('paciente') },
+        { id: 'nutri', label: 'Soy nutricionista', active: professional, onClick: () => chooseEntrada('nutri') },
+      ]} />
       {mode !== 'recover' && (
         <EntrySegments label="Entrar o crear cuenta" options={[
           { id: 'login', label: 'Entrar', active: mode === 'login', onClick: () => setMode('login') },
           { id: 'signup', label: 'Registro', active: mode === 'signup', onClick: () => setMode('signup') },
-        ]} />
-      )}
-
-      {mode === 'signup' && (
-        <EntrySegments label="Tipo de cuenta" options={[
-          { id: 'patient', label: 'Soy paciente', active: !professional, onClick: () => setProfessional(false) },
-          { id: 'pro', label: 'Soy nutricionista', active: professional, onClick: () => setProfessional(true) },
         ]} />
       )}
 

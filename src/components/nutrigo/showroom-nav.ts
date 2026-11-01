@@ -55,21 +55,15 @@ export const PRO_SURFACES: ShellTab[] = [
   { id: 'cobranzas', icon: 'wallet', label: 'Cobranzas' },
 ];
 
-/** Sólo para el administrador de la plataforma (getAdminMe); nunca para pacientes. */
-export const SERVICE_TAB: ShellTab = { id: 'servicio', icon: 'wallet', label: 'Panel del servicio' };
-
-export function proSurfaces(isAdmin: boolean): ShellTab[] {
-  return isAdmin ? [...PRO_SURFACES, SERVICE_TAB] : PRO_SURFACES;
-}
+// El Panel del servicio vive exclusivamente en /admin, fuera del CRM del consultorio.
+export function proSurfaces(): ShellTab[] { return PRO_SURFACES; }
 
 export const PRO_MORE: ShellTab[] = PRO_SURFACES.filter((surface) => !PRO_TABS.some((tab) => tab.id === surface.id));
 
 /** Siguen abriendo por enlace directo, fuera del menú. */
-export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['equipo', 'ajustes', 'ayuda', 'desarrollo', 'ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas', 'servicio'];
+export const PRO_HIDDEN_PAGES: ShowroomPage[] = ['equipo', 'ajustes', 'ayuda', 'desarrollo', 'ficha', 'diario', 'progreso', 'compras', 'ejercicio', 'consultas', 'objetivos', 'recetas', 'recursos', 'reciente', 'guardado', 'paneles', 'videollamadas'];
 
-export function proMore(isAdmin: boolean): ShellTab[] {
-  return isAdmin ? [...PRO_MORE, SERVICE_TAB] : PRO_MORE;
-}
+export function proMore(): ShellTab[] { return PRO_MORE; }
 
 export const PATIENT_CRM_PAGES: ShowroomPage[] = ['modelos', 'alimentos', 'biblioteca', 'ficha', 'pacientes', 'consultas', 'objetivos', 'reciente', 'guardado', 'seguimiento', 'paneles', 'videollamadas'];
 

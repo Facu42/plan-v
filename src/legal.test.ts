@@ -1,14 +1,16 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { LEGAL_VERSION } from './legal';
+import { legalAcceptance, LEGAL_VERSION } from './legal';
 
 const terminos = readFileSync(new URL('../public/legal/terminos.html', import.meta.url), 'utf8');
 const privacidad = readFileSync(new URL('../public/legal/privacidad.html', import.meta.url), 'utf8');
 
 describe('términos y privacidad de Nutridash', () => {
-  it('deja a Nutridash como responsable de la plataforma y a la nutricionista de sus pacientes', () => {
+  it('identifica a Verónica Trenti y conserva a cada nutricionista como responsable de sus pacientes', () => {
     for (const html of [terminos, privacidad]) {
-      expect(html).toContain('Nutridash (Facundo Rodríguez)');
+      expect(html).toContain('Nutridash (Verónica Trenti)');
+      expect(html).not.toContain('Facundo Rodríguez');
+      for (const deber of ['instrucciones documentadas', 'confidencialidad', 'medidas de seguridad', 'No ceder', 'devolver o destruir', 'subencargados', 'Supabase', 'Railway', 'Vercel', 'transferencia internacional']) expect(html).toContain(deber);
       expect(html).toContain('artículo 25');
       expect(html).toContain('Ley 25.326');
       expect(html).toContain('Falta la revisión de un abogado');
@@ -31,5 +33,11 @@ describe('términos y privacidad de Nutridash', () => {
       expect(html).not.toContain('facundorodriguez42@gmail.com');
       expect(html).not.toContain('CUIL');
     }
+  });
+});
+
+describe('constancia de aceptación', () => {
+  it('guarda la versión vigente y el momento', () => {
+    expect(legalAcceptance(new Date('2026-09-29T12:00:00Z'))).toEqual({ legal_version: LEGAL_VERSION, legal_accepted_at: '2026-09-29T12:00:00.000Z' });
   });
 });

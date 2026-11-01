@@ -22,6 +22,7 @@ import '@fontsource/instrument-serif/latin-400.css';
 import '@fontsource/instrument-serif/latin-400-italic.css';
 import './admin-console.css';
 import './admin-redesign.css';
+import './admin-plan-v.css';
 
 /**
  * Pantalla propia del administrador del servicio (/admin). No es la de una nutricionista ni la de
@@ -47,8 +48,8 @@ export function AdminConsole({ darkMode, onToggleTheme, onSignOut, userName }: {
 
   return <div className={`nv-app nv-pro nv-fees-page nv-admin${darkMode ? ' nv-dark' : ''}`}>
     <nav className="nv-admin-rail" aria-label="Nutridash">
-      <a className="nv-admin-brand" href="/admin" aria-label="Nutridash, panel del servicio"><Mark /></a>
-      {admin ? <div className="nv-admin-rail-links">{SERVICIO_TABS.map((item) => <button key={item.id} type="button" className="nv-admin-rail-link" aria-current={tab === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => setTab(item.id)}><Icon name={SERVICIO_TAB_ICONS[item.id]} size={17} /></button>)}</div> : null}
+      <a className="nv-admin-brand" href="/admin" aria-label="Nutridash, panel del servicio"><Mark /><span className="nv-admin-brand-copy"><strong>Nutridash</strong><small>Panel del servicio</small></span></a>
+      {admin ? <div className="nv-admin-rail-links"><span className="nv-admin-rail-label">Administración</span>{SERVICIO_TABS.map((item) => <button key={item.id} type="button" className="nv-admin-rail-link" aria-current={tab === item.id ? 'page' : undefined} aria-label={item.label} title={item.label} onClick={() => setTab(item.id)}><Icon name={SERVICIO_TAB_ICONS[item.id]} size={17} /><span>{item.label}</span></button>)}</div> : null}
       <span className="nv-admin-rail-gap" />
       {onToggleTheme ? <button type="button" className="nv-admin-theme" aria-label={darkMode ? 'Usar tema claro' : 'Usar tema oscuro'} aria-pressed={darkMode} title={darkMode ? 'Tema claro' : 'Tema oscuro'} onClick={onToggleTheme}><Icon name={darkMode ? 'sun' : 'moon'} size={18} /></button> : null}
     </nav>

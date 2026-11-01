@@ -34,6 +34,7 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
   }));
   const [result, setResult] = useState<MealLog | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [enablingConsent, setEnablingConsent] = useState(false);
   const imageBase64 = useMemo(() => base64Payload(draft.photoPreview), [draft.photoPreview]);
   const consented = care.data?.consented ?? null;
   useUnsavedChanges(step === 'capture' && Boolean(draft.description.trim() || imageBase64), step === 'analyzing');
@@ -97,6 +98,29 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
 
   const preview = draft.mode === 'photo' ? draft.photoPreview : null;
   const showCapture = step === 'capture' || (!result && step !== 'analyzing');
+  const enableConsent = async (purposes: Array<'meal_photo' | 'ai_meal_analysis'>) => {
+    if (enablingConsent || !purposes.length) return;
+    setEnablingConsent(true);
+    setError(null);
+    try {
+      const { consents } = await api.getConsentCatalog();
+      for (const purpose of purposes) {
+        const item = consents.find((entry) => entry.purpose === purpose);
+        if (!item) continue;
+        await api.recordConsent(patient.id, {
+          purpose: item.purpose,
+          text_version: item.text_version,
+          text_hash: item.text_hash,
+          decision: 'granted',
+        });
+      }
+      notifyCareChanged();
+    } catch (e) {
+      setError(careErrorMessage(e));
+    } finally {
+      setEnablingConsent(false);
+    }
+  };
   return (
     <div className="mlm-backdrop" ref={dialog} tabIndex={-1} role="dialog" aria-modal="true" aria-label="Registrar comida"
       onMouseDown={(event) => { if (event.target === event.currentTarget) closeSafely(); }}
@@ -126,6 +150,8 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
               draft={draft} error={error} onChange={patchDraft} onFile={handleFile} onAnalyze={() => void analyze()}
               photoBlocked={Boolean(consented) && !consented?.includes('meal_photo')}
               aiBlocked={Boolean(consented) && !consented?.includes('ai_meal_analysis')}
+              onEnableConsent={(purposes) => void enableConsent(purposes)}
+              enablingConsent={enablingConsent}
               consent={care.data && <CareConsent patientId={patient.id} snapshot={care.data} meals />}
             />
           )}
