@@ -10,6 +10,7 @@ import { writeOpsLog } from '../ops/log.js';
 import {runSchedulingSyncJobs} from '../scheduling/worker.js';
 import {runPendingDocumentOrganizer} from '../document-organizer/worker.js';
 import { tickPushReminders } from '../push/reminders.js';
+import { tickHabitReminders } from '../push/habit-reminders.js';
 import { tickPatientSubscriptions } from '../subscriptions/worker.js';
 import { tickPlatformBilling } from '../billing-platform/worker.js';
 import { tickScheduledMessages } from '../messages/scheduled.js';
@@ -46,6 +47,7 @@ export function startJobWorker(owner = 'plan-v-worker', keepAlive = false) {
       void cleanupExpiredConsultationAudio().catch(() => writeOpsLog('warn', 'consultation_cleanup_failed', { status: 'retry_pending' })).finally(() => { cleanupRunning = false; });
     }
     void tickPushReminders().catch(() => undefined);
+    void tickHabitReminders().catch(() => undefined);
     void tickScheduledMessages();
     void tickPlatformBilling().catch(() => writeOpsLog('warn', 'platform_billing_worker_failed', { status: 'retry_pending' }));
     if (!subscriptionDraining) {

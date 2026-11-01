@@ -1,9 +1,12 @@
 // Cajones de la Página pública (los de `PUBA` del boceto v29): perfil, lugar, obras sociales, descuentos, servicio, qué se pide, horarios y reglas.
 // Cada uno edita una copia y, al guardar, entrega la configuración nueva; «Publicar cambios» la guarda en la base.
 import { useState } from 'react';
-import type { PageExtras, SchedulingSettings } from '../../types/scheduling';
+import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
+import type { PageExtras, PublicModality, SchedulingSettings } from '../../types/scheduling';
 import { Campo, CajonV29, Chips, Fila, Segmentado, Tildes } from './CajonV29';
 import { FxKv } from './ficha-fx';
+import { validarImagen } from './ficha-ajustes';
+import { MODALIDADES } from '../../lib/public-page-profile';
 import { ESPECIALIDADES_SUGERIDAS, MODOS_OBRA_SOCIAL, OBRAS_SUGERIDAS, conHorarioDelDia, leerHorario, pedidosAlReservar, type ModoObraSocial } from './publica-extras';
 import { horariosPorDia } from './PanelPublicaV29';
 
@@ -16,7 +19,10 @@ const pesos = (centavos: number) => String(Math.round(centavos / 100));
 const aCentavos = (texto: string) => Math.max(0, Math.round(Number(texto.replace(/\D/g, '')) || 0)) * 100;
 const SLUG = /^[a-z0-9][a-z0-9-]{2,59}$/;
 
-export function CajonPerfil({ config, onAplicar, onClose }: Comun) {
+const HEX = /^#[0-9A-Fa-f]{6}$/;
+const leerImagen = (archivo: File) => new Promise<string>((ok, mal) => { const r = new FileReader(); r.onload = () => ok(String(r.result)); r.onerror = () => mal(new Error('No pudimos leer la imagen.')); r.readAsDataURL(archivo); });
+
+export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = '' }: Comun & { onFoto?: (dataUrl: string) => void; fotoInicial?: string }) {
   const { page, page_extras: extras } = config;
   const [titulo, setTitulo] = useState(page.title);
   const [matricula, setMatricula] = useState(extras?.license ?? '');
@@ -27,25 +33,64 @@ export function CajonPerfil({ config, onAplicar, onClose }: Comun) {
   const [slug, setSlug] = useState(page.slug);
   const [contacto, setContacto] = useState(page.contact);
   const [logo, setLogo] = useState(page.logo_url);
+  const [modalidad, setModalidad] = useState<PublicModality>(extras?.modality ?? 'ambas');
+  const [precio, setPrecio] = useState(pesos(extras?.consult_price_minor ?? 0));
+  const [reserva, setReserva] = useState(extras?.booking_url ?? '');
+  const [color, setColor] = useState(extras?.color ?? '');
+  const [acento, setAcento] = useState(extras?.accent ?? '');
+  const [foto, setFoto] = useState(fotoInicial.startsWith('data:image/') ? fotoInicial : '');
   const [aviso, setAviso] = useState('');
   const opciones = [...ESPECIALIDADES_SUGERIDAS, ...especialidades.filter(e => !(ESPECIALIDADES_SUGERIDAS as readonly string[]).includes(e))];
+  async function subirFoto(archivo?: File) {
+    if (!archivo) return;
+    const mal = validarImagen(archivo); if (mal) { setAviso(mal); return; }
+    try {
+      const dataUrl = await leerImagen(archivo);
+      const view = await nutritionCapabilityApi.settings();
+      await nutritionCapabilityApi.saveSettings({ ...view.settings, brand: { ...view.settings.brand, logo: dataUrl } }, view.revision);
+      setFoto(dataUrl); onFoto?.(dataUrl); setAviso('Foto guardada en tu marca. Publicá los cambios para que se vea en /' + slug + '.');
+    } catch (error) {
+      setAviso(error instanceof Error ? error.message : 'No pudimos guardar la foto.');
+    }
+  }
   const guardar = () => {
     if (!SLUG.test(slug)) { setAviso('La dirección usa minúsculas, números y guiones (mínimo 3 letras).'); return false; }
-    if (logo && !logo.startsWith('https://')) { setAviso('La imagen tiene que ser un enlace https.'); return false; }
+    if (logo && !logo.startsWith('https://')) { setAviso('La imagen tiene que ser un enlace https, o subí un archivo PNG/JPG.'); return false; }
+    if (reserva && !reserva.startsWith('https://')) { setAviso('El link de reserva tiene que ser https.'); return false; }
+    if (color && !HEX.test(color)) { setAviso('El color de texto usa el formato #RRGGBB.'); return false; }
+    if (acento && !HEX.test(acento)) { setAviso('El color de acento usa el formato #RRGGBB.'); return false; }
     const nueva = otra.trim();
     const final = nueva && !especialidades.includes(nueva) ? [...especialidades, nueva] : especialidades;
     if (final.length > 12) { setAviso('Hasta 12 especialidades.'); return false; }
-    onAplicar(conExtras({ ...config, page: { ...page, title: titulo, bio, slug, contact: contacto, logo_url: logo } }, { license: matricula.trim(), area: zona.trim(), specialties: final }));
+    const centavos = Math.max(0, Math.round(Number(precio.replace(/\D/g, '')) || 0)) * 100;
+    onAplicar(conExtras({ ...config, page: { ...page, title: titulo, bio, slug, contact: contacto, logo_url: logo } }, {
+      license: matricula.trim(), area: zona.trim(), specialties: final, modality: modalidad,
+      consult_price_minor: centavos || undefined, booking_url: reserva.trim() || undefined,
+      color: color || undefined, accent: acento || undefined,
+    }));
     return true;
   };
-  return <CajonV29 titulo="Editar perfil" sub="Se ve en tu página y en la app de tus pacientes" aviso={aviso} onGuardar={guardar} onClose={onClose}>
+  return <CajonV29 titulo="Editar perfil" sub="Se ve en tu página pública /slug" aviso={aviso} onGuardar={guardar} onClose={onClose}>
     <Campo etiqueta="Nombre"><input className="ai" value={titulo} maxLength={100} onChange={e => setTitulo(e.target.value)} /></Campo>
-    <Fila><Campo etiqueta="Matrícula"><input className="ai" value={matricula} maxLength={60} placeholder="MN 0000" onChange={e => setMatricula(e.target.value)} /></Campo><Campo etiqueta="Barrio"><input className="ai" value={zona} maxLength={80} placeholder="Belgrano, CABA" onChange={e => setZona(e.target.value)} /></Campo></Fila>
+    <Fila><Campo etiqueta="Matrícula"><input className="ai" value={matricula} maxLength={60} placeholder="MN 0000" onChange={e => setMatricula(e.target.value)} /></Campo><Campo etiqueta="Zona"><input className="ai" value={zona} maxLength={80} placeholder="Belgrano, CABA" onChange={e => setZona(e.target.value)} /></Campo></Fila>
     <Campo etiqueta="Sobre vos"><textarea className="ai" rows={4} maxLength={1200} value={bio} onChange={e => setBio(e.target.value)} /></Campo>
     <Chips etiqueta="Especialidades" opciones={opciones} elegidas={especialidades} onCambiar={setEspecialidades} />
     <Campo etiqueta="Sumar otra"><input className="ai" value={otra} maxLength={40} placeholder="Ej.: Running" onChange={e => setOtra(e.target.value)} /></Campo>
-    <Campo etiqueta="Dirección del link" ayuda="Minúsculas, números y guiones."><input className="ai" value={slug} onChange={e => setSlug(e.target.value)} /></Campo>
-    <Fila><Campo etiqueta="Contacto público"><input className="ai" value={contacto} maxLength={150} onChange={e => setContacto(e.target.value)} /></Campo><Campo etiqueta="Imagen pública"><input className="ai" type="url" value={logo} placeholder="https://" onChange={e => setLogo(e.target.value)} /></Campo></Fila>
+    <Segmentado etiqueta="Modalidad" opciones={MODALIDADES} valor={modalidad} onCambiar={setModalidad} />
+    <Fila>
+      <Campo etiqueta="Precio de consulta (opcional)"><input className="ai" inputMode="numeric" value={precio} placeholder="Sin publicar" onChange={e => setPrecio(e.target.value)} /></Campo>
+      <Campo etiqueta="Link de reserva" ayuda="Si usás otro turno (Calendly u otro), pegá el https. Si no, se usa el de Nutridash."><input className="ai" type="url" value={reserva} placeholder="https://" onChange={e => setReserva(e.target.value)} /></Campo>
+    </Fila>
+    <Campo etiqueta="Dirección del link" ayuda="Minúsculas, números y guiones. Queda en nutridash.app/tu-slug"><input className="ai" value={slug} onChange={e => setSlug(e.target.value)} /></Campo>
+    <Fila><Campo etiqueta="Contacto público"><input className="ai" value={contacto} maxLength={150} onChange={e => setContacto(e.target.value)} /></Campo><Campo etiqueta="Foto o logo (enlace)"><input className="ai" type="url" value={logo} placeholder="https://" onChange={e => setLogo(e.target.value)} /></Campo></Fila>
+    <Campo etiqueta="Subir foto o logo" ayuda="PNG o JPG de hasta 500 KB. Se guarda en tu marca y sale en el PDF y en tu página.">
+      <input className="ai" type="file" accept="image/png,image/jpeg" onChange={e => void subirFoto(e.target.files?.[0])} />
+    </Campo>
+    {foto ? <img src={foto} alt="" width={56} height={56} style={{ objectFit: 'cover', borderRadius: 8 }} /> : null}
+    <Fila>
+      <Campo etiqueta="Color de texto"><input className="ai" type="color" value={HEX.test(color) ? color : '#272832'} onChange={e => setColor(e.target.value)} /></Campo>
+      <Campo etiqueta="Color de acento" ayuda="Sale en el PDF del plan. Si no elegís, se usa el lima de Nutridash."><input className="ai" type="color" value={HEX.test(acento) ? acento : '#C2E66E'} onChange={e => setAcento(e.target.value)} /></Campo>
+    </Fila>
   </CajonV29>;
 }
 

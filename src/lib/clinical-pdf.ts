@@ -1,4 +1,5 @@
 import type { ClinicBrand } from '../types/clinical-workspace';
+import { brandHex, DEFAULT_BRAND_ACCENT, DEFAULT_BRAND_INK, embedBrandLogo, hexToRgb01 } from './brand-pdf';
 export type PdfSection={title:string;lines:string[];pageBreak?:boolean};
 export type PdfChart={title:string;unit:string;points:{date:string;value:number}[]};
 export async function buildClinicalPdf(input:{title:string;patientName:string;brand:ClinicBrand;sections:PdfSection[];charts?:PdfChart[];privateNotes?:boolean;monochrome?:boolean;fontBytes?:Uint8Array}){
@@ -7,9 +8,10 @@ export async function buildClinicalPdf(input:{title:string;patientName:string;br
   const fontBytes=input.fontBytes??new Uint8Array(await(await fetch('/clinical-pdf/Poppins-Regular.ttf')).arrayBuffer());
   const font=await document.embedFont(fontBytes,{subset:true});
   document.setTitle(input.title);document.setAuthor(input.brand.name);document.setSubject(input.privateNotes?'Ficha del consultorio con notas privadas':'Documento revisado por la profesional');
-  let logo:Awaited<ReturnType<typeof document.embedPng>>|null=null;
-  if(input.brand.logo)logo=input.brand.logo.startsWith('data:image/png')?await document.embedPng(input.brand.logo):await document.embedJpg(input.brand.logo);
-  const ink=rgb(39/255,41/255,50/255),line=rgb(225/255,225/255,226/255),green=input.monochrome?rgb(.5,.5,.5):rgb(194/255,230/255,110/255);let page=document.addPage([595.28,841.89]);let y=760;
+  const logo=await embedBrandLogo(document,input.brand.logo);
+  const inkRgb=hexToRgb01(brandHex(input.brand.color,DEFAULT_BRAND_INK));
+  const accentRgb=hexToRgb01(brandHex(input.brand.accent,DEFAULT_BRAND_ACCENT));
+  const ink=rgb(...inkRgb),line=rgb(225/255,225/255,226/255),green=input.monochrome?rgb(.5,.5,.5):rgb(...accentRgb);let page=document.addPage([595.28,841.89]);let y=760;
   const addPage=()=>{page=document.addPage([595.28,841.89]);y=790;};
   const write=(text:string,size=10,width=510)=>{
     const normalized=String(text).replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'');

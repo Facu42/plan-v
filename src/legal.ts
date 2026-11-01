@@ -1,5 +1,5 @@
 /** Versión vigente de los términos y la política de privacidad (public/legal). */
-export const LEGAL_VERSION = '2026-10-29';
+export const LEGAL_VERSION = '2026-10-31';
 export const PRIVACY_URL = '/legal/privacidad.html';
 export const TERMS_URL = '/legal/terminos.html';
 

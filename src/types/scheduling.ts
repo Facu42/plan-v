@@ -3,11 +3,18 @@ import {PUBLIC_SLUG_PATTERN, isReservedPublicSlug} from './public-slug';
 const time=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const timestamp=z.iso.datetime({offset:true});
 const pct=z.number().int().min(0).max(100);
+const brandHex=z.string().regex(/^#[0-9A-Fa-f]{6}$/,'Usá un color #RRGGBB.');
+const httpsOrEmpty=z.union([z.literal(''),z.url().startsWith('https://')]);
 /** Contenido extra de la página pública (perfil, obras sociales, descuentos, indicaciones por servicio, qué se pide al reservar y avisos). Todo opcional: sin la clave, la página queda como antes. */
 export const pageExtrasSchema=z.object({
  license:z.string().trim().max(60).optional(),
  area:z.string().trim().max(80).optional(),
  specialties:z.array(z.string().trim().min(1).max(40)).max(12).optional(),
+ modality:z.enum(['presencial','online','ambas']).optional(),
+ consult_price_minor:z.number().int().min(0).max(100000000).optional(),
+ booking_url:httpsOrEmpty.optional(),
+ color:brandHex.optional(),
+ accent:brandHex.optional(),
  insurers:z.array(z.object({name:z.string().trim().min(1).max(60),mode:z.enum(['copago','reintegro','completo','no']),note:z.string().trim().max(60)}).strict()).max(20).optional(),
  discounts:z.object({transfer:pct,cash:pct,card:pct}).strict().optional(),
  service_notes:z.record(z.uuid(),z.object({instructions:z.string().trim().max(400),who:z.enum(['any','patients']),insurer:z.boolean()}).strict()).optional(),
@@ -15,6 +22,21 @@ export const pageExtrasSchema=z.object({
  notices:z.object({confirm:z.boolean(),unconfirmed:z.boolean(),reopen:z.boolean(),review:z.boolean()}).partial().strict().optional(),
 }).strict();
 export type PageExtras=z.infer<typeof pageExtrasSchema>;
+export const PUBLIC_MODALIDADES=['presencial','online','ambas'] as const;
+export type PublicModality=typeof PUBLIC_MODALIDADES[number];
+/** Lo que se publica en /:slug: sin notas internas, avisos ni obras. */
+export const publicPageProfileSchema=z.object({
+ specialties:z.array(z.string().trim().min(1).max(40)).max(12),
+ area:z.string().trim().max(80),
+ license:z.string().trim().max(60),
+ modality:z.enum(PUBLIC_MODALIDADES).optional(),
+ consult_price_minor:z.number().int().min(0).max(100000000).optional(),
+ booking_url:z.string(),
+ color:brandHex.optional(),
+ accent:brandHex.optional(),
+ photo:z.string(),
+}).strict();
+export type PublicPageProfile=z.infer<typeof publicPageProfileSchema>;
 export const schedulingSettingsSchema=z.object({
  timezone:z.literal('America/Argentina/Buenos_Aires'),
  calendars:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80)}).strict()).min(1).max(10),
@@ -32,7 +54,7 @@ export type SchedulingInterval={start:string;end:string};
 export type SchedulingSlot={starts_at:string;ends_at:string;duration_min:number;calendar_id:string;type_id:string};
 export type SchedulingBooking={id:string;nutritionist_id:string;type_id:string;calendar_id:string;starts_at:string;duration_min:number;status:'requested'|'confirmed'|'cancelled';revision:number;total_minor:number;deposit_minor:number;paid_minor:number;currency:'ARS';appointment_id:string|null;patient_id:string|null;contact_name:string;contact_email:string;contact_phone:string;google_sync_status:string;meet_url:string|null;created_at:string};
 export type PublicBookingReceipt=Pick<SchedulingBooking,'id'|'starts_at'|'duration_min'|'status'|'revision'|'total_minor'|'deposit_minor'|'paid_minor'|'currency'|'meet_url'>;
-export type PublicSchedulingPage={page:SchedulingSettings['page'];calendars:SchedulingSettings['calendars'];types:SchedulingSettings['types'];timezone:SchedulingSettings['timezone'];transfer_alias:string;mercado_pago_connected:boolean};
+export type PublicSchedulingPage={page:SchedulingSettings['page'];profile:PublicPageProfile;calendars:SchedulingSettings['calendars'];types:SchedulingSettings['types'];timezone:SchedulingSettings['timezone'];transfer_alias:string;mercado_pago_connected:boolean};
 export const publicBookingSchema=z.object({client_id:z.uuid(),type_id:z.uuid(),starts_at:timestamp,name:z.string().trim().min(2).max(120),email:z.email().max(200),phone:z.string().trim().min(5).max(40),accepted_contact:z.literal(true)}).strict();
 export type PublicBookingInput=z.infer<typeof publicBookingSchema>;
 export const bookingChangeSchema=z.object({action:z.enum(['confirm','cancel','reschedule']),expected_revision:z.number().int().positive(),starts_at:timestamp.optional(),patient_id:z.uuid().optional()}).strict().superRefine((input,ctx)=>{if(input.action==='reschedule'&&!input.starts_at)ctx.addIssue({code:'custom',message:'Elegí el nuevo horario.'});if(input.action!=='reschedule'&&input.starts_at)ctx.addIssue({code:'custom',message:'El horario sólo se cambia al reprogramar.'});if(input.action!=='confirm'&&input.patient_id)ctx.addIssue({code:'custom',message:'La ficha sólo se vincula al confirmar.'});});

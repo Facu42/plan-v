@@ -35,6 +35,7 @@ export type PlatformBillingView = {
     init_point: string | null;
     attention: string | null;
   };
+  signup_grace: null | { days_left: number; until: string; read_only: boolean };
   usage: null | { active_patients: number; nutritionists: number; ai_photos: number };
   payments: Array<{ id: string; amount_cents: number; status: string; paid_at: string | null }>;
 };

@@ -28,6 +28,13 @@ describe('descarga del plan como PDF local',()=>{
     expect(text.items.map(item=>'str' in item?item.str:'').join(' ')).toContain('19/10/2026');
     await parsed.destroy();
   });
+  it('pinta la copia HTML con los colores de la nutri y no pierde el nombre por esos campos extra',async()=>{
+    const {planPrintHtml}=await import('../components/nutrigo/PlanPrintDocument');
+    const html=planPrintHtml({...copy,brand:{name:'Consultorio Lima',contact:'hola',logo:'',color:'#112233',accent:'#AABBCC'}});
+    expect(html).toContain('#112233');
+    expect(html).toContain('#AABBCC');
+    expect(html).toContain('Consultorio Lima');
+  });
   it('genera bytes PDF reales sin diálogo de impresión y no modifica la copia',async()=>{
     const original=JSON.stringify(copy);
     const fontBytes=await readFile(new URL('../../public/clinical-pdf/Inter-Regular.ttf',import.meta.url));

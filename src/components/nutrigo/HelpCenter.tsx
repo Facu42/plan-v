@@ -3,11 +3,12 @@ import { createPortal } from 'react-dom';
 import { usePanelBoceto } from './panel-v29-boceto';
 import { PanelV29Icon } from './PanelV29Icon';
 import { filterGuides, HELP_GUIDES, HELP_TOPICS, HELP_FAQ } from './help-center-model';
+import { parseSupportEmail, supportEmailFromEnv, supportMailto } from '../../lib/support-email';
 import './help-center.css';
 
 type Faq = (typeof HELP_FAQ)[number];
 
-/** sxAyuda v29 con contenido real; no genera mediciones ni envía pedidos a soporte. */
+/** sxAyuda v29 con contenido real; no genera mediciones. El mail de soporte sale de la variable de entorno, nunca de un Gmail fijo. */
 export function HelpCenter({ onOpen, onHeader }: { onOpen: (href: string) => void; onHeader?: (actions: ReactNode) => void }) {
   const [query, setQuery] = useState('');
   const [topic, setTopic] = useState('todas');
@@ -15,6 +16,7 @@ export function HelpCenter({ onOpen, onHeader }: { onOpen: (href: string) => voi
   const [faq, setFaq] = useState<Faq | null>(null);
   const [asking, setAsking] = useState(false);
   const [notice, setNotice] = useState('');
+  const [support, setSupport] = useState<string | null>(supportEmailFromEnv());
   const visible = filterGuides(query, topic);
   const selected = visible.find(g => g.title === selectedTitle) ?? visible[0];
   useEffect(() => {
@@ -26,6 +28,14 @@ export function HelpCenter({ onOpen, onHeader }: { onOpen: (href: string) => voi
   </form><button className="chip" type="button" onClick={() => setNotice('Todavía no hay medición de consultas. No podemos identificar la más consultada.')}>La más consultada</button></>;
   useEffect(() => { onHeader?.(actions); }, [onHeader, query]); // Las acciones solo dependen del texto de búsqueda.
   useEffect(() => () => onHeader?.(null), [onHeader]);
+  useEffect(() => {
+    const c = new AbortController();
+    fetch('/api/public/support', { signal: c.signal }).then(r => r.ok ? r.json() as Promise<{ email?: string }> : null).then(body => {
+      const mail = parseSupportEmail(body?.email);
+      if (mail) setSupport(mail);
+    }).catch(() => undefined);
+    return () => c.abort();
+  }, []);
   return <div id="s-ayuda" className="sxw" aria-label="Centro de ayuda">
     {!onHeader && <header className="help-local-header"><div><h1>Centro de ayuda</h1><p className="sxsub">Guías, temas y preguntas frecuentes</p></div>{actions}</header>}
     {notice && <p className="sxsub" role="status">{notice}</p>}
@@ -42,9 +52,22 @@ export function HelpCenter({ onOpen, onHeader }: { onOpen: (href: string) => voi
       </section>
     </div></div>
     {faq && <HelpDialog title={faq.q} onClose={() => setFaq(null)}><p className="sxsub">Pregunta frecuente</p><p>{faq.a}</p><button className="chip" type="button" onClick={() => { setFaq(null); onOpen(faq.href); }}>Abrir el apartado</button></HelpDialog>}
-    {asking && <HelpDialog title="Pedir ayuda a Nutridash" onClose={() => setAsking(false)} footer={<><button type="button" className="chip" onClick={() => setAsking(false)}>Cancelar</button><span className="sp"/><button className="cta" type="submit" form="help-request-form">Anotar pedido</button></>}><p className="sxsub">No pongas datos de pacientes ni claves. Este pedido queda solo en esta pantalla: no se envía a soporte ni se guarda al salir.</p><form id="help-request-form" className="help-request" onSubmit={event => { event.preventDefault(); setAsking(false); setNotice('Pedido anotado solo en esta pantalla. No se envió a Nutridash ni se guardó al salir.'); }}>
-      <label><span id="help-section-label">Apartado</span><select aria-labelledby="help-section-label" defaultValue={selected?.title}>{HELP_GUIDES.map(g => <option key={g.title}>{g.title}</option>)}</select></label>
-      <label>Qué pasó<textarea required maxLength={2000} placeholder="Ej.: no veo la conversación"/></label>
+    {asking && <HelpDialog title="Pedir ayuda a Nutridash" onClose={() => setAsking(false)} footer={<><button type="button" className="chip" onClick={() => setAsking(false)}>Cancelar</button><span className="sp"/><button className="cta" type="submit" form="help-request-form">{support ? 'Escribir mail' : 'Anotar pedido'}</button></>}><p className="sxsub">{support ? 'No pongas datos de pacientes ni claves. Se abre tu correo con el mail de soporte de Nutridash; no se guarda acá.' : 'No pongas datos de pacientes ni claves. Este pedido queda solo en esta pantalla: no se envía a soporte ni se guarda al salir.'}</p><form id="help-request-form" className="help-request" onSubmit={event => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const apartado = String((form.elements.namedItem('apartado') as HTMLSelectElement | null)?.value || selected?.title || '');
+      const que = String((form.elements.namedItem('que') as HTMLTextAreaElement | null)?.value || '');
+      if (support) {
+        window.location.assign(supportMailto(support, `Ayuda del panel: ${apartado}`, que));
+        setAsking(false);
+        setNotice('Se abrió tu correo para escribir a soporte. Revisá que no hayas puesto datos de pacientes.');
+        return;
+      }
+      setAsking(false);
+      setNotice('Pedido anotado solo en esta pantalla. No se envió a Nutridash ni se guardó al salir.');
+    }}>
+      <label><span id="help-section-label">Apartado</span><select name="apartado" aria-labelledby="help-section-label" defaultValue={selected?.title}>{HELP_GUIDES.map(g => <option key={g.title}>{g.title}</option>)}</select></label>
+      <label>Qué pasó<textarea name="que" required maxLength={2000} placeholder="Ej.: no veo la conversación"/></label>
       <label className="help-check"><input type="checkbox" required/>No incluyo datos de pacientes ni claves</label>
     </form></HelpDialog>}
   </div>;

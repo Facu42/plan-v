@@ -11,6 +11,7 @@ import { isLocalDemoAllowed, professionalDisplayName, PROFESSIONAL_SIGNUP_FLAG, 
 import { pendingInviteIdFromLocation, rememberPendingInvite, PENDING_INVITE_STORAGE_KEY } from './invite-link';
 import { useAppStore } from '../store/useAppStore';
 import { isPasswordRecovery, PASSWORD_RECOVERY_KEY } from './password-recovery';
+import { track } from '../telemetry';
 
 type AuthState = {
   loading: boolean;
@@ -65,21 +66,27 @@ async function applyPendingGoogleSignup(user: User): Promise<User> {
 // getSession y el aviso de ingreso llegan casi juntos: una sola carga por usuaria.
 let inflightProfile: { userId: string; promise: Promise<Profile | null> } | null = null;
 
-function loadProfile(user: User): Promise<Profile | null> {
+function loadProfile(user: User, accessToken?: string): Promise<Profile | null> {
   if (inflightProfile?.userId === user.id) return inflightProfile.promise;
-  const promise = loadProfileOnce(user).finally(() => {
+  const promise = loadProfileOnce(user, accessToken).finally(() => {
     if (inflightProfile?.promise === promise) inflightProfile = null;
   });
   inflightProfile = { userId: user.id, promise };
   return promise;
 }
 
-async function loadProfileOnce(initialUser: User): Promise<Profile | null> {
+/** El primer alta no puede esperar el SMTP ni un getSession trabado: 8 s y sigue como paciente. */
+export const CLAIM_PROFESSIONAL_TIMEOUT_MS = 8_000;
+
+async function loadProfileOnce(initialUser: User, accessToken?: string): Promise<Profile | null> {
   const user = await applyPendingGoogleSignup(initialUser);
   const profile = await getProfile(user.id);
   if (!supabase || profile?.role !== 'paciente' || !wantsProfessionalSignup(user.user_metadata)) return profile;
   try {
-    await api.claimProfessional(professionalDisplayName(user.user_metadata, profile.full_name || user.email?.split('@')[0] || ''));
+    await api.claimProfessional(
+      professionalDisplayName(user.user_metadata, profile.full_name || user.email?.split('@')[0] || ''),
+      { accessToken, signal: AbortSignal.timeout(CLAIM_PROFESSIONAL_TIMEOUT_MS) },
+    );
     void supabase.auth.updateUser({ data: { [PROFESSIONAL_SIGNUP_FLAG]: false } }).catch(() => {});
     return await getProfile(user.id);
   } catch {
@@ -129,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (cancelled || initialSequence !== authSequence.current) return;
       setSession(data.session);
       if (data.session?.user) {
-        const loaded = await loadProfile(data.session.user);
+        const loaded = await loadProfile(data.session.user, data.session.access_token);
         if (!cancelled && initialSequence === authSequence.current) setProfile(loaded);
       }
       setLoading(false);
@@ -151,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (next?.user) {
         // Auth libera su lock antes de consultar perfiles o volver a usar el SDK.
         window.setTimeout(() => {
-          void loadProfile(next.user).then(value => { if (!cancelled && sequence === authSequence.current) setProfile(value); }).catch(() => { if (!cancelled && sequence === authSequence.current) setProfile(null); }).finally(() => { if (!cancelled && sequence === authSequence.current) setLoading(false); });
+          void loadProfile(next.user, next.access_token).then(value => { if (!cancelled && sequence === authSequence.current) setProfile(value); }).catch(() => { if (!cancelled && sequence === authSequence.current) setProfile(null); }).finally(() => { if (!cancelled && sequence === authSequence.current) setLoading(false); });
         }, 0);
         setDemoMode(false);
       } else {
@@ -191,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return { error: friendlyError(error.message) };
       setDemoMode(false);
+      track('auth.login');
       return {};
     },
     signUp: async (email, password, fullName, professional = false) => {
@@ -201,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: { emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/`, data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
       if (error) return { error: friendlyError(error.message) };
+      track('auth.signup');
       return {};
     },
     requestPasswordReset: async (email) => {

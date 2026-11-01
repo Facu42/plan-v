@@ -45,5 +45,13 @@
 .pms-empty { margin: 8px; font: 400 13px/1.4 Poppins, sans-serif; color: var(--pms-muted); }
 
 /* Avisos al teléfono: misma fila de la hoja; prendida, el ícono toma el verde del archivo. */
+.pms-habits { display: flex; flex-direction: column; gap: 10px; margin: 8px 0 4px; }
+.pms-habit { display: grid; gap: 8px; margin: 0; padding: 10px; border: 1px solid var(--pms-line); border-radius: 14px; }
+.pms-habit label { display: flex; align-items: center; gap: 8px; font: 500 14px/1.3 Poppins, sans-serif; }
+.pms-habit-times { display: flex; flex-wrap: wrap; gap: 8px; }
+.pms-habit :is(input[type="time"], select) { border: 1px solid var(--pms-line); border-radius: 10px; padding: 6px 8px; background: var(--pms-fill); color: var(--pms-ink); font: 400 14px/1 Poppins, sans-serif; }
+.pms-habits button[type="submit"] { min-height: 44px; border: 0; border-radius: 14px; background: var(--pms-green); color: var(--pms-ink); font: 600 14px/1 Poppins, sans-serif; cursor: pointer; }
+.pms-habits button[type="submit"]:disabled { opacity: .6; cursor: default; }
+.pms-habits > small { color: var(--pms-muted); font: 400 12px/1.4 Poppins, sans-serif; }
 .pms-push[aria-pressed='true'] .pms-icon { background: var(--pms-green); color: var(--pms-ink); }
 .pms-push:disabled { cursor: default; opacity: .7; }

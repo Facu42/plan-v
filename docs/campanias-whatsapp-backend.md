@@ -90,3 +90,25 @@ Paso 10 complementario:
 npm test -- server/db-performance.postgres.test.ts server/nutrition-capabilities/exchange-visibility.postgres.test.ts server/ops/release-manifest.test.ts server/security/definer-grants.postgres.test.ts server/admin/centro.test.ts server/lab-reading/bioimpedance.postgres.test.ts server/communications/campaigns.postgres.test.ts --maxWorkers=1
 npm run check
 ```
+
+## Integración con main · 01/11/2026
+
+Se integró `origin/main` (`8826ac83`) en la rama, sin rebase. Los conflictos Markdown conservan los dos aportes. El manifiesto une las migraciones de main y las propias (`20261031200000` y `20261031220000`) en orden de versión: 38 pendientes, 8 de base, 46 archivos. Centro y la prueba de permisos se tomaron completos de main. La lista JSON mantiene firmas completas y agrega solo las seis nuevas funciones cliente; helpers de transporte quedan internos y ningún permiso anónimo se reabre.
+
+Paso 10 complementario de integración:
+
+- Flujos críticos ✅: permisos de funciones con configuración Supabase simulada (anon, authenticated y funciones nuevas), manifiesto exacto, Centro y campañas/bioimpedancia con dos consultorios. 100 pruebas verdes en 13 archivos.
+- Regresiones cubiertas: colisión de versión evitada, inventario combinado completo y lista de permisos con firmas (no solo nombres). Se conservan las pruebas de bajas, cupo y revisión profesional.
+- Contratos: nuevas firmas contrastadas con los grants SQL y con `20261031235550_security_definer_grants`; revocación a PUBLIC/anon y transporte restringido a servicio. Manifiesto exacto 38/46 verificado.
+- Áreas frágiles: orden de migraciones, hashes y permisos; no se debilitó ninguna comparación ni se reescribieron SQL ajenas.
+- Migraciones: SQL propio intacto, sin aplicar remotamente. `npm run check:release-manifest` y `npm run check:migrations` aprobados.
+- Fire test: se conserva el ensayo de consentimiento de la entrega y se ejecutaron las guardas de funciones nuevas cerradas/anon sin permisos del test de main.
+- Automatización: inventario ordenado y lista exacta de seis firmas incluidos en los controles existentes.
+- Veredicto: integración local verificada para commit/push. No se ejecutó merge del PR a main ni operación de producción; #244/#245 intactos.
+
+```sh
+npm test -- server/security/definer-grants.postgres.test.ts server/ops/release-manifest.test.ts server/admin/centro.test.ts server/communications server/lab-reading --maxWorkers=1
+npm run check:release-manifest
+npm run check:migrations
+npm run check
+```

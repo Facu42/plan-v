@@ -6,6 +6,7 @@ const authAdmin = {
   createUser: vi.fn(),
   deleteUser: vi.fn(async () => ({ error: null })),
   listUsers: vi.fn(),
+  getUserByEmail: vi.fn(),
   updateUserById: vi.fn(),
 };
 const resetPasswordForEmail = vi.fn();
@@ -77,6 +78,23 @@ describe('alta de nutricionistas con Supabase', () => {
     provision.mockRejectedValue(new Error('x'));
     await expect(createNutritionist({ name: 'Laura', email: 'laura@example.test', mode: 'password', password: 'una-clave-larga' }, true)).rejects.toMatchObject({ status: 503 });
     expect(authAdmin.deleteUser).toHaveBeenCalledWith('u-3');
+  });
+
+  it('si el mail de Auth se cuelga, abre el consultorio apenas existe la cuenta', async () => {
+    authAdmin.inviteUserByEmail.mockReturnValue(new Promise(() => {}));
+    authAdmin.getUserByEmail.mockResolvedValue({ data: { user: { id: 'u-1', email: 'laura@example.test' } }, error: null });
+    const result = await createNutritionist({ name: 'Laura Díaz', email: 'laura@example.test', mode: 'invite' }, true);
+    expect(result.id).toBe('n-1');
+    expect(provision).toHaveBeenCalledWith({ userId: 'u-1', displayName: 'Laura Díaz' });
+    expect(authAdmin.listUsers).not.toHaveBeenCalled();
+  });
+
+  it('el alta en memoria abre 30 días de gracia', async () => {
+    const { addDays } = await import('../../src/service.js');
+    const { localBillingDate } = await import('../../src/billing.js');
+    const result = await createNutritionist({ name: 'Nueva', email: 'gracia@example.test', mode: 'invite' }, false);
+    expect(result.subscription.trial_ends_on).toBe(addDays(localBillingDate(), 30));
+    expect(result.subscription.paid_until).toBeNull();
   });
 
   it('si falta la migración de altas, el alta igual queda hecha', async () => {

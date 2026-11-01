@@ -7,245 +7,9 @@ import { readFile, readdir } from 'node:fs/promises';
 // esquema public nace ejecutable por anon y authenticated. Sin ese detalle las
 // otras pruebas no veían que 34 funciones internas quedaban abiertas.
 
-// Las únicas que una persona con sesión puede llamar: las que usa la API y las
-// que aparecen en reglas de acceso. Sumar una acá exige que valide a quien llama.
-const ALLOWED = [
-  'accept_org_invite',
-  'accept_patient_invite',
-  'ack_thread_delivery',
-  // Catálogo privado: profesional titular y revisión vigente obligatorios.
-  'act_professional_model',
-  'add_patient_charge',
-  'add_patient_clinical_note',
-  'add_shopping_manual',
-  'admin_extend_trial',
-  'admin_get_service_board',
-  'admin_log_service_event',
-  'admin_mark_test_account',
-  'admin_record_service_payment',
-  'admin_set_service_note',
-  'admin_set_service_override',
-  'admin_set_service_settings',
-  'admin_void_service_payment',
-  'apply_ai_job',
-  // Import rows require a reviewed owner-scoped batch, patient scope and live consent.
-  'apply_patient_import_row',
-  'apply_professional_model',
-  // Clinical references: nutritionist identity, approval and immutable provenance.
-  'approve_clinical_reference',
-  'assign_editorial_resource',
-  'assign_exercise_routine',
-  'assign_patient_program',
-  'assign_recipe',
-  'assign_recipe_day',
-  'audit_clinical_access',
-  'care_can_read',
-  'care_consent',
-  'care_meal_photo_allowed',
-  'claim_ai_job',
-  // Plan 3f: consultorio titular, consentimiento y copia vigente.
-  'claim_meal_plan_email',
-  'claim_recipe_cover',
-  'complete_privacy_delete',
-  'complete_privacy_export',
-  'confirm_appointment',
-  // Consultas: lectura sólo propia/asignada, comandos con consentimiento y revisión CAS.
-  'consultation_can_read',
-  'consultation_command',
-  'consultation_completion_command',
-  'consultation_completion_list',
-  'consultation_enqueue_chunk',
-  'consultation_list_tasks',
-  'correct_own_meal',
-  'correct_own_measurement',
-  'create_organization',
-  'create_patient_with_invite',
-  'deactivate_clinical_reference',
-  'delegate_patient_care',
-  'delete_billing_program',
-  'delete_care_document',
-  'delete_care_photo',
-  'delete_own_meal',
-  'delete_own_measurement',
-  'delete_patient_activity',
-  'delete_shopping_manual',
-  // IA documental: consentimiento específico, paciente vinculada y titularidad vigentes.
-  'document_organizer_enqueue',
-  'document_organizer_list',
-  'document_organizer_read',
-  'document_organizer_review',
-  'enqueue_ai_job',
-  'enqueue_outbox_event',
-  // Proyección histórica limitada por titularidad y permisos de cada propósito.
-  'export_patient_imported_history',
-  'finish_ai_job',
-  'finish_recipe_cover',
-  'get_ai_job',
-  'get_billing_board',
-  // La paciente ve solo su débito, sin correo completo ni ids de Mercado Pago.
-  'get_my_subscriptions',
-  'get_notification_preferences',
-  'get_organization_subscription',
-  'get_patient_appointment',
-  'get_patient_exercise',
-  'get_patient_intake',
-  'get_patient_ledger',
-  'get_patient_library',
-  // Identity must equal my_patient_id; public projection only; full access required.
-  'get_patient_meal_logs',
-  'get_patient_progress',
-  'get_privacy_package',
-  'get_shopping_list',
-  'get_weekly_registrations',
-  'invite_org_member',
-  'is_assigned_patient',
-  'is_assigned_patient_path',
-  'is_org_member',
-  'is_platform_admin',
-  'list_ai_jobs',
-  'list_assigned_recipes',
-  'list_meal_plan_history',
-  'list_my_organizations',
-  'list_outbox_mailbox',
-  'list_outbox_snapshot',
-  'list_patient_care_links',
-  'list_patient_import_contacts',
-  'list_privacy_requests',
-  'list_professional_meal_plan',
-  'list_professional_recipe_favorites',
-  'list_professional_recipes',
-  'list_published_meal_plan',
-  'list_recipe_days',
-  'list_thread_messages',
-  'log_patient_activity',
-  'log_patient_activity_with_kcal',
-  'mark_editorial_resource_read',
-  'mark_meal_plan_handover_seen',
-  'mark_thread_read',
-  'my_archived_at',
-  'my_nutritionist_id',
-  'my_patient_id',
-  'open_message_attachment',
-  // Metadata operativa aislada; opt-in exige la identidad de la paciente y difusión la profesional titular.
-  // Campañas: estado operativo booleano; segmento/configuración/creación verifican titularidad.
-  'ops_campaign_enabled',
-  'ops_campaign_segment',
-  'ops_can_read_clinic',
-  'ops_can_read_patient',
-  'ops_configure_campaigns',
-  'ops_create_broadcast',
-  'ops_create_campaign',
-  'ops_create_email_broadcast',
-  'ops_review_reminder_template',
-  // La baja exige auth.uid de la paciente; nunca la otorga la profesional.
-  'ops_set_campaign_optout',
-  'ops_set_preferences',
-  'patient_has_full_access',
-  // Evidencia clínica externa: titular actual, actor original, ficha sin cuenta y retiro prevalente.
-  'patient_import_authorization_state',
-  'patient_import_external_allowed',
-  // Manual preparation only; assigned active patient and imported contact email.
-  'prepare_imported_patient_invite',
-  'prepare_patient_import',
-  'process_outbox_deliveries',
-  'publish_care_replacement',
-  'publish_editorial_resource',
-  'publish_recipe',
-  'publish_reviewed_meal_plan',
-  'record_meal_analysis',
-  'record_patient_consent',
-  'record_patient_import_authorization',
-  'record_patient_payment',
-  'record_privacy_access',
-  'register_recipe_day',
-  'reject_ai_job',
-  'report_patient_payment',
-  'request_body_data',
-  'request_meal_correction',
-  'request_measurement_correction',
-  'request_privacy_action',
-  'reschedule_appointment',
-  // Exige profesional, titularidad del plan y versión publicada vigente.
-  'retry_menu_dish_covers',
-  'review_care_record',
-  'review_meal_log',
-  'review_patient_intake',
-  'review_patient_payment',
-  'revoke_patient_care',
-  'revoke_patient_import_authorization',
-  'save_billing_program',
-  // Bioimpedancia: consultorio titular, permisos vigentes y revisión explícita.
-  'save_bioimpedance_review',
-  'save_body_metrics',
-  'save_care_preferences',
-  'save_care_record',
-  // Active assigned patient, live purpose consent, own source/reference and review.
-  'save_clinical_brand',
-  'save_clinical_source_document',
-  'save_clinical_workspace_record',
-  'save_editorial_resource',
-  'save_meal_log',
-  'save_meal_plan_draft',
-  'save_my_body_data',
-  'save_notification_preferences',
-  // Consultorio derivado de la sesión; revisión CAS y referencias validadas en base.
-  'save_nutrition_exchange',
-  'save_nutrition_settings',
-  'save_patient_intake',
-  'save_professional_model',
-  'save_recipe_draft',
-  'save_routine_feedback',
-  'schedule_appointment',
-  // Misma revisión y control clínico que publicar, fecha acotada al período.
-  'schedule_reviewed_meal_plan',
-  // Mensaje a varias programado: solo la nutri, a pacientes asignadas (is_assigned_patient por cada una).
-  'schedule_thread_messages',
-  // Agenda/equipo: cada RPC valida dueño, membresía operativa o asignación clínica explícita.
-  'scheduling_accept_staff',
-  'scheduling_add_existing_charge',
-  'scheduling_add_shared_note',
-  'scheduling_can_manage',
-  'scheduling_can_read_shared',
-  'scheduling_change_booking',
-  'scheduling_contact_belongs',
-  'scheduling_existing_operations',
-  'scheduling_invite_professional_email',
-  'scheduling_invite_staff',
-  'scheduling_my_workplaces',
-  'scheduling_operational_snapshot',
-  'scheduling_owns',
-  'scheduling_professional_directory',
-  'scheduling_requeue_appointment_sync',
-  'scheduling_requeue_sync_job',
-  'scheduling_review_existing_payment',
-  'scheduling_review_transfer',
-  'scheduling_revoke_staff',
-  'scheduling_save_config',
-  'scheduling_save_contact',
-  'scheduling_shared_clinical_snapshot',
-  'scheduling_shared_notes',
-  'scheduling_shared_patients',
-  'scheduling_staff_roster',
-  // Catálogo propio/compartido autorizado; filtros y límites validados por RPC.
-  'search_food_catalog',
-  'send_thread_attachment',
-  'send_thread_message',
-  'set_organization_subscription_status',
-  'set_patient_archived',
-  'set_patient_billing',
-  'set_patient_charge_waived',
-  'set_patient_fee',
-  // Objetivo de seguimiento: solo la nutricionista dueña, con estado y avance válidos.
-  'set_patient_goal',
-  'set_payment_settings',
-  'set_professional_recipe_favorite',
-  'set_recipe_cover',
-  'set_shopping_checked',
-  'submit_patient_intake',
-  'toggle_favorite',
-  'transfer_patient_ownership',
-  'unpublish_editorial_resource',
-];
+// Firmas completas, incluidos helpers privados para vistas invoker. Cada permiso
+// nuevo requiere una decisión explícita y una prueba de autorización.
+import ALLOWED from './definer-allowlist.json';
 
 let db: PGlite;
 const nutriA = '00000000-0000-4000-a000-0000000000a1';
@@ -301,13 +65,13 @@ afterAll(async () => {
 
 describe('funciones con permisos de dueño (permisos como en Supabase)', () => {
   async function executable(role: string) {
-    const rows = await db.query<{ proname: string }>(
-      `select distinct p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-       where n.nspname = 'public' and p.prosecdef and has_function_privilege($1, p.oid, 'execute')
+    const rows = await db.query<{ signature: string }>(
+      `select n.nspname || '.' || p.proname || '(' || oidvectortypes(p.proargtypes) || ')' as signature from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname in ('public', 'private') and p.prosecdef and has_function_privilege($1, p.oid, 'execute')
        order by 1`,
       [role],
     );
-    return rows.rows.map((row) => row.proname);
+    return rows.rows.map((row) => row.signature);
   }
 
   it('anon no ejecuta ninguna', async () => {
@@ -315,7 +79,23 @@ describe('funciones con permisos de dueño (permisos como en Supabase)', () => {
   });
 
   it('authenticated sólo ejecuta las de la lista permitida', async () => {
-    expect(await executable('authenticated')).toEqual(ALLOWED);
+    expect(await executable('authenticated')).toEqual([...ALLOWED].sort());
+  });
+
+  it('todas las definer tienen una ruta de búsqueda fija', async () => {
+    const result = await db.query(`select n.nspname, p.proname from pg_proc p
+      join pg_namespace n on n.oid=p.pronamespace
+      where n.nspname in ('public','private') and p.prosecdef
+      and not exists (select 1 from unnest(p.proconfig) setting where setting like 'search_path=%')`);
+    expect(result.rows).toEqual([]);
+  });
+
+  it('los helpers sin llamadas cliente quedan cerrados', async () => {
+    for (const signature of ['public.set_recipe_cover(uuid,text,text,text)', 'public.scheduling_can_read_shared(uuid)']) {
+      const result = await db.query(`select has_function_privilege('anon',$1,'execute') a,
+        has_function_privilege('authenticated',$1,'execute') u`, [signature]);
+      expect(result.rows).toEqual([{ a: false, u: false }]);
+    }
   });
 
   it('la reapertura expone un wrapper invoker y un helper privado autorizado con ruta de búsqueda vacía',async()=>{

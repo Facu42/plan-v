@@ -29,6 +29,37 @@ export function addMonths(iso: string, months: number): string {
   return date.toISOString();
 }
 
+/** Días de acceso completo desde el alta, sin suscripción. El día 31 pasa a solo lectura. */
+export const SIGNUP_GRACE_DAYS = 30;
+const DAY_MS = 86_400_000;
+
+export function signupElapsedDays(createdAt: number, now: number): number {
+  if (!Number.isFinite(createdAt)) return Number.POSITIVE_INFINITY;
+  if (now < createdAt) return 0;
+  return Math.floor((now - createdAt) / DAY_MS);
+}
+
+export function signupGraceDaysLeft(createdAt: number | null, now: number): number | null {
+  if (createdAt == null || !Number.isFinite(createdAt)) return null;
+  return Math.max(0, SIGNUP_GRACE_DAYS - signupElapsedDays(createdAt, now));
+}
+
+export function signupGraceUntil(createdAt: number): string {
+  return new Date(createdAt + SIGNUP_GRACE_DAYS * DAY_MS).toISOString();
+}
+
+/** El plan pago manda. Sin plan, los primeros 30 días desde el alta son acceso completo. */
+export function platformWriteAccess(
+  sub: { status: PlatformStatus; past_due_since: string | null; current_period_end: string | null } | null,
+  createdAt: number | null,
+  now: number,
+): 'full' | 'read_only' {
+  if (accessMode(sub, now) === 'full') return 'full';
+  if (sub && sub.status !== 'pending') return 'read_only';
+  if (createdAt == null || !Number.isFinite(createdAt)) return 'read_only';
+  return signupElapsedDays(createdAt, now) < SIGNUP_GRACE_DAYS ? 'full' : 'read_only';
+}
+
 export function accessMode(sub: { status: PlatformStatus; past_due_since: string | null; current_period_end: string | null } | null, now: number): 'full' | 'read_only' {
   if (!sub) return 'read_only';
   if (sub.status === 'authorized') return 'full';

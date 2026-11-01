@@ -7,6 +7,7 @@ import { planDateLabel, planTakesEffectNow } from '../../types/plan-handover';
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
 import { mealPlanDraftSchema, type MealPlanDraftInput, type PlanItemView, type PlanSlot, type PlanVersionView, type ProfessionalMealPlan } from '../../types/plans';
 import { COMIDAS_EDITOR, fechasDeSemana, paraGuardar, sumarDias } from './planes-editor';
+import { track } from '../../telemetry';
 
 
 const AVISO_SIN_PROPUESTA = 'El asistente no pudo armar la propuesta. El plan no cambió.';
@@ -89,6 +90,7 @@ export async function publicarPlanRevisado(input: {
   try {
     const publicar = input.publish ?? plansApi.publish;
     const respuesta = await publicar(input.plan.id, input.plan.current.version, input.plan.current);
+    track('plan.published');
     return { ok: true as const, plan: respuesta.plan, aviso: avisoTrasPublicar(respuesta.plan, input.hoy) };
   } catch (razon) {
     return { ok: false as const, aviso: careErrorMessage(razon) };
