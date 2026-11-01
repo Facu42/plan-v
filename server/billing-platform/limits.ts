@@ -2,8 +2,8 @@ import { CareError } from '../care/errors.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { billingEnabled } from './flag.js';
 import { planByCode } from './pricing.js';
-import { findOpenSubscription, logBilling, schemaMissing, tryAiPhoto, usageOf } from './repository.js';
-import { accessMode, admission } from './state.js';
+import { findOpenSubscription, logBilling, nutritionistCreatedAt, schemaMissing, tryAiPhoto, usageOf } from './repository.js';
+import { admission, platformWriteAccess } from './state.js';
 
 export function argentinaMonth(now = new Date()): string {
   const parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Argentina/Buenos_Aires', year: 'numeric', month: '2-digit' }).format(now);
@@ -19,12 +19,17 @@ export async function assertCanAdd(nutritionistId: string, kind: 'patient' | 'nu
   if (!billingEnabled() || !isSupabaseEnabled() || incoming <= 0) return;
   try {
     const open = await findOpenSubscription(nutritionistId);
-    if (!open) throw new CareError(403, 'Elegí un plan de Nutridash para seguir cargando. Tus pacientes no pierden el acceso.');
+    const createdAt = await nutritionistCreatedAt(nutritionistId);
+    const mode = platformWriteAccess(open, createdAt, Date.now());
+    if (mode === 'read_only' || !open) {
+      if (mode === 'full') return;
+      throw new CareError(403, 'Elegí un plan de Nutridash para seguir cargando. Tus pacientes no pierden el acceso.');
+    }
     const plan = planByCode(open.plan_code);
     if (!plan) throw new CareError(403, 'Elegí un plan de Nutridash para seguir cargando. Tus pacientes no pierden el acceso.');
     const usage = await usageOf(nutritionistId, argentinaMonth());
     const decision = admission({
-      mode: accessMode(open, Date.now()),
+      mode,
       active: kind === 'patient' ? usage.active_patients : usage.nutritionists,
       incoming,
       max: kind === 'patient' ? plan.max_active_patients : plan.max_nutritionists,

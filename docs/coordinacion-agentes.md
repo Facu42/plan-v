@@ -1,3 +1,12 @@
+1/11 · Codex · PR #253, corrección mínima del CI: `server/admin/centro.test.ts` fija únicamente Date al 28/10/2026 y restaura el reloj en cada caso; el fixture de cobro de octubre ya no depende del mes real. Reproducido: 23 aprobadas/1 fallida; corregido: 24 aprobadas. Solo se ejecutó ese archivo por pedido de Facundo. Sin cambios de lógica de producción, merge ni producción.
+
+1/11 · Codex · Pulido de cobro de #253 completado conservando cambios de Cursor: gracia exacta de 30 días sin extender deudas, pago pendiente retomable, aviso manual sin promesa de bloqueo. 22 pruebas focales y `npx tsc --noEmit` aprobados. [Informe paso 10](cobro-plataforma.md). Sin suite completa, merge ni producción.
+
+31/10 · Codex · Retoma autorizado por Facundo el pulido de Cursor en `work/pulido-alta-nutri`, PR #253. Conserva todos los cambios; revisión y pruebas focales del cobro. Sin merge ni producción.
+
+1/11 · Cursor · Pulido del alta: nutri nueva sin suscripción tiene acceso completo 30 días (día 0 y 29 escriben; día 31 solo lectura, sin borrar). Aviso con días restantes y botón Pagar. `PLATFORM_BILLING_ENABLED` sigue apagada. Rama `work/pulido-alta-nutri`, [PR #253](https://github.com/Facu42/plan-v/pull/253) (borrador). Sin migraciones ni producción.
+
+31/10 · Cursor · Pulido del alta de nutricionista: el primer setup ya no espera el SMTP de Auth (~40 s) ni un `getSession` trabado; el alta abre 30 días de prueba; plantillas de mail de Auth en castellano Nutridash listas para cargar (sin tocar prod). Rama `work/pulido-alta-nutri`, [PR #253](https://github.com/Facu42/plan-v/pull/253) (borrador). Sin migraciones ni producción.
 01/11 · Codex · Seguridad de base en `work/seguridad-definer`, pedido de Facundo del 31/10: relevadas 403 SECURITY DEFINER, cerrados dos helpers sin llamadas cliente, allowlist por firma/esquema (218 ejecutables finales), consolidación de políticas en 16 tablas y bloqueo explícito anon en hábitos; auditoría admin privada sin clínica. 115 pruebas puntuales y TypeScript verdes; build, migraciones, manifiesto y secretos aprobados. Revisión independiente sin P1/P2. Tres migraciones solo ensayadas en PGlite, sin aplicar en producción. PR en borrador; sin merge ni despliegue. [Decisiones e informe del paso 10](seguridad-definer-2026-10-31.md). No toca #244, #245 ni #253.
 
 31/10 · Cursor · Centro de mando real en `/admin`: mismas seis secciones (resumen, nutris, pacientes, cobros, salud, seguridad) con datos de solo lectura. Pipeline, Bandeja y Automatizaciones salieron. MFA aal2 obligatorio aunque MFA_ENFORCE esté apagado. Rama `work/admin-centro-de-mando`, [PR #252](https://github.com/Facu42/plan-v/pull/252), reemplaza #246. Sin migraciones ni producción.
@@ -58,6 +67,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Pulido del alta de nutri | Codex, continuación autorizada de Cursor | `work/pulido-alta-nutri`, [PR #253](https://github.com/Facu42/plan-v/pull/253) | Primer setup sin colgar 40 s. 30 días de acceso completo desde el alta (sin 403 `platform_read_only`); día 31 solo lectura. Aviso con días restantes y Pagar. Plantillas Auth en castellano. Bandera de cobro sin tocar. Borrador. Sin migraciones ni producción |
 | Flecha de plegar el menú del panel | Cursor | `work/fix-sidebar-toggle` | Con el menú abierto la flecha quedaba cortada por la barra. Ahora se ve abierta y plegada, con el círculo del boceto v29. Sin producción ni merge |
 | Términos y privacidad: papeles de Nutridash | Cursor | `work/legal-nutridash` | Nutridash (Verónica Trenti) responsable de la plataforma; la nutricionista, de sus pacientes; Nutridash encargado (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Sin producción ni merge |
 | Monitoreo y eventos | Cursor | `work/monitoreo-errores` | Sentry apagado hasta que existan SENTRY_DSN y VITE_SENTRY_DSN. Eventos: ingreso, alta, plan publicado, mensaje enviado y errores. Sin datos de salud. Sin producción ni merge |

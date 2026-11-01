@@ -1,5 +1,8 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 
+1/11 · Cursor · Pulido del alta en `work/pulido-alta-nutri`: nutri nueva sin plan tiene 30 días de acceso completo; aviso con días restantes y botón Pagar; día 31 solo lectura sin borrar. Bandera de cobro sin tocar. Sin producción ni migraciones.
+
+31/10 · Cursor · Pulido del alta de nutricionista en `work/pulido-alta-nutri`: el primer setup no espera el mail de Auth; el consultorio abre con 30 días de prueba; plantillas de confirmación, clave y magic link en castellano Nutridash listas para cargar. Sin producción ni migraciones.
 31/10 · Cursor · La flecha para plegar el menú del panel de la nutricionista se ve con la barra abierta y con la barra plegada. Rama `work/fix-sidebar-toggle`. Sin producción ni merge.
 31/10 · Cursor · Términos y privacidad: Nutridash (Verónica Trenti) es el responsable de la plataforma, la nutricionista de sus pacientes y Nutridash el encargado del tratamiento (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Rama `work/legal-nutridash`. Sin producción ni merge.
 31/10 · Cursor · Monitoreo de errores y eventos básicos, apagado hasta que Facundo cargue SENTRY_DSN y VITE_SENTRY_DSN. Rama `work/monitoreo-errores`. Sin producción ni merge.

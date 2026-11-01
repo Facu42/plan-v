@@ -29,6 +29,17 @@ function argentinaDate(iso: string) {
   return `${day} a las ${time}`;
 }
 
+export function nutritionistInviteEmail(input: { name: string; link: string }): MailContent {
+  const name = firstName(input.name) || 'Hola';
+  const lead = 'Te invitamos a Nutridash para abrir tu consultorio.';
+  const how = 'Entrá con este enlace, elegí tu clave y listo.';
+  return {
+    subject: 'Tu acceso a Nutridash',
+    html: layout([`Hola ${escape(name)},`, escape(lead), escape(how)], { label: 'Entrar a Nutridash', href: input.link }),
+    text: `Hola ${name},\n\n${lead}\n${how}\n\n${input.link}\n`,
+  };
+}
+
 export function appointmentReminderEmail(input: { patientName: string; nutritionistName: string; startsAt: string; channel: 'video' | 'presencial'; meetUrl: string | null; site: string }): MailContent {
   const name = firstName(input.patientName);
   const pro = input.nutritionistName.trim() || 'tu nutricionista';

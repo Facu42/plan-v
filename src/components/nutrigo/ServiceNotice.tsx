@@ -18,5 +18,6 @@ export function ServiceNotice() {
   if (!text) return null;
   return <section className={`nv-service-notice nv-service-${text.tone}`} role={text.tone === 'blocked' ? 'alert' : 'status'} aria-label="Tu servicio de Nutridash">
     <strong>{text.title}</strong><p>{text.body}</p>
+    {text.action ? <a className="nv-service-pay" href={text.action.href}>{text.action.label}</a> : null}
   </section>;
 }

@@ -92,9 +92,38 @@ function authFailure(error: AuthFailure, step: string): never {
   throw new CareError(503, 'No se pudo crear la cuenta. Reintentá en un momento.');
 }
 
+/** Auth espera el SMTP; si nos quedamos hasta el final, el proxy corta a los ~40 s. */
+export const AUTH_MAIL_BUDGET_MS = 8_000;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function isNotFound(error: AuthFailure): boolean {
+  if (!error) return false;
+  if (error.code === 'user_not_found' || error.status === 404) return true;
+  return /not found|does not exist/i.test(error.message ?? '');
+}
+
+type AuthAdmin = {
+  getUserByEmail?: (email: string) => Promise<{ data: { user: AuthUser | null } | null; error: AuthFailure }>;
+  listUsers: (opts: { page: number; perPage: number }) => Promise<{ data: { users?: AuthUser[] } | null; error: AuthFailure }>;
+  inviteUserByEmail: (
+    email: string,
+    options: { data: Record<string, unknown>; redirectTo?: string },
+  ) => Promise<{ data: { user: AuthUser | null } | null; error: AuthFailure }>;
+};
+
 async function findAuthUserByEmail(email: string): Promise<AuthUser | null> {
   const admin = privilegedDb();
   const wanted = email.toLowerCase();
+  const byEmail = admin.auth.admin as AuthAdmin;
+  if (typeof byEmail.getUserByEmail === 'function') {
+    const { data, error } = await byEmail.getUserByEmail(wanted);
+    if (data?.user) return data.user;
+    if (error && !isNotFound(error)) authFailure(error, 'get_user_by_email');
+    return null;
+  }
   for (let page = 1; page <= 50; page += 1) {
     const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 });
     if (error) authFailure(error, 'list_users');
@@ -104,6 +133,29 @@ async function findAuthUserByEmail(email: string): Promise<AuthUser | null> {
     if (users.length < 200) return null;
   }
   return null;
+}
+
+/** Crea la cuenta de Auth sin esperar a que salga el mail (eso colgaba ~40 s). */
+async function inviteAuthUser(email: string, metadata: Record<string, unknown>, redirectTo?: string): Promise<string> {
+  const admin = privilegedDb();
+  const work = (admin.auth.admin as AuthAdmin).inviteUserByEmail(email, { data: metadata, ...(redirectTo ? { redirectTo } : {}) });
+  void work.catch(() => undefined);
+  const deadline = Date.now() + AUTH_MAIL_BUDGET_MS;
+  while (Date.now() < deadline) {
+    const settled = await Promise.race([
+      work.then((result) => ({ kind: 'done' as const, result })),
+      delay(200).then(() => ({ kind: 'tick' as const })),
+    ]);
+    if (settled.kind === 'done') {
+      if (settled.result.error || !settled.result.data?.user) authFailure(settled.result.error, 'invite');
+      return settled.result.data.user.id;
+    }
+    const found = await findAuthUserByEmail(email);
+    if (found) return found.id;
+  }
+  const found = await findAuthUserByEmail(email);
+  if (found) return found.id;
+  throw new CareError(503, 'El mail de invitación tardó demasiado. Reintentá en un momento.');
 }
 
 async function listTestUsers(): Promise<AuthUser[]> {
@@ -154,10 +206,7 @@ export async function createNutritionist(input: ServiceNutritionistCreateInput, 
   const metadata = { full_name: name, role: PUBLIC_SIGNUP_ROLE, [PROFESSIONAL_SIGNUP_FLAG]: true };
   let userId: string;
   if (input.mode === 'invite') {
-    const redirectTo = siteUrl();
-    const { data, error } = await admin.auth.admin.inviteUserByEmail(email, { data: metadata, ...(redirectTo ? { redirectTo } : {}) });
-    if (error || !data.user) authFailure(error, 'invite');
-    userId = data.user.id;
+    userId = await inviteAuthUser(email, metadata, siteUrl());
   } else {
     const { data, error } = await admin.auth.admin.createUser({ email, password: input.password, email_confirm: true, user_metadata: metadata });
     if (error || !data.user) authFailure(error, 'create_user');
@@ -191,8 +240,13 @@ export async function sendAccess(nutritionistId: string, persistent: boolean): P
   if (!row || !row.email) throw new CareError(400, 'Revisá los datos cargados.');
   const redirectTo = siteUrl();
   // Mail de "recuperar clave": sirve tanto para quien nunca eligió clave como para quien la olvidó.
-  const { error } = await privilegedDb().auth.resetPasswordForEmail(row.email, redirectTo ? { redirectTo } : undefined);
-  if (error) authFailure(error, 'send_access');
+  const work = privilegedDb().auth.resetPasswordForEmail(row.email, redirectTo ? { redirectTo } : undefined);
+  const raced = await Promise.race([
+    work.then((result) => ({ kind: 'done' as const, result })),
+    delay(AUTH_MAIL_BUDGET_MS).then(() => ({ kind: 'timeout' as const })),
+  ]);
+  if (raced.kind === 'timeout') throw new CareError(503, 'El mail tardó demasiado. Reintentá en un momento.');
+  if (raced.result.error) authFailure(raced.result.error, 'send_access');
   await auditBestEffort(nutritionistId, 'service.access_sent');
   writeOpsLog('info', 'admin_access_sent', { domain: maskedDomain(row.email) });
   return { sent: true };
