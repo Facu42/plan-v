@@ -11,6 +11,24 @@ import { Icon } from '../shared/Icon';
 import {ConsultationPageGate,mergeConsultationViews,noteRevisionBase,commandSession,consultationDraftUpdate,consultationPublishUpdate,privateEditorAfterAction,type NoteRevisionBase} from './consultation-pages';
 
 const empty:ConsultationView={sessions:[],shared:[],tasks:[]};
+export type TareaDeAudio={kind:'chunk'|'summary';status:string};
+/** Estados que ve la nutricionista: permiso, subida, transcripción y si el audio sigue o ya se borró. */
+export function estadoDelAudio(input:{grabacion:boolean;ia:boolean;pendientes:number;tareas:TareaDeAudio[]}){
+ const permiso=input.grabacion&&input.ia?'Permiso: la paciente permitió grabar y transcribir.':'Permiso: falta la autorización para grabar o transcribir.';
+ const subiendo=input.pendientes>0||input.tareas.some(t=>t.kind==='chunk'&&t.status==='uploading');
+ const subida=subiendo?'Subida: el audio se está subiendo.':'Subida: no hay una subida en curso.';
+ const transcribiendo=input.tareas.some(t=>t.kind==='chunk'&&(t.status==='queued'||t.status==='running'));
+ const transcripcion=transcribiendo?'Transcripción: se está transcribiendo el audio.':'Transcripción: no se está transcribiendo.';
+ const trozos=input.tareas.filter(t=>t.kind==='chunk');
+ const conservado=trozos.some(t=>['failed','uploading','queued','running'].includes(t.status));
+ const borrado=trozos.some(t=>t.status==='succeeded'||t.status==='cancelled');
+ const audio=conservado?'Audio: sigue guardado para reintentar.':borrado?'Audio: se borró después de transcribir.':'Audio: todavía no hay audio en esta consulta.';
+ return {permiso,subida,transcripcion,audio,reintentar:input.tareas.some(t=>t.status==='failed')};
+}
+export function EstadoDelAudio({grabacion,ia,pendientes,tareas,busy,onReintentar}:{grabacion:boolean;ia:boolean;pendientes:number;tareas:TareaDeAudio[];busy?:boolean;onReintentar?:()=>void}){
+ const estado=estadoDelAudio({grabacion,ia,pendientes,tareas});
+ return <section aria-label="Estado del audio"><p>{estado.permiso}</p><p>{estado.subida}</p><p>{estado.transcripcion}</p><p>{estado.audio}</p>{estado.reintentar?<NvButton type="button" disabled={busy} onClick={onReintentar}>Reintentar</NvButton>:null}</section>;
+}
 const pageIds=(next:ConsultationView)=>[...next.sessions.map(s=>typeof s.id==='string'&&s.id.trim()?`session:${s.id}`:''),...next.shared.map(s=>typeof s.id==='string'&&s.id.trim()?`shared:${s.id}`:'')];
 type Pending={audio:Uint8Array;index:number;clientId:string;sessionId:string};
 export function ConsultationNotes({patientId,appointmentId,showCompletions=true}:{patientId:string;appointmentId?:string;showCompletions?:boolean}) {
@@ -39,6 +57,7 @@ export function ConsultationNotes({patientId,appointmentId,showCompletions=true}
  async function uploadTranscript(file:File){if(!canLeaveWorkspace())return;await perform(async()=>{if(file.size>1048576)throw new Error('La transcripción supera 1 MB.');const text=await file.text();if(!text.trim())throw new Error('La transcripción está vacía.');const s=await create('manual');await consultationsApi.command(patientId,{action:'draft',id:s.id,expected_revision:s.revision,draft:'',transcript:text});},'Transcripción guardada como nota privada.');}
  return <section className="care-panel consultation-notes pn-record-notes" aria-label="Notas de consulta">
   <h3>Notas de consulta</h3><p>Conservá notas privadas y compartí sólo el resumen que hayas revisado. La grabación guarda audio; se elimina al transcribirlo; los pendientes vencen a los siete días.</p>
+  <EstadoDelAudio grabacion={consented.includes('consultation_recording')} ia={consented.includes('ai_consultation')} pendientes={pending.length} tareas={(session?view.tasks.filter(t=>t.session_id===session.id):[])} busy={busy||recording} onReintentar={()=>{const fallida=session&&view.tasks.find(t=>t.session_id===session.id&&t.status==='failed');if(session&&fallida)void perform(()=>consultationsApi.command(patientId,{action:'retry',id:session.id,expected_revision:session.revision,task_id:fallida.id}),'Procesamiento reintentado.');}} />
   {showCompletions&&<ConsultationCompletionPanel patientId={patientId}/>}
   <div className="pn-notes-layout"><div className="pn-notes-main">
 

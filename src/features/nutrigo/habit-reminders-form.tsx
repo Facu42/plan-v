@@ -58,6 +58,75 @@ export function HabitReminderFields({ prefs = DEFAULT_HABIT_REMINDERS, onSave, s
   );
 }
 
+export type PermisoAviso = 'permitido' | 'bloqueado' | 'sin-pedir' | 'no-disponible';
+
+export function textoDiagnostico(input: { permiso: PermisoAviso; suscripcion: boolean; prueba: boolean; avisosActivos: boolean }) {
+  const permiso = {
+    permitido: 'Permiso: el teléfono permite los avisos.',
+    bloqueado: 'Permiso: los avisos están bloqueados en los ajustes del teléfono.',
+    'sin-pedir': 'Permiso: todavía no pedimos permiso en este teléfono.',
+    'no-disponible': 'Permiso: este navegador no recibe avisos.',
+  }[input.permiso];
+  const suscripcion = input.suscripcion ? 'Suscripción: este teléfono está anotado.' : 'Suscripción: este teléfono no está anotado.';
+  const prueba = !input.prueba
+    ? 'El aviso de prueba no está en la versión publicada.'
+    : input.avisosActivos
+      ? 'Podés mandar un aviso de prueba.'
+      : 'Los avisos todavía no están activos en el servidor.';
+  return { permiso, suscripcion, prueba, puedeProbar: input.prueba && input.avisosActivos };
+}
+
+/** Permiso, suscripción y, solo en local o staging, un aviso de prueba. */
+export function HabitPushDiagnostics({ permiso, suscripcion, prueba, avisosActivos, aviso = '', busy = false, onProbar }: {
+  permiso: PermisoAviso; suscripcion: boolean; prueba: boolean; avisosActivos: boolean; aviso?: string; busy?: boolean; onProbar?: () => void;
+}) {
+  const texto = textoDiagnostico({ permiso, suscripcion, prueba, avisosActivos });
+  return (
+    <section className="pms-habit" aria-label="Diagnóstico de avisos">
+      <p className="pms-group">Diagnóstico de avisos</p>
+      <p>{texto.permiso}</p>
+      <p>{texto.suscripcion}</p>
+      <p>{texto.prueba}</p>
+      {texto.puedeProbar ? <button type="button" disabled={busy || !suscripcion} onClick={onProbar}>Mandar aviso de prueba</button> : null}
+      {aviso ? <small>{aviso}</small> : null}
+    </section>
+  );
+}
+
+function permisoDelTelefono(): PermisoAviso {
+  if (typeof Notification === 'undefined') return 'no-disponible';
+  if (Notification.permission === 'granted') return 'permitido';
+  if (Notification.permission === 'denied') return 'bloqueado';
+  return 'sin-pedir';
+}
+
+export function HabitPushDiagnosticsPanel() {
+  const [permiso, setPermiso] = useState<PermisoAviso>('sin-pedir');
+  const [suscripcion, setSuscripcion] = useState(false);
+  const [prueba, setPrueba] = useState(false);
+  const [avisosActivos, setAvisosActivos] = useState(false);
+  const [aviso, setAviso] = useState('');
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    setPermiso(permisoDelTelefono());
+    api.getHabitDiagnostics().then(resultado => {
+      if (!vivo) return;
+      setSuscripcion(resultado.suscripcion);
+      setPrueba(resultado.prueba);
+      setAvisosActivos(resultado.avisos_activos);
+    }).catch(() => undefined);
+    return () => { vivo = false; };
+  }, []);
+  return <HabitPushDiagnostics permiso={permiso} suscripcion={suscripcion} prueba={prueba} avisosActivos={avisosActivos} aviso={aviso} busy={busy} onProbar={() => {
+    setBusy(true);
+    setAviso('');
+    void api.sendHabitTest().then(resultado => setAviso(resultado.enviados > 0 ? 'Mandamos un aviso de prueba a este teléfono.' : 'No había un teléfono anotado.')).catch(error => {
+      setAviso(error instanceof ApiError ? error.message : 'No pudimos mandar el aviso de prueba.');
+    }).finally(() => setBusy(false));
+  }} />;
+}
+
 /** Carga y guarda los horarios de la paciente. Si la base todavía no tiene la tabla, lo dice. */
 export function HabitRemindersPanel() {
   const [prefs, setPrefs] = useState<HabitReminders>(DEFAULT_HABIT_REMINDERS);
@@ -67,13 +136,16 @@ export function HabitRemindersPanel() {
     api.getHabitReminders().then((result) => { if (alive) setPrefs(result.prefs); }).catch(() => undefined);
     return () => { alive = false; };
   }, []);
-  return <HabitReminderFields prefs={prefs} status={status} onSave={async (next) => {
-    try {
-      const saved = await api.saveHabitReminders(next);
-      setPrefs(saved.prefs);
-      setStatus('Listo. Te vamos a avisar en esos horarios.');
-    } catch (error) {
-      setStatus(error instanceof ApiError ? error.message : 'No pudimos guardar. Probá de nuevo.');
-    }
-  }} />;
+  return <>
+    <HabitReminderFields prefs={prefs} status={status} onSave={async (next) => {
+      try {
+        const saved = await api.saveHabitReminders(next);
+        setPrefs(saved.prefs);
+        setStatus('Listo. Te vamos a avisar en esos horarios.');
+      } catch (error) {
+        setStatus(error instanceof ApiError ? error.message : 'No pudimos guardar. Probá de nuevo.');
+      }
+    }} />
+    <HabitPushDiagnosticsPanel />
+  </>;
 }
