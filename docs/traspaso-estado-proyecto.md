@@ -1,4 +1,6 @@
-# Traspaso del proyecto (actualización vigente: 2026-10-30)
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · La flecha para plegar el menú del panel de la nutricionista se ve con la barra abierta y con la barra plegada. Rama `work/fix-sidebar-toggle`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
