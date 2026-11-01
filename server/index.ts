@@ -1,6 +1,8 @@
 import {registerCampaignRoutes} from './communications/campaign-routes.js';
 import { integrationAvailability } from './scheduling/providers.js';
 import {registerSchedulingRoutes} from './scheduling/routes.js';
+import {registerPublicSeoRoutes} from './seo/routes.js';
+import {registerCallRoutes} from './calls/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
 import { registerPlatformBillingRoutes } from './billing-platform/routes.js';
 import { createPlatformReadOnlyGuard } from './billing-platform/guard.js';
@@ -346,6 +348,8 @@ registerPortfolioRoutes(app);
 registerPatientSubscriptionRoutes(app);
 registerPlatformBillingRoutes(app);
 registerSchedulingRoutes(app);
+registerPublicSeoRoutes(app);
+registerCallRoutes(app);
 registerSchedulingTeamRoutes(app);
 registerDocumentOrganizerRoutes(app);
 registerCommunicationChannelRoutes(app);

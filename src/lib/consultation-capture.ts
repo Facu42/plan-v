@@ -23,7 +23,9 @@ export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,ind
  let mic:MediaStream|undefined,tab:MediaStream|undefined,ctx:AudioContext|undefined;let timer:ReturnType<typeof setInterval>|undefined;let disposed=false,started=false;
  const clean=()=>{disposed=true;if(timer)clearInterval(timer);mic?.getTracks().forEach(t=>t.stop());tab?.getTracks().forEach(t=>t.stop());if(ctx&&ctx.state!=='closed')void ctx.close().catch(()=>undefined);};
  try {
+  // El video del compartir pantalla no se codifica ni se sube: solo entra el audio al WAV.
   tab=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+  for (const track of tab.getVideoTracks?.() ?? []) track.enabled = false;
   try{mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});}catch{clean();throw new Error('No se pudo activar el micrófono. Permití su acceso o cargá una grabación.');}
   ctx=new AudioContext();await ctx.resume();
   const processor=ctx.createScriptProcessor(4096,1,1),silent=ctx.createGain();silent.gain.value=0;processor.connect(silent);silent.connect(ctx.destination);

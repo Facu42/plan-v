@@ -15,13 +15,14 @@ const props = (vista: VistaPublica) => ({
   config, reservas: [reserva], publicada: true, sinPublicar: false, link: 'https://x.test/consultorio/mi-consultorio', planes: null, mercadoPago: false,
   vista, servicio: 0, cargando: false, error: '', estado: '', onServicio: vi.fn(), onCajon: vi.fn(), onQuitarServicio: vi.fn(), onDuplicarServicio: vi.fn(),
   onCopiar: vi.fn(), onDescargarQr: vi.fn(), onAviso: vi.fn(), onDia: vi.fn(), onRecordatorios: vi.fn(), onReservar: vi.fn(), onReintentar: vi.fn(), onConfirmar: vi.fn(),
+  onPedirResena: vi.fn(), reviewLink: '',
 });
 
 describe('Página pública con el HTML del boceto v29', () => {
   it('Mi página arma perfil, celular y compartir con datos reales', () => {
     const html = renderToStaticMarkup(<PanelPublicaV29 {...props(0)} />);
     for (const clase of ['id="s-publica"', 'id="pubwrap"', 'pubpf', 'pubph', 'pubsh']) expect(html).toContain(clase);
-    for (const texto of ['Lic. Vero Trenti', 'Primera consulta', 'Av. Cabildo 2040', 'x.test/consultorio/mi-consultorio', 'Todavía no hay opiniones de pacientes.', 'pubqr', 'Links por servicio', 'Este mes', 'Obras sociales', 'Opiniones', 'Descargar QR']) expect(html).toContain(texto);
+    for (const texto of ['Lic. Vero Trenti', 'Primera consulta', 'Av. Cabildo 2040', 'x.test/consultorio/mi-consultorio', 'Todavía no hay opiniones de pacientes.', 'Pedir reseña', 'pubqr', 'Links por servicio', 'Este mes', 'Obras sociales', 'Opiniones', 'Descargar QR']) expect(html).toContain(texto);
     expect(html).not.toContain('Verónica');
   });
 

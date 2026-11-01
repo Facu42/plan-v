@@ -29,6 +29,14 @@
       "destination": "https://api-production-aad6.up.railway.app/api/public/support"
     },
     {
+      "source": "/sitemap.xml",
+      "destination": "https://api-production-aad6.up.railway.app/api/public/seo/sitemap.xml"
+    },
+    {
+      "source": "/robots.txt",
+      "destination": "https://api-production-aad6.up.railway.app/api/public/seo/robots.txt"
+    },
+    {
       "source": "/",
       "has": [
         {

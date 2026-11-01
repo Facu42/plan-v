@@ -7,6 +7,7 @@ import { Campo, CajonV29, Chips, Fila, Segmentado, Tildes } from './CajonV29';
 import { FxKv } from './ficha-fx';
 import { validarImagen } from './ficha-ajustes';
 import { MODALIDADES } from '../../lib/public-page-profile';
+import { isGoogleBusinessUrl } from '../../lib/google-review';
 import { ESPECIALIDADES_SUGERIDAS, MODOS_OBRA_SOCIAL, OBRAS_SUGERIDAS, conHorarioDelDia, leerHorario, pedidosAlReservar, type ModoObraSocial } from './publica-extras';
 import { horariosPorDia } from './PanelPublicaV29';
 
@@ -36,6 +37,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
   const [modalidad, setModalidad] = useState<PublicModality>(extras?.modality ?? 'ambas');
   const [precio, setPrecio] = useState(pesos(extras?.consult_price_minor ?? 0));
   const [reserva, setReserva] = useState(extras?.booking_url ?? '');
+  const [google, setGoogle] = useState(extras?.google_business_url ?? '');
   const [color, setColor] = useState(extras?.color ?? '');
   const [acento, setAcento] = useState(extras?.accent ?? '');
   const [foto, setFoto] = useState(fotoInicial.startsWith('data:image/') ? fotoInicial : '');
@@ -57,6 +59,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
     if (!SLUG.test(slug)) { setAviso('La dirección usa minúsculas, números y guiones (mínimo 3 letras).'); return false; }
     if (logo && !logo.startsWith('https://')) { setAviso('La imagen tiene que ser un enlace https, o subí un archivo PNG/JPG.'); return false; }
     if (reserva && !reserva.startsWith('https://')) { setAviso('El link de reserva tiene que ser https.'); return false; }
+    if (google.trim() && !isGoogleBusinessUrl(google)) { setAviso('El link de Google tiene que ser https, de g.page o el de reseña con placeid.'); return false; }
     if (color && !HEX.test(color)) { setAviso('El color de texto usa el formato #RRGGBB.'); return false; }
     if (acento && !HEX.test(acento)) { setAviso('El color de acento usa el formato #RRGGBB.'); return false; }
     const nueva = otra.trim();
@@ -66,6 +69,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
     onAplicar(conExtras({ ...config, page: { ...page, title: titulo, bio, slug, contact: contacto, logo_url: logo } }, {
       license: matricula.trim(), area: zona.trim(), specialties: final, modality: modalidad,
       consult_price_minor: centavos || undefined, booking_url: reserva.trim() || undefined,
+      google_business_url: google.trim() || undefined,
       color: color || undefined, accent: acento || undefined,
     }));
     return true;
@@ -81,6 +85,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
       <Campo etiqueta="Precio de consulta (opcional)"><input className="ai" inputMode="numeric" value={precio} placeholder="Sin publicar" onChange={e => setPrecio(e.target.value)} /></Campo>
       <Campo etiqueta="Link de reserva" ayuda="Si usás otro turno (Calendly u otro), pegá el https. Si no, se usa el de Nutridash."><input className="ai" type="url" value={reserva} placeholder="https://" onChange={e => setReserva(e.target.value)} /></Campo>
     </Fila>
+    <Campo etiqueta="Link de Google Business" ayuda="El de g.page o el de reseña con placeid. Sirve para pedir la reseña. No se publica en /slug."><input className="ai" type="url" value={google} placeholder="https://g.page/…" onChange={e => setGoogle(e.target.value)} /></Campo>
     <Campo etiqueta="Dirección del link" ayuda="Minúsculas, números y guiones. Queda en nutridash.app/tu-slug"><input className="ai" value={slug} onChange={e => setSlug(e.target.value)} /></Campo>
     <Fila><Campo etiqueta="Contacto público"><input className="ai" value={contacto} maxLength={150} onChange={e => setContacto(e.target.value)} /></Campo><Campo etiqueta="Foto o logo (enlace)"><input className="ai" type="url" value={logo} placeholder="https://" onChange={e => setLogo(e.target.value)} /></Campo></Fila>
     <Campo etiqueta="Subir foto o logo" ayuda="PNG o JPG de hasta 500 KB. Se guarda en tu marca y sale en el PDF y en tu página.">
