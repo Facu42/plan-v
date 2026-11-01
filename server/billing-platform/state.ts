@@ -106,8 +106,9 @@ export function reduceBilling(sub: SubscriptionSnap, fact: RemoteFact, nowIso: s
   const status = paymentRank(fact.status);
   if (!status) return { sub, payment: null };
   const payment = { status, amountCents: fact.amountCents, paidAt: fact.paidAt, statusDetail: fact.statusDetail, id: fact.id };
-  if (olderThan(fact.paidAt, sub.last_payment_at) && status !== 'approved') return { sub, payment };
+  if (olderThan(fact.paidAt, sub.last_payment_at)) return { sub, payment };
   if (status === 'approved') {
+    if (fact.amountCents !== sub.current_amount_cents) return { sub, payment };
     const months = sub.billing_cycle === 'annual' ? 12 : 1;
     const paidAt = fact.paidAt ?? nowIso;
     return {
