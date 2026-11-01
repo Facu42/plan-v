@@ -8,6 +8,8 @@ marketing/
 *.xlsx
 .env
 .env.local
+respaldo.dump
+respaldo.dump.enc
 backups/
 .vercel
 .env*
