@@ -21,8 +21,11 @@ describe('estado del cobro', () => {
   });
 
   it('un aviso viejo no pisa un cobro más nuevo y la gracia dura 7 días', () => {
-    const approved = reduceBilling(base(), { kind: 'payment', id: 'p1', status: 'approved', amountCents: 100, paidAt: '2026-11-02T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-02T12:00:00.000Z');
-    const stale = reduceBilling(approved.sub, { kind: 'payment', id: 'old', status: 'rejected', amountCents: 100, paidAt: '2026-10-01T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-03T12:00:00.000Z');
+    const approved = reduceBilling(base(), { kind: 'payment', id: 'p1', status: 'approved', amountCents: 1_494_000, paidAt: '2026-11-02T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-02T12:00:00.000Z');
+    const stale = reduceBilling(approved.sub, { kind: 'payment', id: 'old', status: 'rejected', amountCents: 1_494_000, paidAt: '2026-10-01T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-03T12:00:00.000Z');
+    const stalePaid = reduceBilling(approved.sub, { kind: 'payment', id: 'older-ok', status: 'approved', amountCents: 1_494_000, paidAt: '2026-10-01T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-03T12:00:00.000Z');
+    expect(stalePaid.sub.current_period_end).toBe(approved.sub.current_period_end);
+    expect(stalePaid.sub.last_payment_at).toBe(approved.sub.last_payment_at);
     expect(stale.sub.status).toBe('authorized');
     const pending = reduceBilling(approved.sub, { kind: 'preapproval', id: 'pre', status: 'pending' }, '2026-11-03T12:00:00.000Z');
     expect(pending.sub.status).toBe('authorized');
@@ -58,6 +61,16 @@ describe('estado del cobro', () => {
     expect(signupGraceDaysLeft(created, day(31))).toBe(0);
     expect(accessMode(null, day(0))).toBe('read_only');
     expect(platformWriteAccess({ status: 'authorized', past_due_since: null, current_period_end: null }, created, day(31))).toBe('full');
+    expect(platformWriteAccess({ status: 'pending', past_due_since: null, current_period_end: null }, created, day(30))).toBe('read_only');
+  });
+
+  it('un pago de otro monto no activa la cuenta y autorizar el plan tampoco', () => {
+    const cheap = reduceBilling(base(), { kind: 'payment', id: 'p1', status: 'approved', amountCents: 100, paidAt: '2026-10-01T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-10-01T12:00:00.000Z');
+    expect(cheap.sub.status).toBe('pending');
+    expect(cheap.payment?.status).toBe('approved');
+    const onlyPlan = reduceBilling(base(), { kind: 'preapproval', id: 'pre', status: 'authorized' }, '2026-10-01T12:00:00.000Z');
+    expect(onlyPlan.sub.status).toBe('pending');
+    expect(onlyPlan.payment).toBeNull();
   });
 });
 

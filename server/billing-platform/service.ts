@@ -4,7 +4,7 @@ import { verifyMpSignature } from '../scheduling/logic.js';
 import { MpCallError } from '../subscriptions/mp.js';
 import { billingEnabled } from './flag.js';
 import { noopInvoiceIssuer, type InvoiceIssuer } from './invoicing.js';
-import { loadRemote, minimalRaw, platformMercadoPago, preapprovalBody } from './mp-platform.js';
+import { loadRemote, minimalRaw, platformMercadoPago, preapprovalBody, sandboxCredentialBlock } from './mp-platform.js';
 import { cycleAmountCents, pesosFromCents, planByCode, catalog } from './pricing.js';
 import * as repo from './repository.js';
 import { accessMode, graceUntil, platformWriteAccess, reduceBilling, signupGraceDaysLeft, signupGraceUntil, type SubscriptionSnap } from './state.js';
@@ -81,7 +81,13 @@ export function disabledPlan() {
   return { enabled: false, founder_seats_left: null, plans: [], subscription: null, signup_grace: null, usage: null, payments: [] };
 }
 
+function assertSandboxCredentials() {
+  const blocked = sandboxCredentialBlock(process.env.MP_PLATFORM_ACCESS_TOKEN);
+  if (blocked) throw new CareError(501, blocked);
+}
+
 export async function checkout(input: { nutritionistId: string; userId: string; planCode: string; cycle: 'monthly' | 'annual'; clientRequestId: string }) {
+  assertSandboxCredentials();
   const plan = planByCode(input.planCode);
   if (!plan) throw new CareError(400, 'Elegí Arranque, Pro o Consultorio.');
   const email = await repo.payerEmail(input.userId);
@@ -135,6 +141,7 @@ export async function checkout(input: { nutritionistId: string; userId: string; 
 }
 
 export async function changePlan(input: { nutritionistId: string; planCode: string; cycle: 'monthly' | 'annual' }) {
+  assertSandboxCredentials();
   const open = await repo.findOpenSubscription(input.nutritionistId);
   if (!open || (open.status !== 'authorized' && open.status !== 'past_due')) throw new CareError(409, 'Todavía no hay un plan activo para cambiar.');
   const plan = planByCode(input.planCode);
@@ -163,6 +170,7 @@ export async function changePlan(input: { nutritionistId: string; planCode: stri
 }
 
 export async function cancelPlan(input: { nutritionistId: string; reason: string }) {
+  assertSandboxCredentials();
   const open = await repo.findOpenSubscription(input.nutritionistId);
   if (!open) throw new CareError(404, 'No hay un plan para cancelar.');
   if (open.provider_preapproval_id) {
@@ -218,6 +226,7 @@ export async function receiveWebhook(notice: Notice, invoice: InvoiceIssuer = no
   if (!secret) return 501;
   const valid = verifyMpSignature({ id: notice.dataId, requestId: notice.requestId, signature: notice.signature, secret, now: notice.now });
   if (!valid) return 401;
+  if (sandboxCredentialBlock(process.env.MP_PLATFORM_ACCESS_TOKEN)) return 501;
   if (await repo.findEvent(notice.requestId, notice.dataId, notice.topic)) return 200;
   let fact: Awaited<ReturnType<typeof loadRemote>>;
   try {
@@ -226,10 +235,20 @@ export async function receiveWebhook(notice: Notice, invoice: InvoiceIssuer = no
     if (error instanceof MpCallError && error.httpStatus === 501) return 501;
     return 503;
   }
-  const reference = fact?.kind === 'payment' ? fact.externalReference : null;
-  const row = reference ? await repo.findSubscription(reference) : await repo.findByPreapproval(notice.dataId);
+  if (!fact) return 503;
+  const reference = fact.kind === 'payment' ? fact.externalReference : null;
+  const row = reference
+    ? await repo.findSubscription(reference)
+    : await repo.findByPreapproval(fact.kind === 'preapproval' ? fact.id : notice.dataId);
+  if (!row) {
+    // El aviso del plan puede llegar antes de que guardemos el id de Mercado Pago. No se marca como hecho.
+    if (fact.kind === 'preapproval') return 503;
+    await repo.saveEvent(notice.requestId, notice.dataId, notice.topic);
+    repo.logBilling('webhook_unmatched');
+    return 200;
+  }
   try {
-    if (row && fact) await applyFact(row, fact, invoice);
+    await applyFact(row, fact, invoice);
   } catch {
     return 503;
   }

@@ -24,10 +24,14 @@ vi.mock('./repository.js', () => ({
   logBilling: () => undefined,
 }));
 
-vi.mock('./mp-platform.js', () => ({
-  loadRemote: () => { calls.loadRemote += 1; return loadRemote(); },
-  minimalRaw: (row: Record<string, unknown>) => row,
-}));
+vi.mock('./mp-platform.js', async () => {
+  const actual = await vi.importActual<typeof import('./mp-platform.js')>('./mp-platform.js');
+  return {
+    ...actual,
+    loadRemote: () => { calls.loadRemote += 1; return loadRemote(); },
+    minimalRaw: (row: Record<string, unknown>) => row,
+  };
+});
 
 function signature(id: string, requestId: string, ts: string, secret = 'platform-secret') {
   const mac = createHmac('sha256', secret).update(`id:${id.toLowerCase()};request-id:${requestId};ts:${ts};`).digest('hex');
@@ -61,6 +65,7 @@ describe('aviso de Mercado Pago de la plataforma', () => {
     expect(missing.status).toBe(501);
     expect(calls.findEvent).toBe(0);
     vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
     const ts = String(Math.floor(Date.now() / 1000));
     const bad = await app().request('/api/public/billing/mp/webhook', {
       method: 'POST',
@@ -82,6 +87,7 @@ describe('aviso de Mercado Pago de la plataforma', () => {
   it('procesa una vez lo que dice Mercado Pago y el repetido no vuelve a escribir', async () => {
     vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
     vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
     const ts = String(Math.floor(Date.now() / 1000));
     const headers = { 'content-type': 'application/json', 'x-request-id': 'req-1', 'x-signature': signature('88', 'req-1', ts) };
     const body = JSON.stringify({ type: 'payment', data: { id: '88' }, status: 'approved', transaction_amount: 1 });
@@ -96,6 +102,7 @@ describe('aviso de Mercado Pago de la plataforma', () => {
   it('si Mercado Pago no responde, contesta 503 y no marca el aviso', async () => {
     vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
     vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
     loadRemote.mockRejectedValueOnce(new MpCallError(503));
     const ts = String(Math.floor(Date.now() / 1000));
     const response = await app().request('/api/public/billing/mp/webhook', {

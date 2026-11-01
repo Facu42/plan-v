@@ -5,10 +5,20 @@ import type { RemoteFact } from './state.js';
 
 type MpResult = Record<string, unknown>;
 
+/**
+ * Solo la clave de prueba de Mercado Pago (empieza con TEST-).
+ * Una clave de producción no se usa: no se consulta ni se cobra.
+ */
+export function sandboxCredentialBlock(token: string | undefined): string | null {
+  const value = token?.trim() ?? '';
+  if (!value) return 'Falta la configuración de Mercado Pago de la plataforma.';
+  if (!value.startsWith('TEST-')) return 'El cobro de Nutridash solo acepta la clave de prueba de Mercado Pago. No se cobra plata de verdad.';
+  return null;
+}
+
 function token(): string {
-  const value = process.env.MP_PLATFORM_ACCESS_TOKEN?.trim();
-  if (!value) throw new MpCallError(501);
-  return value;
+  if (sandboxCredentialBlock(process.env.MP_PLATFORM_ACCESS_TOKEN)) throw new MpCallError(501);
+  return process.env.MP_PLATFORM_ACCESS_TOKEN!.trim();
 }
 
 async function mpFetch(url: string, init: RequestInit = {}): Promise<MpResult> {
