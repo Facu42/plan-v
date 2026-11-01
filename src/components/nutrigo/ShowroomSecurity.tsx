@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { totpEnrollParams } from '../../context/mfa';
 import { supabase } from '../../lib/supabase';
 import { NvButton } from './primitives';
 
@@ -34,7 +35,7 @@ export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean;
       for (const factor of existing?.all ?? []) {
         if (factor.factor_type === 'totp' && factor.status === 'unverified') await supabase.auth.mfa.unenroll({ factorId: factor.id });
       }
-      const created = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Nutridash' });
+      const created = await supabase.auth.mfa.enroll(totpEnrollParams());
       if (created.error || !created.data) { setError('No pudimos preparar el código. Probá de nuevo.'); return; }
       setEnrollment({ factorId: created.data.id, qr: created.data.totp.qr_code, secret: created.data.totp.secret });
       setPhase('enrolling');

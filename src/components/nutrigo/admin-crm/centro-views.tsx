@@ -306,10 +306,10 @@ export function SeguridadView({ data }: { data: CentroSeguridad }) {
       {pageHead({
         kicker: 'Acceso',
         title: 'Seguridad',
-        sub: 'MFA por cuenta, interruptor MFA_ENFORCE y administradores de plataforma.',
+        sub: 'Código de la app en /admin, opcional para la nutricionista, y administradores de plataforma.',
       })}
       <div className="nd-grid nd-kpis nd-mb-18">
-        {kpi({ label: 'MFA_ENFORCE', value: data.mfa_enforce ? 'Prendido' : 'Apagado', note: 'El centro de mando pide el segundo paso igual' })}
+        {kpi({ label: 'MFA_ENFORCE', value: data.mfa_enforce ? 'Prendido' : 'Apagado', note: '/admin pide el segundo paso igual' })}
         {kpi({ label: 'Administradores', value: num(data.admins.length), note: 'cuentas en platform_admins' })}
         {kpi({ label: 'Con segundo paso', value: num(data.cuentas.filter((row) => row.mfa === 'activo').length), note: `${num(data.cuentas.filter((row) => row.mfa === 'sin_alta').length)} sin alta` })}
       </div>

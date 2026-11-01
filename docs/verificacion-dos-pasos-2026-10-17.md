@@ -1,26 +1,28 @@
-# Verificación en dos pasos (issue #132, tarea 1)
+# Verificación en dos pasos (TOTP de Supabase Auth)
 
-Código de 6 cifras de una aplicación (Google Authenticator o parecida) para nutricionistas y administradoras.
-Todo viene **apagado de fábrica**: sin tocar nada, la app se comporta igual que hoy.
+Código de 6 cifras de una aplicación (Google Authenticator o parecida).
+
+## Quién lo tiene
+
+- **`/admin` es obligatorio.** Quien entra ahí tiene que dar de alta el código y usarlo. El servidor lo pide en las rutas del centro de mando aunque `MFA_ENFORCE` esté apagado. La pantalla de alta aparece sola al abrir `/admin`.
+- **La nutricionista lo elige.** En Ajustes → Seguridad, el interruptor «Dos pasos para vos» abre la alta (código QR). Puede quitarlo cuando quiera. Si lo activó, cada ingreso le pide el código y la API rechaza la sesión que no lo pasó.
+- **La paciente no está obligada.** Si alguna vez lo activó, también se le pide al entrar.
+
+No hace falta prender `MFA_ENFORCE` ni `VITE_MFA_ENFORCE`. Esos interruptores ya no obligan a todo el consultorio.
 
 ## Qué hay
-- **Pantallas** (`src/components/auth/MfaScreen.tsx`): alta con QR y clave escrita, y pedido de código. Sirven también a quien entró con Google.
-- **Cuándo aparece** (`src/context/mfa.ts`): a quien ya dio de alta su código se le pide siempre al entrar. A quien no, solo si es nutricionista o entra a `/admin` **y** `VITE_MFA_ENFORCE=1`. A las pacientes no se les exige.
-- **Menú de cuenta** (`ShowroomSecurity.tsx`): «Verificación en dos pasos» para activar o quitar el código, para todos los roles. A quien lo tiene obligatorio no se le ofrece quitarlo.
-- **Servidor** (`server/security/mfa.ts`, `server/middleware/auth.ts`, `server/admin/routes.ts`): con `MFA_ENFORCE=1`, una nutricionista o administradora con token `aal1` recibe 403 `mfa_required` en toda la API, salvo `/api/auth/*` y `/api/admin/me`. `requireAdmin` lo repite.
-- **Base** (`supabase/migrations/20261017030000_mfa_aal2_gate.sql`, **sin aplicar**): una regla restrictiva `mfa_aal2_gate` en 7 tablas de datos clínicos (las del panel de administración las protege el servidor), controlada por `private.mfa_enforcement.enabled` (falso de fábrica). Aditiva: sin DROP.
 
-## Cómo prenderlo, en este orden (cada paso con la frase escrita de Facundo)
-1. Supabase → Authentication → Multi-Factor: dejar prendido TOTP (Enroll y Verify).
-2. Publicar este PR (no cambia nada: los interruptores están apagados).
-3. Facundo y Verónica entran y dan de alta su código desde el menú de cuenta → «Verificación en dos pasos» → Activar. Lo mismo vale para cualquier paciente que quiera.
-4. Prender el frente: `VITE_MFA_ENFORCE=1` en Vercel. Desde ahí, una nutri o quien entre a `/admin` sin código ve la pantalla de alta al entrar.
-5. Cuando ellos dos ya entraron con código, prender el servidor: `MFA_ENFORCE=1` en Railway (API).
-6. Aplicar la migración y, recién después, `update private.mfa_enforcement set enabled = true;`.
-Para volver atrás: quitar las variables o `enabled = false`.
+- **Pantallas** (`src/components/auth/MfaScreen.tsx` y `ShowroomSecurity.tsx`): alta con QR y clave escrita, y pedido de código. Usan `supabase.auth.mfa` con TOTP y el nombre «Nutridash». Sirven también a quien entró con Google.
+- **Cuándo aparece** (`src/context/mfa.ts`): con un código ya dado de alta, siempre. Sin código, solo en `/admin`.
+- **Servidor** (`server/security/mfa.ts`, `server/middleware/auth.ts`, `server/admin/routes.ts`): si Auth dice que hay un TOTP verificado y el token es `aal1`, responde 403. `/admin` exige `aal2` en sus rutas. El ingreso y `/api/admin/me` siguen abiertos para poder mostrar la pantalla.
+- **Base** (`supabase/migrations/20261017030000_mfa_aal2_gate.sql`, **sin aplicar**): una regla extra en tablas clínicas, apagada de fábrica. No se aplica sin la frase de Facundo.
 
-## Riesgo principal
-Dejar afuera a quien administra. Por eso el frente pide el código antes de que el servidor lo exija, y las rutas de ingreso quedan libres. Si alguien pierde su aplicación de códigos hay que quitarle el factor desde Supabase (Authentication → Users → Factors).
+## Qué tiene que hacer Facundo
 
-## Lo que queda para otra tarea
-- Cuentas que crea el administrador (`email_confirm: true`): quedan obligadas en su primer ingreso apenas se prende el interruptor, porque no tienen código dado de alta.
+1. En Supabase → Authentication → Multi-Factor, dejar prendido TOTP (Enroll y Verify). Sin eso el QR no se puede crear.
+2. Entrar a `/admin` y dar de alta su código antes de usar el centro de mando. Si pierde la aplicación de códigos, hay que quitarle el factor en Supabase (Authentication → Users → Factors).
+3. No cargar `MFA_ENFORCE` ni `VITE_MFA_ENFORCE` para obligar a las nutricionistas. Ellas lo prenden en Ajustes.
+
+## Riesgo
+
+Dejar afuera a quien administra si todavía no dio de alta el código. Por eso `/admin` muestra la alta antes de cargar el centro, y las rutas de ingreso quedan libres.
