@@ -24,6 +24,11 @@ export function isMfaExemptPath(path: string): boolean {
   return path.startsWith('/api/auth/') || path === '/api/admin/me';
 }
 
+/** /api/admin exige aal2 siempre, salvo /api/admin/me (para mostrar el aviso del menú). */
+export function isAdminProtectedPath(path: string): boolean {
+  return (path === '/api/admin' || path.startsWith('/api/admin/')) && path !== '/api/admin/me';
+}
+
 /**
  * Rutas mínimas que una profesional puede necesitar antes de completar MFA.
  * El middleware confirma además el rol y, para la bandeja, que el consultorio

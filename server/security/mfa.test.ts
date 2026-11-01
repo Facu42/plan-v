@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { allowPreMfaProfessionalBootstrap, createAuthMiddleware } from '../middleware/auth.js';
-import { isMfaExemptPath, isPreMfaProfessionalPath, mfaEnforced, tokenAal } from './mfa.js';
+import { isAdminProtectedPath, isMfaExemptPath, isPreMfaProfessionalPath, mfaEnforced, tokenAal } from './mfa.js';
 
 const jwt = (claims: object) => `Bearer h.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.s`;
 
@@ -24,6 +24,13 @@ describe('verificación en dos pasos', () => {
     expect(isMfaExemptPath('/api/auth/recover')).toBe(true);
     expect(isMfaExemptPath('/api/admin/me')).toBe(true);
     expect(isMfaExemptPath('/api/admin/accounts')).toBe(false);
+  });
+
+  it('protege /api/admin salvo el aviso del menú, aunque MFA_ENFORCE esté apagado', () => {
+    expect(isAdminProtectedPath('/api/admin/centro/resumen')).toBe(true);
+    expect(isAdminProtectedPath('/api/admin/accounts')).toBe(true);
+    expect(isAdminProtectedPath('/api/admin/me')).toBe(false);
+    expect(isAdminProtectedPath('/api/patients')).toBe(false);
   });
 
   it('limita el bootstrap profesional previo a MFA a setup y la cola', () => {
@@ -55,6 +62,8 @@ describe('middleware con segundo paso', () => {
     }));
     instance.get('/api/patients', (c) => c.json({ ok: true }));
     instance.get('/api/auth/recover', (c) => c.json({ ok: true }));
+    instance.get('/api/admin/me', (c) => c.json({ ok: true }));
+    instance.get('/api/admin/centro/resumen', (c) => c.json({ ok: true }));
     instance.get('/api/nutritionist/setup', (c) => c.json({ ok: true, bootstrap: c.get('preMfaProfessional') }));
     instance.get('/api/crm/work-queue', (c) => c.json({ ok: true, bootstrap: c.get('preMfaProfessional') }));
     return instance;
@@ -80,6 +89,19 @@ describe('middleware con segundo paso', () => {
   it('apagado no cambia nada para nadie', async () => {
     const res = await app({ enforced: false, needsSecondStep: true }).request('/api/patients', { headers: headers('aal1') });
     expect(res.status).toBe(200);
+  });
+
+  it('/admin exige aal2 aunque MFA_ENFORCE esté apagado y deja libre /api/admin/me', async () => {
+    const blocked = await app({ enforced: false, needsSecondStep: false })
+      .request('/api/admin/centro/resumen', { headers: headers('aal1') });
+    const allowed = await app({ enforced: false, needsSecondStep: false })
+      .request('/api/admin/centro/resumen', { headers: headers('aal2') });
+    const menu = await app({ enforced: false, needsSecondStep: false })
+      .request('/api/admin/me', { headers: headers('aal1') });
+    expect(blocked.status).toBe(403);
+    expect(await blocked.json()).toMatchObject({ code: 'mfa_required' });
+    expect(allowed.status).toBe(200);
+    expect(menu.status).toBe(200);
   });
 
   it('las rutas de ingreso quedan libres', async () => {

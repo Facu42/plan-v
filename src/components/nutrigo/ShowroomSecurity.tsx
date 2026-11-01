@@ -1,13 +1,14 @@
 import { useEffect, useState, type FormEvent } from 'react';
 import { supabase } from '../../lib/supabase';
+import { CODE_MISMATCH_MESSAGE, DISABLE_ERROR_MESSAGE, PREPARE_ERROR_MESSAGE, VERIFY_ERROR_MESSAGE, challengeAndConfirmTotp, enrollTotp, listVerifiedTotp, unenrollTotp } from '../../lib/mfa-totp';
 import { NvButton } from './primitives';
 
 type Enrollment = { factorId: string; qr: string; secret: string };
 type Phase = 'loading' | 'off' | 'enrolling' | 'on';
 
 /**
- * "Verificación en dos pasos" (issue #132): cualquiera puede activar o quitar el código de 6 cifras
- * desde el menú de cuenta. Si la cuenta lo tiene obligatorio, el botón de quitar no aparece.
+ * "Verificación en dos pasos": la nutri puede activar o quitar el código de 6 cifras
+ * desde Ajustes o el menú de cuenta. Si la cuenta lo tiene obligatorio, el botón de quitar no aparece.
  */
 export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean; onClose: () => void }) {
   const [phase, setPhase] = useState<Phase>('loading');
@@ -19,10 +20,9 @@ export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean;
 
   useEffect(() => {
     if (!supabase) { setPhase('off'); return; }
-    void supabase.auth.mfa.listFactors().then(({ data }) => {
-      const active = data?.totp[0];
-      setFactorId(active?.id ?? null);
-      setPhase(active ? 'on' : 'off');
+    void listVerifiedTotp(supabase).then((factors) => {
+      setFactorId(factors[0]?.id ?? null);
+      setPhase(factors[0] ? 'on' : 'off');
     }).catch(() => setPhase('off'));
   }, []);
 
@@ -30,15 +30,11 @@ export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean;
     if (!supabase) return;
     setBusy(true); setError('');
     try {
-      const { data: existing } = await supabase.auth.mfa.listFactors();
-      for (const factor of existing?.all ?? []) {
-        if (factor.factor_type === 'totp' && factor.status === 'unverified') await supabase.auth.mfa.unenroll({ factorId: factor.id });
-      }
-      const created = await supabase.auth.mfa.enroll({ factorType: 'totp', friendlyName: 'Nutridash' });
-      if (created.error || !created.data) { setError('No pudimos preparar el código. Probá de nuevo.'); return; }
-      setEnrollment({ factorId: created.data.id, qr: created.data.totp.qr_code, secret: created.data.totp.secret });
+      const created = await enrollTotp(supabase);
+      if (!created.ok) { setError(created.error || PREPARE_ERROR_MESSAGE); return; }
+      setEnrollment({ factorId: created.factorId, qr: created.qr, secret: created.secret });
       setPhase('enrolling');
-    } catch { setError('No pudimos preparar el código. Probá de nuevo.'); }
+    } catch { setError(PREPARE_ERROR_MESSAGE); }
     finally { setBusy(false); }
   };
 
@@ -47,11 +43,10 @@ export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean;
     if (!supabase || !enrollment || busy) return;
     setBusy(true); setError('');
     try {
-      const result = await supabase.auth.mfa.challengeAndVerify({ factorId: enrollment.factorId, code: code.trim() });
-      if (result.error) { setError('El código no coincide. Revisá la hora de tu teléfono y probá con el código nuevo.'); return; }
-      await supabase.auth.refreshSession();
+      const result = await challengeAndConfirmTotp(supabase, enrollment.factorId, code);
+      if (!result.ok) { setError(result.error || CODE_MISMATCH_MESSAGE); return; }
       setFactorId(enrollment.factorId); setEnrollment(null); setCode(''); setPhase('on');
-    } catch { setError('No pudimos verificar el código. Probá de nuevo.'); }
+    } catch { setError(VERIFY_ERROR_MESSAGE); }
     finally { setBusy(false); }
   };
 
@@ -59,11 +54,10 @@ export function ShowroomSecurity({ canDisable, onClose }: { canDisable: boolean;
     if (!supabase || !factorId || busy) return;
     setBusy(true); setError('');
     try {
-      const result = await supabase.auth.mfa.unenroll({ factorId });
-      if (result.error) { setError('No pudimos quitar el código. Volvé a entrar e intentá de nuevo.'); return; }
-      await supabase.auth.refreshSession();
+      const result = await unenrollTotp(supabase, factorId);
+      if (!result.ok) { setError(result.error || DISABLE_ERROR_MESSAGE); return; }
       setFactorId(null); setPhase('off');
-    } catch { setError('No pudimos quitar el código. Probá de nuevo.'); }
+    } catch { setError(DISABLE_ERROR_MESSAGE); }
     finally { setBusy(false); }
   };
 

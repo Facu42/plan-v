@@ -25,3 +25,8 @@ export function decideMfaStep(input: {
   if (input.verifiedFactors > 0) return 'verify';
   return input.enforced && input.requiredForAccount ? 'enroll' : null;
 }
+
+/** Si Supabase no responde: /admin no deja pasar; una nutri con MFA opcional sí. */
+export function decideMfaStepOnLookupError(input: { requiredForAccount: boolean; enforced: boolean }): MfaStep {
+  return input.enforced && input.requiredForAccount ? 'verify' : null;
+}
