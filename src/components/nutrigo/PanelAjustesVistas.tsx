@@ -13,6 +13,7 @@ import { useAvisosProfesional, useDosPasos } from './AjustesAccount';
 import { AVISOS_AUTOMATICOS, CANALES_AVISO, GRUPOS_PLANTILLAS, INTEGRACIONES, REGLAS_DE_REGRESO, avisoConfigurado, datosDeMarca, estadoDosPasos, textoDeEjemplo, type ClaveIntegracion } from './ficha-ajustes';
 import { usePrefsPanel } from './ajustes-prefs';
 import { CajonAjustes } from './AjustesCajon';
+import { AjustesWhatsappEstado } from './FichaWhatsappEstado';
 import type { ModoMarca } from './AjustesEditores';
 import { CERTIFICATE_VARIABLES, NOTICE_KEYS, certificateVariables, type NoticeKey, type NoticeView, type TemplateView } from '../../types/ajustes';
 import type { ClinicBrand } from '../../types/nutrition-capabilities';
@@ -242,6 +243,7 @@ export function AjustesIntegraciones({ onOpen }: { onOpen: (href: string) => voi
       </FxPanel>;
     })}
     {programacion.status || programacion.error ? <p className="nthint" role={programacion.error ? 'alert' : 'status'} style={{ gridColumn: '1 / -1' }}>{programacion.error || programacion.status}</p> : null}
+    <AjustesWhatsappEstado />
     {actual ? <SettingsDialog title={actual.clave === 'balanzas' ? 'Balanzas' : `Conectar ${actual.titulo}`} onClose={() => setAviso(null)}>
       {actual.clave === 'balanzas'
         ? <><p className="pubbio">En la ficha, Mediciones → «Importar balanza». Subís el PDF o una foto del ticket, revisás cada valor y lo confirmás.</p><Boton texto="Elegir paciente" onClick={() => { setAviso(null); onOpen('/crm/pacientes'); }} /></>

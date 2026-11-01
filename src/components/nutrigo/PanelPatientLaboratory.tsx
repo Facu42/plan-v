@@ -13,6 +13,8 @@ import { PanelV29Icon } from './PanelV29Icon';
 import { FxCurva, FxFilas, FxPanel } from './ficha-fx';
 import { COLUMNAS_LAB, analisisDeFecha, analisisPorFecha, estadoDe, fechaCorta, fechasDeLaboratorio, graficoDeValor, historialDeValor, metaDeAnalisis, pedidosDeEstudios, valoresPorFecha, type GraficoLab } from './ficha-laboratorio';
 import { LabLectura } from './LabLectura';
+import { LabReadingDraft } from './LabReadingDraft';
+import { useFeatureFlags } from '../../lib/feature-flags';
 import { armarLectura, pedidoParaIA } from './lab-lectura';
 import { valoresAlterados, type SolapaFicha } from './ficha-presentacion';
 
@@ -46,6 +48,7 @@ async function pedirLecturaIA(patientId:string,series:Parameters<typeof pedidoPa
 }
 
 export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:Date;ir:(solapa:SolapaFicha)=>void}){
+  const flags=useFeatureFlags();
   const {data:care,error:careError}=useCare(patientId,true);
   const allowed=!careError&&(care?.consented.includes('clinical_document')??false)&&(care?.consented.includes('care_relationship')??false);
   const [lecturaAbierta,setLecturaAbierta]=useState(false),[result,setResult]=useState<{key:string;snapshot:ClinicalWorkspaceSnapshot}|null>(null),[error,setError]=useState(''),[revision,setRevision]=useState(0),[selected,setSelected]=useState(''),[column,setColumn]=useState<string|null>(null),[view,setView]=useState<'valores'|'fecha'>('valores'),[mode,setMode]=useState<'none'|'manual'|'upload'>('none'),[files,setFiles]=useState(false);
@@ -91,6 +94,7 @@ export function PanelPatientLaboratory({patientId,now,ir}:{patientId:string;now:
   return <section aria-label="Laboratorio de la paciente">
     {mode==='manual'&&snapshot&&<ManualLaboratoryValue key={patientId} patientId={patientId} snapshot={snapshot} today={today} onSaved={saved} onUpload={()=>changeMode('upload')}/>}
     {mode==='upload'&&<section className="pn-record-card"><LaboratoryEditor patientId={patientId} onChanged={saved}/></section>}
+    <LabReadingDraft patientId={patientId} enabled={flags.lab_draft} onSaved={saved}/>
     <div className="fx hcx" data-mk="1" style={{gridTemplateColumns:'1.62fr 1fr'}}>
       <div className="c">
         <FxPanel titulo="Laboratorio y estudios" grande derecha={<><div className="tabs lbv"><button type="button" className={view==='valores'?'on':''} aria-pressed={view==='valores'} onClick={()=>setView('valores')}>Valores</button><button type="button" className={view==='fecha'?'on':''} aria-pressed={view==='fecha'} onClick={()=>setView('fecha')}>Por fecha</button></div><button type="button" className="sbtn cbtn" disabled={!allowed||!snapshot} onClick={()=>changeMode('manual')}><PanelV29Icon name="plus" size={13}/>Agregar valor</button><button type="button" className="sbtn cbtn" disabled={!allowed||!snapshot||!groups.length} onClick={()=>setLecturaAbierta(true)}><PanelV29Icon name="spark" size={13}/>Analizar valores</button><button type="button" className="sbtn k cbtn" disabled={!allowed} onClick={()=>changeMode('upload')}><PanelV29Icon name="up" size={13}/>Cargar análisis</button></>}>

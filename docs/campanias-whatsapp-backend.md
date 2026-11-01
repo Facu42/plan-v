@@ -1,5 +1,40 @@
 # Campañas, WhatsApp, audio de consultas y bioimpedancia
 
+## Pantallas (01/11/2026)
+
+La web lee `GET /api/features`. Ese dato repite las banderas del servidor y arranca en falso: `REACTIVATION_CAMPAIGNS_ENABLED`, `BIOIMPEDANCE_ENABLED` y `LAB_DRAFT_ENABLED`. Con las tres apagadas no aparece el menú Campañas, ni el bloque de WhatsApp, ni la bioimpedancia, ni el borrador de laboratorio.
+
+- Campañas (`/crm/desarrollo?modulo=campanas`): segmento, vista previa con la cantidad, canal y confirmación. Muestra el cupo que queda hoy, el historial y las bajas. Si la bandera está apagada, la pantalla dice «Próximamente». Confirmar prepara la campaña y no llama al envío.
+- WhatsApp: en la ficha se ve si la paciente se dio de baja. En Ajustes se ve si la cuenta está cargada. Si faltan `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_ID` o `WHATSAPP_BUSINESS_ID`, dice «No disponible».
+- Bioimpedancia, en las evaluaciones de la ficha: se pega el texto, se corrigen las cinco medidas y «Guardar revisado» manda `reviewed: true`. Abajo está la curva.
+- Laboratorio: el borrador sale del texto pegado, sin IA externa. Cada valor se puede corregir. No se guarda si falta la revisión. El ejemplo sin nombres está en `server/lab-reading/fixtures/informe-anonimo.txt`.
+
+No hay migración nueva. Las lecturas usan las tablas que ya tienen permiso por consultorio.
+
+## Cómo dejar lista la cuenta de WhatsApp Business
+
+Esto no se hizo en esta tarea. No hay token ni número real en el repositorio. Cuando Facundo lo autorice por escrito, los pasos son:
+
+1. Crear la cuenta de Meta Business y sumar WhatsApp en el administrador de la app. El número tiene que ser de la API de WhatsApp Business, no la app común del teléfono.
+2. Anotar tres datos y cargarlos en el servidor, sin commitearlos: `WHATSAPP_ACCESS_TOKEN`, `WHATSAPP_PHONE_ID` y `WHATSAPP_BUSINESS_ID`. Sin esos tres, el consultorio ve «No disponible».
+3. Cargar también `WHATSAPP_APP_SECRET` y `WHATSAPP_VERIFY_TOKEN`. Hacen falta para saber que el aviso de baja viene de Meta. El webhook público es `GET` y `POST` de `/webhooks/whatsapp`.
+4. Crear plantillas en idioma `es_AR`, de un solo cuerpo de texto, sin botones, sin imágenes y sin variables `{{ }}`. El texto tiene que incluir la palabra BAJA, para que la persona pueda dejar de recibir avisos.
+5. El recordatorio de turno tiene que coincidir, palabra por palabra, con el texto operativo ya revisado. Recién ahí se guarda la revisión de la plantilla. Las campañas de correo y de aviso en la app usan las dos plantillas fijas, sin datos de salud.
+6. Dejar `WHATSAPP_ENABLED` en falso hasta probar en un entorno que no sea producción. Apagar esa variable corta los envíos y conserva la cola y las bajas.
+
+Mientras las banderas sigan apagadas, nada de esto manda un mensaje ni llama a Meta.
+
+## Pantallas · Regression guard · paso 10
+
+- Flujos críticos verificados: ✅ campañas apagadas muestran «Próximamente» y no llaman a la API (e2e); ✅ vista previa, canal, confirmación, cupo, historial y bajas (vitest y e2e con API simulada); ✅ baja de WhatsApp en la ficha y «No disponible» en ajustes; ✅ bioimpedancia con cinco medidas, guardado sólo revisado y curva; ✅ borrador de laboratorio con revisión obligatoria y fixture anonimizado. Login, cobros y MFA no se tocaron.
+- Regresiones cubiertas: el menú no suma Campañas con la bandera apagada; otro consultorio no ve las bajas ni el borrador (403); sin revisión no hay pedido de guardado.
+- Contratos revisados: `GET /api/features` repite las tres banderas; el tablero de campañas suma cupo, canales y bajas del propio consultorio; la ficha lee la baja; el borrador responde `reviewed: false` y no guarda.
+- Áreas frágiles: un confirmado podría encolar envíos si alguien prende las banderas y el consultorio. La pantalla no llama al despacho. Con las banderas apagadas el worker tampoco manda campañas.
+- Migraciones: no hay SQL nuevo. Las tablas existentes siguen con permiso por consultorio. `npm run check:migrations` aprobado.
+- Fire test: ✅ se anuló el freno de revisión de la bioimpedancia; fallaron dos pruebas. Se restauró y volvieron a verde.
+- Automatizaciones nuevas: la web lee las banderas del servidor en vez de una variable aparte. Si la consulta falla, todo sigue apagado.
+- Veredicto: SHIP para revisión en borrador. HOLD para merge, producción, prender banderas o cargar la cuenta de WhatsApp.
+
 Rama `work/campanias-whatsapp`. Backend para revisión; sin merge, despliegue, cambios remotos ni envíos reales. No modifica landing, login ni alta profesional.
 
 ## Alcance y contratos
