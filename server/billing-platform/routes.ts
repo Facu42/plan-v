@@ -4,6 +4,7 @@ import { CareError } from '../care/errors.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { sbGetActor } from '../db/supabase-repo.js';
 import { billingEnabled } from './flag.js';
+import { parseBillingNotice } from './sandbox.js';
 import { cancelPlan, checkout, changePlan, disabledPlan, planForNutritionist, receiveWebhook } from './service.js';
 
 const checkoutSchema = z.object({
@@ -32,12 +33,11 @@ async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
 }
 
 function notice(c: Context) {
-  const queryId = c.req.query('data.id') ?? c.req.query('id') ?? '';
-  return c.req.json().catch(() => ({})).then((payload: { type?: string; action?: string; data?: { id?: string } }) => ({
-    dataId: String(payload.data?.id ?? queryId),
+  return c.req.json().catch(() => ({})).then((payload: { type?: string; action?: string; data?: { id?: string } }) => parseBillingNotice({
+    query: { 'data.id': c.req.query('data.id'), id: c.req.query('id'), topic: c.req.query('topic'), type: c.req.query('type') },
+    payload,
     requestId: c.req.header('x-request-id') ?? '',
     signature: c.req.header('x-signature') ?? '',
-    topic: String(payload.type ?? payload.action ?? 'payment'),
     now: Date.now(),
   }));
 }

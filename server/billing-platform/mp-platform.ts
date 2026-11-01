@@ -1,22 +1,24 @@
 import { MpCallError, parseMpErrorBody } from '../subscriptions/mp.js';
 import { safePath } from '../ops/log.js';
 import { pesosFromCents } from './pricing.js';
+import { platformMpTokenAllowed } from './sandbox.js';
 import type { RemoteFact } from './state.js';
 
 type MpResult = Record<string, unknown>;
 
 function token(): string {
   const value = process.env.MP_PLATFORM_ACCESS_TOKEN?.trim();
-  if (!value) throw new MpCallError(501);
+  if (!value || !platformMpTokenAllowed(value)) throw new MpCallError(501);
   return value;
 }
 
 async function mpFetch(url: string, init: RequestInit = {}): Promise<MpResult> {
+  const accessToken = token();
   let response: Response;
   try {
     response = await fetch(url, {
       ...init,
-      headers: { Authorization: `Bearer ${token()}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
+      headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(init.headers ?? {}) },
       signal: AbortSignal.timeout(20_000),
     });
   } catch {

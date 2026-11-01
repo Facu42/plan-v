@@ -64,7 +64,7 @@ export async function planForNutritionist(nutritionistId: string) {
       past_due_since: open.past_due_since,
       read_only: mode === 'read_only',
       grace_until: graceUntil(open),
-      init_point: open.status === 'pending' ? open.init_point : null,
+      init_point: open.status === 'pending' || open.status === 'past_due' ? open.init_point : null,
       attention: open.status === 'past_due' ? 'El último cobro fue rechazado. Actualizá el medio de pago para que Mercado Pago pueda reintentar.' : null,
     } : null,
     signup_grace: paidMode === 'full' || (open && open.status !== 'pending') || createdAt == null ? null : {

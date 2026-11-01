@@ -93,6 +93,19 @@ describe('aviso de Mercado Pago de la plataforma', () => {
     expect(calls.loadRemote).toBe(1);
   });
 
+  it('acepta el aviso viejo por query y el tema en action.updated', async () => {
+    vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
+    vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');
+    const ts = String(Math.floor(Date.now() / 1000));
+    const response = await app().request('/api/public/billing/mp/webhook/?topic=payment&id=88', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-request-id': 'req-3', 'x-signature': signature('88', 'req-3', ts) },
+      body: JSON.stringify({ action: 'payment.updated' }),
+    });
+    expect(response.status).toBe(200);
+    expect(calls.loadRemote).toBe(1);
+  });
+
   it('si Mercado Pago no responde, contesta 503 y no marca el aviso', async () => {
     vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
     vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');

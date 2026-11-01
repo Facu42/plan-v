@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
+import { GRACE_MS } from './pricing.js';
 import { accessMode, admission, photoAllowed, platformWriteAccess, reduceBilling, signupGraceDaysLeft, type SubscriptionSnap } from './state.js';
-
-const SIETE_DIAS = 7 * 24 * 60 * 60 * 1000;
 
 const base = (): SubscriptionSnap => ({
   status: 'pending', billing_cycle: 'monthly', founder: true, founder_until: null,
@@ -20,7 +19,7 @@ describe('estado del cobro', () => {
     expect(back.sub.past_due_since).toBeNull();
   });
 
-  it('un aviso viejo no pisa un cobro más nuevo y la gracia dura 7 días', () => {
+  it('un aviso viejo no pisa un cobro más nuevo y la gracia dura 30 días', () => {
     const approved = reduceBilling(base(), { kind: 'payment', id: 'p1', status: 'approved', amountCents: 100, paidAt: '2026-11-02T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-02T12:00:00.000Z');
     const stale = reduceBilling(approved.sub, { kind: 'payment', id: 'old', status: 'rejected', amountCents: 100, paidAt: '2026-10-01T12:00:00.000Z', statusDetail: null, externalReference: 'sub' }, '2026-11-03T12:00:00.000Z');
     expect(stale.sub.status).toBe('authorized');
@@ -28,8 +27,8 @@ describe('estado del cobro', () => {
     expect(pending.sub.status).toBe('authorized');
     const since = '2026-11-01T00:00:00.000Z';
     const due = { status: 'past_due' as const, past_due_since: since, current_period_end: null };
-    expect(accessMode(due, Date.parse(since) + SIETE_DIAS - 1)).toBe('full');
-    expect(accessMode(due, Date.parse(since) + SIETE_DIAS)).toBe('read_only');
+    expect(accessMode(due, Date.parse(since) + GRACE_MS - 1)).toBe('full');
+    expect(accessMode(due, Date.parse(since) + GRACE_MS)).toBe('read_only');
     expect(accessMode({ status: 'canceled', past_due_since: null, current_period_end: '2026-12-01T00:00:00.000Z' }, Date.parse('2026-11-15T00:00:00.000Z'))).toBe('full');
     expect(accessMode({ status: 'canceled', past_due_since: null, current_period_end: '2026-11-01T00:00:00.000Z' }, Date.parse('2026-11-15T00:00:00.000Z'))).toBe('read_only');
     expect(accessMode(null, Date.now())).toBe('read_only');
@@ -62,10 +61,12 @@ describe('estado del cobro', () => {
 });
 
 it('el alta no extiende la gracia de deuda ni reactiva un plan pausado', () => {
-  const now = Date.parse('2026-10-20T12:00:00Z');
+  const now = Date.parse('2026-11-05T12:00:00Z');
   const created = now - 20 * 86_400_000;
-  for (const status of ['past_due', 'paused', 'canceled'] as const) {
-    expect(platformWriteAccess({ status, past_due_since: '2026-10-01T12:00:00Z', current_period_end: null }, created, now)).toBe('read_only');
+  expect(platformWriteAccess({ status: 'past_due', past_due_since: '2026-10-01T12:00:00Z', current_period_end: null }, created, now)).toBe('read_only');
+  expect(platformWriteAccess({ status: 'past_due', past_due_since: '2026-10-20T12:00:00Z', current_period_end: null }, created, now)).toBe('full');
+  for (const status of ['paused', 'canceled'] as const) {
+    expect(platformWriteAccess({ status, past_due_since: '2026-10-20T12:00:00Z', current_period_end: null }, created, now)).toBe('read_only');
   }
   expect(platformWriteAccess({ status: 'pending', past_due_since: null, current_period_end: null }, created, now)).toBe('full');
   expect(platformWriteAccess(null, null, now)).toBe('read_only');
