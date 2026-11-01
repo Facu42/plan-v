@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { appointmentReminderEmail, inviteEmail } from './templates.js';
+import { appointmentReminderEmail, inviteEmail, nutritionistInviteEmail } from './templates.js';
 
 describe('textos de los mails', () => {
   it('la invitación nombra a la nutricionista, lleva el enlace y escapa los nombres', () => {
@@ -10,6 +10,15 @@ describe('textos de los mails', () => {
     expect(mail.html).toContain('href="https://plan-v.test/app/inicio?invite=1&amp;x=2"');
     expect(mail.text).toContain('https://plan-v.test/app/inicio?invite=1&x=2');
     expect(inviteEmail({ patientName: 'Ana', nutritionistName: 'Verónica', link: 'https://x.test', existing: true }).html).toContain('Entrar a Nutridash');
+  });
+
+  it('la invitación de nutricionista lleva marca Nutridash y escapa el nombre', () => {
+    const mail = nutritionistInviteEmail({ name: 'Ana <b>Gómez</b>', link: 'https://plan-v.test/app?x=1' });
+    expect(mail.subject).toBe('Tu acceso a Nutridash');
+    expect(mail.html).toContain('Hola Ana');
+    expect(mail.html).not.toContain('<b>Gómez</b>');
+    expect(mail.html).toContain('href="https://plan-v.test/app?x=1"');
+    expect(mail.text).toContain('https://plan-v.test/app?x=1');
   });
 
   it('el recordatorio dice día y hora de Argentina, la modalidad y el enlace de la videollamada', () => {

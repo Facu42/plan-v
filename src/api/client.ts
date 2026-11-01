@@ -27,24 +27,27 @@ export type PatientInvite = {
   updated_at: string;
 };
 
-async function authHeaders(): Promise<HeadersInit> {
-  const token = await getSessionToken();
+export type ApiRequestInit = RequestInit & { accessToken?: string };
+
+async function authHeaders(accessToken?: string): Promise<HeadersInit> {
+  const token = accessToken || await getSessionToken();
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
   if (token) headers.Authorization = `Bearer ${token}`;
   return headers;
 }
 
-export async function request<T>(path: string, init?: RequestInit, originOverride?: string): Promise<T> {
+export async function request<T>(path: string, init?: ApiRequestInit, originOverride?: string): Promise<T> {
   if (init?.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
-  const headers = await authHeaders();
-  if (init?.signal?.aborted) {
+  const { accessToken, ...fetchInit } = init ?? {};
+  const headers = await authHeaders(accessToken);
+  if (fetchInit.signal?.aborted) {
     throw new DOMException('Aborted', 'AbortError');
   }
   const res = await fetch(resolveApiUrl(path, originOverride), {
-    ...init,
-    headers: { ...headers, ...init?.headers },
+    ...fetchInit,
+    headers: { ...headers, ...fetchInit.headers },
   });
   if (!res.ok) {
     const err = await res.text();
@@ -139,10 +142,11 @@ export const api = {
   getPatient: (id: string, init?: RequestInit) =>
     request<{ patient: Patient; shoppingList: string[] }>(`/api/patients/${id}`, init),
 
-  claimProfessional: (displayName: string) =>
+  claimProfessional: (displayName: string, init?: Pick<ApiRequestInit, 'accessToken' | 'signal'>) =>
     request<{ nutritionist_id: string }>('/api/me/professional', {
       method: 'POST',
       body: JSON.stringify({ display_name: displayName }),
+      ...init,
     }),
 
   setupNutritionist: (displayName: string) =>

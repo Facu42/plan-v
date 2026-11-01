@@ -12,6 +12,10 @@ describe('estado del servicio de una nutricionista', () => {
     expect(summarizeService(sub(), '2026-11-10').state).toBe('cortada');
   });
 
+  it('los primeros 30 días del alta son prueba, no cortada', () => {
+    expect(summarizeService(sub({ trial_ends_on: '2026-11-30' }), '2026-10-31')).toMatchObject({ state: 'prueba', days_left: 30 });
+  });
+
   it('activa, por vencer, sin cargo y suspendida', () => {
     expect(summarizeService(sub({ paid_until: '2026-12-30' }), '2026-11-01').state).toBe('activa');
     expect(summarizeService(sub({ paid_until: '2026-12-30' }), '2026-12-25').state).toBe('por_vencer');
