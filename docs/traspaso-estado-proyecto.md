@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · Respaldo diario de la base: volcado cifrado en GitHub y prueba de restauración. Los secretos los carga Facundo. El PITR de Supabase está explicado en [respaldos-supabase.md](respaldos-supabase.md). Rama `cursor/respaldos-pgdump-6902`. Sin producción.
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 

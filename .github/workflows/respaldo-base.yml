@@ -1,0 +1,79 @@
+name: Respaldo de la base
+
+# Todos los días vuelca la base de Supabase, la cifra y comprueba que se puede
+# restaurar en un Postgres vacío. En cada PR solo corre la prueba, sin secretos
+# y sin tocar la base real.
+on:
+  schedule:
+    - cron: '30 6 * * *'
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  probar:
+    if: github.event_name == 'pull_request' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: respaldo
+          POSTGRES_PASSWORD: respaldo
+          POSTGRES_DB: origen
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U respaldo -d origen"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cliente de Postgres
+        run: sudo apt-get update && (sudo apt-get install -y postgresql-client-16 || sudo apt-get install -y postgresql-client) && pg_dump --version
+      - name: Probar volcado, cifrado y restauración
+        env:
+          ORIGEN_DATABASE_URL: postgres://respaldo:respaldo@localhost:5432/origen
+          RESTORE_DATABASE_URL: postgres://respaldo:respaldo@localhost:5432/restauracion
+        run: bash scripts/respaldo-base.sh probar
+
+  produccion:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: respaldo
+          POSTGRES_PASSWORD: respaldo
+          POSTGRES_DB: restauracion
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U respaldo -d restauracion"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cliente de Postgres
+        run: sudo apt-get update && (sudo apt-get install -y postgresql-client-16 || sudo apt-get install -y postgresql-client) && pg_dump --version
+      - name: Volcar, cifrar y restaurar
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_ENCRYPTION_KEY: ${{ secrets.BACKUP_ENCRYPTION_KEY }}
+          RESTORE_DATABASE_URL: postgres://respaldo:respaldo@localhost:5432/restauracion
+        run: bash scripts/respaldo-base.sh produccion
+      - name: Guardar el archivo cifrado
+        if: always() && hashFiles('respaldo.dump.enc') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: respaldo-supabase-${{ github.run_id }}
+          path: respaldo.dump.enc
+          if-no-files-found: error
+          retention-days: 14
