@@ -126,6 +126,18 @@ export const HELP_GUIDES: HelpGuide[] = [
     error: 'Un archivo dañado puede fallar sin impedir el resto del lote. Conservá el original y revisá el resultado individual.',
   },
   {
+    topic: 'agenda', slug: 'resenas-google', title: 'Pedir una reseña en Google',
+    summary: 'Cargá el link de tu ficha de Google y pedí la reseña por el chat.',
+    body: [
+      'En Página pública → Editar perfil pegá el link de tu ficha de Google. Sirve el de g.page o el de reseña que trae placeid.',
+      '«Pedir reseña» arma el link y un texto corto, sin datos de la consulta. Si no elegís a nadie, copia el texto.',
+      'Si elegís una paciente, se manda por el chat de la app. Si se dio de baja de avisos o apagó los mensajes de la app, no se manda. El mail y WhatsApp no salen por este botón.',
+    ],
+    steps: ['Pegá el link de Google en Editar perfil.', 'Elegí a la paciente o copiá el texto con Pedir reseña.', 'Si hay baja, el chat no lo envía.'],
+    href: '/crm/agenda?agenda=publica',
+    error: 'Si la paciente se dio de baja de avisos, el pedido no se manda. Podés copiar el link y no enviarlo.',
+  },
+  {
     topic: 'agenda', slug: 'agenda', title: 'Agenda y cobranzas',
     summary: 'Confirmar asistencia no es lo mismo que terminar la consulta.',
     body: [
@@ -171,6 +183,7 @@ export const HELP_FAQ = [
   { q: '¿Sin registros es una falta?', a: 'No. Si no cargó, falta el dato. No queda marcada en incumplimiento.', href: '/crm/progreso-global' },
   { q: '¿Puedo corregir SARA 2?', a: 'No. SARA 2 se consulta. Para usar otro valor, creá un alimento propio.', href: '/crm/alimentos' },
   { q: '¿Dónde edito mi página /slug?', a: 'En Página pública → Editar perfil. Ahí están foto, bio, especialidades, modalidad, zona, precio y el link de reserva.', href: '/crm/agenda?agenda=publica' },
+  { q: '¿Cómo pido una reseña de Google?', a: 'En Página pública cargá el link de tu ficha y tocá Pedir reseña. El texto va por el chat y no sale si la paciente se dio de baja.', href: '/crm/agenda?agenda=publica' },
 ];
 
 export const HELP_START = ['alta', 'primer-paciente', 'plan', 'app-paciente', 'cobros', 'privacidad'] as const;

@@ -18,6 +18,7 @@ describe('perfil público de la nutri', () => {
     const extras = pageExtrasSchema.parse({
       license: 'MN 1', area: 'Palermo', specialties: ['Embarazo'], modality: 'presencial',
       consult_price_minor: 4000000, booking_url: 'https://turno.example', color: '#010203',
+      google_business_url: 'https://g.page/ana-nutri',
       insurers: [{ name: 'OSDE', mode: 'copago', note: '$8.000' }], notices: { review: true },
       photo_sha256: 'ab'.repeat(32),
     });
@@ -29,6 +30,7 @@ describe('perfil público de la nutri', () => {
     });
     expect(perfil).not.toHaveProperty('insurers');
     expect(perfil).not.toHaveProperty('photo_sha256');
+    expect(perfil).not.toHaveProperty('google_business_url');
     expect(etiquetaModalidad('ambas')).toBe('Presencial y online');
     expect(precioConsulta(4000000)).toBe('$40.000');
     expect(precioConsulta(0)).toBe('');

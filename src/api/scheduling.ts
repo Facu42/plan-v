@@ -13,6 +13,7 @@ export const schedulingApi={
  sync:(id:string)=>request(`/api/scheduling/bookings/${encodeURIComponent(id)}/sync`,{method:'POST'}),
  reconcile:(id:string)=>request<{checked:number}>(`/api/scheduling/bookings/${encodeURIComponent(id)}/reconcile`,{method:'POST'}),
  reviewTransfer:(id:string,decision:'confirm'|'reject')=>request(`/api/scheduling/transfers/${encodeURIComponent(id)}/review`,json('POST',{decision})),
+ askReview:(patient_id:string)=>request<{delivered:'chat'|'none';text:string;link:string}>('/api/scheduling/review-requests',json('POST',{patient_id})),
  page:(slug:string,signal?:AbortSignal)=>request<PublicSchedulingPage>(base(slug),{signal}),
  slots:(slug:string,typeId:string,date:string,signal?:AbortSignal)=>request<{slots:SchedulingSlot[]}>(`${base(slug)}/slots?type_id=${encodeURIComponent(typeId)}&date=${encodeURIComponent(date)}`,{signal}),
  book:(slug:string,input:PublicBookingInput)=>request<{booking:PublicBookingReceipt;token:string}>(`${base(slug)}/bookings`,json('POST',input)),
