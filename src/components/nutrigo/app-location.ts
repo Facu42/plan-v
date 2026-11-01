@@ -71,8 +71,8 @@ function pageFor(role: AppRole, token: string, recurso: boolean): ShowroomPage {
 
 export function resolveAppLocation(input: LocationInput): ResolvedLocation {
   const locked = input.lockedRole ?? null;
-  // /admin abre el Panel del servicio (la pantalla misma verifica que sea administrador).
-  const parsed = isAdminPath(input.pathname) ? { surface: 'crm' as const, page: 'servicio' } : parseAppPath(input.pathname);
+  // La sesión administrativa se atiende en PlanVExperience, nunca en el CRM del consultorio.
+  const parsed = parseAppPath(input.pathname);
   const recurso = hasResourceHash(input.hash ?? '');
   const role = locked ?? (parsed ? roleFromSurface(parsed.surface) : 'patient');
   const surfaceOk = !locked || !parsed || parsed.surface === surfaceFor(role);

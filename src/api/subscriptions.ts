@@ -10,10 +10,10 @@ export type CreatedSubscription = { id: string; status: string; init_point: stri
 export type PublicSubscriptionStatus = { id: string; status: string; message: string };
 
 export const subscriptionsApi = {
-  plans: () => request<{ plans: SubscriptionPlan[] }>('/api/scheduling/subscription-plans'),
+  plans: () => request<{ enabled?: boolean; plans: SubscriptionPlan[] }>('/api/scheduling/subscription-plans'),
   createPlan: (input: PlanInput) => request<{ plan: SubscriptionPlan }>('/api/scheduling/subscription-plans', json('POST', input)),
   updatePlan: (id: string, input: PlanPatch) => request<{ plan: SubscriptionPlan }>(`/api/scheduling/subscription-plans/${encodeURIComponent(id)}`, json('PATCH', input)),
-  list: () => request<SubscriptionList>('/api/scheduling/subscriptions'),
+  list: () => request<SubscriptionList & { enabled?: boolean }>('/api/scheduling/subscriptions'),
   create: (input: { plan_id: string; patient_id: string; payer_email: string; source: 'panel'; client_request_id: string }) =>
     request<CreatedSubscription>('/api/scheduling/subscriptions', json('POST', input)),
   change: (id: string, action: 'pause' | 'resume' | 'cancel', expected: number) =>

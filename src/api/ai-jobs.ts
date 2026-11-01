@@ -10,7 +10,7 @@ export const aiJobsApi = {
   get: (id: string, signal?: AbortSignal) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}`, { signal }),
   apply: (id: string, signal?: AbortSignal) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}/apply`, { method: 'POST', signal }),
   reject: (id: string) => request<{ job: AiJobView; source: string }>(`/api/ai/jobs/${id}/reject`, { method: 'POST' }),
-  list: (patientId: string, signal?: AbortSignal) => request<{ jobs: AiJobView[]; usage?: AiMonthlyUsage | null; source: string }>(
+  list: (patientId: string, signal?: AbortSignal) => request<{ jobs: AiJobView[]; usage?: AiMonthlyUsage | null; consented?: string[] | null; ai_available?: boolean; source: string }>(
     `/api/patients/${encodeURIComponent(patientId)}/ai/jobs`,
     { signal },
   ),

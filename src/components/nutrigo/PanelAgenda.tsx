@@ -1,7 +1,10 @@
 import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent as TeclaEvento, type ReactNode } from 'react';
+import { api } from '../../api/client';
+import { useAppStore } from '../../store/useAppStore';
 import type { Patient } from '../../types';
 import type { SchedulingBooking, SchedulingSettings } from '../../types/scheduling';
 import { agendaDay, argentinaStamp, bookingHref, buildPanelAgendaEvents, dayHeading, depositMode, monthGrid, monthLabel, nowFraction, shiftDay, weekDays, withHalfDeposit, type AgendaView, type PanelAgendaEvent } from '../../lib/panel-agenda';
+import { secureMeetUrl } from './ShowroomConsultations';
 import { GoogleReviewControl } from './GoogleReviewControl';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
 import { PanelV29Icon } from './PanelV29Icon';
@@ -12,6 +15,14 @@ import { usePanelScheduling } from './use-panel-scheduling';
 import './panel-fase5.css';
 
 export type AgendaHeader = { sufijo: string; cuando: string; actions: ReactNode };
+
+const DIAS_SEMANA_TURNO = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
+const DURACIONES_TURNO = [15, 30, 45, 60, 90] as const;
+
+function nombreDiaSemana(day: string): string {
+  const fecha = new Date(`${day}T15:00:00Z`);
+  return DIAS_SEMANA_TURNO[(fecha.getUTCDay() + 6) % 7] ?? 'Lunes';
+}
 
 type Seccion = 'horarios' | 'pagos' | 'conexiones';
 const VISTAS: Array<[AgendaView, string]> = [['dia', 'Día'], ['semana', 'Semana'], ['mes', 'Mes']];
@@ -33,11 +44,11 @@ function Acciones({ view, busy, loading, onView, onShift, onBlock, onManage }: {
 
 const iniciar = (nombre: string) => inicialesDe(nombre);
 
-export function PanelAgendaView({ view, anchor = '', days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor, transfers = [], bookings = [], moreBookings = false, morePatients = false, onReviewTransfer, onSync, onReconcile, onMoreBookings, onMorePatients, onDisconnect, libres = [], recordatorio, onPickDay, onMonth, onHeader }: {
+export function PanelAgendaView({ view, anchor = '', days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onPickSlot, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor, transfers = [], bookings = [], moreBookings = false, morePatients = false, onReviewTransfer, onSync, onReconcile, onMoreBookings, onMorePatients, onDisconnect, libres = [], recordatorio, onPickDay, onMonth, onHeader }: {
   title?: string; subtitle?: string; view: AgendaView; anchor?: string; days: string[]; today: string; now: Date; events: PanelAgendaEvent[];
   pending: SchedulingBooking[]; types: SchedulingSettings['types']; page?: SchedulingSettings['page'];
   connections: Record<ConnectionKey, boolean>; status: string; busy: boolean; loading: boolean; error: string; focus: string | null;
-  onView: (view: AgendaView) => void; onShift: (delta: number) => void; onToday: () => void; onManage: () => void; onCopy: () => void;
+  onView: (view: AgendaView) => void; onShift: (delta: number) => void; onToday: () => void; onManage: () => void; onPickSlot?: (slot: LugarLibre) => void; onCopy: () => void;
   onConnect: (key: ConnectionKey) => void; onConfirm: (booking: SchedulingBooking, patientId: string) => void; onCancel: (booking: SchedulingBooking) => void;
   onReschedule: (booking: SchedulingBooking, startsAt: string) => void; onBlock: () => void; onRetry: () => void; patients: Array<{ id: string; name: string }>; editor?: ReactNode;
   transfers?: Array<{ id: string; amount_minor: number; reference: string }>; bookings?: SchedulingBooking[]; moreBookings?: boolean; morePatients?: boolean;
@@ -107,7 +118,7 @@ export function PanelAgendaView({ view, anchor = '', days, today, now, events, p
           </div></div>
         <div className="card" style={{ flex: 1, minHeight: 0 }}>
           <div className="ch"><h2>Lugares libres</h2><span className="meta">{ESTE_PERIODO[view]}</span></div>
-          {visibles.length > 0 ? <div className="slot">{visibles.map(lugar => <button type="button" key={`${lugar.day}:${lugar.startMin}`} title="Agendar un turno" onClick={onManage}><small>{lugar.dia}</small>{lugar.hora}</button>)}{ocultos > 0 && <span className="meta ag-mas-lugares">+{ocultos} más</span>}</div>
+          {visibles.length > 0 ? <div className="slot">{visibles.map(lugar => <button type="button" key={`${lugar.day}:${lugar.startMin}`} title="Agendar un turno" onClick={() => onPickSlot ? onPickSlot(lugar) : onManage()}><small>{lugar.dia}</small>{lugar.hora}</button>)}{ocultos > 0 && <span className="meta ag-mas-lugares">+{ocultos} más</span>}</div>
             : <p className="ag-vacio">{types.length ? 'No quedan lugares libres.' : 'Cargá tus horarios y tipos de consulta para ver los lugares libres.'}</p>}
           <div className="foot ag-foot">
             <button type="button" className="lnk" onClick={onCopy} disabled={!page?.enabled}>{page?.enabled ? 'Copiar link de reservas' : 'Reservas online sin publicar'}</button>
@@ -195,13 +206,17 @@ function HoursEditor({ config, busy, googleConnected, onChange, onSave }: { conf
   </section>;
 }
 
-export function PanelAgenda({ patients, now, section, onManage, onHeader }: { patients: Patient[]; now: Date; section: string | null; onManage: (patientId: string) => void; onHeader?: (header: AgendaHeader | null) => void }) {
+export function PanelAgenda({ patients, now, section, onManage: _onManage, onHeader }: { patients: Patient[]; now: Date; section: string | null; onManage: (patientId: string) => void; onHeader?: (header: AgendaHeader | null) => void }) {
   const scheduling = usePanelScheduling();
   const [view, setView] = useState<AgendaView>('semana');
   const [anchor, setAnchor] = useState(() => agendaDay(now));
   const [draft, setDraft] = useState<SchedulingSettings | null>(null);
   const [blocking, setBlocking] = useState(false);
   const [block, setBlock] = useState({ day: agendaDay(now), start: '13:00', end: '14:00', label: '' });
+  const [creatingAppt, setCreatingAppt] = useState(false);
+  const [savingAppt, setSavingAppt] = useState(false);
+  const [apptError, setApptError] = useState('');
+  const [newAppt, setNewAppt] = useState({ patientId: '', day: agendaDay(now), time: '10:00', duration: 45, channel: 'video' as 'video' | 'presencial', meetUrl: '' });
   const config = draft ?? scheduling.config;
   const loaded = Boolean(scheduling.snapshot);
   const days = useMemo(() => view === 'dia' ? [anchor] : weekDays(anchor), [view, anchor]);
@@ -210,16 +225,73 @@ export function PanelAgenda({ patients, now, section, onManage, onHeader }: { pa
   // Se arman una sola vez para todo el mes: la grilla, el mes chico y los lugares libres salen de los mismos turnos.
   const events = useMemo(() => loaded ? buildPanelAgendaEvents(patients, config, scheduling.snapshot?.bookings ?? [], now, month) : [], [loaded, patients, config, scheduling.snapshot, now, month]);
   const libres = useMemo(() => loaded ? lugaresLibres(config, events, now, verDias) : [], [loaded, config, events, now, verDias]);
+  const patientOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const p of patients) if (p.id && p.name) seen.set(p.id, p.name);
+    for (const p of scheduling.patients) if (p.id && p.name && !seen.has(p.id)) seen.set(p.id, p.name);
+    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+  }, [patients, scheduling.patients]);
   const moverMes = (delta: number) => setAnchor(current => { const [year, mes] = current.split('-').map(Number); return new Date(Date.UTC(year, mes - 1 + delta, 1)).toISOString().slice(0, 10); });
   const pending = (scheduling.snapshot?.bookings ?? []).filter(booking => booking.status === 'requested');
   useUnsavedChanges(Boolean(draft), scheduling.busy);
   useEffect(() => {
-    if (!blocking) return;
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') setBlocking(false); };
+    if (!blocking && !creatingAppt) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setBlocking(false);
+        setCreatingAppt(false);
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [blocking]);
+  }, [blocking, creatingAppt]);
   useEffect(() => { if (section === 'reservas') document.getElementById('pn-reservas')?.focus(); }, [section, pending.length]);
+
+  const abrirNuevoTurno = (slot?: LugarLibre) => {
+    setApptError('');
+    setNewAppt({
+      patientId: '',
+      day: slot?.day ?? anchor,
+      time: slot?.hora ?? '10:00',
+      duration: config.types[0]?.duration_min ?? 45,
+      channel: config.types[0]?.channel === 'presencial' ? 'presencial' : 'video',
+      meetUrl: '',
+    });
+    setCreatingAppt(true);
+  };
+
+  const saveNewAppt = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!newAppt.patientId) {
+      setApptError('Elegí una paciente antes de guardar el turno.');
+      return;
+    }
+    const meetUrlTrimmed = newAppt.meetUrl.trim();
+    if (newAppt.channel === 'video' && meetUrlTrimmed && !secureMeetUrl(meetUrlTrimmed)) {
+      setApptError('El enlace de videollamada debe empezar con https://.');
+      return;
+    }
+    setSavingAppt(true);
+    setApptError('');
+    try {
+      const weekday = nombreDiaSemana(newAppt.day);
+      const result = await api.updateAppointment(newAppt.patientId, {
+        day: weekday,
+        time: newAppt.time,
+        duration: newAppt.duration,
+        channel: newAppt.channel,
+        ...(newAppt.channel === 'video' && meetUrlTrimmed ? { meet_url: meetUrlTrimmed } : {}),
+      });
+      useAppStore.getState().addPatient(result.patient);
+      setAnchor(newAppt.day);
+      setCreatingAppt(false);
+      scheduling.setStatus('Turno agendado.');
+    } catch (error) {
+      setApptError(error instanceof Error ? error.message : 'No pudimos agendar el turno. Intentá de nuevo.');
+    } finally {
+      setSavingAppt(false);
+    }
+  };
 
   const saveBlock = (event: FormEvent) => {
     event.preventDefault();
@@ -229,8 +301,18 @@ export function PanelAgenda({ patients, now, section, onManage, onHeader }: { pa
   };
 
   return <>
-    <PanelAgendaView view={view} anchor={anchor} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago) }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} libres={libres} recordatorio={loaded ? config.reminders_enabled !== false : undefined} onHeader={onHeader} onView={setView} onShift={delta => view === 'mes' ? moverMes(delta) : setAnchor(current => shiftDay(current, view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onPickDay={day => { setAnchor(day); if (view === 'mes') setView('dia'); }} onMonth={moverMes} onManage={() => { const id = patients.find(patient => !patient.appointment)?.id ?? patients[0]?.id; if (id) onManage(id); }} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={loaded ? <HoursEditor config={config} busy={scheduling.busy} googleConnected={Boolean(scheduling.snapshot?.connections.google)} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} transfers={scheduling.snapshot?.transfers ?? []} bookings={scheduling.snapshot?.bookings ?? []} moreBookings={scheduling.bookingMore} morePatients={scheduling.patientMore} onReviewTransfer={(id, decision) => void scheduling.reviewTransfer(id, decision)} onSync={id => void scheduling.syncBooking(id)} onReconcile={id => void scheduling.reconcileBooking(id)} onMoreBookings={() => void scheduling.loadMoreBookings()} onMorePatients={() => void scheduling.loadMorePatients()} onDisconnect={key => void scheduling.disconnect(key)} />
+    <PanelAgendaView view={view} anchor={anchor} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago) }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} libres={libres} recordatorio={loaded ? config.reminders_enabled !== false : undefined} onHeader={onHeader} onView={setView} onShift={delta => view === 'mes' ? moverMes(delta) : setAnchor(current => shiftDay(current, view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onPickDay={day => { setAnchor(day); if (view === 'mes') setView('dia'); }} onMonth={moverMes} onManage={() => abrirNuevoTurno()} onPickSlot={slot => abrirNuevoTurno(slot)} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={loaded ? <HoursEditor config={config} busy={scheduling.busy} googleConnected={Boolean(scheduling.snapshot?.connections.google)} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} transfers={scheduling.snapshot?.transfers ?? []} bookings={scheduling.snapshot?.bookings ?? []} moreBookings={scheduling.bookingMore} morePatients={scheduling.patientMore} onReviewTransfer={(id, decision) => void scheduling.reviewTransfer(id, decision)} onSync={id => void scheduling.syncBooking(id)} onReconcile={id => void scheduling.reconcileBooking(id)} onMoreBookings={() => void scheduling.loadMoreBookings()} onMorePatients={() => void scheduling.loadMorePatients()} onDisconnect={key => void scheduling.disconnect(key)} />
     {scheduling.snapshot?.bookings.some(booking => booking.google_sync_status === 'uncertain') && <div className="p5-card">{scheduling.snapshot.bookings.filter(booking => booking.google_sync_status === 'uncertain').map(booking => <GoogleReviewControl key={booking.id} kind="booking" targetId={booking.id} revision={booking.revision} disabled={scheduling.busy} onResolved={async () => { await scheduling.load(); }} />)}</div>}
+    {creatingAppt && <div className="p5-dialog" role="dialog" aria-modal="true" aria-labelledby="p5-new-appt-title"><form onSubmit={saveNewAppt}><h3 id="p5-new-appt-title">Nuevo turno</h3>
+      <label>Paciente<select aria-label="Paciente" required value={newAppt.patientId} onChange={event => setNewAppt(current => ({ ...current, patientId: event.target.value }))}><option value="">Elegí una paciente…</option>{patientOptions.map(patient => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</select></label>
+      <label>Día<input aria-label="Día" type="date" required value={newAppt.day} onChange={event => setNewAppt(current => ({ ...current, day: event.target.value }))} /></label>
+      <label>Hora<input aria-label="Hora" type="time" required value={newAppt.time} onChange={event => setNewAppt(current => ({ ...current, time: event.target.value }))} /></label>
+      <label>Duración<select aria-label="Duración" value={newAppt.duration} onChange={event => setNewAppt(current => ({ ...current, duration: Number(event.target.value) }))}>{DURACIONES_TURNO.map(duration => <option key={duration} value={duration}>{duration} min</option>)}</select></label>
+      <label>Modalidad<select aria-label="Modalidad" value={newAppt.channel} onChange={event => setNewAppt(current => ({ ...current, channel: event.target.value as 'video' | 'presencial' }))}><option value="presencial">Consultorio</option><option value="video">Videollamada</option></select></label>
+      {newAppt.channel === 'video' && <label>Enlace de videollamada (opcional)<input aria-label="Enlace de videollamada" type="url" maxLength={500} placeholder="https://…" value={newAppt.meetUrl} onChange={event => setNewAppt(current => ({ ...current, meetUrl: event.target.value }))} /></label>}
+      {apptError && <p className="ag-aviso" role="alert">{apptError}</p>}
+      <div className="p5-row"><button type="button" className="p5-btn" disabled={savingAppt} onClick={() => setCreatingAppt(false)}>Volver</button><button className="p5-btn p5-pri" disabled={savingAppt}>{savingAppt ? 'Guardando…' : 'Guardar turno'}</button></div>
+    </form></div>}
     {blocking && <div className="p5-dialog" role="dialog" aria-modal="true" aria-labelledby="p5-block-title"><form onSubmit={saveBlock}><h3 id="p5-block-title">Bloquear horario</h3>
       <label>Día<input type="date" required value={block.day} onChange={event => setBlock(current => ({ ...current, day: event.target.value }))} /></label>
       <label>Desde<input type="time" required value={block.start} onChange={event => setBlock(current => ({ ...current, start: event.target.value }))} /></label>

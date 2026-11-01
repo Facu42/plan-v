@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Nutridash">
+  <rect width="64" height="64" rx="18" fill="#eaf7ee"/>
+  <text x="9" y="43" font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif" font-size="30" font-weight="800" letter-spacing="-2" fill="#0b0f0c">nd</text>
+  <path d="M46 14c7 1 11 5 12 12-7 1-12-2-13-9 0-1 0-2 1-3Z" fill="#c7f24a"/>
+  <path d="M47 26c-1-5 0-8 4-11" fill="none" stroke="#0b0f0c" stroke-width="1.7" stroke-linecap="round" opacity=".55"/>
+</svg>

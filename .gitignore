@@ -30,3 +30,6 @@ design/auditoria/
 /playwright-report/
 /.npm-cache/
 
+# Copia local de referencia del Centro de mando. No versionar.
+.ref-centro-mando/
+
