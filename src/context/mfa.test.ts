@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { decideMfaStep, mfaEnforcedForPath, mfaEnforcedInApp } from './mfa';
+import { decideMfaStep, decideMfaStepOnLookupError, mfaEnforcedForPath, mfaEnforcedInApp } from './mfa';
 
 const base = { currentLevel: 'aal1', verifiedFactors: 0, requiredForAccount: true, enforced: true };
 
@@ -23,7 +23,12 @@ describe('decideMfaStep', () => {
   });
   it('/admin pide el segundo paso aunque el interruptor esté apagado', () => {
     expect(mfaEnforcedForPath('/admin', {})).toBe(true);
+    expect(mfaEnforcedForPath('/admin/', {})).toBe(true);
     expect(mfaEnforcedForPath('/crm/inicio', {})).toBe(false);
     expect(mfaEnforcedForPath('/crm/inicio', { VITE_MFA_ENFORCE: '1' })).toBe(true);
+  });
+  it('si Supabase no responde, /admin no deja pasar y una nutri opcional sí', () => {
+    expect(decideMfaStepOnLookupError({ requiredForAccount: true, enforced: true })).toBe('verify');
+    expect(decideMfaStepOnLookupError({ requiredForAccount: true, enforced: false })).toBeNull();
   });
 });

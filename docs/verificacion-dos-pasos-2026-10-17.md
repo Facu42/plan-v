@@ -1,7 +1,9 @@
 # Verificación en dos pasos (issue #132, tarea 1)
 
+Resumen actualizado: [mfa-totp.md](mfa-totp.md).
+
 Código de 6 cifras de una aplicación (Google Authenticator o parecida) para nutricionistas y administradoras.
-Todo viene **apagado de fábrica**: sin tocar nada, la app se comporta igual que hoy.
+Todo viene **apagado de fábrica** para nutricionistas: `/admin` sí pide el segundo paso.
 
 ## Qué hay
 - **Pantallas** (`src/components/auth/MfaScreen.tsx`): alta con QR y clave escrita, y pedido de código. Sirven también a quien entró con Google.

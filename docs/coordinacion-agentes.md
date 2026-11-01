@@ -1,3 +1,4 @@
+01/11 · Cursor · MFA TOTP en `feat/mfa`: enroll/challenge/verify, opcional para nutris, obligatorio en `/admin`. [Nota](mfa-totp.md). Sin merge, producción ni #244/#245.
 01/11 · Codex · PR #256 puesto al día con main `8826ac83` (#247/#248/#250/#251/#253/#254/#255), según autorización de Facundo. Documentación combinada, manifiesto 38+8=46, tests Centro y definer tomados de main y seis firmas nuevas agregadas a definer-allowlist. 100 pruebas puntuales verdes en 13 archivos; manifiesto y migraciones aprobados. Sin tocar #244/#245 ni producción. [Informe](campanias-whatsapp-backend.md).
 
 01/11 · Codex · PR #256: migración de bioimpedancia renombrada a `20261031220000_bioimpedance_reviews.sql` para evitar la colisión con #250; manifiesto y referencias actualizados, contenido SQL sin cambios. 17 pruebas puntuales verdes (bioimpedancia y manifiesto).
@@ -78,6 +79,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| MFA TOTP (aal2) | Cursor | `feat/mfa` | TOTP con enroll/challenge/verify. Opcional para nutris (Ajustes, QR y código). Obligatorio en `/admin` (frente y middleware). [Nota](mfa-totp.md). Sin migraciones aplicadas, sin merge ni producción |
 | Campañas de reactivación, WhatsApp, audio y bioimpedancia | Codex, autorizado por Facundo el 31/10 | `work/campanias-whatsapp` | Backend bajo banderas apagadas. RLS por consultorio y dos migraciones sin aplicar. [Informe y paso 10](campanias-whatsapp-backend.md). Sin merge ni producción |
 | Página pública /slug, PDF con marca y mail de soporte | Cursor | `work/landing-nutri-pdf` | Editor de perfil (foto, bio, especialidades, modalidad, zona, precio, reserva, colores). `/slug` muestra ese recorte. El PDF del plan usa logo y colores de la nutri. Centro de ayuda con guías de arranque; el mail de soporte sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`, nunca un Gmail fijo. Sin migraciones ni producción |
 | Recordatorios de comer, agua y dormir | Cursor | `work/recordatorios-push` | La paciente los prende y elige el horario en Avisos. Empiezan apagados. El aviso al teléfono no lleva datos de salud. Migración sin aplicar. Sin producción ni merge |
@@ -168,6 +170,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **1/11 · Cursor · MFA TOTP (HOLD)** · Verificación en dos pasos con enroll/challenge/verify de Supabase Auth. La nutri la prende o apaga en Ajustes; `/admin` exige aal2 siempre. [Nota y paso 10](mfa-totp.md). Sin migraciones aplicadas, sin merge ni producción. No toca #244 ni #245.
 - **1/11 · Cursor · Página pública /slug, PDF con marca y mail de soporte (HOLD)** · En Página pública → Editar perfil se cargan foto, bio, especialidades, modalidad, zona, precio, link de reserva y colores. Eso se ve en `nutridash.app/slug` (sin obras ni avisos internos). El PDF del plan toma logo de la marca y colores de esa página; si faltan, usa lima y tinta de Nutridash. El centro de ayuda suma alta, primera paciente, app y cobros; el mail de soporte sale de `SUPPORT_EMAIL` (Railway) o `VITE_SUPPORT_EMAIL` (Vercel), nunca un Gmail en el código. Sin migraciones. Tests de los archivos tocados y tipos en verde. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 - **01/11 · Codex · Destrabe autorizado de #250** · Merge de `origin/main` fb5cb9bb en `work/recordatorios-push`, conservando ambas partes del conflicto documental. Corregidas las causas de verify: manifiesto completo y hashes, conteo exacto 33 pendientes/41 total y política RLS con initplan mediante migración correctiva nueva; original intacta. 30 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
 

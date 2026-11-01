@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
-import { decideMfaStep, mfaEnforcedInApp, type MfaStep } from './mfa';
+import { listVerifiedTotp } from '../lib/mfa-totp';
+import { decideMfaStep, decideMfaStepOnLookupError, mfaEnforcedInApp, type MfaStep } from './mfa';
 
 /** Consulta a Supabase en qué nivel está la sesión y cuántos códigos tiene dados de alta. */
 export function useMfaGate(session: Session | null, requiredForAccount: boolean, ready: boolean, enforced = mfaEnforcedInApp()) {
@@ -13,17 +14,16 @@ export function useMfaGate(session: Session | null, requiredForAccount: boolean,
     try {
       const [level, factors] = await Promise.all([
         supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
-        supabase.auth.mfa.listFactors(),
+        listVerifiedTotp(supabase),
       ]);
       setStep(decideMfaStep({
         currentLevel: level.data?.currentLevel ?? null,
-        verifiedFactors: factors.data?.totp.length ?? 0,
+        verifiedFactors: factors.length,
         requiredForAccount,
         enforced,
       }));
     } catch {
-      // Si Supabase no responde, no dejamos pasar a quien tendría que verificar: el servidor igual lo frena.
-      setStep(null);
+      setStep(decideMfaStepOnLookupError({ requiredForAccount, enforced }));
     }
   }, [userId, requiredForAccount, enforced]);
 

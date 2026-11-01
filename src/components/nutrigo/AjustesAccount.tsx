@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '../../api/client';
 import { supabase } from '../../lib/supabase';
 import { friendlyError } from '../../lib/error-messages';
+import { listVerifiedTotp } from '../../lib/mfa-totp';
 import type { CanalAviso } from './ficha-ajustes';
 
 type PreferenciasAviso = Record<CanalAviso, boolean>;
@@ -22,6 +23,6 @@ export function useAvisosProfesional() {
 /** Estado de la verificación en dos pasos de la profesional; solo consulta. */
 export function useDosPasos() {
   const [mfa, setMfa] = useState('Consultando…'), [error, setError] = useState('');
-  useEffect(() => { let alive = true; if (!supabase) { setMfa('No disponible en modo demo'); return; } supabase.auth.mfa.listFactors().then(({ data, error }) => { if (!alive) return; if (error) { setMfa('Sin información'); setError(friendlyError(error)); } else setMfa(data.totp.some(f => f.status === 'verified') ? 'Activa' : 'Apagada'); }).catch(e => { if (alive) { setMfa('Sin información'); setError(friendlyError(e)); } }); return () => { alive = false; }; }, []);
+  useEffect(() => { let alive = true; if (!supabase) { setMfa('No disponible en modo demo'); return; } listVerifiedTotp(supabase).then((factors) => { if (alive) setMfa(factors.length ? 'Activa' : 'Apagada'); }).catch(e => { if (alive) { setMfa('Sin información'); setError(friendlyError(e)); } }); return () => { alive = false; }; }, []);
   return { mfa, error };
 }

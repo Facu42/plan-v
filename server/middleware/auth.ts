@@ -8,7 +8,7 @@ import {
 } from '../db/supabase-client.js';
 import { allowsSyntheticDemo } from '../config/runtime.js';
 import { resolveRequestAuth } from '../security/contracts.js';
-import { isMfaExemptPath, isPreMfaProfessionalPath, MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
+import { isAdminProtectedPath, isMfaExemptPath, isPreMfaProfessionalPath, MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
 import { sbGetActor, sbGetProfileRole } from '../db/supabase-repo.js';
 import { isAdmin } from '../admin/repository.js';
 
@@ -79,7 +79,11 @@ export function createAuthMiddleware(dependencies: AuthDependencies) {
       if (actorDb) {
         return bindActorClient(actorDb, async () => {
           const mfa = dependencies.mfa;
-          if (mfa?.enforced() && !isMfaExemptPath(c.req.path) && tokenAal(c.req.header('Authorization')) !== 'aal2'
+          const aal = tokenAal(c.req.header('Authorization'));
+          if (isAdminProtectedPath(c.req.path) && aal !== 'aal2') {
+            return c.json({ error: MFA_REQUIRED_MESSAGE, code: 'mfa_required' }, 403);
+          }
+          if (mfa?.enforced() && !isMfaExemptPath(c.req.path) && aal !== 'aal2'
             && await mfa.needsSecondStep(decision.userId)) {
             const bootstrap = isPreMfaProfessionalPath(c.req.path)
               && await mfa.allowProfessionalBootstrap?.(decision.userId, c.req.path);
