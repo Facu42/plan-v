@@ -50,7 +50,7 @@ export function PanelFichaCabecera({ patient, now, datos, etiquetasPropias = nul
         <button className="ibtn" type="button" onClick={onEdit} aria-label={`Editar datos de ${patient.name}`}><PanelV29Icon name="pen" /></button>
         {bell}
         {llamada ? <a className="cta" href={llamada} target="_blank" rel="noopener noreferrer"><PanelV29Icon name="play" />Iniciar consulta</a> : <button className="cta" type="button" onClick={onConsulta}><PanelV29Icon name="play" />Iniciar consulta</button>}
-        {patient.appointment?.channel === 'video' ? <EmbeddedVideoCall /> : null}
+        {patient.appointment?.channel === 'video' ? <EmbeddedVideoCall patientId={patient.id} label={patient.initials} /> : null}
       </div>
     </div>
     {editando && onGuardarEtiquetas ? <FichaEtiquetas nombre={patient.name.split(' ')[0] ?? patient.name} actuales={propias.map(t => t.label)} onGuardar={onGuardarEtiquetas} onClose={() => setEditando(false)} /> : null}
