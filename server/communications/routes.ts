@@ -1,9 +1,10 @@
+import {dispatchCommunicationDelivery} from './worker.js';
 import type { Hono } from 'hono';
 import { z } from 'zod';
 import { getRequestDb, isSupabaseEnabled, privilegedDb } from '../db/supabase-client.js';
 import { queueDbError, readAllRows, resolveWorkScope } from '../crm/repository.js';
 import { CareError } from '../care/errors.js';
-import { DeliveryError, isOptOut, normalPhone, readApprovedTemplate, sendApprovedTemplate, templateHash, verifyWhatsAppSignature, whatsappConfig } from './provider.js';
+import { isOptOut, normalPhone, readApprovedTemplate, templateHash, verifyWhatsAppSignature, whatsappConfig } from './provider.js';
 import { apiHeaders, createBodyGuard } from '../security/http.js';
 const createSchema=z.object({request_key:z.uuid(),template:z.string().regex(/^\w{1,100}$/),language:z.string().regex(/^\w{2,10}$/),template_hash:z.string().regex(/^[a-f0-9]{64}$/),patient_ids:z.array(z.uuid()).min(1).max(100)}).strict();
 const preferencesSchema=z.object({phone:z.string().refine(p=>Boolean(normalPhone(p))),reminders:z.boolean(),broadcasts:z.boolean(),consent_version:z.literal('whatsapp.v1')}).strict();
@@ -55,18 +56,7 @@ export function registerCommunicationRoutes(app:Hono) {
   // Actor/RLS before service credential: no claim can be made for another clinic.
   const owned=await getRequestDb().from('ops_deliveries').select('id').eq('id',id).eq('channel','whatsapp').maybeSingle();queueDbError(owned.error);
   if(!owned.data)throw new CareError(404,'No encontramos el envío.');
-  const claim=await privilegedDb().rpc('ops_claim_delivery',{p_nutritionist:scope.nutritionistId,p_item:id});rpcError(claim.error);
-  if(!claim.data)return c.json({claimed:false});
-  const data=claim.data as {token:string;phone:string;template:string;language:string;template_hash:string};
-  let state='accepted',provider:string|null=null,revoked=false;
-  try{provider=await sendApprovedTemplate(config,data.phone,data.template,data.language,fetch,async()=>{
-   const checked=await privilegedDb().rpc('ops_check_delivery',{p_nutritionist:scope.nutritionistId,p_item:id,p_token:data.token});rpcError(checked.error);
-   revoked=checked.data!==true;return !revoked;
-  },data.template_hash);}
-  catch(error){state=revoked?'cancelled':error instanceof DeliveryError&&error.uncertain?'uncertain':'failed';}
-  const finish=await privilegedDb().rpc('ops_finish_delivery',{p_item:id,p_token:data.token,p_state:state,p_provider:provider});rpcError(finish.error);
-  if(!finish.data)throw new CareError(409,'La reserva venció. El envío requiere revisión y no se repetirá automáticamente.');
-  return c.json({claimed:true,state});
+  return c.json(await dispatchCommunicationDelivery(scope.nutritionistId,id));
  });
  app.get('/api/portfolio/preferences/me',async c=>{
   const auth=c.get('auth');if(!('userId'in auth)||!isSupabaseEnabled())return c.json({mode:'demo',preferences:null});

@@ -104,7 +104,7 @@ const GONE = new Set([404, 410]);
 export function createPushNotifier(deps: { config: () => PushConfig | null; store: () => PushStore; send?: PushSender }) {
   const send = deps.send ?? webPushSender;
   /** Manda el aviso a todos los teléfonos de la paciente. Devuelve cuántos lo recibieron. Nunca lanza. */
-  async function notifyPatient(patientId: string, kind: PushKind): Promise<number> {
+  async function notifyPatient(patientId: string, kind: PushKind, authorize?:()=>Promise<boolean>, override?:PushPayload): Promise<number> {
     const config = deps.config();
     if (!config) return 0;
     try {
@@ -112,10 +112,11 @@ export function createPushNotifier(deps: { config: () => PushConfig | null; stor
       const userId = await store.patientUser(patientId);
       if (!userId) return 0;
       const subscriptions = await store.forUser(userId);
-      const payload = JSON.stringify(PUSH_TEXTS[kind]);
+      const payload = JSON.stringify(override??PUSH_TEXTS[kind]);
       let delivered = 0;
       for (const subscription of subscriptions) {
         try {
+          if(authorize&&(!allowedPushEndpoint(subscription.endpoint)||!await authorize()))continue;
           await send(subscription, payload, config);
           delivered += 1;
           await store.touch(subscription.endpoint).catch(() => undefined);

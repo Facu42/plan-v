@@ -47,7 +47,7 @@ export async function runPendingConsultations(limit=2) {
   let t:ConsultationTask|null;
   if(persistent){const r=await privilegedDb().rpc('consultation_claim_task');consultationDbError(r.error);t=r.data as ConsultationTask|null;}else t=claimMemory();
   if(!t)break;
-  let lost=false;
+  let lost=false,transcribed=false,audioDisposable=false;
   const renewal=setInterval(()=>{void(async()=>{try{if(persistent){const r=await privilegedDb().rpc('consultation_renew_task',{task_id:t!.id,token:t!.run_token});if(r.error||r.data!==true)lost=true;}else{const current=tasks.get(t!.id);if(current?.run_token!==t!.run_token||current.status!=='running')lost=true;else current.lease_until=new Date(Date.now()+120000).toISOString();}}catch{lost=true;}})();},30000);
   try {
    if(!await allowed(t,persistent)){await complete(t,'','El permiso cambió. Revisá los permisos de la paciente.',persistent);continue;}
@@ -56,7 +56,7 @@ export async function runPendingConsultations(limit=2) {
     let audio:Uint8Array;
     if(persistent){const r=await privilegedDb().storage.from(AUDIO_BUCKET).download(t.audio_path!);if(r.error||!r.data)throw new Error('private_audio_unavailable');audio=new Uint8Array(await r.data.arrayBuffer());}else{const b=memoryAudio.get(t.audio_path!);if(!b)throw new Error('private_audio_unavailable');audio=b;}
     const {durationSeconds}=decodeConsultationWav(audio);if(Math.abs(durationSeconds-t.duration_seconds)>0.000001)throw new Error('audio_duration_mismatch');if(!await allowed(t,persistent)||lost)continue;
-    const result=await provider.transcribeClinicalAudio({scope,taskId:t.id,requestKey:t.request_key,previousRequestKeys:t.request_history,runToken:t.run_token??undefined,sessionId:t.session_id,revision:t.index+1,audio,mime:'audio/wav',durationSeconds,consentVersion:'ai_consultation.v1'});text=result.text;
+    const result=await provider.transcribeClinicalAudio({scope,taskId:t.id,requestKey:t.request_key,previousRequestKeys:t.request_history,runToken:t.run_token??undefined,sessionId:t.session_id,revision:t.index+1,audio,mime:'audio/wav',durationSeconds,consentVersion:'ai_consultation.v1'});text=result.text;transcribed=true;
     segments=result.segments.filter(s=>Number.isFinite(s.start)&&Number.isFinite(s.end)&&s.start>=0&&s.end>=s.start&&s.end<=durationSeconds+1&&typeof s.text==='string'&&s.text.length<=5000).slice(0,1000);
    }else{
     let transcript:string;
@@ -70,10 +70,23 @@ export async function runPendingConsultations(limit=2) {
    }
    // A successful transcription may contain silence. Only summaries require words.
    if((t.kind==='summary'&&!text.trim())||text.length>50000)throw new Error('invalid_provider_result');
-   if(!lost)await complete(t,text,null,persistent,segments); processed++;
+   if(!lost){const saved=await complete(t,text,null,persistent,segments);audioDisposable=saved||!await allowed(t,persistent);} processed++;
   }catch{
    if(!lost)await complete(t,'','No se pudo procesar con IA. Revisá la configuración, el presupuesto o los permisos y reintentá.',persistent);
-  }finally{clearInterval(renewal);}
+  }finally{
+   clearInterval(renewal);
+   if(transcribed&&audioDisposable&&t.audio_path){
+    if(!persistent)memoryAudio.delete(t.audio_path);
+    else {
+     // Mark due before deletion so the existing cleanup job repairs a storage failure.
+     const db=privilegedDb();
+     const due=await db.from('consultation_tasks').update({expires_at:new Date().toISOString()}).eq('id',t.id).eq('nutritionist_id',t.nutritionist_id);
+     consultationDbError(due.error);
+     const removed=await db.storage.from(AUDIO_BUCKET).remove([t.audio_path]);
+     if(!removed.error){const marked=await db.from('consultation_tasks').update({audio_deleted_at:new Date().toISOString()}).eq('id',t.id).eq('nutritionist_id',t.nutritionist_id);consultationDbError(marked.error);}
+    }
+   }
+  }
  }
  return processed;
 }

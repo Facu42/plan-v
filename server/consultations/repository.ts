@@ -88,7 +88,7 @@ export async function cleanupExpiredConsultationAudio(limit=100) {
   const db=privilegedDb();
   const cache=await db.from('clinical_ai_spend').update({response_cache:null}).not('response_cache','is',null).lte('created_at',new Date(Date.now()-7*86400000).toISOString());consultationDbError(cache.error);
   const interrupted=await db.from('consultation_sessions').update({status:'finished',incomplete:true,finished_at:new Date().toISOString()}).eq('status','recording').lte('started_at',new Date(Date.now()-3*3600000).toISOString()); consultationDbError(interrupted.error);
-  const {data,error}=await db.from('consultation_tasks').select('id,audio_path').not('audio_path','is',null).is('audio_deleted_at',null).lte('expires_at',new Date().toISOString()).limit(Math.min(limit,100)); consultationDbError(error);
+  const {data,error}=await db.from('consultation_tasks').select('id,audio_path').not('audio_path','is',null).is('audio_deleted_at',null).or(`expires_at.lte.${new Date().toISOString()},status.in.(succeeded,cancelled)`).limit(Math.min(limit,100)); consultationDbError(error);
   let deleted=0;
   for(const t of data??[]) {
     const result=await db.storage.from(AUDIO_BUCKET).remove([String(t.audio_path)]); if(result.error) continue;

@@ -1,3 +1,4 @@
+import {registerBioimpedanceRoutes} from '../lab-reading/bioimpedance-routes.js';
 import type { Context,Hono } from 'hono';
 import { z } from 'zod';
 import { clinicalWorkspaceInputSchema,clinicalDocumentInputSchema,clinicBrandSchema,methodReferenceSchema } from '../../src/types/clinical-workspace.js';
@@ -16,6 +17,7 @@ import { labReadingProvider,labReadingOperationKey,labReadingInputSchema,LabRead
 async function scope(c:Context,patientId?:string){const auth=c.get('auth');const persistent='userId'in auth&&isSupabaseEnabled();if(!persistent){if(c.req.query('audience')==='patient')throw new CareError(403,'Sólo la profesional puede abrir este apartado.');if(patientId&&!getPatient(patientId))throw new CareError(404,'Paciente no encontrado.');return {persistent:false,nutritionistId:DEMO_NUTRITIONIST_ID};}const actor=await sbGetActor(auth.userId);if(actor?.role!=='nutri')throw new CareError(403,'Sólo la profesional puede abrir este apartado.');if(patientId&&(await sbGetPatientResource(patientId))?.nutritionistId!==actor.nutritionistId)throw new CareError(403,'La ficha no pertenece a tu consultorio.');return {persistent:true,nutritionistId:actor.nutritionistId};}
 async function body<T>(c:Context,schema:z.ZodType<T>,max=900000):Promise<T>{const raw=await c.req.text();if(new TextEncoder().encode(raw).length>max)throw new CareError(413,'El archivo o lote supera el límite.');let input:unknown;try{input=JSON.parse(raw);}catch{throw new CareError(400,'Revisá el formulario.');}const result=schema.safeParse(input);if(!result.success)throw new CareError(400,'Revisá valores, unidades, fechas, referencia y la revisión de cada dato.');return result.data;}
 export function registerClinicalWorkspaceRoutes(app:Hono){
+  registerBioimpedanceRoutes(app);
   app.get('/api/patients/:id/clinical-workspace/imported-export',async c=>{
     const id=c.req.param('id'),s=await scope(c,id);
     return c.json(await repo.exportImportedClinical(id,s.nutritionistId,s.persistent));

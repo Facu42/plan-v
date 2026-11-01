@@ -1,0 +1,21 @@
+import {beforeEach,afterEach,describe,it,expect,vi} from 'vitest';
+import {Hono} from 'hono';
+const m=vi.hoisted(()=>({rpc:vi.fn(),from:vi.fn(),scope:vi.fn(),wa:vi.fn()}));
+vi.mock('../db/supabase-client.js',()=>({isSupabaseEnabled:()=>true,getRequestDb:()=>({rpc:m.rpc,from:m.from}),privilegedDb:()=>({rpc:m.rpc,from:m.from})}));
+vi.mock('../crm/repository.js',async()=>({...await vi.importActual('../crm/repository.js'),resolveWorkScope:m.scope}));
+vi.mock('./provider.js',async()=>({...await vi.importActual('./provider.js'),whatsappConfig:m.wa}));
+import {registerCampaignRoutes} from './campaign-routes.js';
+import {registerCommunicationRoutes} from './routes.js';
+import {EMAIL_TEMPLATES} from './catalog.js';
+const clinic='10000000-0000-4000-a000-000000000001',patient='10000000-0000-4000-a000-000000000002',delivery='10000000-0000-4000-a000-000000000003';
+function app(){const a=new Hono();a.use('*',async(c,next)=>{c.set('auth',{userId:'owner'});await next();});a.onError((e,c)=>c.json({error:e.message},'status'in e?e.status as 400:500));registerCampaignRoutes(a);registerCommunicationRoutes(a);return a;}
+const request=(path:string,data:unknown,method='POST')=>app().request(path,{method,headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+beforeEach(()=>{vi.stubEnv('REACTIVATION_CAMPAIGNS_ENABLED','true');vi.stubEnv('VAPID_PUBLIC_KEY','fictional');vi.stubEnv('VAPID_PRIVATE_KEY','fictional');vi.stubEnv('VAPID_SUBJECT','mailto:fake@example.test');m.rpc.mockReset();m.from.mockReset();m.scope.mockResolvedValue({persistent:true,nutritionistId:clinic,patients:[{id:patient,name:'Paciente ficticia'}]});m.wa.mockReturnValue({enabled:true});});
+afterEach(()=>vi.unstubAllEnvs());
+describe('endpoints campañas apagadas y ámbito de sesión',()=>{
+ it('apagadas responden 503 antes de consultar datos',async()=>{vi.stubEnv('REACTIVATION_CAMPAIGNS_ENABLED','false');expect((await request('/api/portfolio/campaigns/preview',{segment:'no_app_record',days:30})).status).toBe(503);expect(m.rpc).not.toHaveBeenCalled();});
+ it('preview valida N y muestra bajas sin enviar nada',async()=>{m.rpc.mockResolvedValue({data:[{patient_id:patient}],error:null});m.from.mockReturnValue({select:async()=>({data:[{patient_id:patient,opted_out:true}],error:null})});expect((await request('/api/portfolio/campaigns/preview',{segment:'no_app_record',days:0})).status).toBe(400);const r=await request('/api/portfolio/campaigns/preview',{segment:'no_app_record',days:30});expect(r.status).toBe(200);expect(await r.json()).toMatchObject({patients:[{id:patient,opted_out:true}],total:1});expect(m.rpc).toHaveBeenCalledExactlyOnceWith('ops_campaign_segment',{nid:clinic,p_segment:'no_app_record',p_days:30});});
+ it('crea con hash revisado y consultorio de sesión; rechaza campos de ámbito del cliente',async()=>{m.rpc.mockResolvedValue({data:delivery,error:null});const t=EMAIL_TEMPLATES[0],data={request_key:delivery,segment:'no_app_record',days:30,channel:'push',template:t.id,template_hash:t.hash,patient_ids:[patient]};expect((await request('/api/portfolio/campaigns',{...data,nutritionist_id:'other'})).status).toBe(400);expect((await request('/api/portfolio/campaigns',data)).status).toBe(201);expect(m.rpc).toHaveBeenCalledWith('ops_create_campaign',expect.objectContaining({nid:clinic,p_patients:[patient]}));});
+ it('baja sigue accesible apagado y la base impide cambiar otra paciente',async()=>{vi.stubEnv('REACTIVATION_CAMPAIGNS_ENABLED','false');m.rpc.mockResolvedValue({data:null,error:{code:'42501'}});expect((await request('/api/portfolio/campaign-preferences/me',{patient_id:patient,opted_out:true},'PUT')).status).toBe(403);expect(m.rpc).toHaveBeenCalledWith('ops_set_campaign_optout',{pid:patient,p_opted_out:true});});
+ it('el dispatch WhatsApp anterior tampoco saltea la bandera general',async()=>{vi.stubEnv('REACTIVATION_CAMPAIGNS_ENABLED','false');const builder={select:()=>builder,update:()=>builder,eq:()=>builder,then:(resolve:(v:unknown)=>unknown)=>Promise.resolve(resolve({data:null,error:null})),maybeSingle:async()=>({data:{id:delivery,campaign_id:'campaign'},error:null})};m.from.mockReturnValue(builder);const r=await request(`/api/portfolio/communications/${delivery}/dispatch`,{});expect(r.status).toBe(200);expect(await r.json()).toEqual({claimed:false});expect(m.rpc).not.toHaveBeenCalled();});
+});
