@@ -72,10 +72,13 @@ export function PlanNutridash() {
   const sub = data.subscription;
   const plan = data.plans.find((item) => item.code === sub?.plan_code) ?? null;
   const uso = data.usage;
+  const gracia = data.signup_grace;
+  const diasGracia = gracia ? (gracia.days_left === 1 ? 'Te queda 1 día para regularizar el pago.' : gracia.days_left > 1 ? `Te quedan ${gracia.days_left} días para regularizar el pago.` : null) : null;
   return <>
     <div className="ajplan"><b>{sub?.founder ? 'Fundadora' : (sub?.plan_name ?? 'Sin plan')}</b><small>{sub?.founder && sub.founder_until ? `40% hasta el ${fecha(sub.founder_until)}` : sub ? `${sub.billing_cycle === 'annual' ? 'Anual' : 'Mensual'} · ${estado[sub.status] ?? sub.status}` : 'Elegí un plan para empezar'}</small></div>
     {sub?.attention ? <p className="nthint" role="status">{sub.attention}</p> : null}
-    {sub?.read_only ? <p className="nthint">Estás en solo lectura. Tus pacientes siguen viendo sus datos y los mensajes.</p> : null}
+    {diasGracia && !gracia?.read_only ? <p className="nthint" role="status">{diasGracia} Podés seguir cargando pacientes.</p> : null}
+    {sub?.read_only || gracia?.read_only ? <p className="nthint">Estás en solo lectura. Tus pacientes siguen viendo sus datos y los mensajes.</p> : null}
     {uso && plan ? <div className="ajuso">
       <Barra etiqueta="Pacientes activas" usado={uso.active_patients} tope={plan.max_active_patients} />
       <Barra etiqueta="Equipo" usado={uso.nutritionists} tope={plan.max_nutritionists} />
@@ -84,7 +87,7 @@ export function PlanNutridash() {
     <FxKv filas={[['Próximo pago', sub ? `${pesos(sub.current_amount_cents)} · ${fecha(sub.current_period_end)}` : '—'], ['Medio', 'Mercado Pago'], ['Cupo fundadora', data.founder_seats_left == null ? '—' : String(data.founder_seats_left)]]} />
     {aviso ? <p className="nthint" role="status">{aviso}</p> : null}
     <div className="fxfoot">
-      <button type="button" className="sbtn cbtn" onClick={() => setDialogo('elegir')}>{sub && sub.status !== 'pending' ? 'Cambiar plan' : 'Elegir plan'}</button>
+      <button type="button" className="sbtn cbtn" onClick={() => sub?.status === 'pending' && sub.init_point ? ir(sub.init_point) : setDialogo('elegir')}>{sub?.status === 'pending' && sub.init_point ? 'Continuar pago' : sub && sub.status !== 'pending' ? 'Cambiar plan' : gracia ? 'Pagar' : 'Elegir plan'}</button>
       <button type="button" className="sbtn cbtn" onClick={() => setDialogo('pagos')} disabled={!sub}>Ver pagos</button>
       {sub?.attention && sub.init_point ? <button type="button" className="sbtn cbtn" onClick={() => ir(sub.init_point)}>Actualizar medio de pago</button> : null}
       {sub && sub.status !== 'canceled' ? <button type="button" className="sbtn cbtn" onClick={() => setDialogo('cancelar')}>Cancelar</button> : null}

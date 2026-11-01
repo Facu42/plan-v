@@ -29,6 +29,7 @@ import { registerAdminRoutes } from './admin/routes.js';
 import { createOwnServiceCache, createServiceReadOnlyGuard, loadOwnService, registerOwnServiceRoutes } from './service/own-service.js';
 import { registerOutboxRoutes } from './outbox/routes.js';
 import { registerPushRoutes } from './push/routes.js';
+import { registerHabitReminderRoutes } from './push/habit-routes.js';
 import { registerProgressRoutes } from './progress/routes.js';
 import { registerExerciseRoutes } from './exercise/routes.js';
 import { registerResourceRoutes } from './resources/routes.js';
@@ -57,6 +58,7 @@ import { processQueue } from './jobs/queue.js';
 import { startJobWorker } from './jobs/worker.js';
 import { authMiddleware } from './middleware/auth.js';
 import { emitOpsAlert } from './ops/alerts.js';
+import { trackServer } from './ops/telemetry.js';
 import { resolveCorsOrigin } from './ops/cors.js';
 import { safePath, writeOpsLog } from './ops/log.js';
 import { createRateLimitMiddleware } from './ops/rate-limit.js';
@@ -255,6 +257,7 @@ app.onError((error, c) => {
     message: error instanceof Error ? error.message : 'unknown',
   });
   emitOpsAlert({ kind: 'http_5xx', path: c.req.path, status: 500 });
+  trackServer('server.error');
   return c.json({ error: 'No se pudo completar la operación' }, 500);
 });
 
@@ -324,6 +327,7 @@ registerAdminRoutes(app);
 registerOwnServiceRoutes(app, ownService.get);
 registerOutboxRoutes(app);
 registerPushRoutes(app);
+registerHabitReminderRoutes(app);
 registerProgressRoutes(app);
 registerExerciseRoutes(app);
 registerResourceRoutes(app);

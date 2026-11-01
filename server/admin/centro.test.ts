@@ -84,9 +84,9 @@ const board: ServiceBoard = {
 };
 
 beforeEach(() => {
-  // Los pagos del fixture son de octubre: el reloj no debe cambiar el mes consultado.
+  // El pago del fixture pertenece a octubre; el mes consultado no depende de hoy.
   vi.useFakeTimers({ toFake: ['Date'] });
-  vi.setSystemTime(new Date('2026-10-31T15:00:00Z'));
+  vi.setSystemTime(new Date('2026-10-28T15:00:00Z'));
   mocks.isAdmin.mockReset();
   mocks.getBoard.mockReset();
   mocks.isAdmin.mockResolvedValue(false);

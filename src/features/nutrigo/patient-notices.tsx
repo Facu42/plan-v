@@ -10,6 +10,7 @@ import { unreadCount } from '../../components/nutrigo/message-receipts';
 import { unreadBadge } from './patient-navigation';
 import { useFeeNotice } from './fee-notice';
 import { PushRow } from './push-row';
+import { HabitRemindersPanel } from './habit-reminders-form';
 import './patient-menu-sheet.css';
 
 export type PatientNotice = { id: string; icon: IconName; title: string; note: string; page: ShowroomPage; resource?: string };
@@ -129,6 +130,7 @@ export function NoticesSheet({ items, onNavigate, onClose }: { items: PatientNot
               </li>
             ))}</ul>}
           <PushRow />
+          <HabitRemindersPanel />
         </nav>
       </div>
     </dialog>

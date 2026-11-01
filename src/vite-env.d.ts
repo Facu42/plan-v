@@ -6,6 +6,8 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   readonly VITE_ALLOW_DEMO?: string;
   readonly VITE_SUPPORT_EMAIL?: string;
+  /** Vacío = el monitoreo del navegador queda apagado. */
+  readonly VITE_SENTRY_DSN?: string;
 }
 
 interface ImportMeta {

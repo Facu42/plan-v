@@ -1,6 +1,15 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
+# Traspaso del proyecto (actualización vigente: 2026-10-31)
+
+31/10 · Cursor · Recordatorios al teléfono para comer, tomar agua y dormir, configurables en Avisos de la paciente. Empiezan apagados. Migración `20261031180000_habit_reminders` sin aplicar. Rama `work/recordatorios-push`. Sin producción ni merge.
+1/11 · Cursor · Pulido del alta en `work/pulido-alta-nutri`: nutri nueva sin plan tiene 30 días de acceso completo; aviso con días restantes y botón Pagar; día 31 solo lectura sin borrar. Bandera de cobro sin tocar. Sin producción ni migraciones.
+
+31/10 · Cursor · Pulido del alta de nutricionista en `work/pulido-alta-nutri`: el primer setup no espera el mail de Auth; el consultorio abre con 30 días de prueba; plantillas de confirmación, clave y magic link en castellano Nutridash listas para cargar. Sin producción ni migraciones.
+31/10 · Cursor · La flecha para plegar el menú del panel de la nutricionista se ve con la barra abierta y con la barra plegada. Rama `work/fix-sidebar-toggle`. Sin producción ni merge.
+31/10 · Cursor · Términos y privacidad: Nutridash (Verónica Trenti) es el responsable de la plataforma, la nutricionista de sus pacientes y Nutridash el encargado del tratamiento (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Rama `work/legal-nutridash`. Sin producción ni merge.
+31/10 · Cursor · Monitoreo de errores y eventos básicos, apagado hasta que Facundo cargue SENTRY_DSN y VITE_SENTRY_DSN. Rama `work/monitoreo-errores`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 
