@@ -37,14 +37,17 @@ describe('Agenda del boceto', () => {
     expect(html).not.toContain('Entrar a la videollamada');
   });
 
-  it('ofrece entrar a la videollamada desde 10 minutos antes hasta el final', () => {
-    const event = { id: 'b', tone: 'online' as const, title: 'Julia Sosa', subtitle: 'Videollamada', day: '2026-10-21', startMin: 14 * 60 + 30, endMin: 15 * 60 + 15, patientId: 'julia' };
-    const dentro = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[event]} videoCallEnabled />);
+  it('abre Meet en otra pestaña desde 10 minutos antes hasta el final', () => {
+    const event = { id: 'b', tone: 'online' as const, title: 'Julia Sosa', subtitle: 'Videollamada', day: '2026-10-21', startMin: 14 * 60 + 30, endMin: 15 * 60 + 15, patientId: 'julia', meetUrl: 'https://meet.example/julia' };
+    const dentro = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[event]} />);
     expect(dentro).toContain('Entrar a la videollamada');
-    const temprano = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:19:00-03:00')} events={[event]} videoCallEnabled />);
+    expect(dentro).toContain('href="https://meet.example/julia"');
+    expect(dentro).toContain('target="_blank"');
+    expect(dentro).toContain('rel="noopener noreferrer"');
+    const temprano = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:19:00-03:00')} events={[event]} />);
     expect(temprano).not.toContain('Entrar a la videollamada');
-    const consultorio = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[{ ...event, tone: 'seguimiento' }]} videoCallEnabled />);
-    expect(consultorio).not.toContain('Entrar a la videollamada');
+    const sinMeet = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[{ ...event, meetUrl: undefined }]} />);
+    expect(sinMeet).not.toContain('Entrar a la videollamada');
   });
 
   it('muestra el recordatorio de turno como el boceto, activo o apagado, y no lo inventa mientras carga', () => {

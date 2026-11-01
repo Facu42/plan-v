@@ -59,7 +59,6 @@
     "gsap": "^3.13.0",
     "hono": "4.13.12",
     "jszip": "^3.10.2",
-    "livekit-client": "^2.23.0",
     "nodemailer": "10.2.1",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^5.4.149",

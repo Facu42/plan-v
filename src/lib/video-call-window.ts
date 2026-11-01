@@ -27,6 +27,16 @@ export function appointmentStart(appointment: { when?: string; starts_at?: strin
   return new Date(now.getFullYear(), now.getMonth(), now.getDate() + delta, hours, minutes);
 }
 
+export function meetLink(value?: string | null): string {
+  if (!value) return '';
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
 export function argentinaStart(day: string, startMin: number): Date {
   const hours = Math.floor(startMin / 60);
   const minutes = startMin % 60;
