@@ -6,6 +6,8 @@ create table public.bioimpedance_readings (
  reviewed_at timestamptz not null default clock_timestamp()
 );
 create index bioimpedance_patient_date on public.bioimpedance_readings(patient_id,recorded_on);
+create index bioimpedance_nutritionist on public.bioimpedance_readings(nutritionist_id);
+create index bioimpedance_reviewer on public.bioimpedance_readings(reviewed_by);
 alter table public.bioimpedance_readings enable row level security;
 revoke all on public.bioimpedance_readings from public,anon,authenticated;
 grant select on public.bioimpedance_readings to authenticated;

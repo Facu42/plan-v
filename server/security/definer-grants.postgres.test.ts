@@ -127,11 +127,18 @@ const ALLOWED = [
   'my_patient_id',
   'open_message_attachment',
   // Metadata operativa aislada; opt-in exige la identidad de la paciente y difusión la profesional titular.
+  // Campañas: estado operativo booleano; segmento/configuración/creación verifican titularidad.
+  'ops_campaign_enabled',
+  'ops_campaign_segment',
   'ops_can_read_clinic',
   'ops_can_read_patient',
+  'ops_configure_campaigns',
   'ops_create_broadcast',
+  'ops_create_campaign',
   'ops_create_email_broadcast',
   'ops_review_reminder_template',
+  // La baja exige auth.uid de la paciente; nunca la otorga la profesional.
+  'ops_set_campaign_optout',
   'ops_set_preferences',
   'patient_has_full_access',
   // Evidencia clínica externa: titular actual, actor original, ficha sin cuenta y retiro prevalente.
@@ -167,6 +174,8 @@ const ALLOWED = [
   'revoke_patient_care',
   'revoke_patient_import_authorization',
   'save_billing_program',
+  // Bioimpedancia: consultorio titular, permisos vigentes y revisión explícita.
+  'save_bioimpedance_review',
   'save_body_metrics',
   'save_care_preferences',
   'save_care_record',

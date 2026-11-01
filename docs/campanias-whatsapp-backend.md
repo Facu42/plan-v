@@ -67,3 +67,26 @@ Ronda posterior a la corrección de cola:
 ```sh
 npm test -- server/communications/campaigns.postgres.test.ts server/communications/campaign-routes.test.ts server/communications/worker.test.ts src/lib/consultation-capture.test.ts --maxWorkers=1
 ```
+
+## Corrección de CI · 01/11/2026
+
+Se revisaron con `gh run view --log-failed` los runs `41268479853` y `41269768506`. Ambos tenían las mismas cinco causas: dos FKs de bioimpedancia sin índice, inventario de migraciones incompleto, lista de funciones públicas sin las seis funciones nuevas, y prueba de cobros de octubre dependiente del mes real. La falla de Equivalencias era consecuencia del inventario incompleto.
+
+Se agregaron los dos índices en la migración propia **todavía no aplicada**, se registraron las dos migraciones y sus hashes, se mantuvo la comprobación exacta de inventario (33 pendientes + 8 de base) y de permisos, y se fijó el reloj de la prueba de cobros a octubre con restauración al terminar. No cambió el código del centro de mando ni sus permisos.
+
+Paso 10 complementario:
+
+- Flujos críticos: ✅ índices de FKs, manifiesto exacto, visibilidad de Equivalencias, permisos por rol, cobros con fecha estable y aislamiento A/B de campañas/bioimpedancia.
+- Regresiones: reproducción local de los cinco archivos fallidos antes del arreglo; 61 pruebas verdes después, en siete archivos. Sin omitir pruebas ni debilitar las comparaciones.
+- Contratos: hashes SQL/manifiesto, inventario de funciones que puede ejecutar cada rol y fecha de referencia de datos ficticios.
+- Áreas frágiles: inventario de migraciones y cambio de mes; se conservan verificaciones estrictas y se elimina la dependencia del calendario de CI.
+- Migraciones: solo índices aditivos en el SQL propio aún no aplicado; ninguna operación remota. Hash actualizado. Rollback operativo: banderas apagadas.
+- Fire test: el control de FKs y los otros cuatro archivos se reprodujeron en rojo con el estado anterior y quedaron verdes tras corregir las causas; se conserva además el fire test de consentimiento de la entrega original.
+- Automatización: los guardas existentes ahora incluyen explícitamente las dos migraciones y seis funciones nuevas; el test de cobros usa un reloj determinista.
+- Validación: `npm run check` ✅ y diff sin errores de espacios. Revisión independiente aprobada. Solo pruebas puntuales y tsc; no suite global ni build local.
+- Veredicto: SHIP de la corrección a la rama del PR en borrador; el resultado de la nueva CI queda pendiente del push. Sin merge, despliegue manual ni producción.
+
+```sh
+npm test -- server/db-performance.postgres.test.ts server/nutrition-capabilities/exchange-visibility.postgres.test.ts server/ops/release-manifest.test.ts server/security/definer-grants.postgres.test.ts server/admin/centro.test.ts server/lab-reading/bioimpedance.postgres.test.ts server/communications/campaigns.postgres.test.ts --maxWorkers=1
+npm run check
+```

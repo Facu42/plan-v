@@ -167,6 +167,16 @@
       "version": "20261030120000",
       "file": "20261030120000_platform_billing.sql",
       "sha256": "61f4a6da44bb4f969747df163eccf1b2923fd85b8fd4d837b80c65831eaf63cd"
+    },
+    {
+      "version": "20261031200000",
+      "file": "20261031200000_reactivation_campaigns.sql",
+      "sha256": "2215808888b89968305b32ead18b8a85163b7446c6a52b975d8da144d780728d"
+    },
+    {
+      "version": "20261031210000",
+      "file": "20261031210000_bioimpedance_reviews.sql",
+      "sha256": "d0baa62a3a029f3916bbd80583cb959cf97132a88f8581d49ddaef2af59abab2"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

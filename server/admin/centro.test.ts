@@ -84,6 +84,9 @@ const board: ServiceBoard = {
 };
 
 beforeEach(() => {
+  // El pago ficticio es de octubre: el mes de la prueba no depende del reloj de CI.
+  vi.useFakeTimers({ toFake: ['Date'] });
+  vi.setSystemTime(new Date('2026-10-31T12:00:00Z'));
   mocks.isAdmin.mockReset();
   mocks.getBoard.mockReset();
   mocks.isAdmin.mockResolvedValue(false);
@@ -91,6 +94,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
 });
 
