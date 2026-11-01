@@ -5,6 +5,9 @@ import {
 import { NvState } from './primitives';
 import { appointmentReplyLabel, readAppointmentReply, writeAppointmentReply, type AppointmentReply } from './appointment-reply';
 import { parseAppointmentWhen, secureMeetUrl } from './ShowroomConsultations';
+import { appointmentStart, inVideoCallWindow } from '../../lib/video-call-window';
+import { embeddedVideoEnabled } from '../../lib/embedded-video';
+import { openCall } from '../../lib/call-pip';
 import { AppointmentHistoryList } from './AppointmentHistory';
 import type { ShowroomPage } from './ShowroomPanels';
 import {
@@ -273,6 +276,7 @@ export function ShowroomPatientAgenda({
   onReschedule,
   onConfirm,
   storage = typeof window === 'undefined' ? null : window.localStorage,
+  callEnabled = embeddedVideoEnabled(),
 }: {
   patient: ShowroomPatient;
   now: Date;
@@ -281,6 +285,7 @@ export function ShowroomPatientAgenda({
   onReschedule?: (day: string, time: string) => Promise<void> | void;
   onConfirm?: (reply: Exclude<AppointmentReply, 'pending'>) => Promise<void> | void;
   storage?: Pick<Storage, 'getItem' | 'setItem'> | null;
+  callEnabled?: boolean;
 }) {
   const current = patient.appointment;
   const allEvents = useMemo(() => buildPatientCalendarEvents(patient, now), [patient, now]);
@@ -309,6 +314,8 @@ export function ShowroomPatientAgenda({
 
   const consultEvent = allEvents.find((event) => event.kind === 'consult') ?? null;
   const safeUrl = current?.channel === 'video' ? secureMeetUrl(current.meet_url) : null;
+  const empieza = current ? appointmentStart(current, now) : null;
+  const entrar = Boolean(callEnabled && current?.channel === 'video' && empieza && inVideoCallWindow(now, empieza, current.duration));
   const dayEvents = allEvents.filter((event) => event.dateId === nav.selectedDateId && !hidden.has(event.kind));
   const consultOnDay = Boolean(consultEvent && dayEvents.some((event) => event.id === consultEvent.id));
   const otherDayEvents = dayEvents.filter((event) => event.kind !== 'consult');
@@ -367,6 +374,7 @@ export function ShowroomPatientAgenda({
     ]}
     note={{ label: 'Tu respuesta', text: <p>{reply === 'pending' ? 'Todavía no confirmaste la asistencia.' : `${appointmentReplyLabel(reply)}.`}{reply === 'needs_change' ? ' Podés proponer un nuevo día y hora; duración y modalidad las conserva el consultorio.' : ''}</p> }}
     actions={<>
+      {entrar && <button type="button" className="nvcal-btn nvcal-btn-primary" onClick={() => openCall({ patientId: patient.id, label: patient.initials, appointmentId: current.starts_at ?? `${patient.id}-${current.when}`, meetUrl: safeUrl ?? '' }, true)}>Entrar a la videollamada</button>}
       {safeUrl && <a className="nvcal-btn" href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada</a>}
       {reply === 'pending' && <>
         <button type="button" className="nvcal-btn" disabled={confirmBusy} onClick={() => { void respond('needs_change'); }}>Necesito cambiar el horario</button>

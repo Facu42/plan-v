@@ -12,17 +12,19 @@ Conviene LiveKit, en un servidor propio, antes que Daily.
 - Daily cobra por minuto y el acuerdo para datos de salud es un plan de pago. La documentación pública habla de regiones de Estados Unidos y Europa. No doy por hecho un centro en Argentina.
 - Jitsi público (meet.jit.si) no sirve para una consulta: el audio pasa por 8x8 y no deja elegir el país.
 
-En esta prueba la sala de LiveKit no se conecta. No hay dirección ni clave en el proyecto. La ventana dice eso y deja Meet como salida.
+La sala se conecta sola cuando en el servidor están las tres: `LIVEKIT_URL` (wss://…), `LIVEKIT_API_KEY` y `LIVEKIT_API_SECRET`. No van en el navegador y no se commitean. Si falta alguna, el botón abre el enlace de Meet.
+
+No se graba ni se guarda video. No se usa LiveKit Egress ni la grabación de la sala (`roomRecord` queda en falso). La imagen en vivo, si la hay, no se archiva.
 
 ## Ventana flotante
 
-Cuando la bandera está prendida, «Abrir sala» muestra una ventana en la esquina de abajo (derecha al empezar, o izquierda). Se puede arrastrar. Vive en el cascarón del panel, no dentro de una pantalla: al pasar de Agenda a la ficha o a Cobranzas sigue ahí. Así se puede seguir cargando datos durante la llamada.
+Con la prueba prendida, desde 10 minutos antes del turno y hasta que termina, la Agenda de la nutricionista y la agenda de la paciente muestran «Entrar a la videollamada» en ese turno. Abre la ventana de esa sala, en la esquina de abajo (derecha al empezar, o izquierda). Se puede arrastrar. Vive en el cascarón, no dentro de una pantalla: al pasar de Agenda a la ficha sigue ahí.
 
 ## Grabación y resumen
 
-El audio no lo graba LiveKit ni Daily. Usa la grabación de consulta que ya existe (`consultation_recording` y `ai_consultation`). Sin esos dos permisos de la paciente no se abre el micrófono ni se manda audio.
+No se graba ni se guarda video. No hay Egress ni grabación de sala.
 
-Con permiso, los trozos van a la consulta de la ficha. El trabajador que ya procesa las consultas (`runPendingConsultations`) los transcribe y, cuando el texto está, arma el resumen en un trabajo aparte. La pantalla no se queda esperando: arriba aparece «Preparando el resumen» y, al terminar, «El resumen quedó en la ficha». Ese aviso sigue visible al cambiar de pantalla. El texto queda en la nota privada de la consulta, no se publica solo.
+El audio, solo si la paciente dio permiso de grabación y de resumen con IA, entra por la grabación de consulta que ya existe. Es un WAV, no un video. El trabajador lo transcribe y después borra el audio. Con ese texto arma el resumen en otro trabajo, sin frenar la pantalla. Arriba se ve «Preparando el resumen» y, al terminar, «El resumen quedó en la ficha». Ese aviso sigue al cambiar de pantalla. El texto queda en la nota privada y no se publica solo.
 
 ## Qué se comparó
 
@@ -38,7 +40,7 @@ Mandar el audio de una consulta a otro país es una transferencia internacional 
 
 ## Qué queda como está
 
-- Meet sigue siendo el enlace del turno.
-- La sala de LiveKit no se conecta y no hay claves.
+- Sin las tres claves, el botón deja Meet.
+- No se graba ni se guarda video. El audio de la transcripción se borra al procesarlo.
 - Grabar pide el permiso que ya usa la consulta. Sin ese permiso no sale audio.
 - El resumen lo escribe el trabajador en la ficha. Hay que revisarlo antes de compartirlo.

@@ -34,6 +34,17 @@ describe('Agenda del boceto', () => {
     expect(html).toContain('Próxima · videollamada');
     expect(html).toContain('ev f');
     expect(html).not.toContain('Todavía no hay turnos');
+    expect(html).not.toContain('Entrar a la videollamada');
+  });
+
+  it('ofrece entrar a la videollamada desde 10 minutos antes hasta el final', () => {
+    const event = { id: 'b', tone: 'online' as const, title: 'Julia Sosa', subtitle: 'Videollamada', day: '2026-10-21', startMin: 14 * 60 + 30, endMin: 15 * 60 + 15, patientId: 'julia' };
+    const dentro = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[event]} videoCallEnabled />);
+    expect(dentro).toContain('Entrar a la videollamada');
+    const temprano = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:19:00-03:00')} events={[event]} videoCallEnabled />);
+    expect(temprano).not.toContain('Entrar a la videollamada');
+    const consultorio = renderToStaticMarkup(<PanelAgendaView {...base} now={new Date('2026-10-21T14:25:00-03:00')} events={[{ ...event, tone: 'seguimiento' }]} videoCallEnabled />);
+    expect(consultorio).not.toContain('Entrar a la videollamada');
   });
 
   it('muestra el recordatorio de turno como el boceto, activo o apagado, y no lo inventa mientras carga', () => {

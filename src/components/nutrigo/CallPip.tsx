@@ -5,6 +5,8 @@ import { closeCall, getCallPip, moveCall, setCallPhase, setCallSession, snapCall
 import { recordingAllowed, shouldQueueSummary, summaryCommand, summaryNotice, summaryPhase } from '../../lib/call-recording';
 import { prepareConsultationCapture, type ConsultationCapture } from '../../lib/consultation-capture';
 import { embeddedVideoEnabled } from '../../lib/embedded-video';
+import { callsApi } from '../../api/calls';
+import { joinLiveKitRoom } from '../../lib/livekit-join';
 
 /** Ventana flotante del cascarón. Sigue visible cuando cambia la pantalla. */
 export function CallPipHost({ enabled = embeddedVideoEnabled() }: { enabled?: boolean }) {
@@ -13,6 +15,8 @@ export function CallPipHost({ enabled = embeddedVideoEnabled() }: { enabled?: bo
   const revision = useRef(1);
   const chunks = useRef(0);
   const queued = useRef(false);
+  const stage = useRef<HTMLDivElement>(null);
+  const joined = useRef<{ disconnect: () => void } | null>(null);
   useEffect(() => { queued.current = false; }, [pip.sessionId]);
   useEffect(() => {
     if (!enabled || pip.phase !== 'working' || !pip.patientId || !pip.sessionId) return;
@@ -34,6 +38,15 @@ export function CallPipHost({ enabled = embeddedVideoEnabled() }: { enabled?: bo
     }, 4000);
     return () => { stop = true; clearInterval(timer); };
   }, [enabled, pip.phase, pip.patientId, pip.sessionId]);
+  useEffect(() => {
+    if (!enabled || !pip.open || !pip.patientId || !pip.appointmentId) return;
+    let cancel = false;
+    void callsApi.livekit(pip.patientId, pip.appointmentId).then(async result => {
+      if (cancel || !result.ready || result.videoRecording || result.egress || !result.url || !result.token || !stage.current) return;
+      joined.current = await joinLiveKitRoom(result.url, result.token, stage.current);
+    }).catch(() => undefined);
+    return () => { cancel = true; joined.current?.disconnect(); joined.current = null; };
+  }, [enabled, pip.open, pip.patientId, pip.appointmentId]);
   if (!enabled || (!pip.open && pip.phase !== 'working' && pip.phase !== 'ready' && pip.phase !== 'failed' && pip.phase !== 'blocked')) return null;
   const notice = pip.notice || summaryNotice(pip.phase);
   const placed = pip.x == null || pip.y == null
@@ -106,7 +119,9 @@ export function CallPipHost({ enabled = embeddedVideoEnabled() }: { enabled?: bo
         <button type="button" onClick={() => snapCall('right')}>Derecha</button>
         <button type="button" aria-label="Cerrar sala" onClick={() => { capture.current?.dispose(); capture.current = null; closeCall(); }}>Cerrar</button>
       </header>
-      <p>LiveKit no está conectado: no hay claves. Meet sigue siendo el enlace. El audio, si hay permiso, entra por la grabación de la consulta.</p>
+      <div ref={stage} data-live-stage="audio-or-live" />
+      <p>No se graba ni se guarda video. Si hay permiso, solo se toma el audio para la transcripción y el resumen, y ese audio se borra después de procesarlo.</p>
+      {pip.meetUrl ? <p><a href={pip.meetUrl} target="_blank" rel="noopener noreferrer">Abrir en Meet</a> si la sala de LiveKit no está configurada.</p> : <p>Sin claves de LiveKit y sin enlace de Meet.</p>}
       {pip.sessionId ? <button type="button" onClick={() => void terminar()}>Terminar grabación</button> : <button type="button" onClick={() => void grabar()}>Grabar audio</button>}
     </aside> : null}
   </>;
