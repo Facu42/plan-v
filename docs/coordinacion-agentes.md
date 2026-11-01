@@ -1,3 +1,5 @@
+1/11 · Codex · PR #253, corrección mínima del CI: `server/admin/centro.test.ts` fija únicamente Date al 28/10/2026 y restaura el reloj en cada caso; el fixture de cobro de octubre ya no depende del mes real. Reproducido: 23 aprobadas/1 fallida; corregido: 24 aprobadas. Solo se ejecutó ese archivo por pedido de Facundo. Sin cambios de lógica de producción, merge ni producción.
+
 1/11 · Codex · Pulido de cobro de #253 completado conservando cambios de Cursor: gracia exacta de 30 días sin extender deudas, pago pendiente retomable, aviso manual sin promesa de bloqueo. 22 pruebas focales y `npx tsc --noEmit` aprobados. [Informe paso 10](cobro-plataforma.md). Sin suite completa, merge ni producción.
 
 31/10 · Codex · Retoma autorizado por Facundo el pulido de Cursor en `work/pulido-alta-nutri`, PR #253. Conserva todos los cambios; revisión y pruebas focales del cobro. Sin merge ni producción.
