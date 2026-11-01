@@ -24,6 +24,13 @@
 #pv-panel-v29 .mnav button { appearance: none; margin: 0; }
 #pv-panel-v29 button.fold,
 #pv-panel-v29 button.ibtn { padding: 0; }
+/* La barra recorta con overflow:hidden para que el menú scrollee. La flecha
+   vive a caballo del borde (right:-12px): con el menú abierto se cortaba la
+   mitad de afuera y la de adentro se perdía sobre la cuenta. En escritorio,
+   abierto, la barra deja ver esa flecha. Plegada sigue adentro del riel.
+   El círculo, el tamaño y la sombra quedan los del boceto. */
+#pv-panel-v29:not(.mob) .app:not(.mcol) .side { overflow: visible; }
+#pv-panel-v29 .side .fold { z-index: 5; color: var(--ink); }
 #pv-panel-v29 button.acct { width: 100%; color: inherit; cursor: pointer; text-align: left; }
 #pv-panel-v29 a.cta { text-decoration: none; }
 #pv-panel-v29 a.nv,
