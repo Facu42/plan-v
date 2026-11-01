@@ -4,6 +4,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
+import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../types/centro';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 import type { HabitReminders } from '../habit-reminders';
@@ -253,6 +254,12 @@ export const api = {
 
   // Panel del servicio (administrador de la plataforma). En demo el acceso se pide con audience 'admin'.
   getAdminMe: (audience?: 'admin') => request<{ admin: boolean }>(`/api/admin/me${audience ? '?audience=admin' : ''}`),
+  getCentroResumen: () => request<{ resumen: CentroResumen }>('/api/admin/centro/resumen'),
+  getCentroNutris: () => request<{ nutris: CentroNutri[] }>('/api/admin/centro/nutris'),
+  getCentroPacientes: () => request<{ pacientes: CentroPacientes }>('/api/admin/centro/pacientes'),
+  getCentroCobros: () => request<{ cobros: CentroCobros }>('/api/admin/centro/cobros'),
+  getCentroSalud: () => request<{ salud: CentroSalud }>('/api/admin/centro/salud'),
+  getCentroSeguridad: () => request<{ seguridad: CentroSeguridad }>('/api/admin/centro/seguridad'),
   getServiceBoard: () => request<{ board: ServiceBoard }>('/api/admin/service'),
   saveServiceSettings: (settings: ServiceSettings) =>
     request<{ settings: ServiceSettings }>('/api/admin/service/settings', { method: 'PUT', body: JSON.stringify(settings) }),

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react';
 import { aiJobsApi } from '../../api/ai-jobs';
+import { api } from '../../api/client';
 import type { AiMonthlyUsage } from '../../types/ai-jobs';
 import type { Patient } from '../../types';
 import { PanelV29Icon } from './PanelV29Icon';
@@ -30,13 +31,23 @@ export function PanelPlanArmar({
 }) {
   const paciente = pacientes.find(persona => persona.id === pacienteId) ?? pacientes[0];
   const [uso, setUso] = useState<AiMonthlyUsage | null | undefined>(undefined);
+  const [permisos, setPermisos] = useState<string[] | null | undefined>(undefined);
+  const [iaDisponible, setIaDisponible] = useState(true);
+  const [enviandoPermiso, setEnviandoPermiso] = useState(false);
   useEffect(() => {
     const controller = new AbortController();
     setUso(undefined);
+    setPermisos(undefined);
+    setIaDisponible(true);
     if (pacienteId) aiJobsApi.list(pacienteId, controller.signal)
-      .then(respuesta => { if (!controller.signal.aborted) setUso(respuesta.usage ?? null); })
-      .catch(() => { if (!controller.signal.aborted) setUso(null); });
-    else setUso(null);
+      .then(respuesta => {
+        if (controller.signal.aborted) return;
+        setUso(respuesta.usage ?? null);
+        setPermisos(respuesta.consented ?? null);
+        setIaDisponible(respuesta.ai_available !== false);
+      })
+      .catch(() => { if (!controller.signal.aborted) { setUso(null); setPermisos(null); } });
+    else { setUso(null); setPermisos(null); }
     return () => controller.abort();
   }, [pacienteId, armando]);
   const [pedido, setPedido] = useState('');
@@ -96,7 +107,40 @@ export function PanelPlanArmar({
     }
   }
 
+  const faltaPermisoMenu = Array.isArray(permisos) && !permisos.includes('ai_menu_draft');
+
+  async function pedirPermisoEnChat() {
+    if (!paciente || enviandoPermiso) return;
+    setEnviandoPermiso(true);
+    try {
+      await api.sendMessage(paciente.id, `Hola ${nombre}, para armar un borrador de tu plan con el asistente necesito que actives el permiso «Borradores de menú con IA» desde tu app en Mi ficha → Mis datos y permisos.`, 'vero');
+      onAviso(`Le enviamos un mensaje a ${nombre} en el chat de la app para que active «Borradores de menú con IA».`);
+    } catch {
+      onAviso('No pudimos enviar el mensaje por el chat. Podés copiar las instrucciones y mandárselas.');
+    } finally {
+      setEnviandoPermiso(false);
+    }
+  }
+
+  async function copiarInstruccionesPermiso() {
+    const texto = `Hola ${nombre}, para que pueda preparar un borrador de tu plan con IA activá el permiso «Borradores de menú con IA» desde tu app en Mi ficha → Mis datos y permisos.`;
+    try {
+      await navigator.clipboard.writeText(texto);
+      onAviso('Instrucciones copiadas para enviarle a la paciente.');
+    } catch {
+      onAviso(texto);
+    }
+  }
+
   function crear() {
+    if (!iaDisponible) {
+      onAviso('El asistente de IA no está habilitado en este entorno. Podés armar el plan manualmente en el editor.');
+      return;
+    }
+    if (faltaPermisoMenu) {
+      onAviso(`${nombre} todavía no activó el permiso «Borradores de menú con IA». Debe habilitarlo desde su app en Mi ficha → Mis datos y permisos.`);
+      return;
+    }
     if (!pedido.trim()) {
       onAviso('Contá qué plan necesitás antes de crear la propuesta.');
       return;
@@ -138,6 +182,15 @@ export function PanelPlanArmar({
           <span className="av" style={{ background: fondoAvatar(persona.tone) }}>{persona.initials}</span>
           <span className="t"><b>{persona.name}</b><small>{persona.goal.trim() || 'Sin objetivo'}</small></span>
         </button>)}</div> : null}
+        {!iaDisponible ? <div className="p28-context-link" role="status">
+          <span><PanelV29Icon name="spark" size={14} /><b>Asistente de IA no disponible en este entorno</b><small>Podés armar el plan manualmente en el editor o usar una plantilla.</small></span>
+        </div> : faltaPermisoMenu ? <div className="p28-context-link" role="status">
+          <span><PanelV29Icon name="spark" size={14} /><b>Falta que {nombre} active «Borradores de menú con IA»</b><small>La paciente lo habilita desde su app en Mi ficha → Mis datos y permisos.</small></span>
+          <div className="iabar">
+            <button type="button" className="sbtn k" disabled={enviandoPermiso} onClick={() => void pedirPermisoEnChat()}>{enviandoPermiso ? 'Enviando…' : 'Pedirle permiso por chat'}</button>
+            <button type="button" className="sbtn" onClick={() => void copiarInstruccionesPermiso()}>Copiar instrucciones</button>
+          </div>
+        </div> : null}
         <div className="p28-ai-grid">
           <div className="p28-compose">
             <div className="p28-section-label"><b>Tu pedido</b><span>Con tus palabras</span></div>

@@ -8,7 +8,7 @@ import { SEGUIR_PLEGADO_MS, aplicarPastilla, movimientoReducido, type PendienteP
 // Los grupos quedan en el orden de la app: el boceto dibuja otros nombres y otro orden, y eso no se inventa acá.
 export type PanelNavChild = { label: string; href: string; count?: number };
 export type PanelNavItem = { label: string; glyph: PanelV29IconName; href: string; count?: number; hot?: boolean; children?: PanelNavChild[] };
-export function panelNavGroups(patients: readonly Patient[], unread: number, admin: boolean): { title: string; items: PanelNavItem[] }[] {
+export function panelNavGroups(patients: readonly Patient[], unread: number): { title: string; items: PanelNavItem[] }[] {
   const active = patients.filter(p => !p.archived_at);
   const toReview = active.reduce((sum, p) => sum + (p.weekly_registration?.pending_review ?? 0), 0);
   return [
@@ -62,7 +62,6 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, adm
     { title: 'Cuenta', items: [
       { label: 'Equipo', glyph: 'team', href: '/crm/equipo' },
       { label: 'Ajustes', glyph: 'gear', href: '/crm/ajustes' },
-      ...(admin ? [{ label: 'Panel del servicio', glyph: 'shield' as const, href: '/crm/servicio' }] : []),
     ] },
   ];
 }
@@ -105,10 +104,10 @@ function medirPastilla(nav: HTMLElement, pill: HTMLElement, cur: PosicionPastill
 }
 
 /** Menú (`.navs` / `.nv`) del boceto v29. */
-export function PanelNavigation({ patients, unread, admin, current, collapsed, onOpen }: {
-  patients: readonly Patient[]; unread: number; admin: boolean; current: string; collapsed: boolean; onOpen: (href: string) => void;
+export function PanelNavigation({ patients, unread, current, collapsed, onOpen }: {
+  patients: readonly Patient[]; unread: number; current: string; collapsed: boolean; onOpen: (href: string) => void;
 }) {
-  const groups = panelNavGroups(patients, unread, admin);
+  const groups = panelNavGroups(patients, unread);
   const activeParent = groups.flatMap(g => g.items).find(item => item.children && panelNavActive(item, current))?.label ?? '';
   // Como `openSub` del boceto: al cambiar de pantalla queda abierto sólo el submenú de la sección activa.
   const [open, setOpen] = useState(() => ({ at: current, labels: new Set([activeParent]) }));
@@ -151,7 +150,7 @@ export function PanelNavigation({ patients, unread, admin, current, collapsed, o
       nav.removeEventListener('scroll', onScroll);
       window.removeEventListener('resize', onResize);
     };
-  }, [current, collapsed, openKey, patients, unread, admin]);
+  }, [current, collapsed, openKey, patients, unread]);
   const go = (href: string) => (event: MouseEvent) => {
     if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     event.preventDefault(); onOpen(href);

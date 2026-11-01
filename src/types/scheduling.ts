@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {PUBLIC_SLUG_PATTERN, isReservedPublicSlug} from './public-slug';
 const time=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const timestamp=z.iso.datetime({offset:true});
 const pct=z.number().int().min(0).max(100);
@@ -20,7 +21,7 @@ export const schedulingSettingsSchema=z.object({
  types:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80),calendar_id:z.uuid(),duration_min:z.number().int().min(10).max(180),channel:z.enum(['video','presencial']),price_minor:z.number().int().min(0).max(100000000),deposit_minor:z.number().int().min(0).max(100000000)}).strict()).max(30),
  weekly:z.array(z.object({calendar_id:z.uuid(),weekday:z.number().int().min(0).max(6),start:time,end:time}).strict()).max(100),
  blocks:z.array(z.object({id:z.uuid(),calendar_id:z.uuid(),start:timestamp,end:timestamp,label:z.string().trim().max(80)}).strict()).max(300),
- page:z.object({slug:z.string().regex(/^[a-z0-9][a-z0-9-]{2,59}$/),enabled:z.boolean(),title:z.string().trim().min(1).max(100),bio:z.string().trim().max(1200),location:z.string().trim().max(200),contact:z.string().trim().max(150),logo_url:z.union([z.literal(''),z.url().startsWith('https://')])}).strict(),
+ page:z.object({slug:z.string().regex(PUBLIC_SLUG_PATTERN).refine(slug=>!isReservedPublicSlug(slug),'Ese enlace está reservado.'),enabled:z.boolean(),title:z.string().trim().min(1).max(100),bio:z.string().trim().max(1200),location:z.string().trim().max(200),contact:z.string().trim().max(150),logo_url:z.union([z.literal(''),z.url().startsWith('https://')])}).strict(),
  google_calendar_id:z.string().trim().max(200),google_enabled:z.boolean(),create_meet:z.boolean(),transfer_alias:z.string().trim().max(100),
  // Recordatorio de turno 24 h antes (app y mail). Sin la clave está activo.
  reminders_enabled:z.boolean().optional(),

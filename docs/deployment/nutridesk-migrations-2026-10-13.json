@@ -167,6 +167,16 @@
       "version": "20261030120000",
       "file": "20261030120000_platform_billing.sql",
       "sha256": "61f4a6da44bb4f969747df163eccf1b2923fd85b8fd4d837b80c65831eaf63cd"
+    },
+    {
+      "file": "20261031180000_habit_reminders.sql",
+      "version": "20261031180000",
+      "sha256": "5c9dd2897ad4d1a7b9b99d6498c6312c432a467ebe85e1499d10f3868dd9474e"
+    },
+    {
+      "file": "20261031210000_habit_reminders_policy_initplan.sql",
+      "version": "20261031210000",
+      "sha256": "11367fc96febf6337e3c03309e6716ed802a86a2ce9216bc9dc6275057c42375"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

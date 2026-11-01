@@ -44,6 +44,16 @@ async function owner(c: Context) {
   return actor.nutritionistId;
 }
 
+async function optionalOwner(c: Context): Promise<string | null> {
+  if (!subscriptionsEnabled() || !isSupabaseEnabled()) return null;
+  const auth = c.get('auth');
+  if (!('userId' in auth)) return null;
+  const actor = await sbGetActor(auth.userId);
+  if (actor?.role !== 'nutri') throw new CareError(403, 'Solo la nutricionista puede hacer esto.');
+  if (!subscriptionsAllowed(actor.nutritionistId)) return null;
+  return actor.nutritionistId;
+}
+
 async function reader(c: Context, nutritionistId: string) {
   enabled();
   if (!subscriptionsAllowed(nutritionistId)) throw new CareError(404, 'No encontrado.');
@@ -133,7 +143,11 @@ export function registerPatientSubscriptionRoutes(app: Hono) {
   app.post('/api/public/scheduling/mp/webhook', webhook);
   app.post('/api/public/scheduling/mp/webhook/', webhook);
 
-  app.get('/api/scheduling/subscription-plans', async c => c.json({ plans: await listPlans(await owner(c)) }));
+  app.get('/api/scheduling/subscription-plans', async c => {
+    const nutritionistId = await optionalOwner(c);
+    if (!nutritionistId) return c.json({ enabled: false, plans: [] });
+    return c.json({ enabled: true, plans: await listPlans(nutritionistId) });
+  });
   app.post('/api/scheduling/subscription-plans', async c => {
     const nutritionistId = await owner(c);
     const input = await body(c, planBody);
@@ -150,9 +164,10 @@ export function registerPatientSubscriptionRoutes(app: Hono) {
     return c.json({ plan: await service.archivePlan(nutritionistId, parsed(uuid, c.req.param('id')), input.expected_revision) });
   });
   app.get('/api/scheduling/subscriptions', async c => {
-    const nutritionistId = await owner(c);
+    const nutritionistId = await optionalOwner(c);
+    if (!nutritionistId) return c.json({ enabled: false, subscriptions: [], summary: { active: 0, pending: 0, problems: 0, unlinked: 0 } });
     const status = c.req.query('status');
-    return c.json(await service.listForNutritionist(nutritionistId, status || undefined, true));
+    return c.json({ enabled: true, ...await service.listForNutritionist(nutritionistId, status || undefined, true) });
   });
   app.post('/api/scheduling/subscriptions', async c => {
     const nutritionistId = await owner(c);

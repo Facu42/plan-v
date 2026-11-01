@@ -10,6 +10,8 @@ describe('AdminConsole', () => {
     expect(html).toContain('Facundo');
     expect(html).toContain('Cerrar sesión');
     expect(html).toContain('Estamos verificando tu acceso');
+    expect(html).toContain('nv-admin-brand-copy');
+    expect(html).not.toContain('nv-admin-rail-links');
     expect(html).not.toContain('Pacientes');
   });
 

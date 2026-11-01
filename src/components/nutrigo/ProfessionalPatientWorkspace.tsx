@@ -41,9 +41,11 @@ import './panel-patient-record.css';
 export { RECORD_TABS, recordTab } from './patient-record-sections';
 export type { RecordTab } from './patient-record-sections';
 
-export function CompletedConsultationCount({patientId}:{patientId:string}){
+export function CompletedConsultationCount({patientId,canCare=true,waiting=false}:{patientId:string;canCare?:boolean;waiting?:boolean}){
   const [value,setValue]=useState<{patientId:string;count:number|null;error:boolean}>({patientId,count:null,error:false});
-  useEffect(()=>{let controller=new AbortController();setValue({patientId,count:null,error:false});const load=()=>{controller.abort();controller=new AbortController();const signal=controller.signal;void consultationsApi.completions(patientId,0,1,signal).then(view=>{if(!signal.aborted)setValue({patientId,count:view.total_completed,error:false});}).catch(()=>{if(!signal.aborted)setValue({patientId,count:null,error:true});});};const changed=(event:Event)=>{if((event as CustomEvent<{patientId:string}>).detail?.patientId===patientId)load();};load();window.addEventListener('plan-v:consultation-completion-changed',changed);return()=>{controller.abort();window.removeEventListener('plan-v:consultation-completion-changed',changed);};},[patientId]);
+  useEffect(()=>{if(waiting||!canCare){setValue({patientId,count:null,error:false});return;}let controller=new AbortController();setValue({patientId,count:null,error:false});const load=()=>{controller.abort();controller=new AbortController();const signal=controller.signal;void consultationsApi.completions(patientId,0,1,signal).then(view=>{if(!signal.aborted)setValue({patientId,count:view.total_completed,error:false});}).catch(()=>{if(!signal.aborted)setValue({patientId,count:null,error:true});});};const changed=(event:Event)=>{if((event as CustomEvent<{patientId:string}>).detail?.patientId===patientId)load();};load();window.addEventListener('plan-v:consultation-completion-changed',changed);return()=>{controller.abort();window.removeEventListener('plan-v:consultation-completion-changed',changed);};},[patientId,canCare,waiting]);
+  if(waiting)return <span>Consultando…</span>;
+  if(!canCare)return <span>Esperando consentimiento</span>;
   return <span>{value.patientId!==patientId||value.count===null?(value.error?'No disponible':'Consultando…'):value.count}</span>;
 }
 
@@ -82,7 +84,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const phone = (patient as Patient & { phone?: string | null }).phone;
   const pendientes = pendientesDeFicha(patient, datos, homeDay(now));
   const conteo = conteoDeSolapas({ comidas: pendientes.comidas, notaPorAprobar: pendientes.notaPorAprobar, alterados: pendientes.alterados.length });
-  const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
+  const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id} canCare={datos.canCare} waiting={!datos.care && !datos.careError}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
   return <div className="scr" id="s-ficha" aria-label={`Espacio de ${patient.name}`}>
     <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>setChatOpen(true)} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
     <FichaSolapas ref={tabsRef} activa={solapa} conteo={conteo} onChange={next=>change(seccionDe(next))}/>

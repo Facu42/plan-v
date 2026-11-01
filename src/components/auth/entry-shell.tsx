@@ -36,16 +36,17 @@ function asNode(value: SourceNode | string | number): SourceNode {
 const idlePicker = asNode(nodes.segmented.children[1]);
 const activePicker = asNode(nodes.segmented.children[2]);
 
-export function EntryChrome({ title, subtitle, onToggleTheme, darkMode = false, role, children }: {
+export function EntryChrome({ title, subtitle, onToggleTheme, darkMode = false, role, stage, children }: {
   title: string;
   subtitle?: string;
   onToggleTheme?: () => void;
   darkMode?: boolean;
   role?: 'alert' | 'status';
+  /** Lado oscuro con la escena de cada entrada. Sin él, la tarjeta va sola al centro. */
+  stage?: ReactNode;
   children?: ReactNode;
 }) {
-  return (
-    <div className="mcp-nutrigo entry-screen">
+  const card = (
       <section className="entry-card" role={role} aria-label={role ? title : undefined}>
         <header className="entry-head">
           <div className="entry-logo">
@@ -63,6 +64,12 @@ export function EntryChrome({ title, subtitle, onToggleTheme, darkMode = false, 
         </div>
         {children}
       </section>
+  );
+  if (!stage) return <div className="mcp-nutrigo entry-screen">{card}</div>;
+  return (
+    <div className="mcp-nutrigo entry-screen entry-screen--split">
+      {stage}
+      <div className="entry-pane">{card}</div>
     </div>
   );
 }

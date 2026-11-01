@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { careApi } from '../../api/care';
 import { patientHistoryApi } from '../../api/patient-history';
 import type { Patient } from '../../types';
 import { vigentes } from './ficha-historia';
@@ -26,6 +27,8 @@ export function usePatologias(pacientes: readonly Patient[], hoy: string): Reado
     const trabajar = async () => {
       for (let id = pendientes.shift(); id && !controller.signal.aborted; id = pendientes.shift()) {
         try {
+          const care = await careApi.snapshot(id, true, controller.signal);
+          if (!care.consented.includes('care_relationship')) continue;
           const { entries } = await patientHistoryApi.list(id, controller.signal);
           if (!controller.signal.aborted) setMapa(previo => new Map(previo).set(id as string, patologiasDe(entries, hoy)));
         } catch { /* sin permiso o sin red: queda «Sin declarar» */ }

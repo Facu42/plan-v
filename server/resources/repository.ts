@@ -76,7 +76,7 @@ function asResource(value: unknown): EditorialResource | null {
     related: Array.isArray(row.related) ? row.related.map((item) => String(item)) : [],
     action_label: String(row.action_label ?? ''),
     action_page: String(row.action_page ?? ''),
-    author_name: String(row.author_name ?? ''),
+    author_name: String(row.author_name ?? '').replace(/Plan V/g, 'Nutridash'),
     reviewed_at: row.reviewed_at == null ? null : String(row.reviewed_at),
     published: Boolean(row.published),
     license_kind: license,

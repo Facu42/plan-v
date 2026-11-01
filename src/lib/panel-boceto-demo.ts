@@ -33,7 +33,7 @@ function booking(id: string, name: string, typeId: string, starts: string, minut
   return {
     id, nutritionist_id: 'demo', type_id: typeId, calendar_id: CAL, starts_at: starts, duration_min: minutes, status, revision: 1,
     total_minor: total, deposit_minor: Math.round(total / 2), paid_minor: paid, currency: 'ARS', appointment_id: null, patient_id: null,
-    contact_name: name, contact_email: 'demo@planv.app', contact_phone: '', google_sync_status: 'not_connected', meet_url: null, created_at: starts,
+    contact_name: name, contact_email: 'demo@nutridash.app', contact_phone: '', google_sync_status: 'not_connected', meet_url: null, created_at: starts,
   };
 }
 

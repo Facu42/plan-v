@@ -87,7 +87,7 @@ describe('PV-36 recursos editoriales y favoritos unificados', () => {
     expect(assigned.status).toBe(200);
     const after = await library();
     expect(after.body.library.articles.map((entry) => entry.slug)).toEqual(['hidratacion-cotidiana']);
-    expect(after.body.library.articles[0].author_name).toBe('Equipo editorial Plan V');
+    expect(after.body.library.articles[0].author_name).toBe('Equipo editorial Nutridash');
     expect(after.body.library.articles[0].reviewed_at).toBeTruthy();
     expect(after.body.library.articles[0].cover_url).toBeNull();
 
