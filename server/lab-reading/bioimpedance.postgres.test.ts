@@ -26,7 +26,7 @@ create table consultation_completions(patient_id uuid,nutritionist_id uuid,compl
 create table meal_logs(patient_id uuid,logged_at timestamptz);
 create table habit_logs(patient_id uuid,logged_at timestamptz);
 create table push_subscriptions(user_id uuid,endpoint text);`);
-await db.exec(await readFile(new URL('../../supabase/migrations/20261031210000_bioimpedance_reviews.sql',import.meta.url),'utf8'));
+await db.exec(await readFile(new URL('../../supabase/migrations/20261031220000_bioimpedance_reviews.sql',import.meta.url),'utf8'));
 await db.exec("insert into consent_catalog values('measurement','measurement.v1',repeat('b',64))");
 await db.query("insert into consent_events(patient_id,purpose,decision,text_version,text_hash)values($1,'measurement','granted','measurement.v1',repeat('b',64))",[patient]);
 },30000);afterAll(async()=>{await db?.close();});

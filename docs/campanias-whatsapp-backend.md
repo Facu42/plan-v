@@ -31,7 +31,7 @@ La preview devuelve el catálogo exacto de correo/push. Para WhatsApp se usa tam
 
 ## Migraciones y habilitación futura
 
-SQL nuevo: `20261031200000_reactivation_campaigns.sql` y `20261031210000_bioimpedance_reviews.sql`. Solo se ensayaron en PostgreSQL local. Tablas con RLS, escrituras por funciones que verifican sesión/consultorio, funciones del worker solo para servicio. Sin modificación ni borrado de datos clínicos previos.
+SQL nuevo: `20261031200000_reactivation_campaigns.sql` y `20261031220000_bioimpedance_reviews.sql`. Solo se ensayaron en PostgreSQL local. Tablas con RLS, escrituras por funciones que verifican sesión/consultorio, funciones del worker solo para servicio. Sin modificación ni borrado de datos clínicos previos.
 
 Lista obligatoria para una habilitación futura (no ejecutada en esta tarea):
 
