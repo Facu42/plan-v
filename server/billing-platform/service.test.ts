@@ -80,12 +80,13 @@ describe('plan y gracia del alta', () => {
   });
   it('no ofrece gracia de alta a un cobro rechazado con gracia vencida', async () => {
     rows.clear();
-    rows.set('sub', { id: 'sub', status: 'past_due', plan_code: 'arranque', past_due_since: '2026-10-02T12:00:00Z' });
+    rows.set('sub', { id: 'sub', status: 'past_due', plan_code: 'arranque', past_due_since: '2026-09-01T12:00:00Z', init_point: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_id=pre-1' });
     vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-20T12:00:00Z'));
     try {
       const view = await planForNutritionist('nutri-1');
       expect(view.signup_grace).toBeNull();
       expect(view.subscription?.read_only).toBe(true);
+      expect(view.subscription?.init_point).toContain('mercadopago.com');
     } finally { rows.clear(); vi.restoreAllMocks(); }
   });
 });

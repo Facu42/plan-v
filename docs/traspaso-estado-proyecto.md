@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · Sandbox del cobro Nutridash con Mercado Pago en `feat/mp-sandbox`: gracia de 30 días si el cobro se rechaza, tests del webhook simulado y guía `docs/mp-sandbox.md`. Falta el token `TEST-` para el checkout real; no se usaron credenciales de producción. Sin merge ni producción.
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 

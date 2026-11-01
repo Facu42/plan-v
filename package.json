@@ -41,7 +41,8 @@
     "worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
     "start:api": "node scripts/with-env.mjs tsx server/index.ts",
     "start:worker": "node scripts/with-env.mjs tsx server/jobs/worker-main.ts",
-    "check:secrets": "node scripts/check-secrets.mjs"
+    "check:secrets": "node scripts/check-secrets.mjs",
+    "mp:sandbox": "node scripts/mp-platform-sandbox.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.53",

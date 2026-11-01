@@ -1,7 +1,8 @@
 /** Precios de Nutridash en centavos enteros. El 40% de fundador no se suma al 20% anual. */
 
 export const FOUNDER_CAP = 30;
-export const GRACE_MS = 7 * 24 * 60 * 60 * 1000;
+export const GRACE_DAYS = 30;
+export const GRACE_MS = GRACE_DAYS * 24 * 60 * 60 * 1000;
 export const ACTIVE_PATIENT_DAYS = 30;
 
 export const PLATFORM_PLANS = [

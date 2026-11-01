@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { cycleAmountCents, PLATFORM_PLANS } from './pricing.js';
+import { cycleAmountCents, GRACE_DAYS, GRACE_MS, PLATFORM_PLANS } from './pricing.js';
 import { preapprovalBody } from './mp-platform.js';
 
 describe('precios de Nutridash', () => {
+  it('la gracia por cobro rechazado dura 30 días', () => {
+    expect(GRACE_DAYS).toBe(30);
+    expect(GRACE_MS).toBe(30 * 24 * 60 * 60 * 1000);
+  });
+
   it('calcula la lista, el anual del 20% y la fundadora del 40% sin sumarlos', () => {
     const [arranque, pro, consultorio] = PLATFORM_PLANS;
     expect(cycleAmountCents(arranque.monthly_amount_cents, 'monthly', false)).toBe(2_490_000);

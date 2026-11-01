@@ -77,6 +77,7 @@ export function PlanNutridash() {
   return <>
     <div className="ajplan"><b>{sub?.founder ? 'Fundadora' : (sub?.plan_name ?? 'Sin plan')}</b><small>{sub?.founder && sub.founder_until ? `40% hasta el ${fecha(sub.founder_until)}` : sub ? `${sub.billing_cycle === 'annual' ? 'Anual' : 'Mensual'} · ${estado[sub.status] ?? sub.status}` : 'Elegí un plan para empezar'}</small></div>
     {sub?.attention ? <p className="nthint" role="status">{sub.attention}</p> : null}
+    {sub?.status === 'past_due' && sub.grace_until && !sub.read_only ? <p className="nthint" role="status">Tenés tiempo hasta el {fecha(sub.grace_until)} para regularizar. Después el panel pasa a solo lectura. Tus pacientes no pierden el acceso.</p> : null}
     {diasGracia && !gracia?.read_only ? <p className="nthint" role="status">{diasGracia} Podés seguir cargando pacientes.</p> : null}
     {sub?.read_only || gracia?.read_only ? <p className="nthint">Estás en solo lectura. Tus pacientes siguen viendo sus datos y los mensajes.</p> : null}
     {uso && plan ? <div className="ajuso">

@@ -8,7 +8,7 @@ La tabla vieja `organization_subscriptions` sigue siendo el permiso de atención
 
 Arranque 24.900, Pro 49.900, Consultorio 89.900 pesos por mes. El anual es 20% sobre 12 meses (Arranque 239.040, Pro 479.040, Consultorio 863.040). El 862.080 que figuraba en el brief no cierra con 89.900 × 12 × 0,8; manda la cuenta. La fundadora (primeras 30) tiene 40% durante 12 meses. Esos dos descuentos no se suman: si es fundadora, paga el 60% del precio de lista del ciclo que eligió. Al mes 13 el worker pasa el débito al precio de lista (el anual queda con su 20%). El cupo no vuelve si cancela.
 
-Una nutri nueva sin suscripción tiene acceso completo durante 30 días desde el alta (puede cargar pacientes). El día 31, si no pagó, el panel pasa a solo lectura sin borrar datos. Si un cobro se rechaza, hay 7 días de gracia y después solo lectura. La paciente no pierde sus datos ni Mensajes.
+Una nutri nueva sin suscripción tiene acceso completo durante 30 días desde el alta (puede cargar pacientes). El día 31, si no pagó, el panel pasa a solo lectura sin borrar datos. Si un cobro se rechaza, hay 30 días de gracia y después solo lectura. La paciente no pierde sus datos ni Mensajes.
 
 Paciente activa: no archivada y, en los últimos 30 días, tuvo una comida, un hábito, un mensaje, un turno, o fue dada de alta.
 
@@ -31,13 +31,15 @@ También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
 3. En Mercado Pago, apuntar el aviso a `https://<sitio>/api/public/billing/mp/webhook` (con y sin barra final) para los temas `subscription_preapproval`, `subscription_authorized_payment` y `payment`. El secreto tiene que ser el mismo que `MP_PLATFORM_WEBHOOK_SECRET`.
 4. Prender `PLATFORM_BILLING_ENABLED=1` en Railway.
 
-## Prueba en sandbox (pendiente de las claves)
+## Prueba en sandbox (pendiente de las claves TEST-)
+
+El detalle, el chequeo de nombres (sin secretos) y el aviso firmado solo a localhost están en [mp-sandbox.md](mp-sandbox.md). El 1/11 no había `MP_PLATFORM_ACCESS_TOKEN` con prefijo `TEST-`: no se inventó ni se usó un token de producción.
 
 1. Una nutricionista de prueba elige Arranque mensual y llega al enlace de Mercado Pago con 14.940 si entra en las 30, o 24.900 si no.
 2. Con el pago de prueba aprobado, el plan queda al día.
 3. Un aviso con firma inválida responde 401 y no escribe.
 4. El mismo aviso dos veces no duplica el pago.
-5. Un rechazo deja el plan en deuda, con el aviso en Ajustes, y a los 7 días pasa a solo lectura sin cortar a la paciente.
+5. Un rechazo deja el plan en deuda, con el aviso en Ajustes, y a los 30 días pasa a solo lectura sin cortar a la paciente.
 
 ## Informe Regression Guard (Paso 10)
 
@@ -45,7 +47,7 @@ También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
   - Cálculo de precios en centavos (mensual, anual -20%, fundadora -40% sin sumar descuentos): ✅ cubierto (`server/billing-platform/pricing.test.ts`).
   - Alta de preapproval con token de plataforma, monto del servidor e idempotencia (`X-Idempotency-Key`): ✅ cubierto (`server/billing-platform/service.test.ts`).
   - Webhook de Mercado Pago (firma HMAC-SHA256, vencimiento de `ts`, idempotencia por evento, consulta remota a MP, fallo 503): ✅ cubierto (`server/billing-platform/routes.test.ts`).
-  - Máquina de estados, gracia de 7 días en `past_due`, modo solo lectura sin cortar al paciente y topes de admisión/fotos IA: ✅ cubierto (`server/billing-platform/state.test.ts`).
+  - Máquina de estados, gracia de 30 días en `past_due`, modo solo lectura sin cortar al paciente y topes de admisión/fotos IA: ✅ cubierto (`server/billing-platform/state.test.ts`, `sandbox-flow.test.ts`).
   - Migración aditiva, cupo atómico de 30 fundadoras (`FOR UPDATE`) y aislamiento RLS entre nutricionistas: ✅ cubierto (`server/billing-platform/migration.postgres.test.ts`, `server/rls-ab.test.ts`).
   - Pantalla de plan en Ajustes v29 en claro y oscuro sin desborde: ✅ cubierto (`e2e/plan-nutridash.spec.ts`, `e2e/equipo-ajustes.spec.ts`).
   - No regresión del cobro nutri→paciente (`server/subscriptions/*`, `src/billing.ts`): ✅ cubierto (`server/subscriptions/*.test.ts`, `src/billing.test.ts`, `server/billing-flow.integration.test.ts`).
@@ -66,6 +68,10 @@ También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
 - **Automatizaciones nuevas:**
   - Tablas internas y manifiesto de migraciones verificados por `check:migrations`, `check:release-manifest`, `check:secrets` y `server/security/internal-tables.postgres.test.ts`.
 - **Veredicto:** **HOLD** (PR en borrador; requiere frase de Facundo para aplicar la migración en producción y cargar las variables en Railway).
+
+## Continuación sandbox · 1/11, Cursor
+
+Gracia por cobro rechazado: 30 días (antes 7). Tests de aviso firmado y guía en [mp-sandbox.md](mp-sandbox.md). Sin token `TEST-` no se hizo el checkout real. `PLATFORM_BILLING_SANDBOX=1` rechaza `APP_USR-`.
 
 ## Continuación del pulido · Regression Guard, paso 10 (1/11, Codex)
 
