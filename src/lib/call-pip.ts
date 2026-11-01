@@ -17,10 +17,11 @@ export type CallPipState = {
   phase: SummaryPhase;
   notice: string;
   sessionId: string;
+  meetUrl: string;
 };
 
 const closed: CallPipState = {
-  open: false, patientId: '', label: '', appointmentId: '', corner: 'right', x: null, y: null, phase: 'idle', notice: '', sessionId: '',
+  open: false, patientId: '', label: '', appointmentId: '', corner: 'right', x: null, y: null, phase: 'idle', notice: '', sessionId: '', meetUrl: '',
 };
 
 let state: CallPipState = closed;
@@ -44,16 +45,19 @@ export function resetCallPip() {
   emit(closed);
 }
 
-export function openCall(input: { patientId: string; label: string; appointmentId?: string }, enabled = embeddedVideoEnabled()) {
+export function openCall(input: { patientId: string; label: string; appointmentId?: string; meetUrl?: string }, enabled = embeddedVideoEnabled()) {
   if (!enabled || !input.patientId) return false;
+  const appointmentId = input.appointmentId ?? '';
   emit({
     ...state,
     open: true,
     patientId: input.patientId,
     label: input.label.trim().slice(0, 40) || 'Consulta',
-    appointmentId: input.appointmentId ?? '',
-    phase: 'idle',
-    notice: '',
+    appointmentId,
+    meetUrl: input.meetUrl?.startsWith('https://') ? input.meetUrl : '',
+    sessionId: state.appointmentId === appointmentId ? state.sessionId : '',
+    phase: state.appointmentId === appointmentId ? state.phase : 'idle',
+    notice: state.appointmentId === appointmentId ? state.notice : '',
   });
   return true;
 }
