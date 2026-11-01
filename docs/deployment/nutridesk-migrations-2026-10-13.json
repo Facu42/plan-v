@@ -179,6 +179,16 @@
       "sha256": "2d25ddfa1dce09a1910727dd767e431d0c050d78d75661e638646ec73809cd44"
     },
     {
+      "file": "20261031180000_habit_reminders.sql",
+      "version": "20261031180000",
+      "sha256": "5c9dd2897ad4d1a7b9b99d6498c6312c432a467ebe85e1499d10f3868dd9474e"
+    },
+    {
+      "file": "20261031210000_habit_reminders_policy_initplan.sql",
+      "version": "20261031210000",
+      "sha256": "11367fc96febf6337e3c03309e6716ed802a86a2ce9216bc9dc6275057c42375"
+    },
+    {
       "version": "20261031235550",
       "file": "20261031235550_security_definer_grants.sql",
       "sha256": "28cff8a42def3292d28c928f982447342223ea33073579d3a1d93193f58bd314"

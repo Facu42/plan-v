@@ -67,6 +67,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Recordatorios de comer, agua y dormir | Cursor | `work/recordatorios-push` | La paciente los prende y elige el horario en Avisos. Empiezan apagados. El aviso al teléfono no lleva datos de salud. Migración sin aplicar. Sin producción ni merge |
 | Pulido del alta de nutri | Codex, continuación autorizada de Cursor | `work/pulido-alta-nutri`, [PR #253](https://github.com/Facu42/plan-v/pull/253) | Primer setup sin colgar 40 s. 30 días de acceso completo desde el alta (sin 403 `platform_read_only`); día 31 solo lectura. Aviso con días restantes y Pagar. Plantillas Auth en castellano. Bandera de cobro sin tocar. Borrador. Sin migraciones ni producción |
 | Flecha de plegar el menú del panel | Cursor | `work/fix-sidebar-toggle` | Con el menú abierto la flecha quedaba cortada por la barra. Ahora se ve abierta y plegada, con el círculo del boceto v29. Sin producción ni merge |
 | Términos y privacidad: papeles de Nutridash | Cursor | `work/legal-nutridash` | Nutridash (Verónica Trenti) responsable de la plataforma; la nutricionista, de sus pacientes; Nutridash encargado (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Sin producción ni merge |
@@ -133,6 +134,7 @@ visto bueno de Facundo.
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
 | `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261030120000_platform_billing` | Cursor | Cobro de Nutridash a la nutri. Escrita el 30/10. Sin aplicar. Hace falta la frase de Facundo |
+| `20261031180000_habit_reminders` | Cursor | Recordatorios de comer, agua y dormir. Escrita el 31/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261020143000_patient_fee_checkouts` | Cursor | Escrita el 19/10, en `cursor/pago-mensual-unico`. Sin aplicar. Hace falta la frase de Facundo |
 
 ## 4. Decisiones vigentes de Facundo (fechadas)
@@ -153,6 +155,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **01/11 · Codex · Destrabe autorizado de #250** · Merge de `origin/main` fb5cb9bb en `work/recordatorios-push`, conservando ambas partes del conflicto documental. Corregidas las causas de verify: manifiesto completo y hashes, conteo exacto 33 pendientes/41 total y política RLS con initplan mediante migración correctiva nueva; original intacta. 30 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
+
+- **31/10 · Cursor · Recordatorios para comer, tomar agua y dormir** · Rama `work/recordatorios-push`. La paciente los configura en Avisos: tres horarios de comida, cada cuántas horas el agua y una hora para dormir. Empiezan apagados. El teléfono recibe un texto corto, sin datos de salud, si los avisos push ya están activos. La tabla nueva no se aplicó en producción.
 - **01/11 · Codex · Integración mecánica de #251** · Incorporado `origin/main` `4f137ba8`; conflictos únicamente documentales, conservando main y rama. Sin cambios manuales de código, sin merge de PR ni producción.
 
 - **01/11 · Codex · Integración mecánica de #248** · Incorporado `origin/main` `10c957d2` en la rama de legal; conflictos únicamente en coordinación y traspaso, conservando main y rama. Sin cambios manuales de código, sin merge de PR ni producción.

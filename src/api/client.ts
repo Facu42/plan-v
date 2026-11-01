@@ -7,6 +7,7 @@ import { resolveApiUrl } from './origin';
 import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../types/centro';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
+import type { HabitReminders } from '../habit-reminders';
 
 export { ApiError } from './error';
 
@@ -228,6 +229,11 @@ export const api = {
       `/api/notification-preferences${query ? `?${query}` : ''}`,
     );
   },
+
+  getHabitReminders: () => request<{ prefs: HabitReminders }>('/api/habit-reminders'),
+
+  saveHabitReminders: (prefs: HabitReminders) =>
+    request<{ prefs: HabitReminders }>('/api/habit-reminders', { method: 'PUT', body: JSON.stringify(prefs) }),
 
   saveNotificationPrefs: (
     prefs: { in_app: boolean; email: boolean; push: boolean },

@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 
+31/10 · Cursor · Recordatorios al teléfono para comer, tomar agua y dormir, configurables en Avisos de la paciente. Empiezan apagados. Migración `20261031180000_habit_reminders` sin aplicar. Rama `work/recordatorios-push`. Sin producción ni merge.
 1/11 · Cursor · Pulido del alta en `work/pulido-alta-nutri`: nutri nueva sin plan tiene 30 días de acceso completo; aviso con días restantes y botón Pagar; día 31 solo lectura sin borrar. Bandera de cobro sin tocar. Sin producción ni migraciones.
 
 31/10 · Cursor · Pulido del alta de nutricionista en `work/pulido-alta-nutri`: el primer setup no espera el mail de Auth; el consultorio abre con 30 días de prueba; plantillas de confirmación, clave y magic link en castellano Nutridash listas para cargar. Sin producción ni migraciones.
