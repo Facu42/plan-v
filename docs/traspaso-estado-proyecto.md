@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · Pantallas de campañas, estado de WhatsApp, bioimpedancia y borrador de laboratorio. Las tres banderas salen apagadas del servidor: sin ellas no se ve el menú ni se guarda ni se envía nada. Rama `cursor/campanas-ficha-lecturas-885d`. Sin migración nueva y sin producción.
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 

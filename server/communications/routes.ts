@@ -43,6 +43,13 @@ export function registerCommunicationRoutes(app:Hono) {
   const result=await getRequestDb().rpc('ops_create_broadcast',{p_key:parsed.data.request_key,p_template:parsed.data.template,p_language:parsed.data.language,p_patients:parsed.data.patient_ids,p_template_hash:parsed.data.template_hash});
   rpcError(result.error);return c.json({id:result.data},201);
  });
+ app.get('/api/portfolio/communications/whatsapp-status',async c=>{
+  const auth=c.get('auth');
+  await professional(auth);
+  const config=whatsappConfig();
+  if(!config)return c.json({configured:false,enabled:false,status:'unavailable' as const});
+  return c.json({configured:true,enabled:config.enabled,status:config.enabled?'ready' as const:'disabled' as const});
+ });
  app.get('/api/portfolio/communications/template',async c=>{
   const scope=await professional(c.get('auth')),config=whatsappConfig();if(!scope.persistent||!config)throw new CareError(503,'La cuenta oficial todavía no está configurada.');
   try{const text=await readApprovedTemplate(config,c.req.query('name')??'',c.req.query('language')??'');return c.json({text,hash:templateHash(text)});}

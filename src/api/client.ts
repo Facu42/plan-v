@@ -430,4 +430,81 @@ export const api = {
       `/api/patients/${patientId}/privacy/requests/${requestId}/package`,
       init,
     ),
+
+  features: (init?: RequestInit) => request<FeatureFlags>('/api/features', init),
+
+  campaigns: (init?: RequestInit) => request<CampaignBoard>('/api/portfolio/campaigns', init),
+
+  previewCampaign: (data: { segment: CampaignSegment; days: number }) =>
+    request<CampaignPreview>('/api/portfolio/campaigns/preview', { method: 'POST', body: JSON.stringify(data) }),
+
+  createCampaign: (data: CampaignCreate) =>
+    request<{ id: string }>('/api/portfolio/campaigns', { method: 'POST', body: JSON.stringify(data) }),
+
+  campaignPatient: (patientId: string, init?: RequestInit) =>
+    request<CampaignPatientStatus>(`/api/portfolio/campaigns/patients/${encodeURIComponent(patientId)}`, init),
+
+  whatsappStatus: (init?: RequestInit) =>
+    request<WhatsappPracticeStatus>('/api/portfolio/communications/whatsapp-status', init),
+};
+
+export type FeatureFlags = {
+  reactivation_campaigns: boolean;
+  bioimpedance: boolean;
+  lab_draft: boolean;
+};
+
+export const FEATURES_OFF: FeatureFlags = {
+  reactivation_campaigns: false,
+  bioimpedance: false,
+  lab_draft: false,
+};
+
+export function readFeatureFlags(value: unknown): FeatureFlags {
+  const record = value && typeof value === 'object' ? value as Record<string, unknown> : {};
+  return {
+    reactivation_campaigns: record.reactivation_campaigns === true,
+    bioimpedance: record.bioimpedance === true,
+    lab_draft: record.lab_draft === true,
+  };
+}
+
+export type CampaignSegment = 'no_consultation' | 'no_app_record';
+export type CampaignChannel = 'push' | 'email' | 'whatsapp';
+export type CampaignTemplate = { id: string; subject: string; text: string; path: string; hash: string };
+export type CampaignBoard = {
+  settings: { enabled: boolean; daily_limit: number };
+  quota: { daily_limit: number; used: number; remaining: number };
+  templates: CampaignTemplate[];
+  channels: Record<CampaignChannel, boolean>;
+  whatsapp_template: { name: string; hash: string } | null;
+  campaigns: Array<{ id: string; segment: CampaignSegment; days: number; channel: CampaignChannel; template: string; template_hash: string; created_at: string }>;
+  deliveries: Array<{ id: string; campaign_id: string | null; patient_id: string; channel: string; state: string; delivery_status: string | null; updated_at: string }>;
+  optouts: Array<{ patient_id: string; name: string; opted_out: true }>;
+};
+export type CampaignPreview = {
+  segment: { segment: CampaignSegment; days: number };
+  templates: CampaignTemplate[];
+  patients: Array<{ id: string; name: string; opted_out: boolean }>;
+  total: number;
+  max_recipients: number;
+};
+export type CampaignCreate = {
+  request_key: string;
+  segment: CampaignSegment;
+  days: number;
+  channel: CampaignChannel;
+  template: string;
+  template_hash: string;
+  patient_ids: string[];
+};
+export type CampaignPatientStatus = {
+  patient_id: string;
+  campaign_opted_out: boolean;
+  whatsapp: { configured: boolean; enabled: boolean; opted_out?: boolean; status?: 'unavailable' };
+};
+export type WhatsappPracticeStatus = {
+  configured: boolean;
+  enabled: boolean;
+  status: 'unavailable' | 'disabled' | 'ready';
 };
