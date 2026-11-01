@@ -166,7 +166,13 @@ describe('panel del servicio (PGlite)', () => {
     const before = (await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows;
     const migrations = new URL('../supabase/migrations/', import.meta.url);
     const migration = (await readdir(migrations)).find((name) => name.endsWith('_harden_nutrition_target_access.sql'))!;
-    await db.exec(await readFile(new URL(migration, migrations), 'utf8'));
+    // La cadena completa ya se aplicó en beforeAll. Para ensayar el arreglo
+    // de datos repetimos sólo su bloque DO, sin restaurar políticas históricas
+    // que migraciones posteriores reemplazaron.
+    const sql = await readFile(new URL(migration, migrations), 'utf8');
+    const repair = sql.match(/do \$\$\s*declare target uuid;[\s\S]*?end; \$\$;/i)?.[0];
+    expect(repair).toBeDefined();
+    await db.exec(repair!);
     expect((await db.query("select to_char(paid_until,'YYYY-MM-DD') as d from public.nutritionist_subscriptions where nutritionist_id=$1", [id])).rows[0]).toEqual({ d: '2027-01-31' });
     expect((await db.query('select * from public.service_payments where nutritionist_id=$1 order by months', [id])).rows).toEqual(before);
     await db.query('delete from public.nutritionists where id=$1', [id]);
