@@ -56,6 +56,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Página pública /slug, PDF con marca y mail de soporte | Cursor | `work/landing-nutri-pdf` | Editor de perfil (foto, bio, especialidades, modalidad, zona, precio, reserva, colores). `/slug` muestra ese recorte. El PDF del plan usa logo y colores de la nutri. Centro de ayuda con guías de arranque; el mail de soporte sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`, nunca un Gmail fijo. Sin migraciones ni producción |
 | Centro de mando en `/admin` | Cursor | `work/admin-centro-de-mando`, [PR #252](https://github.com/Facu42/plan-v/pull/252) | `/admin` muestra Resumen, Nutris, Pacientes, Cobros, Salud y Seguridad con datos reales de solo lectura. Sale Pipeline, Bandeja y Automatizaciones (datos de ejemplo). MFA aal2 obligatorio aunque MFA_ENFORCE esté apagado. Reemplaza #246. Sin migraciones ni producción |
 | Cobro de suscripciones Nutridash con MP | Cursor, brief de Codex, decisiones de Facundo del 30/10 | `work/cobro-suscripciones-mp` | Backend, webhook, límites y bloque de plan en Ajustes. Bandera apagada. Migración sin aplicar en producción. [Nota](cobro-plataforma.md) |
 | Bloqueantes del piloto simulado | Codex, autorizado por Facundo el 30/10 | `work/fix-bloqueantes-piloto` | 7 puntos resueltos: 501 agenda settings, 501 /api/team, consentimientos IA/foto, bucle React Planes, 403 UX historial, modal nuevo turno sin paciente preseleccionada, rebrand visible. Checks y sweep limpios. PR en draft, sin merge ni producción |
@@ -137,6 +138,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **1/11 · Cursor · Página pública /slug, PDF con marca y mail de soporte (HOLD)** · En Página pública → Editar perfil se cargan foto, bio, especialidades, modalidad, zona, precio, link de reserva y colores. Eso se ve en `nutridash.app/slug` (sin obras ni avisos internos). El PDF del plan toma logo de la marca y colores de esa página; si faltan, usa lima y tinta de Nutridash. El centro de ayuda suma alta, primera paciente, app y cobros; el mail de soporte sale de `SUPPORT_EMAIL` (Railway) o `VITE_SUPPORT_EMAIL` (Vercel), nunca un Gmail en el código. Sin migraciones. Tests de los archivos tocados y tipos en verde. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 
 - **31/10 · Cursor · Centro de mando en `/admin` (HOLD)** · `/admin` deja el CRM de ejemplo y pasa a ser el centro de mando: Resumen, Nutris, Pacientes, Cobros, Salud y Seguridad, con datos reales de solo lectura (conteos y cuentas; nunca clínicos). Seis GET nuevos bajo `/api/admin/centro/*` protegidos por admin + aal2 aunque MFA_ENFORCE esté apagado. Pipeline, Bandeja y Automatizaciones no se muestran. Sin migraciones. Pruebas de los archivos tocados 46/46 y tipos en verde; fire test: sumar 1 a nutris activas hizo fallar dos pruebas, se revirtió. Flujos: login/admin con sesión real ⚠️; contratos de los seis GET ✅. [PR #252](https://github.com/Facu42/plan-v/pull/252), reemplaza #246. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 

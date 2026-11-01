@@ -6,15 +6,26 @@ import { NvButton } from './primitives';
 import { PlanPrintPreview } from './PlanPrintPreview';
 import './plan-print.css';
 import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
-import type { ClinicBrand } from '../../types/nutrition-capabilities';
+import { schedulingApi } from '../../api/scheduling';
+import type { PlanPrintBrand } from './PlanPrintDocument';
 
 export function PlanPrintDialog({ plan, patientName, professionalName = '', demo, currentAllowed, onClose, options, action }: { options?: OpcionesPdf; action?: 'download' | 'print'; plan: ProfessionalMealPlan; patientName: string; professionalName?: string; demo: boolean; currentAllowed: boolean; onClose: () => void }) {
   const [selection, setSelection] = useState<'current' | 'published'>(currentAllowed ? 'current' : 'published');
   const [name, setName] = useState(professionalName), [ready, setReady] = useState(false), [error, setError] = useState('');
   const [html, setHtml] = useState('');
   const [downloading,setDownloading]=useState(false);
-  const[brand,setBrand]=useState<ClinicBrand|undefined>(),[brandReady,setBrandReady]=useState(false),[brandError,setBrandError]=useState('');
-  useEffect(()=>{const controller=new AbortController();nutritionCapabilityApi.settings(controller.signal).then(view=>{if(!controller.signal.aborted)setBrand(view.settings.brand);}).catch(()=>{if(!controller.signal.aborted)setBrandError('No pudimos consultar la marca del consultorio. Esta copia conserva la identidad de Nutridash.');}).finally(()=>{if(!controller.signal.aborted)setBrandReady(true);});return()=>controller.abort();},[]);
+  const[brand,setBrand]=useState<PlanPrintBrand|undefined>(),[brandReady,setBrandReady]=useState(false),[brandError,setBrandError]=useState('');
+  useEffect(()=>{const controller=new AbortController();
+    Promise.all([
+      nutritionCapabilityApi.settings(controller.signal),
+      schedulingApi.workspace(0,controller.signal).catch(()=>null),
+    ]).then(([view,agenda])=>{
+      if(controller.signal.aborted)return;
+      const extras=agenda?.profile.config.page_extras;
+      setBrand({...view.settings.brand,color:extras?.color,accent:extras?.accent});
+    }).catch(()=>{if(!controller.signal.aborted)setBrandError('No pudimos consultar la marca del consultorio. Esta copia conserva la identidad de Nutridash.');}).finally(()=>{if(!controller.signal.aborted)setBrandReady(true);});
+    return()=>controller.abort();
+  },[]);
   const version = selection === 'published' ? plan.published : currentAllowed ? plan.current : null;
   useEffect(() => {
     let active = true;
@@ -59,7 +70,7 @@ export function PlanPrintDialog({ plan, patientName, professionalName = '', demo
     <p>Elegí la copia a entregar y revisala. En la ventana de impresión podés elegir «Guardar como PDF». Esta acción no publica ni envía el plan.</p>
     {!currentAllowed && <p role="status">El formulario y el borrador guardado no coinciden. Guardá o recuperá los cambios antes de imprimir el borrador; la copia publicada sigue disponible.</p>}
     <div className="plan-print-options"><label>Copia del plan<select value={selection} onChange={event => { setReady(false); setSelection(event.target.value as 'current' | 'published'); }}><option value="current" disabled={!currentAllowed}>{plan.current.published_at ? 'Versión actual publicada' : 'Borrador guardado'} · v{plan.current.version}</option><option value="published" disabled={!plan.published}>Copia publicada{plan.published ? ` · v${plan.published.version}` : ' · no disponible'}</option></select></label><label>Nombre del profesional en el documento<input maxLength={160} value={name} placeholder="Opcional" onChange={event => { setReady(false); setName(event.target.value); }} /></label></div>
-    <p>El nombre profesional se usa en esta copia. El logo y contacto se toman de tu configuración nutricional.</p>
+    <p>El nombre profesional se usa en esta copia. El logo y contacto salen de tu marca; los colores, de tu página pública.</p>
     {brandError&&<p role="status">{brandError}</p>}
     {error && <p role="alert">{error}</p>}
     {version ? html ? <PlanPrintPreview html={html} title={`Vista previa del plan ${version.published_at ? 'publicado' : 'en borrador'} versión ${version.version}`} onReady={setReady} /> : <p role="status">Preparando la vista previa…</p> : <p>No hay una copia disponible para imprimir.</p>}

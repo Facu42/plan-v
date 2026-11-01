@@ -164,6 +164,7 @@ describe('deploy contract', () => {
     ]);
     expect(rewrites).toContainEqual({ source: '/api/billing/:path*', destination: 'https://api-production-aad6.up.railway.app/api/billing/:path*' });
     expect(rewrites).toContainEqual({ source: '/api/public/billing/:path*', destination: 'https://api-production-aad6.up.railway.app/api/public/billing/:path*' });
+    expect(rewrites).toContainEqual({ source: '/api/public/support', destination: 'https://api-production-aad6.up.railway.app/api/public/support' });
     const host = (value: string, destination: string) => ({ source: '/', has: [{ type: 'host', value }], destination });
     expect(rewrites).toContainEqual(host('nutridash-ar.vercel.app', '/nutris/index.html'));
     expect(rewrites).toContainEqual(host('nutridash.com.ar', '/nutris/index.html'));
