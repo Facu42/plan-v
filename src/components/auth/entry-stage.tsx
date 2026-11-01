@@ -36,7 +36,7 @@ export function EntryStage({ entrada }: { entrada: EntryEntrada }) {
   return (
     <aside className="entry-stage" data-entrada={entrada}>
       <span className="entry-stage-glow" aria-hidden="true" />
-      <img className="entry-stage-logo" src="/nutridash-logo-blanco.svg" alt="Nutridash" width="125" height="32" />
+      <span className="entry-stage-logo"><img src="/brand/nutridash-icon.png" alt="" width={44} height={44} /><span>nutridash</span></span>
       <div className="entry-stage-scene" role="img" aria-label={content.label}>
         {/* Escena propia (archivo del repo, no contenido de usuarios). */}
         <svg viewBox="0 0 480 300" aria-hidden="true" focusable="false" dangerouslySetInnerHTML={{ __html: content.scene }} />

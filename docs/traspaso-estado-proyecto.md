@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · Logo nuevo de Nutridash en el panel de la nutri: favicon, menú, ingreso, página pública y la app instalable. Los botones de acción principal pasan al degradé celeste–menta; los secundarios y la baja no. En Inicio los cinco números quedan arriba, visibles sin scroll, con una entrada suave. Rama `cursor/nutridash-logo-botones-inicio-bb46`. Sin producción ni merge.
+
 1/11 · Cursor · Lista de consultas de la profesional: con los tres permisos dados igual aparecía «Revisá los permisos de la paciente». La causa es un permiso de Postgres en la lectura de las consultas. Migración `20261101230000_consultation_session_visible.sql` sin aplicar. Sin producción ni merge.
 
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.

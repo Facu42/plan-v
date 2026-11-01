@@ -15,6 +15,7 @@ describe('Inicio v29', () => {
     for (const marca of ['class="iup"', 'id="pfil2"', 'id="plist"', 'id="alist"', 'id="det"', 'dv dvx dv-j', 'class="hoy"', 'id="rows"', 'class="kpis"']) expect(html).toContain(marca);
     for (const titulo of ['Pendientes', 'Necesitan atención', 'Consultas de hoy', 'Para hacer', 'Felicitar', 'Consultas de hoy', 'Pacientes activas', 'Adherencia al plan', 'Por cobrar']) expect(html).toContain(titulo);
     expect((html.match(/class="card kpi"/g) ?? []).length).toBe(5);
+    expect(html.indexOf('class="kpis"')).toBeLessThan(html.indexOf('class="iup"'));
   });
   it('enlaza las tareas reales y no inventa pacientes del boceto', () => {
     const html = renderToStaticMarkup(<PanelHomeView {...props} />);

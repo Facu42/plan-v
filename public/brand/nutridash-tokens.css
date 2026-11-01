@@ -1,0 +1,11 @@
+/* Marca Nutridash: el degradé del isotipo (celeste → menta) y la tinta que pasa AA encima. */
+:root {
+  --nd-cyan: #07d2fd;
+  --nd-mint: #03eac5;
+  --nd-cyan-deep: #00b7fa;
+  --nd-mint-deep: #02c9a8;
+  --nd-action-ink: #10241c;
+  --nd-action-ring: #0b3a32;
+  --nd-action: linear-gradient(118deg, var(--nd-cyan) 0%, var(--nd-mint) 100%);
+  --nd-action-hover: linear-gradient(118deg, var(--nd-cyan-deep) 0%, var(--nd-mint-deep) 100%);
+}
