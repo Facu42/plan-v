@@ -18,7 +18,7 @@ describe('videollamada embebida', () => {
     expect(embeddedVideoEnabled({})).toBe(false);
     expect(embeddedVideoEnabled({ VITE_EMBEDDED_VIDEO_CALL: '1' })).toBe(false);
     expect(embeddedVideoEnabled({ VITE_EMBEDDED_VIDEO_CALL: 'true' })).toBe(true);
-    expect(embeddedCallPlan(false)).toEqual({ enabled: false, recording: false, provider: null, fallback: 'meet' });
+    expect(embeddedCallPlan(false)).toEqual({ enabled: false, provider: 'livekit', connected: false, recording: 'consultation-consent', fallback: 'meet' });
   });
 
   it('con la bandera apagada el turno sigue en Meet y no hay sala', () => {
@@ -32,16 +32,13 @@ describe('videollamada embebida', () => {
     expect(html).not.toContain('livekit');
   });
 
-  it('con la bandera prendida la sala es local, sin grabar y sin proveedor', () => {
-    const html = renderToStaticMarkup(<EmbeddedVideoCall enabled />);
-    expect(html).toContain('data-embedded-video="local"');
-    expect(html).toContain('data-recording="off"');
-    expect(html).toContain('No graba');
-    expect(html).toContain('Meet sigue siendo el enlace');
-    expect(html).not.toContain('MediaRecorder');
+  it('con la bandera prendida el turno abre la sala y no se conecta a un proveedor', () => {
+    const html = renderToStaticMarkup(<EmbeddedVideoCall enabled patientId="p1" label="AR" />);
+    expect(html).toContain('Abrir sala');
+    expect(html).toContain('data-open-call="true"');
+    expect(html).not.toContain('wss://');
     expect(html).not.toContain('meet.jit.si');
     expect(html).not.toContain('daily.co');
-    expect(html).not.toContain('livekit');
     expect(html).not.toContain('Ana Ruiz');
   });
 });

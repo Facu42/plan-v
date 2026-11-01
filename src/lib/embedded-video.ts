@@ -5,5 +5,5 @@ export function embeddedVideoEnabled(env?: { VITE_EMBEDDED_VIDEO_CALL?: string }
 }
 
 export function embeddedCallPlan(enabled: boolean) {
-  return { enabled, recording: false as const, provider: null, fallback: 'meet' as const };
+  return { enabled, provider: 'livekit' as const, connected: false as const, recording: 'consultation-consent' as const, fallback: 'meet' as const };
 }
