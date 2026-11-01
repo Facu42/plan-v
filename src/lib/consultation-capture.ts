@@ -12,34 +12,39 @@ function encodeSegment(samples:Float32Array,sampleRate:number):Uint8Array {
  const padded=new Float32Array(minimum);padded.set(samples);return encodeConsultationWav(padded,sampleRate);
 }
 export type AudioPresence={microphone:boolean;remote:boolean;microphone_level:number;remote_level:number};
-export type ConsultationCapture={sources:AudioPresence;begin():void;stop():Promise<void>;dispose():void};
+export type ConsultationCapture={sources:AudioPresence;begin():void;pause():void;resume():void;stop():Promise<void>;dispose():void};
+/** Solo se guarda audio. El video de la pestaña no entra al archivo. */
+export function captureSample(started:boolean,paused:boolean){return started&&!paused;}
 async function requireRecordedConsent(authorize?:()=>Promise<boolean>) {
  let allowed=false;try{allowed=await authorize?.()===true;}catch{/* Fail closed if the saved permission cannot be read. */}
  if(!allowed)throw new Error('La paciente debe activar los permisos de grabación e IA antes de continuar.');
 }
-export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,index:number)=>void,onSources:(presence:AudioPresence)=>void,onInterruption:()=>void,authorize?:()=>Promise<boolean>):Promise<ConsultationCapture> {
- await requireRecordedConsent(authorize);
- if(!navigator.mediaDevices?.getDisplayMedia||!navigator.mediaDevices?.getUserMedia||!window.AudioContext)throw new Error('Este navegador no permite grabar la videollamada. Cargá un audio o una transcripción.');
- let mic:MediaStream|undefined,tab:MediaStream|undefined,ctx:AudioContext|undefined;let timer:ReturnType<typeof setInterval>|undefined;let disposed=false,started=false;
+export async function prepareConsultationCapture(onSegment:(audio:Uint8Array,index:number)=>void,onSources:(presence:AudioPresence)=>void,onInterruption:()=>void,authorize?:()=>Promise<boolean>,options?:{micOnly?:boolean;preconsented?:boolean}):Promise<ConsultationCapture> {
+ const micOnly=options?.micOnly===true;
+ if(!options?.preconsented)await requireRecordedConsent(authorize);
+ if((!micOnly&&!navigator.mediaDevices?.getDisplayMedia)||!navigator.mediaDevices?.getUserMedia||!window.AudioContext)throw new Error('Este navegador no permite grabar la videollamada. Cargá un audio o una transcripción.');
+ let mic:MediaStream|undefined,tab:MediaStream|undefined,ctx:AudioContext|undefined;let timer:ReturnType<typeof setInterval>|undefined;let disposed=false,started=false,paused=false;
  const clean=()=>{disposed=true;if(timer)clearInterval(timer);mic?.getTracks().forEach(t=>t.stop());tab?.getTracks().forEach(t=>t.stop());if(ctx&&ctx.state!=='closed')void ctx.close().catch(()=>undefined);};
  try {
-  // El video del compartir pantalla no se codifica ni se sube: solo entra el audio al WAV.
-  tab=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
-  for (const track of tab.getVideoTracks?.() ?? []) track.enabled = false;
+  if(!micOnly){
+   // Chrome pide video para compartir una pestaña. Ese video no se codifica ni se sube.
+   tab=await navigator.mediaDevices.getDisplayMedia({video:true,audio:true});
+   for (const track of tab.getVideoTracks?.() ?? []) track.enabled = false;
+  }
   try{mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true},video:false});}catch{clean();throw new Error('No se pudo activar el micrófono. Permití su acceso o cargá una grabación.');}
   ctx=new AudioContext();await ctx.resume();
   const processor=ctx.createScriptProcessor(4096,1,1),silent=ctx.createGain();silent.gain.value=0;processor.connect(silent);silent.connect(ctx.destination);
-  const sources:AudioPresence={microphone:mic.getAudioTracks().some(t=>t.readyState==='live'),remote:tab.getAudioTracks().some(t=>t.readyState==='live'),microphone_level:0,remote_level:0};
+  const sources:AudioPresence={microphone:mic.getAudioTracks().some(t=>t.readyState==='live'),remote:tab?.getAudioTracks().some(t=>t.readyState==='live')??false,microphone_level:0,remote_level:0};
   const levels:Array<{analyser:AnalyserNode;kind:'microphone'|'remote'}>=[];
-  for(const [stream,kind] of [[mic,'microphone'],[tab,'remote']] as const){if(!stream.getAudioTracks().length)continue;const source=ctx.createMediaStreamSource(new MediaStream(stream.getAudioTracks())),gain=ctx.createGain(),analyser=ctx.createAnalyser();gain.gain.value=0.7;source.connect(gain);gain.connect(processor);source.connect(analyser);levels.push({analyser,kind});}
+  for(const [stream,kind] of [[mic,'microphone'],[tab,'remote']] as const){const tracks=stream?.getAudioTracks()??[];if(!tracks.length)continue;const source=ctx.createMediaStreamSource(new MediaStream(tracks)),gain=ctx.createGain(),analyser=ctx.createAnalyser();gain.gain.value=0.7;source.connect(gain);gain.connect(processor);source.connect(analyser);levels.push({analyser,kind});}
   let buffers:Float32Array[]=[],count=0,index=0;
   const flush=()=>{if(!count)return;const samples=new Float32Array(count);let offset=0;for(const b of buffers){samples.set(b,offset);offset+=b.length;}buffers=[];count=0;onSegment(encodeSegment(samples,ctx!.sampleRate),index++);};
-  processor.onaudioprocess=event=>{if(!started||disposed)return;const b=new Float32Array(event.inputBuffer.getChannelData(0));buffers.push(b);count+=b.length;if(count>=ctx!.sampleRate*30)flush();};
-  const interrupted=()=>{if(disposed)return;onInterruption();sources.microphone=mic!.getAudioTracks().some(t=>t.readyState==='live');sources.remote=tab!.getAudioTracks().some(t=>t.readyState==='live');onSources({...sources});};
-  mic.getTracks().forEach(t=>t.addEventListener('ended',interrupted));tab.getTracks().forEach(t=>t.addEventListener('ended',interrupted));
+  processor.onaudioprocess=event=>{if(!captureSample(started,paused)||disposed)return;const b=new Float32Array(event.inputBuffer.getChannelData(0));buffers.push(b);count+=b.length;if(count>=ctx!.sampleRate*30)flush();};
+  const interrupted=()=>{if(disposed)return;onInterruption();sources.microphone=mic!.getAudioTracks().some(t=>t.readyState==='live');sources.remote=tab?.getAudioTracks().some(t=>t.readyState==='live')??false;onSources({...sources});};
+  mic.getTracks().forEach(t=>t.addEventListener('ended',interrupted));tab?.getTracks().forEach(t=>t.addEventListener('ended',interrupted));
   timer=setInterval(()=>{for(const {analyser,kind}of levels){const values=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(values);const rms=Math.sqrt(values.reduce((sum,v)=>sum+v*v,0)/values.length);if(kind==='microphone')sources.microphone_level=rms;else sources.remote_level=rms;}onSources({...sources});},500);
   onSources({...sources});
-  return {sources,begin(){started=true;},async stop(){started=false;flush();processor.disconnect();clean();},dispose(){processor.disconnect();clean();}};
+  return {sources,begin(){started=true;paused=false;},pause(){paused=true;},resume(){paused=false;started=true;},async stop(){started=false;paused=false;flush();processor.disconnect();clean();},dispose(){processor.disconnect();clean();}};
  }catch(error){clean();throw error;}
 }
 

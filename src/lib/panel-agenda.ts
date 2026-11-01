@@ -1,5 +1,6 @@
 import type { Patient } from '../types';
 import type { SchedulingBooking, SchedulingSettings } from '../types/scheduling';
+import { meetLink } from './video-call-window';
 
 export const AGENDA_ZONE = 'America/Argentina/Buenos_Aires';
 const DAY_NAMES = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -17,6 +18,7 @@ export type PanelAgendaEvent = {
   endMin: number;
   patientId?: string;
   bookingId?: string;
+  meetUrl?: string;
 };
 
 export const agendaDay = (date: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: AGENDA_ZONE }).format(date);
@@ -116,7 +118,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
     if (!inRange(day)) continue;
     const type = settings?.types.find(item => item.id === booking.type_id);
     const tone = booking.status === 'requested' ? 'pendiente' : toneFor(type?.channel ?? 'presencial', type?.name ?? '', false);
-    const event = eventFromRange(`book:${booking.id}`, tone, booking.contact_name, type?.name || (booking.status === 'requested' ? 'Por confirmar' : 'Consulta'), at, booking.duration_min, { patientId: booking.patient_id ?? undefined, bookingId: booking.id });
+    const event = eventFromRange(`book:${booking.id}`, tone, booking.contact_name, type?.name || (booking.status === 'requested' ? 'Por confirmar' : 'Consulta'), at, booking.duration_min, { patientId: booking.patient_id ?? undefined, bookingId: booking.id, meetUrl: type?.channel === 'video' ? meetLink(booking.meet_url) || undefined : undefined });
     if (!event) continue;
     events.push(event);
     if (booking.patient_id) covered.add(`${booking.patient_id}:${day}:${event.startMin}`);
@@ -133,7 +135,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
         const day = agendaDay(at);
         const startMin = agendaClock(at).minutes;
         if (inRange(day) && !covered.has(`${patient.id}:${day}:${startMin}`)) {
-          const event = eventFromRange(`appt:${patient.id}`, toneFor(appointment.channel, appointment.when, first), patient.name, appointment.channel === 'video' ? 'Online' : 'Consultorio', at, appointment.duration, { patientId: patient.id });
+          const event = eventFromRange(`appt:${patient.id}`, toneFor(appointment.channel, appointment.when, first), patient.name, appointment.channel === 'video' ? 'Online' : 'Consultorio', at, appointment.duration, { patientId: patient.id, meetUrl: appointment.channel === 'video' ? meetLink(appointment.meet_url) || undefined : undefined });
           if (event) events.push(event);
         }
       }

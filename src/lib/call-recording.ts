@@ -1,6 +1,6 @@
 import { CONSULTATION_AI_VERSION, CONSULTATION_RECORDING_VERSION, type ConsultationCommand } from '../types/consultations';
 
-/** La grabación de la sala usa la consulta que ya existe. Sin los dos permisos no se manda audio. */
+/** El audio de Meet usa la consulta que ya existe. Sin los dos permisos no se manda audio. */
 export function recordingAllowed(consented: readonly string[]) {
   return consented.includes('consultation_recording') && consented.includes('ai_consultation');
 }
@@ -33,7 +33,7 @@ export function summaryNotice(phase: 'idle' | 'working' | 'ready' | 'failed' | '
 
 type Started = { id: string; revision: number };
 
-/** Manda el audio por la consulta existente. No llama a LiveKit ni a Daily. */
+/** Manda el audio por la consulta existente. No guarda video. */
 export async function recordCallWithConsent(input: {
   consented: readonly string[];
   chunks: readonly Uint8Array[];

@@ -66,14 +66,16 @@ describe('Agenda paciente Nutrigo', () => {
     expect(html).not.toContain('Abrir videollamada');
   });
 
-  it('muestra Entrar a la videollamada desde 10 minutos antes y no antes', () => {
+  it('abre Meet en otra pestaña desde 10 minutos antes y no antes', () => {
     const enTurno = { ...patient, appointment: { ...patient.appointment!, starts_at: '2026-11-01T13:00:00Z' } };
-    const dentro = renderToStaticMarkup(<ShowroomPatientAgenda patient={enTurno} now={new Date('2026-11-01T12:51:00Z')} onMessage={vi.fn()} storage={null} callEnabled />);
+    const dentro = renderToStaticMarkup(<ShowroomPatientAgenda patient={enTurno} now={new Date('2026-11-01T12:51:00Z')} onMessage={vi.fn()} storage={null} />);
     expect(dentro).toContain('Entrar a la videollamada');
-    const temprano = renderToStaticMarkup(<ShowroomPatientAgenda patient={enTurno} now={new Date('2026-11-01T12:49:00Z')} onMessage={vi.fn()} storage={null} callEnabled />);
+    expect(dentro).toContain('href="https://meet.example.com/ana"');
+    expect(dentro).toContain('target="_blank"');
+    const temprano = renderToStaticMarkup(<ShowroomPatientAgenda patient={enTurno} now={new Date('2026-11-01T12:49:00Z')} onMessage={vi.fn()} storage={null} />);
     expect(temprano).not.toContain('Entrar a la videollamada');
     const presencial = { ...enTurno, appointment: { ...enTurno.appointment, channel: 'presencial' } };
-    const noVideo = renderToStaticMarkup(<ShowroomPatientAgenda patient={presencial} now={new Date('2026-11-01T12:51:00Z')} onMessage={vi.fn()} storage={null} callEnabled />);
+    const noVideo = renderToStaticMarkup(<ShowroomPatientAgenda patient={presencial} now={new Date('2026-11-01T12:51:00Z')} onMessage={vi.fn()} storage={null} />);
     expect(noVideo).not.toContain('Entrar a la videollamada');
   });
 

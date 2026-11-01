@@ -48,7 +48,6 @@ import { ShowroomGrocery } from './ShowroomGrocery';
 import { ShowroomProgress } from './ShowroomProgress';
 import { ShowroomPatientDiary } from './ShowroomPatientDiary';
 import { ShowroomPatientAgenda } from './ShowroomPatientAgenda';
-import { CallPipHost } from './CallPip';
 import { ShowroomPatientPlan } from './ShowroomPatientPlan';
 import { ShowroomHealthyMenu } from './ShowroomHealthyMenu';
 import { ShowroomExercise } from './ShowroomExercise';
@@ -610,7 +609,6 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
         {compactHeader && page === 'inicio' && footer}
       </div>
     </div>
-    <CallPipHost />
     {menuOpen && <div className="nv-drawer-scrim" role="presentation" onClick={() => { setMenuOpen(false); menuButtonRef.current?.focus(); }} />}
     <nav className="nv-tabbar" aria-label="Secciones principales">
       {tabs.map((tab) => <button key={tab.id} type="button" aria-current={!pendingModule && page === tab.id ? 'page' : undefined} onClick={() => navigate(tab.id)}><span className="nv-tab-icon"><Icon name={tab.icon} size={22} />{tab.id === 'mensajes' && messageUnread > 0 && <b className="nv-tab-unread" aria-label={`${messageUnread} sin leer`}>{messageUnread > 9 ? '9+' : messageUnread}</b>}</span><span>{tab.label}</span></button>)}

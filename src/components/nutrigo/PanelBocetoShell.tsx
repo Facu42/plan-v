@@ -1,6 +1,6 @@
 import { createContext, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
-import { CallPipHost } from './CallPip';
+import { MeetAudioBar } from './MeetAudioBar';
 import { aplicarPrefsGuardadas } from './ajustes-prefs';
 import type { PanelV29IconName } from './panel-v29-icons';
 import '@fontsource/inter/latin-300.css';
@@ -116,7 +116,7 @@ export function PanelBocetoShell({ dark, collapsed, onCollapse, menuOpen, onMenu
       <nav className="mnav" aria-label="Accesos">{tabs.map(tab => <button type="button" key={tab.label} className={tab.on ? 'on' : undefined} onClick={() => { if (tab.href) onOpen(tab.href); else onMore(); }}>
         <PanelV29Icon name={tab.glyph} size={19} /><span>{tab.label}</span>{tab.count ? <b className="num">{tab.count}</b> : null}
       </button>)}</nav>
-      <CallPipHost />
+      <MeetAudioBar />
     </div>
   </div>;
 }
