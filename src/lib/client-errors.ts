@@ -1,4 +1,5 @@
 import { resolveApiUrl } from '../api/origin';
+import { track } from '../telemetry';
 
 export type ClientErrorKind = 'render' | 'error' | 'promise';
 
@@ -22,6 +23,7 @@ export function reportClientError(kind: ClientErrorKind, error: unknown, locatio
   const body = JSON.stringify({ kind, path: location.pathname.slice(0, 200), message: clientErrorMessage(error) });
   try {
     void fetch(resolveApiUrl('/api/client-errors'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body, keepalive: true }).catch(() => undefined);
+    track('client.error');
     return true;
   } catch {
     return false;

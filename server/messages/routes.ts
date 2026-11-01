@@ -11,6 +11,7 @@ import * as repo from './repository.js';
 import { writeOpsLog } from '../ops/log.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
 import { notifyPatientPush } from '../push/push.js';
+import { trackServer } from '../ops/telemetry.js';
 import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
 import { CareError } from '../care/errors.js';
 import { MAX_PROGRAMADAS, scheduleThreadMessages } from './scheduled.js';
@@ -85,6 +86,7 @@ export function registerMessageRoutes(app: Hono) {
         filename: body.filename,
       }, true);
       if (actor.role === 'nutri') notifyPatientPush(patientId, 'message');
+      trackServer('message.sent');
       await enqueueOutboxBestEffort({
         patient_id: patientId,
         event_type: 'thread_message',
@@ -113,6 +115,7 @@ export function registerMessageRoutes(app: Hono) {
       asset_id: body.asset_id,
       filename: body.filename,
     }, false);
+    trackServer('message.sent');
     await enqueueOutboxBestEffort({
       patient_id: patientId,
       event_type: 'thread_message',

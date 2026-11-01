@@ -1,6 +1,9 @@
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 
 31/10 · Cursor · Recordatorios al teléfono para comer, tomar agua y dormir, configurables en Avisos de la paciente. Empiezan apagados. Migración `20261031180000_habit_reminders` sin aplicar. Rama `work/recordatorios-push`. Sin producción ni merge.
+31/10 · Cursor · La flecha para plegar el menú del panel de la nutricionista se ve con la barra abierta y con la barra plegada. Rama `work/fix-sidebar-toggle`. Sin producción ni merge.
+31/10 · Cursor · Términos y privacidad: Nutridash (Verónica Trenti) es el responsable de la plataforma, la nutricionista de sus pacientes y Nutridash el encargado del tratamiento (art. 25, Ley 25.326). CUIT, domicilio y mail en [COMPLETAR]. Falta revisión de un abogado. Rama `work/legal-nutridash`. Sin producción ni merge.
+31/10 · Cursor · Monitoreo de errores y eventos básicos, apagado hasta que Facundo cargue SENTRY_DSN y VITE_SENTRY_DSN. Rama `work/monitoreo-errores`. Sin producción ni merge.
 
 30/10 · Cursor · Cobro de Nutridash a la nutricionista con Mercado Pago de la plataforma, en `work/cobro-suscripciones-mp`. No es el débito de la paciente. Bandera apagada y migración sin aplicar en producción. El detalle y los pasos de Facundo están en [cobro-plataforma.md](cobro-plataforma.md).
 

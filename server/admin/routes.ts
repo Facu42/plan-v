@@ -7,6 +7,7 @@ import { demoAiCheck, runAiCheck } from './ai-check.js';
 import { runFullAiCheck } from './ai-check-full.js';
 import { MFA_REQUIRED_MESSAGE, tokenAal } from '../security/mfa.js';
 import * as centro from './centro.js';
+import { registerAdminAudit } from './audit.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -73,6 +74,7 @@ function source(persistent: boolean) {
 }
 
 export function registerAdminRoutes(app: Hono) {
+  registerAdminAudit(app, requireAdmin);
   // Para mostrar el acceso al panel en el menú. En demo sólo con ?audience=admin.
   app.get('/api/admin/me', async (c) => {
     const auth = c.get('auth');
