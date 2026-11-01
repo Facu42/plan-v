@@ -168,6 +168,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **1/11 · Cursor · Verificación en dos pasos** · Rama `cursor/mfa-totp-admin-6902`. `/admin` exige el código de la app. La nutricionista lo activa en Ajustes → Seguridad y puede quitarlo. Si lo activó, la API pide el código. No se obliga a todo el consultorio. Sin migración aplicada ni producción.
 - **1/11 · Cursor · Página pública /slug, PDF con marca y mail de soporte (HOLD)** · En Página pública → Editar perfil se cargan foto, bio, especialidades, modalidad, zona, precio, link de reserva y colores. Eso se ve en `nutridash.app/slug` (sin obras ni avisos internos). El PDF del plan toma logo de la marca y colores de esa página; si faltan, usa lima y tinta de Nutridash. El centro de ayuda suma alta, primera paciente, app y cobros; el mail de soporte sale de `SUPPORT_EMAIL` (Railway) o `VITE_SUPPORT_EMAIL` (Vercel), nunca un Gmail en el código. Sin migraciones. Tests de los archivos tocados y tipos en verde. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 - **01/11 · Codex · Destrabe autorizado de #250** · Merge de `origin/main` fb5cb9bb en `work/recordatorios-push`, conservando ambas partes del conflicto documental. Corregidas las causas de verify: manifiesto completo y hashes, conteo exacto 33 pendientes/41 total y política RLS con initplan mediante migración correctiva nueva; original intacta. 30 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
 
