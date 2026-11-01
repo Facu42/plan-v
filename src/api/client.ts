@@ -235,6 +235,10 @@ export const api = {
   saveHabitReminders: (prefs: HabitReminders) =>
     request<{ prefs: HabitReminders }>('/api/habit-reminders', { method: 'PUT', body: JSON.stringify(prefs) }),
 
+  getHabitDiagnostics: () => request<{ suscripcion: boolean; prueba: boolean; avisos_activos: boolean }>('/api/habit-reminders/diagnostico'),
+
+  sendHabitTest: () => request<{ enviados: number }>('/api/habit-reminders/prueba', { method: 'POST' }),
+
   saveNotificationPrefs: (
     prefs: { in_app: boolean; email: boolean; push: boolean },
     patientId?: string,
