@@ -11,6 +11,7 @@ import { isLocalDemoAllowed, professionalDisplayName, PROFESSIONAL_SIGNUP_FLAG, 
 import { pendingInviteIdFromLocation, rememberPendingInvite, PENDING_INVITE_STORAGE_KEY } from './invite-link';
 import { useAppStore } from '../store/useAppStore';
 import { isPasswordRecovery, PASSWORD_RECOVERY_KEY } from './password-recovery';
+import { track } from '../telemetry';
 
 type AuthState = {
   loading: boolean;
@@ -197,6 +198,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) return { error: friendlyError(error.message) };
       setDemoMode(false);
+      track('auth.login');
       return {};
     },
     signUp: async (email, password, fullName, professional = false) => {
@@ -207,6 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         options: { emailRedirectTo: typeof window === 'undefined' ? undefined : `${window.location.origin}/`, data: { full_name: fullName, role: PUBLIC_SIGNUP_ROLE, ...legalAcceptance(), ...(professional ? { [PROFESSIONAL_SIGNUP_FLAG]: true } : {}) } },
       });
       if (error) return { error: friendlyError(error.message) };
+      track('auth.signup');
       return {};
     },
     requestPasswordReset: async (email) => {
