@@ -36,6 +36,8 @@
 
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+31/10 · Codex · Cierre autorizado del carril de Cursor `work/landing-nutri-pdf`: código ya commiteado y alineado con origin en `43689c03`; repetidos 43 tests puntuales (11 archivos) y los tres tsc de `npm run check`, todos verdes. Revisión estática detectó foto guardada inmediatamente en la marca y visible en /slug antes de «Publicar cambios» cuando no hay URL HTTPS; con URL HTTPS esa imagen conserva prioridad. Se documenta en el PR borrador contra main con paso 10 y HOLD para merge. Sin cambios de aplicación, migraciones, merge ni producción. La cifra anterior de 44 pruebas no se toma como verificación propia.
+
 20/10 · Claude · Panel de la nutri: [instrucciones pantalla por pantalla y fases nuevas A a I](panel-nutri-rediseno/instrucciones-boceto.md). El boceto se pasa como código; Claude desarrolla por fases y cada una se junta a main solo con el ok de Facundo.
 
 20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción. Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
