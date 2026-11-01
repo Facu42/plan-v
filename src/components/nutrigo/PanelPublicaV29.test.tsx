@@ -43,9 +43,9 @@ describe('Página pública con el HTML del boceto v29', () => {
   });
 
   it('muestra los bloques del boceto con lo guardado en page_extras', () => {
-    const conExtras = { ...config, page_extras: { license: 'MN 4521', area: 'Belgrano', specialties: ['Celiaquía'], insurers: [{ name: 'OSDE', mode: 'reintegro' as const, note: '' }, { name: 'Galeno', mode: 'copago' as const, note: '$10.000' }], discounts: { transfer: 10, cash: 10, card: 0 }, service_notes: { [config.types[0].id]: { instructions: 'Traé tus análisis.', who: 'patients' as const, insurer: true } } } };
+    const conExtras = { ...config, page_extras: { license: 'MN 4521', area: 'Belgrano', specialties: ['Celiaquía'], modality: 'ambas' as const, consult_price_minor: 3500000, booking_url: 'https://turno.example/vero', insurers: [{ name: 'OSDE', mode: 'reintegro' as const, note: '' }, { name: 'Galeno', mode: 'copago' as const, note: '$10.000' }], discounts: { transfer: 10, cash: 10, card: 0 }, service_notes: { [config.types[0].id]: { instructions: 'Traé tus análisis.', who: 'patients' as const, insurer: true } } } };
     const mi = renderToStaticMarkup(<PanelPublicaV29 {...props(0)} config={conExtras} />);
-    for (const texto of ['MN 4521 · Belgrano', 'Celiaquía', 'pubosl', 'Copago $10.000', 'Reintegro']) expect(mi).toContain(texto);
+    for (const texto of ['MN 4521 · Belgrano · Presencial y online', 'Celiaquía', 'Consulta $35.000', 'turno.example/vero', 'pubosl', 'Copago $10.000', 'Reintegro']) expect(mi).toContain(texto);
     const servicios = renderToStaticMarkup(<PanelPublicaV29 {...props(1)} config={conExtras} />);
     for (const texto of ['Solo pacientes', 'Traé tus análisis.', '10%', 'Descuentos por medio de pago', 'Duplicar']) expect(servicios).toContain(texto);
     const reservas = renderToStaticMarkup(<PanelPublicaV29 {...props(2)} config={conExtras} />);

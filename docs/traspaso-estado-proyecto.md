@@ -1,3 +1,6 @@
+# Traspaso del proyecto (actualización vigente: 2026-11-01)
+
+1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)
 
 31/10 · Cursor · Recordatorios al teléfono para comer, tomar agua y dormir, configurables en Avisos de la paciente. Empiezan apagados. Migración `20261031180000_habit_reminders` sin aplicar. Rama `work/recordatorios-push`. Sin producción ni merge.

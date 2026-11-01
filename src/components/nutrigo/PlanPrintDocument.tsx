@@ -12,8 +12,16 @@ import logo from '../../assets/nutridash-logo-256.png';
 import { PlanGuidanceView } from './PlanGuidance';
 import { clinicBrandSchema, type ClinicBrand } from '../../types/nutrition-capabilities';
 import { analyzePlanWeek, macroEnergyShare, type DayAnalysisLine } from '../../types/plan-day-analysis';
+import { brandHex, DEFAULT_BRAND_ACCENT, DEFAULT_BRAND_INK } from '../../lib/brand-pdf';
 
-export type PlanPrintCopy = { version: PlanVersionView; patientName: string; professionalName: string; demo: boolean; brand?:ClinicBrand; options?: OpcionesPdf };
+export type PlanPrintBrand = ClinicBrand & { color?: string; accent?: string };
+function printBrand(brand?: PlanPrintBrand) {
+  if (!brand) return undefined;
+  const { color, accent, ...clinic } = brand;
+  const parsed = clinicBrandSchema.safeParse(clinic);
+  return parsed.success ? { ...parsed.data, color, accent } : undefined;
+}
+export type PlanPrintCopy = { version: PlanVersionView; patientName: string; professionalName: string; demo: boolean; brand?:PlanPrintBrand; options?: OpcionesPdf };
 const amount = (value: number) => Number.isFinite(value) ? value.toLocaleString('es-AR', value !== 0 && Math.abs(value) < 0.0001 ? { maximumSignificantDigits: 4 } : { maximumFractionDigits: 4 }) : 'Cantidad sin confirmar';
 const declaredAmount = (value: number) => Number.isFinite(value) ? value.toLocaleString('es-AR', { maximumSignificantDigits: 15 }) : 'Cantidad sin confirmar';
 const dateLabel = (date: string) => date.split('-').reverse().join('/');
@@ -54,8 +62,7 @@ export function PlanPrintDocument({ version, patientName, professionalName, demo
   const dates = eachIsoDate(version.period_start, version.period_end);
   const purchases = options?.compras ? listaDeCompras(version.items, dates) : [];
   const published = Boolean(version.published_at);
-  const verifiedBrand=options?.logo !== false && brand ? clinicBrandSchema.safeParse(brand) : undefined;
-  const identity=verifiedBrand?.success?verifiedBrand.data:undefined;
+  const identity = options?.logo !== false ? printBrand(brand) : undefined;
   return <main className={options?.logo === false ? "pv-paper pv-monochrome" : "pv-paper"}><header className="pv-head"><div>{options?.logo !== false && <img src={identity?.logo||logo} alt={identity?.name||"Nutridash"} />}<span>{identity?.name||"Nutridash · Nutrición"}</span></div><p className={published ? 'pv-state' : 'pv-state pv-draft'}>{published ? 'PLAN PUBLICADO' : 'BORRADOR GUARDADO · NO PUBLICADO'} · v{version.version}</p></header>
     {identity?.contact&&<p>{identity.contact}</p>}
     <h1>Plan de alimentación</h1><p className="pv-patient">{patientName || 'Paciente seleccionado'}</p>{professionalName.trim() && <p>Profesional: {professionalName.trim()}</p>}
@@ -69,9 +76,14 @@ export function PlanPrintDocument({ version, patientName, professionalName, demo
     <footer>Versión {version.version} · {published ? `Publicada el ${new Date(version.published_at!).toLocaleDateString('es-AR', { timeZone: 'America/Argentina/Buenos_Aires' })}` : 'Borrador guardado, sin publicación'}. Las cantidades y fuentes corresponden a esta copia.</footer>
   </main>;
 }
-export const PLAN_PRINT_CSS = `@font-face{font-family:Inter;src:url("${interUrl}") format("woff2")} [data-week-break]{break-before:page}.pv-monochrome *{border-color:#555!important;color:#222!important;background:#fff!important}.pv-monochrome svg{filter:grayscale(1)}@page{size:A4;margin:16mm}*{box-sizing:border-box}body{overflow-wrap:anywhere;margin:0;color:#253129;background:#fff;font:14px/1.5 Inter,sans-serif}.pv-paper{max-width:780px;margin:0 auto;padding:32px}.pv-head{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid #91ad45;padding-bottom:14px}.pv-head>div{display:flex;align-items:center;gap:10px;font-weight:bold}.pv-head img{width:36px;height:36px;object-fit:contain}.pv-state{font-size:11px;letter-spacing:.04em}.pv-draft{color:#705219;border:1px solid #c6aa72;padding:10px;background:#fff9ea}.pv-patient{font-size:20px;font-weight:bold}h1{font-size:26px;margin-bottom:6px}h2{font-size:19px;margin-top:26px;border-bottom:1px solid #cdd5c9;padding-bottom:8px}h3{font-size:16px}h4{font-size:14px;margin:12px 0 4px}p{margin:6px 0}small{font-size:11px;color:#586457}.pv-meal{margin-bottom:16px;padding-left:12px;border-left:3px solid #b3ce70}.pv-component{margin-bottom:12px}.pv-meal,.pv-component{break-inside:avoid}.pv-note{white-space:pre-wrap;font-style:italic}li{margin-bottom:4px}footer{border-top:1px solid #cdd5c9;margin-top:28px;padding-top:12px;font-size:11px;color:#586457}h2,h3,h4{break-after:avoid}li,.pv-note{break-inside:avoid}p,li{orphans:3;widows:3}@media print{.pv-paper{max-width:none;padding:0}.pv-draft{background:#fff}body{print-color-adjust:exact}}`;
+export const PLAN_PRINT_CSS = `@font-face{font-family:Inter;src:url("${interUrl}") format("woff2")} [data-week-break]{break-before:page}.pv-monochrome *{border-color:#555!important;color:#222!important;background:#fff!important}.pv-monochrome svg{filter:grayscale(1)}@page{size:A4;margin:16mm}*{box-sizing:border-box}body{overflow-wrap:anywhere;margin:0;color:var(--pv-ink,#253129);background:#fff;font:14px/1.5 Inter,sans-serif}.pv-paper{max-width:780px;margin:0 auto;padding:32px}.pv-head{display:flex;align-items:center;justify-content:space-between;gap:16px;border-bottom:2px solid var(--pv-accent,#91ad45);padding-bottom:14px}.pv-head>div{display:flex;align-items:center;gap:10px;font-weight:bold}.pv-head img{width:36px;height:36px;object-fit:contain}.pv-state{font-size:11px;letter-spacing:.04em}.pv-draft{color:#705219;border:1px solid #c6aa72;padding:10px;background:#fff9ea}.pv-patient{font-size:20px;font-weight:bold}h1{font-size:26px;margin-bottom:6px}h2{font-size:19px;margin-top:26px;border-bottom:1px solid #cdd5c9;padding-bottom:8px}h3{font-size:16px}h4{font-size:14px;margin:12px 0 4px}p{margin:6px 0}small{font-size:11px;color:#586457}.pv-meal{margin-bottom:16px;padding-left:12px;border-left:3px solid var(--pv-accent,#b3ce70)}.pv-component{margin-bottom:12px}.pv-meal,.pv-component{break-inside:avoid}.pv-note{white-space:pre-wrap;font-style:italic}li{margin-bottom:4px}footer{border-top:1px solid #cdd5c9;margin-top:28px;padding-top:12px;font-size:11px;color:#586457}h2,h3,h4{break-after:avoid}li,.pv-note{break-inside:avoid}p,li{orphans:3;widows:3}@media print{.pv-paper{max-width:none;padding:0}.pv-draft{background:#fff}body{print-color-adjust:exact}}`;
+export function planPrintCss(brand?: PlanPrintBrand) {
+  const ink = brandHex(brand?.color, DEFAULT_BRAND_INK);
+  const accent = brandHex(brand?.accent, DEFAULT_BRAND_ACCENT);
+  return `${PLAN_PRINT_CSS}:root{--pv-ink:${ink};--pv-accent:${accent}}`;
+}
 export function planPrintHtml(copy: PlanPrintCopy) {
   const body = renderToStaticMarkup(<PlanPrintDocument {...copy} />);
   // React escapes every patient/professional/content string. No patient data in scripts or URLs.
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><title>Plan de alimentación · v${copy.version.version}</title><style>${PLAN_PRINT_CSS}</style></head><body>${body}</body></html>`;
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="referrer" content="no-referrer"><title>Plan de alimentación · v${copy.version.version}</title><style>${planPrintCss(copy.options?.logo === false ? undefined : copy.brand)}</style></head><body>${body}</body></html>`;
 }

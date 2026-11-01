@@ -3,6 +3,7 @@ import type { SchedulingSettings } from '../../types/scheduling';
 import { bookingHref, depositMode, withHalfDeposit } from '../../lib/panel-agenda';
 import { monthlyLabel, planDraftError } from '../../lib/panel-subscriptions';
 import { subscriptionsApi } from '../../api/subscriptions';
+import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
 import { ApiError } from '../../api/error';
 import { friendlyError } from '../../lib/error-messages';
 import type { SubscriptionPlan } from '../../types/subscriptions';
@@ -96,6 +97,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const [vista, setVista] = useState<VistaPublica>(0);
   const [servicio, setServicio] = useState(0);
   const [cajon, setCajon] = useState<{ cual: CajonPublica; id: string | null } | null>(null);
+  const [marcaLogo, setMarcaLogo] = useState('');
   const loadPlans = () => {
     subscriptionsApi.plans().then(result => setPlans(result.enabled === false ? null : result.plans.filter(plan => plan.status === 'active'))).catch(error => {
       if (error instanceof ApiError && error.status === 404) setPlans(null);
@@ -103,6 +105,11 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
     });
   };
   useEffect(loadPlans, []);
+  useEffect(() => {
+    const c = new AbortController();
+    nutritionCapabilityApi.settings(c.signal).then(view => { if (!c.signal.aborted) setMarcaLogo(view.settings.brand.logo || ''); }).catch(() => undefined);
+    return () => c.abort();
+  }, []);
   const config = draft ?? scheduling.config;
   const loaded = Boolean(scheduling.snapshot);
   useUnsavedChanges(Boolean(draft), scheduling.busy);
@@ -155,7 +162,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
   const setAviso = (clave: AvisoReserva, activo: boolean) => setDraft(conExtras(config, { notices: { ...config.page_extras?.notices, [clave]: activo } }));
   const setDia = (dia: number, activo: boolean) => setDraft({ ...config, weekly: conHorarioDelDia(config.weekly, dia, activo ? [HORARIO_NUEVO] : [], config.calendars[0].id) });
   return <>
-    <PanelPublicaV29 config={config} reservas={scheduling.snapshot?.bookings ?? []} publicada={published} sinPublicar={Boolean(draft)} link={pageUrl} planes={plans} mercadoPago={mercadoPago}
+    <PanelPublicaV29 config={config} reservas={scheduling.snapshot?.bookings ?? []} publicada={published} sinPublicar={Boolean(draft)} link={pageUrl} planes={plans} mercadoPago={mercadoPago} marcaLogo={marcaLogo}
       vista={vista} servicio={servicio} cargando={!loaded && !scheduling.error} error={scheduling.error} estado={planNotice || scheduling.status}
       onServicio={setServicio} onCajon={(cual, id) => setCajon({ cual, id: id ?? null })} onQuitarServicio={quitarServicio} onDuplicarServicio={duplicarServicio}
       onCopiar={copy} onDescargarQr={downloadQr} onAviso={setAviso} onDia={setDia}
@@ -165,7 +172,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
       onNuevoPlan={plans ? () => { setPlanNotice(''); setEditor('nuevo'); } : undefined}
       onPlan={plans ? (plan, visible) => { subscriptionsApi.updatePlan(plan.id, { expected_revision: plan.revision, public_visible: visible }).then(loadPlans).catch(error => setPlanNotice(friendlyError(error))); } : undefined}
       conexiones={<PanelConnections connected={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: mercadoPago }} onConnect={key => void scheduling.connect(key)} onDisconnect={key => void scheduling.disconnect(key)} />} />
-    {cajon?.cual === 'perfil' && <CajonPerfil {...comun} />}
+    {cajon?.cual === 'perfil' && <CajonPerfil {...comun} onFoto={setMarcaLogo} fotoInicial={marcaLogo} />}
     {cajon?.cual === 'lugar' && <CajonLugar {...comun} />}
     {cajon?.cual === 'obras' && <CajonObras {...comun} />}
     {cajon?.cual === 'desc' && <CajonDescuentos {...comun} />}
@@ -173,7 +180,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
     {cajon?.cual === 'pide' && <CajonPide {...comun} />}
     {cajon?.cual === 'horarios' && <CajonHorarios {...comun} />}
     {cajon?.cual === 'reglas' && <CajonReglas onClose={cerrar} />}
-    {cajon?.cual === 'abrir' && <CajonV29 titulo="Tu página pública" sub={pageUrl.replace(/^https?:\/\//, '') || 'Sin publicar'} ok={false} onClose={cerrar}><div className="pubbig"><Celular config={config} publicados={config.types} /></div></CajonV29>}
+    {cajon?.cual === 'abrir' && <CajonV29 titulo="Tu página pública" sub={pageUrl.replace(/^https?:\/\//, '') || 'Sin publicar'} ok={false} onClose={cerrar}><div className="pubbig"><Celular config={config} publicados={config.types} marcaLogo={marcaLogo} /></div></CajonV29>}
     {editor && <div className="p5-dialog" role="dialog" aria-modal="true" aria-label={current ? 'Editar plan' : 'Nuevo plan'}>
       <PlanForm plan={current} canPublish={mercadoPago} onCancel={() => setEditor(null)} onSubmit={draft => {
         const problem = planDraftError(draft);

@@ -25,6 +25,10 @@
       "destination": "https://api-production-aad6.up.railway.app/api/public/billing/:path*"
     },
     {
+      "source": "/api/public/support",
+      "destination": "https://api-production-aad6.up.railway.app/api/public/support"
+    },
+    {
       "source": "/",
       "has": [
         {

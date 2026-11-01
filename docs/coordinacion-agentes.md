@@ -47,6 +47,10 @@
 
 # Coordinación entre agentes (Claude, Codex, Cursor)
 
+1/11 · Codex · Corrección de CI de PR #255 autorizada por Facundo en `work/landing-nutri-pdf`, incluyendo el fixture de admin sin cambiar su implementación: reloj fijo de octubre para el pago del fixture; selección explícita entre las dos guías de conciliación; recorrido signed-auth selecciona el día/mes argentino real de la consulta en curso después de recargar, incluso al cruzar medianoche. Logs leídos con `gh run view`: ambos e2e fallaban en la misma expectativa, verify en cobrado_mes y signed-auth en navegador después de aprobar sus 30 pruebas API. 43 pruebas puntuales, un e2e de filtros de Ayuda (Chrome local) y tres tsc aprobados; regresión de medianoche roja antes y verde después. El e2e también elige explícitamente Mensajes antes de comprobar su destino. Revisión independiente sin bloqueantes. No se ejecutó suite completa ni pila signed-auth local. Sin merge, migraciones ni producción. Informe del paso 10 actualizado en PR; sigue HOLD para merge.
+
+31/10 · Codex · Cierre autorizado del carril de Cursor `work/landing-nutri-pdf`: código ya commiteado y alineado con origin en `43689c03`; repetidos 43 tests puntuales (11 archivos) y los tres tsc de `npm run check`, todos verdes. Revisión estática detectó foto guardada inmediatamente en la marca y visible en /slug antes de «Publicar cambios» cuando no hay URL HTTPS; con URL HTTPS esa imagen conserva prioridad. Se documenta en el PR borrador contra main con paso 10 y HOLD para merge. Sin cambios de aplicación, migraciones, merge ni producción. La cifra anterior de 44 pruebas no se toma como verificación propia.
+
 20/10 · Claude · Panel de la nutri: [instrucciones pantalla por pantalla y fases nuevas A a I](panel-nutri-rediseno/instrucciones-boceto.md). El boceto se pasa como código; Claude desarrolla por fases y cada una se junta a main solo con el ok de Facundo.
 
 20/10 · Cursor · Se trajo `origin/main` (`f51f413`) a `cursor/pago-mensual-unico` ([PR #157](https://github.com/Facu42/plan-v/pull/157)) sin rebase. La fase 5 sigue integrada a main. Las correcciones del boceto van en el [PR #158](https://github.com/Facu42/plan-v/pull/158). No se toca `codex/panel-nutri-fase-6`. Sin merge, sin migración aplicada y sin producción. Pruebas: 3.244 aprobadas y 2 omitidas, en 511 archivos. Tipos en verde.
@@ -67,6 +71,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Página pública /slug, PDF con marca y mail de soporte | Cursor | `work/landing-nutri-pdf` | Editor de perfil (foto, bio, especialidades, modalidad, zona, precio, reserva, colores). `/slug` muestra ese recorte. El PDF del plan usa logo y colores de la nutri. Centro de ayuda con guías de arranque; el mail de soporte sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`, nunca un Gmail fijo. Sin migraciones ni producción |
 | Recordatorios de comer, agua y dormir | Cursor | `work/recordatorios-push` | La paciente los prende y elige el horario en Avisos. Empiezan apagados. El aviso al teléfono no lleva datos de salud. Migración sin aplicar. Sin producción ni merge |
 | Pulido del alta de nutri | Codex, continuación autorizada de Cursor | `work/pulido-alta-nutri`, [PR #253](https://github.com/Facu42/plan-v/pull/253) | Primer setup sin colgar 40 s. 30 días de acceso completo desde el alta (sin 403 `platform_read_only`); día 31 solo lectura. Aviso con días restantes y Pagar. Plantillas Auth en castellano. Bandera de cobro sin tocar. Borrador. Sin migraciones ni producción |
 | Flecha de plegar el menú del panel | Cursor | `work/fix-sidebar-toggle` | Con el menú abierto la flecha quedaba cortada por la barra. Ahora se ve abierta y plegada, con el círculo del boceto v29. Sin producción ni merge |
@@ -155,6 +160,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **1/11 · Cursor · Página pública /slug, PDF con marca y mail de soporte (HOLD)** · En Página pública → Editar perfil se cargan foto, bio, especialidades, modalidad, zona, precio, link de reserva y colores. Eso se ve en `nutridash.app/slug` (sin obras ni avisos internos). El PDF del plan toma logo de la marca y colores de esa página; si faltan, usa lima y tinta de Nutridash. El centro de ayuda suma alta, primera paciente, app y cobros; el mail de soporte sale de `SUPPORT_EMAIL` (Railway) o `VITE_SUPPORT_EMAIL` (Vercel), nunca un Gmail en el código. Sin migraciones. Tests de los archivos tocados y tipos en verde. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 - **01/11 · Codex · Destrabe autorizado de #250** · Merge de `origin/main` fb5cb9bb en `work/recordatorios-push`, conservando ambas partes del conflicto documental. Corregidas las causas de verify: manifiesto completo y hashes, conteo exacto 33 pendientes/41 total y política RLS con initplan mediante migración correctiva nueva; original intacta. 30 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
 
 - **31/10 · Cursor · Recordatorios para comer, tomar agua y dormir** · Rama `work/recordatorios-push`. La paciente los configura en Avisos: tres horarios de comida, cada cuántas horas el agua y una hora para dormir. Empiezan apagados. El teléfono recibe un texto corto, sin datos de salud, si los avisos push ya están activos. La tabla nueva no se aplicó en producción.

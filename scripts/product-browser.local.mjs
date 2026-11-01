@@ -271,7 +271,12 @@ try {
   try {
     const ongoing=(await pool.query("update public.appointments set starts_at=clock_timestamp()-interval '10 minutes' where id=$1 returning (starts_at at time zone 'America/Argentina/Buenos_Aires')::date::text as day",[originalAppointment.id])).rows[0];
     for(const actor of [patient,professional]) check((await read(actor,`/api/patients/${pid}`)).patient.appointment?.meet_url==='https://example.test/consulta','consulta en curso conserva el enlace para ambos roles');
-    await B('reload');await until("document.body.innerText.includes('Entrar a videollamada')");
+    await B('reload');
+    // Al cruzar medianoche (o mes), la consulta iniciada hace diez minutos pertenece al día anterior.
+    await B('wait','[aria-label="Elegir mes"]');
+    await B('fill','[aria-label="Elegir mes"]',ongoing.day.slice(0,7));
+    await B('click',`[data-calendar-date="${ongoing.day}"]`);
+    await until("document.body.innerText.includes('Entrar a videollamada')");
     check((await B('js',"Array.from(document.querySelectorAll('a')).some(a=>a.textContent.includes('Entrar a videollamada')&&a.getAttribute('href')==='https://example.test/consulta')")).includes('true'),'enlace de videollamada corresponde a la consulta vigente');
     check(true,'paciente mantiene la videollamada al recargar durante la consulta');
     await pool.query("update public.appointments set starts_at=clock_timestamp()-make_interval(mins=>duration_min+1) where id=$1",[originalAppointment.id]);
