@@ -56,10 +56,23 @@ export async function payerEmail(userId: string): Promise<string | null> {
   return data.user.email;
 }
 
-export async function nutritionistIdForUser(userId: string): Promise<string | null> {
-  const row = await db().from('nutritionists').select('id').eq('user_id', userId).maybeSingle();
+export async function nutritionistForUser(userId: string): Promise<{ id: string; created_at: string } | null> {
+  const row = await db().from('nutritionists').select('id,created_at').eq('user_id', userId).maybeSingle();
   if (row.error) raise(row.error);
-  return (row.data?.id as string | undefined) ?? null;
+  if (!row.data?.id) return null;
+  return { id: String(row.data.id), created_at: String(row.data.created_at ?? '') };
+}
+
+export async function nutritionistIdForUser(userId: string): Promise<string | null> {
+  const row = await nutritionistForUser(userId);
+  return row?.id ?? null;
+}
+
+export async function nutritionistCreatedAt(nutritionistId: string): Promise<number | null> {
+  const row = await db().from('nutritionists').select('created_at').eq('id', nutritionistId).maybeSingle();
+  if (row.error) raise(row.error);
+  const parsed = Date.parse(String(row.data?.created_at ?? ''));
+  return Number.isFinite(parsed) ? parsed : null;
 }
 
 export async function findOpenSubscription(nutritionistId: string): Promise<SubscriptionRow | null> {

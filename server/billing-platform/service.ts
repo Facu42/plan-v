@@ -7,7 +7,7 @@ import { noopInvoiceIssuer, type InvoiceIssuer } from './invoicing.js';
 import { loadRemote, minimalRaw, platformMercadoPago, preapprovalBody } from './mp-platform.js';
 import { cycleAmountCents, pesosFromCents, planByCode, catalog } from './pricing.js';
 import * as repo from './repository.js';
-import { accessMode, graceUntil, reduceBilling, type SubscriptionSnap } from './state.js';
+import { accessMode, graceUntil, platformWriteAccess, reduceBilling, signupGraceDaysLeft, signupGraceUntil, type SubscriptionSnap } from './state.js';
 import { argentinaMonth } from './limits.js';
 
 export type Notice = { dataId: string; requestId: string; signature: string; topic: string; now: number };
@@ -43,7 +43,10 @@ export async function planForNutritionist(nutritionistId: string) {
   const plan = open ? planByCode(open.plan_code) : null;
   const usage = await repo.usageOf(nutritionistId, argentinaMonth());
   const payments = open ? await repo.listPayments(open.id) : [];
-  const mode = accessMode(open, Date.now());
+  const now = Date.now();
+  const createdAt = await repo.nutritionistCreatedAt(nutritionistId);
+  const paidMode = accessMode(open, now);
+  const mode = platformWriteAccess(open, createdAt, now);
   return {
     enabled: true,
     founder_seats_left: await repo.founderSeatsLeft(),
@@ -64,13 +67,18 @@ export async function planForNutritionist(nutritionistId: string) {
       init_point: open.status === 'pending' ? open.init_point : null,
       attention: open.status === 'past_due' ? 'El último cobro fue rechazado. Actualizá el medio de pago para que Mercado Pago pueda reintentar.' : null,
     } : null,
+    signup_grace: paidMode === 'full' || (open && open.status !== 'pending') || createdAt == null ? null : {
+      days_left: signupGraceDaysLeft(createdAt, now) ?? 0,
+      until: signupGraceUntil(createdAt),
+      read_only: mode === 'read_only',
+    },
     usage,
     payments,
   };
 }
 
 export function disabledPlan() {
-  return { enabled: false, founder_seats_left: null, plans: [], subscription: null, usage: null, payments: [] };
+  return { enabled: false, founder_seats_left: null, plans: [], subscription: null, signup_grace: null, usage: null, payments: [] };
 }
 
 export async function checkout(input: { nutritionistId: string; userId: string; planCode: string; cycle: 'monthly' | 'annual'; clientRequestId: string }) {

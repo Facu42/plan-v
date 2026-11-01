@@ -1,7 +1,7 @@
 import type { Context, Next } from 'hono';
 import { billingEnabled } from './flag.js';
-import { findOpenSubscription, nutritionistIdForUser } from './repository.js';
-import { accessMode } from './state.js';
+import { findOpenSubscription, nutritionistForUser } from './repository.js';
+import { platformWriteAccess } from './state.js';
 
 const OPEN = ['/api/billing', '/api/public/billing', '/api/auth', '/api/me', '/api/admin', '/api/notices', '/api/notification-preferences'];
 
@@ -16,10 +16,11 @@ export function createPlatformReadOnlyGuard() {
     const auth = c.get('auth');
     if (!auth || !('userId' in auth)) return next();
     try {
-      const nutritionistId = await nutritionistIdForUser(auth.userId);
-      if (!nutritionistId) return next();
-      const open = await findOpenSubscription(nutritionistId);
-      if (accessMode(open, Date.now()) === 'full') return next();
+      const nutri = await nutritionistForUser(auth.userId);
+      if (!nutri) return next();
+      const open = await findOpenSubscription(nutri.id);
+      const createdAt = Date.parse(nutri.created_at);
+      if (platformWriteAccess(open, Number.isFinite(createdAt) ? createdAt : null, Date.now()) === 'full') return next();
     } catch {
       return next();
     }

@@ -2,5 +2,6 @@
 .nv-service-notice{display:grid;gap:4px;margin:0 var(--nv-content-pad,24px) 16px;padding:14px 16px;border-radius:var(--nv-r-card,16px);background:var(--nv-gold-soft);color:var(--nv-ink)}
 .nv-service-notice strong{font-size:14px}
 .nv-service-notice p{margin:0;font-size:13px;line-height:1.5}
+.nv-service-notice .nv-service-pay{justify-self:start;margin-top:8px;padding:6px 14px;border-radius:999px;background:var(--nv-ink);color:var(--nv-paper,#fff);font-size:13px;font-weight:600;text-decoration:none}
 .nv-service-blocked{background:var(--nv-coral-soft)}
 @media(max-width:799px){.nv-service-notice{margin:0 16px 16px}}

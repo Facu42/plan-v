@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { checkout } from './service.js';
+import { checkout, planForNutritionist, disabledPlan } from './service.js';
 
 const rows = new Map<string, Record<string, unknown>>();
 const created: Array<Record<string, unknown>> = [];
 
 vi.mock('./repository.js', () => ({
+  nutritionistCreatedAt: async () => Date.parse('2026-10-01T12:00:00Z'),
+  usageOf: async () => ({ active_patients: 0, nutritionists: 1, ai_photos: 0 }),
+  listPayments: async () => [],
+  founderSeatsLeft: async () => 30,
   payerEmail: async () => 'nutri@example.test',
   findByClientRequest: async (_nid: string, key: string) => [...rows.values()].find((row) => row.client_request_id === key) ?? null,
   findOpenSubscription: async () => [...rows.values()].find((row) => ['pending', 'authorized', 'paused', 'past_due'].includes(String(row.status))) ?? null,
@@ -60,5 +64,28 @@ describe('alta con el token de la plataforma', () => {
       auto_recurring: { frequency: 1, transaction_amount: 14940, currency_id: 'ARS' },
     });
     expect(JSON.stringify(created[0].body)).not.toContain('free_trial');
+  });
+});
+
+describe('plan y gracia del alta', () => {
+  it('informa días restantes y solo lectura al cumplir 30 días', async () => {
+    rows.clear();
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-30T12:00:00Z'));
+    try {
+      expect((await planForNutritionist('nutri-1')).signup_grace).toEqual({ days_left: 1, until: '2026-10-31T12:00:00.000Z', read_only: false });
+      vi.mocked(Date.now).mockReturnValue(Date.parse('2026-10-31T12:00:00Z'));
+      expect((await planForNutritionist('nutri-1')).signup_grace).toMatchObject({ days_left: 0, read_only: true });
+      expect(disabledPlan()).toMatchObject({ enabled: false, signup_grace: null });
+    } finally { vi.restoreAllMocks(); }
+  });
+  it('no ofrece gracia de alta a un cobro rechazado con gracia vencida', async () => {
+    rows.clear();
+    rows.set('sub', { id: 'sub', status: 'past_due', plan_code: 'arranque', past_due_since: '2026-10-02T12:00:00Z' });
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-20T12:00:00Z'));
+    try {
+      const view = await planForNutritionist('nutri-1');
+      expect(view.signup_grace).toBeNull();
+      expect(view.subscription?.read_only).toBe(true);
+    } finally { rows.clear(); vi.restoreAllMocks(); }
   });
 });
