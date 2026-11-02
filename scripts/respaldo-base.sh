@@ -22,23 +22,35 @@ exigir() {
 }
 
 cifrar() {
+  local entrada="${1:-$plano}"
   if [ "${#BACKUP_ENCRYPTION_KEY}" -lt 16 ]; then
     echo "La clave de cifrado tiene que tener al menos 16 caracteres." >&2
     exit 1
   fi
   openssl enc -aes-256-cbc -pbkdf2 -iter 200000 -salt \
-    -in "$plano" -out "$cifrado" -pass env:BACKUP_ENCRYPTION_KEY
+    -in "$entrada" -out "$cifrado" -pass env:BACKUP_ENCRYPTION_KEY
 }
 
 descifrar() {
+  local abierto="$trabajo/abierto"
   openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 \
-    -in "$cifrado" -out "$plano" -pass env:BACKUP_ENCRYPTION_KEY
+    -in "$cifrado" -out "$abierto" -pass env:BACKUP_ENCRYPTION_KEY
+  local firma
+  firma="$(head -c 5 "$abierto" || true)"
+  if [ "$firma" = "PGDMP" ]; then
+    cp "$abierto" "$plano"
+    rm -f "$trabajo/auth.dump"
+  else
+    tar -xf "$abierto" -C "$trabajo"
+    cp "$trabajo/app.dump" "$plano"
+  fi
+  rm -f "$abierto"
 }
 
 preparar_restauracion() {
-  # El volcado trae public y private. auth, storage y extensions no se vuelcan:
-  # son del proyecto de Supabase. Sin estos huecos, una vista o una función
-  # que los nombra no se puede crear en un Postgres vacío.
+  # El volcado trae public, private y las filas de auth.users.
+  # storage, extensions y el resto de auth no se vuelcan: son del proyecto
+  # de Supabase. Sin estos huecos, una vista o una función no se puede crear.
   psql "$1" -v ON_ERROR_STOP=1 <<'SQL'
 do $$
 declare rol text;
@@ -69,23 +81,6 @@ create or replace function auth.uid() returns uuid language sql stable as $$ sel
 create or replace function auth.role() returns text language sql stable as $$ select 'authenticated'::text $$;
 create or replace function auth.jwt() returns jsonb language sql stable as $$ select '{}'::jsonb $$;
 create or replace function auth.email() returns text language sql stable as $$ select null::text $$;
-create table if not exists auth.users (
-  id uuid primary key,
-  aud text,
-  role text,
-  email text,
-  encrypted_password text,
-  email_confirmed_at timestamptz,
-  raw_app_meta_data jsonb,
-  raw_user_meta_data jsonb,
-  created_at timestamptz,
-  last_sign_in_at timestamptz,
-  phone text,
-  banned_until timestamptz,
-  deleted_at timestamptz,
-  is_anonymous boolean default false,
-  is_sso_user boolean default false
-);
 create table if not exists storage.buckets (
   id text primary key,
   name text,
@@ -121,10 +116,41 @@ argumentos_de_esquema() {
 
 volcar() {
   # La dirección queda en el entorno, no en los argumentos que se imprimen.
-  pg_dump --format=custom --no-owner --no-acl --file="$plano" ${2:-} "$1"
-  if [ ! -s "$plano" ]; then
+  local archivo="${3:-$plano}"
+  pg_dump --format=custom --no-owner --no-acl --file="$archivo" ${2:-} "$1"
+  if [ ! -s "$archivo" ]; then
     echo "El volcado salió vacío." >&2
     exit 1
+  fi
+}
+
+volcar_cuentas() {
+  # Sin las filas de auth.users, las claves de public (por ejemplo
+  # notification_preferences) no se pueden crear. identities entra si existe.
+  local args=()
+  local tabla
+  for tabla in users identities; do
+    if [ "$(psql "$1" -Atqc "select 1 from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'auth' and c.relname = '${tabla}' and c.relkind = 'r'")" = "1" ]; then
+      args+=("--table=auth.${tabla}")
+    fi
+  done
+  rm -f "$trabajo/auth.dump"
+  if [ "${#args[@]}" -eq 0 ]; then
+    return 0
+  fi
+  pg_dump --format=custom --no-owner --no-acl --file="$trabajo/auth.dump" "${args[@]}" "$1"
+  if [ ! -s "$trabajo/auth.dump" ]; then
+    echo "El volcado de las cuentas salió vacío." >&2
+    exit 1
+  fi
+}
+
+empaquetar() {
+  if [ -s "$trabajo/auth.dump" ]; then
+    tar -C "$trabajo" -cf "$trabajo/paquete.tar" app.dump auth.dump
+    printf '%s' "$trabajo/paquete.tar"
+  else
+    printf '%s' "$trabajo/app.dump"
   fi
 }
 
@@ -135,6 +161,53 @@ restaurar() {
   # Las funciones en SQL nombran tablas de auth que no hace falta ejecutar ahora.
   PGOPTIONS="${PGOPTIONS:-} -c check_function_bodies=off" \
     pg_restore --use-list="$lista" --no-owner --no-acl --exit-on-error --dbname="$1" "$plano"
+}
+
+restaurar_cuentas() {
+  # Carga auth.users (y identities) antes que public y private.
+  # Deja afuera triggers y claves que apuntan a otras tablas de auth:
+  # esas tablas no están en el volcado y el disparador vive en public.
+  [ -s "$trabajo/auth.dump" ] || return 0
+  local completa="$trabajo/auth-completa.toc"
+  local lista="$trabajo/auth.toc"
+  local una="$trabajo/auth-una.toc"
+  pg_restore --list "$trabajo/auth.dump" > "$completa"
+  : > "$lista"
+  while IFS= read -r line || [ -n "$line" ]; do
+    case "$line" in
+      ""|";"*) printf '%s\n' "$line" >> "$lista"; continue ;;
+    esac
+    case "$line" in
+      *" TRIGGER "*|*" POLICY "*|*" COMMENT "*|*" ACL "*|*" ROW SECURITY "*|*" RULE "*) continue ;;
+    esac
+    case "$line" in
+      *" FK CONSTRAINT "*)
+        printf '%s\n' "$line" > "$una"
+        local sql ref
+        sql="$(pg_restore --use-list="$una" -f - "$trabajo/auth.dump" 2>/dev/null || true)"
+        ref="$(printf '%s\n' "$sql" | grep -oiE 'REFERENCES[[:space:]]+(ONLY[[:space:]]+)?[^ (]+' | head -1 || true)"
+        case "$ref" in
+          *users|*identities|*'"users"'|*'"identities"') printf '%s\n' "$line" >> "$lista" ;;
+        esac
+        ;;
+      *) printf '%s\n' "$line" >> "$lista" ;;
+    esac
+  done < "$completa"
+  PGOPTIONS="${PGOPTIONS:-} -c check_function_bodies=off" \
+    pg_restore --use-list="$lista" --no-owner --no-acl --exit-on-error --dbname="$1" "$trabajo/auth.dump"
+}
+
+ciclo_aplicacion() {
+  local origen="$1"
+  local destino="$2"
+  volcar "$origen" "$(argumentos_de_esquema "$origen")" "$trabajo/app.dump"
+  volcar_cuentas "$origen"
+  cifrar "$(empaquetar)"
+  rm -f "$trabajo/app.dump" "$trabajo/paquete.tar" "$plano"
+  descifrar
+  preparar_restauracion "$destino"
+  restaurar_cuentas "$destino"
+  restaurar "$destino"
 }
 
 probar() {
@@ -191,12 +264,7 @@ produccion() {
   exigir psql
   exigir openssl
   local destino="${RESTORE_DATABASE_URL:?Falta RESTORE_DATABASE_URL}"
-  volcar "$SUPABASE_DB_URL" "$(argumentos_de_esquema "$SUPABASE_DB_URL")"
-  cifrar
-  rm -f "$plano"
-  descifrar
-  preparar_restauracion "$destino"
-  if ! restaurar "$destino"; then
+  if ! ciclo_aplicacion "$SUPABASE_DB_URL" "$destino"; then
     echo "La restauración falló. El archivo cifrado quedó para guardarlo." >&2
     exit 1
   fi
@@ -222,12 +290,7 @@ ensayar() {
     BACKUP_ENCRYPTION_KEY="$(openssl rand -base64 24)"
     export BACKUP_ENCRYPTION_KEY
   fi
-  volcar "$origen" "$(argumentos_de_esquema "$origen")"
-  cifrar
-  rm -f "$plano"
-  descifrar
-  preparar_restauracion "$destino"
-  restaurar "$destino"
+  ciclo_aplicacion "$origen" "$destino"
   echo "Restauración de ensayo ok."
 }
 

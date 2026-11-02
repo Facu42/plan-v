@@ -15,9 +15,9 @@ Esas copias las administra Supabase. Si el proyecto se borra o la cuenta se cier
 
 El workflow `.github/workflows/respaldo-base.yml` corre todos los días a las 03:30 de Argentina.
 
-1. Hace `pg_dump` de los esquemas `public` y `private`. El cliente es Postgres 17, el mismo mayor que la base de Supabase (17.6). Una versión menor se niega a volcar. `private` entra solo si existe.
-2. Cifra el archivo (AES-256, la clave no está en el repo).
-3. Lo restaura en un Postgres 17 vacío de la misma corrida y comprueba que haya tablas. Antes crea los huecos que Supabase trae y este volcado no: roles (`anon`, `authenticated`, `service_role` y los de auth/storage), esquemas `auth`, `storage` y `extensions`, y las funciones `auth.uid` y `storage.foldername`. La prueba de cada pull request usa el mismo cliente y el mismo contenedor, con una base de mentira.
+1. Hace `pg_dump` de los esquemas `public` y `private`, y de las filas de `auth.users` y `auth.identities` (si esa tabla existe). El cliente es Postgres 17, el mismo mayor que la base de Supabase (17.6). Una versión menor se niega a volcar. `private` entra solo si existe. Sin los usuarios, las claves que apuntan a `auth.users` no se pueden crear.
+2. Cifra el archivo (AES-256, la clave no está en el repo). Si hay cuentas, el archivo es un paquete con el volcado de la app y el de las cuentas.
+3. Lo restaura en un Postgres 17 vacío de la misma corrida y comprueba que haya tablas. Primero carga las cuentas y después `public` y `private`. Antes crea los huecos que Supabase trae y este volcado no: roles (`anon`, `authenticated`, `service_role` y los de auth/storage), esquemas `auth`, `storage` y `extensions`, y las funciones `auth.uid` y `storage.foldername`. La prueba de cada pull request usa el mismo cliente y el mismo contenedor, con una base de mentira.
 4. Guarda solo el archivo cifrado como artifact de GitHub, 14 días. Si la restauración falla, el archivo igual se guarda.
 
 En cada pull request corre la misma prueba con una base vacía de mentira. No usa secretos y no toca Supabase.
@@ -39,16 +39,22 @@ Sin esos dos secretos, la corrida diaria falla y no hay copia. La prueba de cada
 2. Descifrar. Exportá `BACKUP_ENCRYPTION_KEY` en esa terminal y no la pegues en el comando:
 
 ```bash
-openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in respaldo.dump.enc -out respaldo.dump -pass env:BACKUP_ENCRYPTION_KEY
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in respaldo.dump.enc -out respaldo.claro -pass env:BACKUP_ENCRYPTION_KEY
 ```
 
-3. Restaurar en un Postgres vacío de tu máquina, nunca en producción. `RESTORE_DATABASE_URL` es esa base local:
+3. Restaurar en un Postgres vacío de tu máquina, nunca en producción. Si el archivo descifrado empieza como un volcado (`PGDMP`), es uno solo. Si no, es un paquete: adentro están `auth.dump` (usuarios) y `app.dump` (el resto). Las cuentas van primero.
 
 ```bash
-pg_restore --no-owner --no-acl --dbname="$RESTORE_DATABASE_URL" respaldo.dump
+if head -c 5 respaldo.claro | grep -q PGDMP; then
+  pg_restore --no-owner --no-acl --dbname="$RESTORE_DATABASE_URL" respaldo.claro
+else
+  tar -xf respaldo.claro
+  pg_restore --no-owner --no-acl --dbname="$RESTORE_DATABASE_URL" auth.dump
+  pg_restore --no-owner --no-acl --dbname="$RESTORE_DATABASE_URL" app.dump
+fi
 ```
 
-Eso trae datos de pacientes. No lo subas a ningún chat ni lo dejes en una carpeta compartida.
+Eso trae datos de pacientes y las cuentas (mail y clave cifrada). No lo subas a ningún chat ni lo dejes en una carpeta compartida.
 
 ## Qué no hace
 

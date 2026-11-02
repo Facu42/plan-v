@@ -45,7 +45,12 @@ describe('respaldo de la base', () => {
     expect(scriptText).toContain('create schema if not exists storage');
     expect(scriptText).toContain('create schema if not exists extensions');
     expect(scriptText).toContain('create role service_role');
-    expect(scriptText).toContain('auth.users');
+    expect(scriptText).toContain('--table=auth.${tabla}');
+    expect(scriptText).toContain('for tabla in users identities');
+    expect(scriptText).toContain('restaurar_cuentas "$destino"');
+    const ciclo = scriptText.slice(scriptText.indexOf('ciclo_aplicacion()'));
+    expect(ciclo.indexOf('restaurar_cuentas "$destino"')).toBeGreaterThan(-1);
+    expect(ciclo.indexOf('restaurar_cuentas "$destino"')).toBeLessThan(ciclo.indexOf('restaurar "$destino"'));
     expect(scriptText).toContain('storage.foldername');
     expect(scriptText).toContain('check_function_bodies=off');
     expect(scriptText).toContain('argumentos_de_esquema');
