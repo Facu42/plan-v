@@ -5,6 +5,7 @@ import { crmWorkApi } from '../../api/crm-work';
 import type { MealLog, Patient } from '../../types';
 import type { CrmFeedItem } from '../../types/crm-feed';
 import type { CrmWorkItem } from '../../types/crm-work';
+import { MealReviewPanel } from '../crm/MealReviewPanel';
 import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
 import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
@@ -28,20 +29,30 @@ function Avatar({ name, initials, tone }: { name: string; initials: string; tone
 }
 
 function Foto({ url }: { url: string | null }) {
-  return <span className="sxpic" title="Foto del plato">{url ? <img src={url} alt="" /> : <PanelV29Icon name="img" size={14} />}</span>;
+  return <span className="sxpic cola-foto">{url ? <img src={url} alt="" /> : <PanelV29Icon name="img" size={14} />}</span>;
 }
 
 function Barras({ on }: { on: number | null }) {
   return <span className="sxdays" aria-hidden="true">{[0, 1, 2, 3, 4, 5, 6].map(dia => <i key={dia} className={on != null && dia < on ? 'on' : undefined} />)}</span>;
 }
 
-function Tarjeta({ titulo, meta, children }: { titulo: string; meta: string; children: ReactNode }) {
-  return <section className="fxp g"><header><h3>{titulo}</h3><span className="m">{meta}</span><span className="sp" /></header>{children}</section>;
+function Tarjeta({ titulo, meta, children, clase = '' }: { titulo: string; meta: string; children: ReactNode; clase?: string }) {
+  return <section className={`fxp g${clase ? ` ${clase}` : ''}`}><header><h3>{titulo}</h3><span className="m">{meta}</span><span className="sp" /></header>{children}</section>;
+}
+
+function EsqueletoCola() {
+  return <ul className="cola" aria-busy="true" aria-label="Cargando platos">
+    {[0, 1, 2].map(indice => <li className="cola-fila cola-skel" key={indice}>
+      <span className="sxpic cola-foto sk" />
+      <span className="cola-txt"><b className="sk" /><small className="sk" /></span>
+      <span className="cola-acts"><span className="sk" /><span className="sk" /></span>
+    </li>)}
+  </ul>;
 }
 
 export function PanelSeguimientoVista({
   tab, comidas, sentimientos, dias, pendientes, estado, mas, dialog, toast, pedir,
-  onConfirm, onAdjust, onComment, onVer, onSentir, onClose, onGuardarComentario, onPedir, onAbrir,
+  onConfirm, onAdjust, onComment, onVer, onSentir, onClose, onGuardarComentario, onPedir, onAbrir, editor,
 }: {
   tab: Tab;
   comidas: ComidaFila[];
@@ -62,29 +73,44 @@ export function PanelSeguimientoVista({
   onGuardarComentario: (texto: string) => void;
   onPedir: (pacienteId: string, dias: 7 | 14, comidas: string[], aviso: boolean) => void;
   onAbrir: (href: string) => void;
+  editor?: ReactNode;
 }) {
   const cargaron = dias.filter(fila => (fila.on ?? 0) > 0).length;
   const filas = estado === 'loading'
-    ? <p className="sxsub">Cargando comidas…</p>
+    ? <EsqueletoCola />
     : estado === 'error'
-      ? <p className="sxsub">No se pudieron cargar las comidas.</p>
+      ? <p className="cola-estado" role="alert">No pudimos traer las fotos. Volvé a intentar en un rato.</p>
       : comidas.length
-        ? comidas.map(comida => <div className="l" key={`${tab}:${comida.patientId}:${comida.id}`}>
-          <span className="sxmeal">
-            <Avatar name={comida.name} initials={comida.initials} tone={comida.tone} />
-            <Foto url={comida.photoUrl} />
-            <span className="sxwho"><b>{comida.title}</b><small>{comida.meta}</small></span>
-          </span>
-          <span className="sxacts">{tab === 'pend'
-            ? <><button type="button" className="chip" onClick={() => onConfirm(comida)}>Confirmar</button><button type="button" className="chip" onClick={() => onAdjust(comida)}>Ajustar</button><button type="button" className="chip" onClick={() => onComment(comida)}>Comentar</button></>
-            : <button type="button" className="chip" onClick={() => onVer(comida)}>Ver</button>}</span>
-        </div>)
-        : <p className="sxsub">No hay comidas en esta lista.</p>;
+        ? <ul className="cola" aria-label={tab === 'pend' ? 'Cola de fotos por revisar' : 'Fotos ya revisadas'}>
+          {comidas.map(comida => {
+            const detalle = [comida.title, comida.slot, comida.age || comida.when, comida.kcal ?? 'Sin estimación'].filter(Boolean).join(' · ');
+            return <li className="cola-fila" key={`${tab}:${comida.patientId}:${comida.id}`}>
+              <Foto url={comida.photoUrl} />
+              <span className="cola-txt">
+                <b>{comida.name}</b>
+                <small>
+                  <span>{detalle}</span>
+                  {tab === 'pend' ? <button type="button" className="cola-link" aria-label={`Comentar la comida de ${comida.name}`} onClick={() => onComment(comida)}>Comentar</button> : null}
+                </small>
+              </span>
+              <span className="cola-acts">{tab === 'pend'
+                ? <>
+                  <button type="button" className="cola-pri" aria-label={`Confirmar la comida de ${comida.name}`} onClick={() => onConfirm(comida)}>Confirmar</button>
+                  <button type="button" className="cola-sec" aria-label={`Ajustar la comida de ${comida.name}`} onClick={() => onAdjust(comida)}>Ajustar</button>
+                </>
+                : <button type="button" className="cola-sec" aria-label={`Ver la comida de ${comida.name}`} onClick={() => onVer(comida)}>Ver</button>}</span>
+            </li>;
+          })}
+        </ul>
+        : tab === 'pend'
+          ? <p className="cola-vacio"><b>Todo al día</b><span>No hay platos por revisar</span></p>
+          : <p className="cola-vacio"><b>Todo al día</b><span>No hay platos revisados en estos días.</span></p>;
   return <div id="s-seguimiento" className="sxw">
+    {editor}
     <div className="fx" data-mk="1" style={{ gridTemplateColumns: '1.22fr .9fr' }}>
       <div className="c">
-        <Tarjeta titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={tab === 'pend' ? `Cola fotos · ${pendientes} por revisar · la foto sale de la app` : `${pendientes} por revisar · la foto sale de la app`}>
-          <div className="fxs"><div className="fxr">{filas}</div>{mas && tab === 'pend' ? <p className="sxsub">Hay más por revisar. Seguí en la ficha.</p> : null}</div>
+        <Tarjeta clase="cola-fxp" titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={tab === 'pend' ? `Cola fotos · ${pendientes} por revisar · la foto sale de la app` : `${pendientes} por revisar · la foto sale de la app`}>
+          {filas}{mas && tab === 'pend' ? <p className="cola-estado">Hay más por revisar. Seguí en la ficha.</p> : null}
         </Tarjeta>
       </div>
       <div className="c">
@@ -207,6 +233,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
   const [mas, setMas] = useState(false);
   const [estado, setEstado] = useState<'loading' | 'ready' | 'error'>('loading');
   const [dialog, setDialog] = useState<Dialogo>(null);
+  const [ajuste, setAjuste] = useState<{ patient: Patient; log: MealLog } | null>(null);
   const [toast, setToast] = useState('');
   const [marca, setMarca] = useState(0);
   const ordenadas = [...patients].sort((a, b) => a.name.localeCompare(b.name, 'es'));
@@ -273,9 +300,11 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     return () => window.removeEventListener('keydown', cerrar);
   }, [dialog]);
 
-  const ajustar = (meal: ComidaFila) => {
-    if (meal.log) onReview(meal.log);
-    else avisar('Abrí la ficha para ajustar alimentos y macros.');
+  const abrirEditor = (meal: ComidaFila) => {
+    const persona = patients.find(patient => patient.id === meal.patientId);
+    if (meal.log && persona) { setAjuste({ patient: persona, log: meal.log }); return; }
+    if (meal.log) { onReview(meal.log); return; }
+    avisar('Abrí la ficha para ajustar alimentos y macros.');
   };
 
   const confirmar = async (meal: ComidaFila) => {
@@ -321,9 +350,10 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     pendientes={pendienteTotal} estado={estado} mas={mas} dialog={dialog} toast={toast}
     pedir={{ pacientes: ordenadas, aviso: true, dias: 7, comidas: [...COMIDAS_PEDIDO], pacienteId: ordenadas[0]?.id ?? '' }}
     onConfirm={meal => void confirmar(meal)}
-    onAdjust={ajustar}
+    onAdjust={abrirEditor}
     onComment={meal => setDialog({ kind: 'comentar', meal })}
-    onVer={meal => { if (meal.log) onReview(meal.log); else setDialog({ kind: 'ver', meal }); }}
+    onVer={meal => { if (meal.log) abrirEditor(meal); else setDialog({ kind: 'ver', meal }); }}
+    editor={ajuste ? <MealReviewPanel layout="card" patient={ajuste.patient} log={ajuste.log} onClose={() => { setAjuste(null); setMarca(valor => valor + 1); }} /> : null}
     onSentir={row => setDialog({ kind: 'sentir', row })}
     onClose={() => setDialog(null)}
     onGuardarComentario={texto => void comentar(texto)}

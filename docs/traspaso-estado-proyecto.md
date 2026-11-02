@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-02)
 
+2/11 · Cursor · Foto confirmada, la cola Confirmar/Ajustar y el editor quedan en la tarjeta de Seguimiento. Sin merge. Migración sin aplicar.
 2/11 · Cursor · Foto confirmada, la línea de tiempo de la paciente ya no arrastra la nota interna. Cifra: pasa con gaps. La migración sigue sin aplicar.
 
 2/11 · Cursor · Foto confirmada, primer corte: la paciente no ve la nota interna y el texto dice si la estimación sigue pendiente o ya la confirmó su nutricionista. El indicador no suma una comida floja ni una que sigue en revisión. La cola de fotos del panel sale de la más vieja. Migración `20261102140000_meal_photo_review_stamp.sql` sin aplicar. El permiso para subir la foto ya existe; no se escribió un texto legal nuevo. [Nota](foto-confirmada-p1.md). Sin producción ni merge.

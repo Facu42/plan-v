@@ -2,11 +2,11 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { HabitLog, Patient } from '../../types';
 import { PanelSeguimientoVista } from './PanelSeguimiento';
-import { animoDe, aguaDe, diasEtiqueta, fotoVisible, kcalLabel, mealWhen, ordenarColaFotos, sentimientoDe, sintomasDe, textoPedido } from './seguimiento-presentacion';
+import { animoDe, aguaDe, antiguedadDe, diasEtiqueta, fotoVisible, kcalLabel, mealWhen, ordenarColaFotos, sentimientoDe, sintomasDe, textoPedido } from './seguimiento-presentacion';
 
 const comida = {
   id: 'ml-1', patientId: 'p1', name: 'Sofía Gómez', initials: 'SG', tone: 'mint' as const,
-  slot: 'Desayuno', when: 'Hoy 8:10', title: 'Tostadas con palta', meta: 'Sofía Gómez · Desayuno · Hoy 8:10 · 420 kcal',
+  slot: 'Desayuno', when: 'Hoy 8:10', age: 'hace 2 h', kcal: '420 kcal', title: 'Tostadas con palta', meta: 'Sofía Gómez · Desayuno · hace 2 h · 420 kcal',
   photoUrl: null, href: '/crm/ficha?paciente=p1', log: null,
 };
 
@@ -25,15 +25,44 @@ describe('seguimiento, el dibujo', () => {
     expect(html).toContain('Comidas con foto');
     expect(html).toContain('Cómo se sienten');
     expect(html).toContain('Días registrados');
-    expect(html).toContain('class="sxmeal"');
-    expect(html).toContain('class="sxpic"');
+    expect(html).toContain('class="fxp g cola-fxp"');
+    expect(html).toContain('class="cola-fila"');
+    expect(html).toContain('class="sxpic cola-foto"');
+    expect(html).toContain('class="cola-pri"');
+    expect(html).toContain('class="cola-sec"');
+    expect(html).toContain('aria-label="Confirmar la comida de Sofía Gómez"');
+    expect(html).toContain('aria-label="Ajustar la comida de Sofía Gómez"');
+    expect(html).toContain('hace 2 h');
     expect(html).toContain('Confirmar');
     expect(html).toContain('Ajustar');
     expect(html).toContain('Cola fotos');
     expect(html).toContain('Comentar');
     expect(html).not.toContain('WhatsApp');
+    expect(html).not.toContain('Confianza');
+    expect(html).not.toContain('Nota IA');
+    expect(html).not.toContain('%');
     expect(html).toContain('sxdays');
     expect(html).toContain('class="on"');
+  });
+
+  it('sin platos dice que está todo al día y al cargar muestra el esqueleto menta', () => {
+    const vacio = renderToStaticMarkup(<PanelSeguimientoVista
+      tab="pend" comidas={[]} sentimientos={[]} dias={[]}
+      pendientes={0} estado="ready" mas={false} dialog={null} toast=""
+      pedir={{ pacientes: [], aviso: true, dias: 7, comidas: [], pacienteId: '' }}
+      onConfirm={vi.fn()} onAdjust={vi.fn()} onComment={vi.fn()} onVer={vi.fn()} onSentir={vi.fn()} onClose={vi.fn()} onGuardarComentario={vi.fn()} onPedir={vi.fn()} onAbrir={vi.fn()}
+    />);
+    expect(vacio).toContain('Todo al día');
+    expect(vacio).toContain('No hay platos por revisar');
+    const cargando = renderToStaticMarkup(<PanelSeguimientoVista
+      tab="pend" comidas={[]} sentimientos={[]} dias={[]}
+      pendientes={0} estado="loading" mas={false} dialog={null} toast=""
+      pedir={{ pacientes: [], aviso: true, dias: 7, comidas: [], pacienteId: '' }}
+      onConfirm={vi.fn()} onAdjust={vi.fn()} onComment={vi.fn()} onVer={vi.fn()} onSentir={vi.fn()} onClose={vi.fn()} onGuardarComentario={vi.fn()} onPedir={vi.fn()} onAbrir={vi.fn()}
+    />);
+    expect(cargando).toContain('cola-skel');
+    expect(cargando).toContain('aria-busy="true"');
+    expect(cargando).not.toContain('Estamos trayendo');
   });
 
   it('pedir registro avisa solo por la app', () => {
@@ -56,6 +85,8 @@ describe('seguimiento, los datos', () => {
   });
 
   it('arma el horario del consultorio y no inventa calorías ni fotos', () => {
+    expect(antiguedadDe('2026-10-25T13:00:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toBe('hace 2 h');
+    expect(antiguedadDe('2026-10-25T14:40:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toBe('hace 20 min');
     expect(mealWhen('2026-10-25T11:10:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toMatch(/^Hoy /);
     expect(mealWhen('2026-10-24T21:00:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toMatch(/^Ayer /);
     expect(kcalLabel(null)).toBeNull();
