@@ -3,6 +3,7 @@ import {PROFESSIONAL_MODULES,plannedModuleHref,type ProfessionalModule} from './
 import {Icon} from '../shared/Icon';
 import {NvButton} from './primitives';
 import './professional-modules.css';
+import { PanelCampanias } from './PanelCampanias';
 import { PortfolioAssistant } from './PortfolioAssistant';
 import { HelpCenter } from './HelpCenter';
 import { ConfigurationReports } from './ConfigurationReports';
@@ -30,6 +31,7 @@ export function ProfessionalModules({selectedId,onOpen,onHeader}:{selectedId?:st
   if(selectedId==='equipo') return <PanelEquipo onHeader={onHeader}/>;
   if(selectedId==='asistente-ia') return <PortfolioAssistant onOpen={onOpen} onHeader={onHeader}/>;
   if(selectedId==='ayuda') return <HelpCenter onOpen={onOpen} onHeader={onHeader}/>;
+  if(selectedId==='campanas') return <PanelCampanias/>;
   if(selectedId==='comunicaciones') return <section className="pm-modules" aria-label="Mensajes y avisos"><header className="pm-page-head"><div><h2>Mensajes y avisos</h2><p>Los mensajes y los recordatorios van por el chat y los avisos de la app.</p></div><NvButton onClick={()=>onOpen('/crm/mensajes')}>Abrir mensajes</NvButton></header></section>;
   if(selectedId==='configuracion') return <ConfigurationReports onOpen={onOpen}/>;
   const selected=PROFESSIONAL_MODULES.find(m=>m.id===selectedId);

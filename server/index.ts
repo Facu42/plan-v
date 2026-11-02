@@ -1,4 +1,5 @@
 import {registerCampaignRoutes} from './communications/campaign-routes.js';
+import {registerFeatureRoutes} from './features/routes.js';
 import { integrationAvailability } from './scheduling/providers.js';
 import {registerSchedulingRoutes} from './scheduling/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
@@ -350,6 +351,7 @@ registerSchedulingTeamRoutes(app);
 registerDocumentOrganizerRoutes(app);
 registerCommunicationChannelRoutes(app);
 registerCampaignRoutes(app);
+registerFeatureRoutes(app);
 
 app.get('/api/patients', async (c) => {
   const parsedPage = listPageQuerySchema.safeParse({

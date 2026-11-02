@@ -17,6 +17,7 @@ import { ConsultationNotes,ConsultationCompletionPanel } from './ConsultationNot
 import { RECORD_PLAN_TABS, recordTab, appointmentRecordSummary, type RecordTab } from './patient-record-sections';
 import {PanelPatientHistory} from './PanelPatientHistory';
 import { FichaSolapas, PanelFichaCabecera } from './PanelFichaCabecera';
+import { FichaWhatsappEstado } from './FichaWhatsappEstado';
 import { PanelFichaChat } from './PanelFichaChat';
 import { FxKv, FxPanel } from './ficha-fx';
 import { PanelFichaResumen } from './PanelFichaResumen';
@@ -87,6 +88,7 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const contacto = <FxPanel titulo="Datos y contacto"><label className="fxsel">Paciente<select aria-label="Paciente de la ficha" value={patient.id} onChange={event=>onSelect(event.target.value)}>{patients.map(person=><option key={person.id} value={person.id}>{person.name}</option>)}</select></label><FxKv filas={[['Teléfono',phone||'Sin teléfono registrado'],['Próxima consulta',patient.appointment?.when||'Sin consulta programada'],['Consultas realizadas',<CompletedConsultationCount key="hechas" patientId={patient.id} canCare={datos.canCare} waiting={!datos.care && !datos.careError}/>],['Asistencias confirmadas',String(appointments.confirmed)]]}/></FxPanel>;
   return <div className="scr" id="s-ficha" aria-label={`Espacio de ${patient.name}`}>
     <PanelFichaCabecera patient={patient} now={now} datos={datos} etiquetasPropias={etiquetas.tags} onGuardarEtiquetas={etiquetas.guardar} onBack={()=>onOpenHref('/crm/pacientes')} onChat={()=>setChatOpen(true)} onAgendar={()=>onOpenHref('/crm/agenda')} onEdit={onEdit} onConsulta={()=>change('consultas')}/>
+    <FichaWhatsappEstado patientId={patient.id}/>
     <FichaSolapas ref={tabsRef} activa={solapa} conteo={conteo} onChange={next=>change(seccionDe(next))}/>
     {refreshError && <p role="alert">{refreshError}</p>}
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>

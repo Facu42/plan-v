@@ -1,0 +1,5 @@
+Glucemia: 91 mg/dL | 70-99
+Hemoglobina: 13.4 g/dL | 12-16
+Colesterol total: 176 mg/dL | <200
+Trigliceridos: 98 mg/dL | <150
+Ferritina: 42 ng/mL | 15-150

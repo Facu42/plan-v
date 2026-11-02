@@ -1,4 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
+import { useFeatureFlags } from '../../lib/feature-flags';
 import type { Patient } from '../../types';
 import { PanelV29Icon } from './PanelV29Icon';
 import type { PanelV29IconName } from './panel-v29-icons';
@@ -8,7 +9,7 @@ import { SEGUIR_PLEGADO_MS, aplicarPastilla, movimientoReducido, type PendienteP
 // Los grupos quedan en el orden de la app: el boceto dibuja otros nombres y otro orden, y eso no se inventa acá.
 export type PanelNavChild = { label: string; href: string; count?: number };
 export type PanelNavItem = { label: string; glyph: PanelV29IconName; href: string; count?: number; hot?: boolean; children?: PanelNavChild[] };
-export function panelNavGroups(patients: readonly Patient[], unread: number): { title: string; items: PanelNavItem[] }[] {
+export function panelNavGroups(patients: readonly Patient[], unread: number, options?: { campanas?: boolean }): { title: string; items: PanelNavItem[] }[] {
   const active = patients.filter(p => !p.archived_at);
   const toReview = active.reduce((sum, p) => sum + (p.weekly_registration?.pending_review ?? 0), 0);
   return [
@@ -41,6 +42,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number): { 
         // Respuestas guardadas: la pantalla llega con la fase F; mientras tanto abre Mensajes.
         { label: 'Respuestas guardadas', href: '/crm/mensajes?vista=respuestas' },
       ] },
+      ...(options?.campanas ? [{ label: 'Campañas', glyph: 'send' as const, href: '/crm/desarrollo?modulo=campanas' }] : []),
       { label: 'Progreso', glyph: 'trend', href: '/crm/progreso-global' },
     ] },
     { title: 'Plan', items: [
@@ -107,7 +109,8 @@ function medirPastilla(nav: HTMLElement, pill: HTMLElement, cur: PosicionPastill
 export function PanelNavigation({ patients, unread, current, collapsed, onOpen }: {
   patients: readonly Patient[]; unread: number; current: string; collapsed: boolean; onOpen: (href: string) => void;
 }) {
-  const groups = panelNavGroups(patients, unread);
+  const flags = useFeatureFlags();
+  const groups = panelNavGroups(patients, unread, { campanas: flags.reactivation_campaigns });
   const activeParent = groups.flatMap(g => g.items).find(item => item.children && panelNavActive(item, current))?.label ?? '';
   // Como `openSub` del boceto: al cambiar de pantalla queda abierto sólo el submenú de la sección activa.
   const [open, setOpen] = useState(() => ({ at: current, labels: new Set([activeParent]) }));
