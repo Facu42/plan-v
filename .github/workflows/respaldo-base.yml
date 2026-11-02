@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 15
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_USER: respaldo
           POSTGRES_PASSWORD: respaldo
@@ -34,7 +34,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Cliente de Postgres
-        run: sudo apt-get update && (sudo apt-get install -y postgresql-client-16 || sudo apt-get install -y postgresql-client) && pg_dump --version
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y curl ca-certificates
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          export PATH="/usr/lib/postgresql/17/bin:${PATH}"
+          pg_dump --version
+          pg_dump --version | grep -q ' 17\.'
+          pg_restore --version | grep -q ' 17\.'
       - name: Probar volcado, cifrado y restauración
         env:
           ORIGEN_DATABASE_URL: postgres://respaldo:respaldo@localhost:5432/origen
@@ -47,7 +61,7 @@ jobs:
     timeout-minutes: 30
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_USER: respaldo
           POSTGRES_PASSWORD: respaldo
@@ -62,7 +76,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Cliente de Postgres
-        run: sudo apt-get update && (sudo apt-get install -y postgresql-client-16 || sudo apt-get install -y postgresql-client) && pg_dump --version
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y curl ca-certificates
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+          export PATH="/usr/lib/postgresql/17/bin:${PATH}"
+          pg_dump --version
+          pg_dump --version | grep -q ' 17\.'
+          pg_restore --version | grep -q ' 17\.'
       - name: Volcar, cifrar y restaurar
         env:
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}

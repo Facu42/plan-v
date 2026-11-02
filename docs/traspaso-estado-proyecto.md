@@ -1,3 +1,7 @@
+# Traspaso del proyecto (actualización vigente: 2026-11-02)
+
+2/11 · Cursor · El volcado diario usa el cliente de Postgres 17 y restaura en un Postgres 17 vacío. El cliente 16 no puede leer la base de Supabase 17.6. Rama `cursor/respaldo-pg17-3f0e`. Sin producción ni merge.
+
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
 1/11 · Cursor · Pantallas de campañas, estado de WhatsApp, bioimpedancia y borrador de laboratorio. Las tres banderas salen apagadas del servidor: sin ellas no se ve el menú ni se guarda ni se envía nada. Rama `cursor/campanas-ficha-lecturas-885d`. Sin migración nueva y sin producción.
