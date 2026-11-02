@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-02)
 
+2/11 · Cursor · La copia diaria de la base también guarda el esquema private y arma en el Postgres vacío lo que Supabase ya trae (auth, storage, extensions y los roles). Así la restauración de prueba no se corta en una vista. El archivo cifrado queda guardado aunque esa prueba falle. Rama `cursor/respaldo-schema-private-3f0e`. Sin producción ni merge.
 2/11 · Cursor · Foto confirmada incorpora main, que ya tiene Hoy y el respaldo en Postgres 17. La migración de la foto sigue sin aplicar. Sin merge.
 2/11 · Cursor · Foto confirmada, rebase sobre main. La respuesta de la paciente saca la nota interna también si estaba copiada en la línea de tiempo. Migración sin aplicar. Sin merge.
 2/11 · Cursor · Foto confirmada, la cola y el editor respetan el tema del panel (oscuro o claro). Sin merge.

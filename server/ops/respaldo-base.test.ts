@@ -37,6 +37,27 @@ describe('respaldo de la base', () => {
     expect(texto).not.toMatch(/postgres:\/\/[^@\s]+:[^@\s]+@db\.[a-z0-9]+\.supabase\.co/);
   });
 
+  it('vuelca private y deja listos auth, storage y extensions', () => {
+    const scriptText = readFileSync(script, 'utf8');
+    expect(scriptText).toContain('--schema=private');
+    expect(scriptText).toContain("nspname = 'private'");
+    expect(scriptText).toContain('create schema if not exists auth');
+    expect(scriptText).toContain('create schema if not exists storage');
+    expect(scriptText).toContain('create schema if not exists extensions');
+    expect(scriptText).toContain('create role service_role');
+    expect(scriptText).toContain('auth.users');
+    expect(scriptText).toContain('storage.foldername');
+    expect(scriptText).toContain('check_function_bodies=off');
+    expect(scriptText).toContain('argumentos_de_esquema');
+  });
+
+  it('el archivo cifrado se guarda aunque falle la restauración', () => {
+    const workflow = readFileSync('.github/workflows/respaldo-base.yml', 'utf8');
+    const paso = workflow.slice(workflow.indexOf('Guardar el archivo cifrado'));
+    expect(paso).toContain('if: always()');
+    expect(paso).toContain('respaldo.dump.enc');
+  });
+
   it('el cliente y el contenedor de restauración son Postgres 17 en los dos jobs', () => {
     const workflow = readFileSync('.github/workflows/respaldo-base.yml', 'utf8');
     expect(workflow.match(/image: postgres:17/g)).toHaveLength(2);

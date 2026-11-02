@@ -98,6 +98,7 @@ jobs:
           RESTORE_DATABASE_URL: postgres://respaldo:respaldo@localhost:5432/restauracion
         run: bash scripts/respaldo-base.sh produccion
       - name: Guardar el archivo cifrado
+        # always: la copia se guarda aunque la restauración de prueba falle.
         if: always() && hashFiles('respaldo.dump.enc') != ''
         uses: actions/upload-artifact@v4
         with:
