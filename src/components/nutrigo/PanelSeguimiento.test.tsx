@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { HabitLog, Patient } from '../../types';
@@ -43,6 +44,16 @@ describe('seguimiento, el dibujo', () => {
     expect(html).not.toContain('%');
     expect(html).toContain('sxdays');
     expect(html).toContain('class="on"');
+  });
+
+  it('la cola usa el tema del panel y no pinta una superficie clara fija', () => {
+    const css = readFileSync(new URL('./panel-v29-app.css', import.meta.url), 'utf8');
+    const bloque = css.slice(css.indexOf('Cola de fotos y editor'));
+    expect(bloque.length).toBeGreaterThan(200);
+    expect(bloque).toContain('var(--card)');
+    expect(bloque).toContain('var(--lima)');
+    expect(bloque).toContain('var(--ink)');
+    expect(bloque).not.toMatch(/#F7FAF9|#DCEFE7|#fff\b|color-scheme:\s*light/i);
   });
 
   it('sin platos dice que está todo al día y al cargar muestra el esqueleto menta', () => {
