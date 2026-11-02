@@ -56,7 +56,6 @@ import { ShowroomPatientOnboarding } from './ShowroomPatientOnboarding';
 import { ShowroomPrivacy } from './ShowroomPrivacy';
 import { ShowroomSecurity } from './ShowroomSecurity';
 import { supabaseConfigured } from '../../lib/supabase';
-import { mfaEnforcedInApp } from '../../context/mfa';
 import { ShowroomWorkCenter, type WorkCenterModule } from './ShowroomWorkCenter';
 import { PATIENT_MORE, PATIENT_SURFACES, PATIENT_TABS, PLAN_SUBPAGES, PRO_TABS, proMore, proSurfaces, tabBarState } from './showroom-nav';
 import { appPath, buildAppHref, contentIdentity, hasResourceHash, resolveAppLocation, type AppRole } from './app-location';
@@ -557,7 +556,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
         mainKey={`${contentIdentity(role, page, selected?.id)}:${workspaceRevision}`}
         notice={<><ServiceNotice />{selected && ['consultas', 'objetivos', 'progreso'].includes(page) && <SelectedPatientContext patient={selected} onRecord={() => navigate('ficha')} />}</>}
       >{pageContent}</PanelBocetoShell>
-      {securityOpen && <ShowroomSecurity canDisable={!mfaEnforcedInApp()} onClose={() => setSecurityOpen(false)} />}
+      {securityOpen && <ShowroomSecurity canDisable onClose={() => setSecurityOpen(false)} />}
       {recordEditing && selected && <ShowroomPatientEdit patient={selected} onClose={() => setRecordEditing(false)} onSaved={(updated) => { addPatient(updated); setRecordEditing(false); }} />}
       {variasAbierto && page === 'mensajes' && <PanelMensajeVarias pacientes={activePatients} ahora={now} onClose={() => setVariasAbierto(false)} />}
       {reviewLog && reviewPatient && <div className="modal-backdrop review-backdrop"><MealReviewPanel patient={reviewPatient} log={reviewLog} onClose={() => { setReviewLog(null); window.dispatchEvent(new CustomEvent('plan-v:seguimiento-refresh')); }} /></div>}
