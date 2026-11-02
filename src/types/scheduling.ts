@@ -1,4 +1,5 @@
 import {z} from 'zod';
+import {isGoogleBusinessUrl} from '../lib/google-review';
 import {PUBLIC_SLUG_PATTERN, isReservedPublicSlug} from './public-slug';
 const time=z.string().regex(/^(?:[01]\d|2[0-3]):[0-5]\d$/);
 const timestamp=z.iso.datetime({offset:true});
@@ -22,6 +23,7 @@ export const pageExtrasSchema=z.object({
  notices:z.object({confirm:z.boolean(),unconfirmed:z.boolean(),reopen:z.boolean(),review:z.boolean()}).partial().strict().optional(),
  // Huella de la foto publicada. Sin esta huella, /slug no muestra el logo de la marca.
  photo_sha256:z.string().regex(/^[a-f0-9]{64}$/).optional(),
+ google_business_url:z.union([z.literal(''),z.string().trim().max(300).refine(value=>isGoogleBusinessUrl(value),'Usá un link https de Google para pedir la reseña.')]).optional(),
 }).strict();
 export type PageExtras=z.infer<typeof pageExtrasSchema>;
 export const PUBLIC_MODALIDADES=['presencial','online','ambas'] as const;

@@ -24,7 +24,7 @@ export function resolveRequestAuth(input: {
   verifiedUserId: string | null;
   allowDemo: boolean;
 }): RequestAuthDecision {
-  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/') || input.path.startsWith('/api/public/scheduling/') || input.path.startsWith('/api/public/billing/')) return { kind: 'public' };
+  if (PUBLIC_API_PATHS.has(input.path) || input.path.startsWith('/api/assets/blob/') || input.path.startsWith('/api/public/scheduling/') || input.path.startsWith('/api/public/billing/') || input.path.startsWith('/api/public/seo/')) return { kind: 'public' };
   if (!input.supabaseEnabled) return input.allowDemo ? { kind: 'demo' } : { kind: 'unavailable' };
   if (input.verifiedUserId) return { kind: 'user', userId: input.verifiedUserId };
   return { kind: 'unauthorized' };

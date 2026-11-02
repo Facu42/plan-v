@@ -10,6 +10,8 @@ import { PanelConnections, type ConnectionKey } from './PanelConnections';
 import { PanelV29Icon } from './PanelV29Icon';
 import { fondoAvatar, inicialesDe } from './seguimiento-presentacion';
 import { claseDeEvento, consultasDelDia, encabezadoAgenda, etiquetaDeEvento, franjaDeHoras, lugaresLibres, miniMes, proximoEvento, recortarLugares, textoDelPedido, tituloDelPedido, type LugarLibre } from './agenda-presentacion';
+import { argentinaStart, inVideoCallWindow } from '../../lib/video-call-window';
+import { OfertaGrabarAudioDelTurno } from './MeetAudioBar';
 import { useUnsavedChanges } from './unsaved-changes';
 import { usePanelScheduling } from './use-panel-scheduling';
 import './panel-fase5.css';
@@ -94,7 +96,8 @@ export function PanelAgendaView({ view, anchor = '', days, today, now, events, p
                 const clase = claseDeEvento(event, now, proximo);
                 const top = ((event.startMin - franja.start * 60) / (filas * 60)) * 100;
                 const alto = ((event.endMin - event.startMin) / (filas * 60)) * 100;
-                return <div className={`ev ${clase}`} key={event.id} style={{ top: `calc(${top}% + 1px)`, height: `calc(${alto}% - 3px)` }}><b>{event.title}</b><small className="num">{etiquetaDeEvento(event, clase)}</small></div>;
+                const entrar = event.tone === 'online' && Boolean(event.meetUrl) && inVideoCallWindow(now, argentinaStart(event.day, event.startMin), event.endMin - event.startMin);
+                return <div className={`ev ${clase}`} key={event.id} style={{ top: `calc(${top}% + 1px)`, height: `calc(${alto}% - 3px)` }}><b>{event.title}</b><small className="num">{etiquetaDeEvento(event, clase)}</small>{entrar && <a href={event.meetUrl} target="_blank" rel="noopener noreferrer">Entrar a la videollamada</a>}{entrar && event.patientId ? <OfertaGrabarAudioDelTurno patientId={event.patientId} appointmentId={event.id} /> : null}</div>;
               })}
             </div>)}
             {Array.from({ length: filas - 1 }, (_, k) => <div className="gl" key={k} style={{ top: `${((k + 1) / filas) * 100}%` }} />)}

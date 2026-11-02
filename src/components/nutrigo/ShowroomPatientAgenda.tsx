@@ -5,6 +5,7 @@ import {
 import { NvState } from './primitives';
 import { appointmentReplyLabel, readAppointmentReply, writeAppointmentReply, type AppointmentReply } from './appointment-reply';
 import { parseAppointmentWhen, secureMeetUrl } from './ShowroomConsultations';
+import { appointmentStart, inVideoCallWindow } from '../../lib/video-call-window';
 import { AppointmentHistoryList } from './AppointmentHistory';
 import type { ShowroomPage } from './ShowroomPanels';
 import {
@@ -309,6 +310,8 @@ export function ShowroomPatientAgenda({
 
   const consultEvent = allEvents.find((event) => event.kind === 'consult') ?? null;
   const safeUrl = current?.channel === 'video' ? secureMeetUrl(current.meet_url) : null;
+  const empieza = current ? appointmentStart(current, now) : null;
+  const entrar = Boolean(current?.channel === 'video' && safeUrl && empieza && inVideoCallWindow(now, empieza, current.duration));
   const dayEvents = allEvents.filter((event) => event.dateId === nav.selectedDateId && !hidden.has(event.kind));
   const consultOnDay = Boolean(consultEvent && dayEvents.some((event) => event.id === consultEvent.id));
   const otherDayEvents = dayEvents.filter((event) => event.kind !== 'consult');
@@ -367,6 +370,7 @@ export function ShowroomPatientAgenda({
     ]}
     note={{ label: 'Tu respuesta', text: <p>{reply === 'pending' ? 'Todavía no confirmaste la asistencia.' : `${appointmentReplyLabel(reply)}.`}{reply === 'needs_change' ? ' Podés proponer un nuevo día y hora; duración y modalidad las conserva el consultorio.' : ''}</p> }}
     actions={<>
+      {entrar && safeUrl && <a className="nvcal-btn nvcal-btn-primary" href={safeUrl} target="_blank" rel="noopener noreferrer">Entrar a la videollamada</a>}
       {safeUrl && <a className="nvcal-btn" href={safeUrl} target="_blank" rel="noopener noreferrer">Abrir videollamada</a>}
       {reply === 'pending' && <>
         <button type="button" className="nvcal-btn" disabled={confirmBusy} onClick={() => { void respond('needs_change'); }}>Necesito cambiar el horario</button>

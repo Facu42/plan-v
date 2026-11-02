@@ -41,6 +41,37 @@ describe('audio final válido para el servidor sin perder muestras',()=>{
   expect(new DataView(wav.buffer).getInt16(44+4095*2,true)).toBeGreaterThan(0);
   expect(track.stop).toHaveBeenCalled();expect(vi.getTimerCount()).toBe(0);
  });
+ it('apaga el video de la pestaña, no lo mezcla, y la pausa no guarda audio',async()=>{
+  vi.useFakeTimers();const {Context,processor}=audioContext(new Float32Array(0));
+  const video={enabled:true,readyState:'live',stop:vi.fn(),addEventListener:vi.fn()};
+  const remote={readyState:'live',stop:vi.fn(),addEventListener:vi.fn()};
+  const micTrack={readyState:'live',stop:vi.fn(),addEventListener:vi.fn()};
+  const tab={getAudioTracks:()=>[remote],getVideoTracks:()=>[video],getTracks:()=>[video,remote]};
+  const mic={getAudioTracks:()=>[micTrack],getVideoTracks:()=>[],getTracks:()=>[micTrack]};
+  vi.stubGlobal('navigator',{mediaDevices:{getDisplayMedia:async()=>tab,getUserMedia:async()=>mic}});
+  vi.stubGlobal('window',{AudioContext:Context});vi.stubGlobal('MediaStream',class{});
+  const output=vi.fn();const capture=await prepareConsultationCapture(output,vi.fn(),vi.fn(),async()=>true);
+  expect(video.enabled).toBe(false);
+  capture.begin();capture.pause();
+  processor.onaudioprocess!({inputBuffer:{getChannelData:()=>new Float32Array(4096).fill(0.25)}});
+  expect(output).not.toHaveBeenCalled();
+  capture.resume();
+  processor.onaudioprocess!({inputBuffer:{getChannelData:()=>new Float32Array(4096).fill(0.25)}});
+  await capture.stop();
+  expect(output).toHaveBeenCalledTimes(1);
+ });
+ it('el modo solo micrófono no pide la pestaña',async()=>{
+  const {Context}=audioContext(new Float32Array(0));
+  const getDisplayMedia=vi.fn();
+  const track={readyState:'live',stop:vi.fn(),addEventListener:vi.fn()};
+  vi.stubGlobal('navigator',{mediaDevices:{getDisplayMedia,getUserMedia:async()=>({getAudioTracks:()=>[track],getTracks:()=>[track]})}});
+  vi.stubGlobal('window',{AudioContext:Context});vi.stubGlobal('MediaStream',class{});
+  const capture=await prepareConsultationCapture(vi.fn(),vi.fn(),vi.fn(),undefined,{micOnly:true,preconsented:true});
+  expect(getDisplayMedia).not.toHaveBeenCalled();
+  expect(capture.sources.remote).toBe(false);
+  expect(capture.sources.microphone).toBe(true);
+  capture.dispose();
+ });
 });
 
 describe('consentimiento registrado antes de usar el audio',()=>{
