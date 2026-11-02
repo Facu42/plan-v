@@ -2,6 +2,7 @@ import type { Hono, Context } from 'hono';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { analysisOrUnavailable, analyzeMeal } from '../ai/meal-analyzer.js';
+import { hasFullPatientAccess } from '../../src/billing.js';
 import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import { validatePhoto } from '../care/repository.js';
 import { signMealPhotos, uploadMealPhoto } from '../care/meal-photos.js';
@@ -53,8 +54,16 @@ function emitMemoryTimeline(
   });
 }
 
+function publicTimeline(events: Array<NonNullable<ReturnType<typeof getPatient>>['timeline'][number] & { visibility?: 'professional' | 'patient' }>) {
+  return events
+    .filter((event) => event.visibility !== 'professional')
+    .map(({ id, kind, atLabel, title, body }) => ({ id, kind, atLabel, title, body }));
+}
+
 function patientResponse(patient: NonNullable<ReturnType<typeof getPatient>>) {
-  return { ...toPatientSelfView(patient), timeline: patient.timeline ?? [] };
+  const view = toPatientSelfView(patient);
+  if (!hasFullPatientAccess(patient)) return view;
+  return { ...view, timeline: publicTimeline(patient.timeline ?? []) };
 }
 
 function photoDataUrl(body: { imageBase64?: string; photoPreview?: string }) {
