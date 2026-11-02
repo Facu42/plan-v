@@ -3,6 +3,7 @@ import { gaugeLabel } from '../../store/useAppStore';
 import { Icon, Mark, ScoreRing } from '../shared/Icon';
 import { buildJourneySummary } from './journey-summary';
 import { waterGoalOf } from '../../types/water';
+import { nutriNameOf, patientMealCopy } from '../../lib/meal-review';
 
 function formatSleep(minutes: number | null): string {
   if (minutes === null) return '—';
@@ -22,6 +23,7 @@ function formatMealDate(value: string): string {
 
 export function PatientCamino({ patient }: { patient: Patient }) {
   const summary = buildJourneySummary(patient);
+  const nutri = nutriNameOf(patient.nutritionist_name);
   const recentLogIds = new Set(summary.days.flatMap((day) => day.mealLogIds));
   const recentMealLogs = patient.meal_logs
     .filter((log) => recentLogIds.has(log.id))
@@ -36,7 +38,7 @@ export function PatientCamino({ patient }: { patient: Patient }) {
       <section className="subpage-hero">
         <p className="eyebrow">Tus últimos 7 días</p>
         <h1>Tu ritmo, en contexto</h1>
-        <p>Datos declarados por vos y comidas revisadas por Verónica. Es un seguimiento, no un juicio.</p>
+        <p>{`Datos declarados por vos y comidas revisadas por ${nutri}. Es un seguimiento, no un juicio.`}</p>
       </section>
 
       <section className="camino-score-card" aria-label={`Adherencia semanal ${patient.adherence_score}`}>
@@ -88,7 +90,7 @@ export function PatientCamino({ patient }: { patient: Patient }) {
               <div className="log-head">
                 <div><strong>{log.slot}</strong><time dateTime={log.logged_at}>{formatMealDate(log.logged_at)}</time></div>
                 <span className={`status-chip ${log.status}`}>
-                  {log.status === 'pending_review' ? 'Pendiente de Vero' : log.status === 'confirmed' ? 'Confirmado' : 'Ajustado'}
+                  {log.review_label || patientMealCopy(log.status, nutri)}
                 </span>
               </div>
               <p className="log-foods">{log.foods.map((food) => food.name).join(', ') || log.description || 'Sin detalle'}</p>
@@ -96,7 +98,7 @@ export function PatientCamino({ patient }: { patient: Patient }) {
                 <p className="log-macros">{log.macros.kcal} kcal · P {log.macros.protein_g}g · C {log.macros.carbs_g}g · G {log.macros.fat_g}g</p>
               )}
               {log.status === 'pending_review' && (
-                <p className="log-pending">Estimación pendiente · Verónica la revisa antes de sumarla</p>
+                <p className="log-pending">{log.review_label || patientMealCopy(log.status, nutri)}</p>
               )}
             </article>
           ))}

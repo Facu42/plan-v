@@ -3,6 +3,7 @@ import { Fire } from '@phosphor-icons/react';
 import type { FoodItem, MealLog } from '../../types';
 import { Icon } from '../shared/Icon';
 import { useCountUp, useTicker } from './meal-log-motion';
+import { nutriNameOf, patientMealCopy } from '../../lib/meal-review';
 import {
   MEAL_KEPT_COPY, MEAL_TEXT_COPY, analyzingMessages, confidenceLevel, macroShares, mealLoggedWithoutAi, mealLogWasKept, messageAt, type CaptureMode,
 } from './meal-log-helpers';
@@ -12,7 +13,7 @@ const MESSAGE_MS = 2300;
 const whole = Math.round;
 const cssVars = (vars: Record<string, string | number>) => vars as CSSProperties;
 
-export function AnalyzingView({ mode, preview, description, withoutAi = false }: { mode: CaptureMode; preview: string | null; description: string; withoutAi?: boolean }) {
+export function AnalyzingView({ mode, preview, description, withoutAi = false, nutriName = '' }: { mode: CaptureMode; preview: string | null; description: string; withoutAi?: boolean; nutriName?: string }) {
   const messages = withoutAi ? ['Guardando tu descripción…'] : analyzingMessages(mode, Boolean(preview));
   const tick = useTicker(MESSAGE_MS);
   const heading = withoutAi ? 'Guardando tu descripción…' : 'Analizando tu comida…';
@@ -27,7 +28,7 @@ export function AnalyzingView({ mode, preview, description, withoutAi = false }:
       <div className="mlm-progress" aria-hidden><i /></div>
       <p className="mlm-scan-msg" key={tick % messages.length} aria-hidden>{messageAt(messages, tick)}</p>
       <h2 className="mlm-title" tabIndex={-1} data-mlm-heading>{heading}</h2>
-      <p className="mlm-note">{withoutAi ? 'No usamos IA. Verónica la revisa.' : 'La IA estima alimentos y macros. Verónica confirma antes de que cuente.'}</p>
+      <p className="mlm-note">{withoutAi ? `No usamos IA. ${patientMealCopy('pending_review', nutriName)}` : `La IA estima alimentos y macros. ${patientMealCopy('pending_review', nutriName)}`}</p>
     </div>
   );
 }
@@ -84,9 +85,9 @@ function FoodCards({ foods }: { foods: FoodItem[] }) {
   );
 }
 
-type ReviewProps = { result: MealLog; slot: string; preview: string | null; description: string; onConfirm: () => void };
+type ReviewProps = { result: MealLog; slot: string; preview: string | null; description: string; onConfirm: () => void; nutriName?: string };
 
-export function ReviewView({ result, slot, preview, description, onConfirm }: ReviewProps) {
+export function ReviewView({ result, slot, preview, description, onConfirm, nutriName = '' }: ReviewProps) {
   const withoutAi = mealLoggedWithoutAi(result);
   const kept = mealLogWasKept(result);
   return (
@@ -106,13 +107,13 @@ export function ReviewView({ result, slot, preview, description, onConfirm }: Re
               <>
                 <MacroPanel macros={result.macros} />
                 <p className="mlm-confidence" data-level={confidenceLevel(result.confidence)}>
-                  {`Estimación · confianza ${(result.confidence * 100).toFixed(0)}% · pendiente de Verónica`}
+                  {`${result.review_label || patientMealCopy(result.status, nutriName)} · confianza ${(result.confidence * 100).toFixed(0)}%`}
                 </p>
               </>
-            ) : <p className="mlm-note">No pudimos estimar macros con confianza. Verónica lo revisará.</p>}
+            ) : <p className="mlm-note">{`No pudimos estimar macros con confianza. ${nutriNameOf(nutriName)} lo revisará.`}</p>}
           </>
         )}
-        {!withoutAi && <p className="mlm-note">No es una medida exacta. Verónica confirma antes de que cuente para tu seguimiento.</p>}
+        {!withoutAi && <p className="mlm-note">{`No es una medida exacta. ${nutriNameOf(nutriName)} confirma antes de que cuente para tu seguimiento.`}</p>}
       </div>
       <footer className="mlm-foot">
         <button className="mlm-cta" type="button" data-ready="true" onClick={onConfirm}><Icon name="check" size={18} />Guardar comida</button>
@@ -121,7 +122,7 @@ export function ReviewView({ result, slot, preview, description, onConfirm }: Re
   );
 }
 
-export function SuccessView({ name, macros, onClose, withoutAi = false }: { name: string; macros: Macros | null; onClose: () => void; withoutAi?: boolean }) {
+export function SuccessView({ name, macros, onClose, withoutAi = false, nutriName = '' }: { name: string; macros: Macros | null; onClose: () => void; withoutAi?: boolean; nutriName?: string }) {
   return (
     <>
       <div className="mlm-scroll mlm-success">
@@ -131,7 +132,7 @@ export function SuccessView({ name, macros, onClose, withoutAi = false }: { name
         </div>
         <p className="mlm-eyebrow">Comida registrada</p>
         <h2 className="mlm-title" tabIndex={-1} data-mlm-heading>{`¡Listo, ${name.split(' ')[0]}!`}</h2>
-        <p className="mlm-lead">{withoutAi ? 'Quedó tu descripción. Verónica la revisa cuando corresponda.' : 'Quedó como estimación. Verónica lo revisa cuando corresponda.'}</p>
+        <p className="mlm-lead">{withoutAi ? `Quedó tu descripción. ${patientMealCopy('pending_review', nutriName)}` : `Quedó como estimación. ${patientMealCopy('pending_review', nutriName)}`}</p>
         {macros && (
           <ul className="mlm-summary" aria-label="Resumen de la comida">
             <li><strong>{whole(macros.kcal)}</strong><small>kcal</small></li>

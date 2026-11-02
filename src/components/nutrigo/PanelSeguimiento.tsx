@@ -9,7 +9,7 @@ import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
 import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
-  armarComida, COMIDAS_PEDIDO, comidaId, diasDe, fondoAvatar, sentimientoDe, textoPedido,
+  armarComida, COMIDAS_PEDIDO, comidaId, diasDe, fondoAvatar, ordenarColaFotos, sentimientoDe, textoPedido,
   type ComidaFila, type DiasFila, type SentimientoFila,
 } from './seguimiento-presentacion';
 
@@ -41,7 +41,7 @@ function Tarjeta({ titulo, meta, children }: { titulo: string; meta: string; chi
 
 export function PanelSeguimientoVista({
   tab, comidas, sentimientos, dias, pendientes, estado, mas, dialog, toast, pedir,
-  onConfirm, onComment, onVer, onSentir, onClose, onGuardarComentario, onPedir, onAbrir,
+  onConfirm, onAdjust, onComment, onVer, onSentir, onClose, onGuardarComentario, onPedir, onAbrir,
 }: {
   tab: Tab;
   comidas: ComidaFila[];
@@ -54,6 +54,7 @@ export function PanelSeguimientoVista({
   toast: string;
   pedir: { pacientes: Patient[]; aviso: boolean; dias: 7 | 14; comidas: string[]; pacienteId: string };
   onConfirm: (meal: ComidaFila) => void;
+  onAdjust: (meal: ComidaFila) => void;
   onComment: (meal: ComidaFila) => void;
   onVer: (meal: ComidaFila) => void;
   onSentir: (row: SentimientoFila) => void;
@@ -75,14 +76,14 @@ export function PanelSeguimientoVista({
             <span className="sxwho"><b>{comida.title}</b><small>{comida.meta}</small></span>
           </span>
           <span className="sxacts">{tab === 'pend'
-            ? <><button type="button" className="chip" onClick={() => onConfirm(comida)}>Confirmar</button><button type="button" className="chip" onClick={() => onComment(comida)}>Comentar</button></>
+            ? <><button type="button" className="chip" onClick={() => onConfirm(comida)}>Confirmar</button><button type="button" className="chip" onClick={() => onAdjust(comida)}>Ajustar</button><button type="button" className="chip" onClick={() => onComment(comida)}>Comentar</button></>
             : <button type="button" className="chip" onClick={() => onVer(comida)}>Ver</button>}</span>
         </div>)
         : <p className="sxsub">No hay comidas en esta lista.</p>;
   return <div id="s-seguimiento" className="sxw">
     <div className="fx" data-mk="1" style={{ gridTemplateColumns: '1.22fr .9fr' }}>
       <div className="c">
-        <Tarjeta titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={`${pendientes} por revisar · la foto sale de la app`}>
+        <Tarjeta titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={tab === 'pend' ? `Cola fotos · ${pendientes} por revisar · la foto sale de la app` : `${pendientes} por revisar · la foto sale de la app`}>
           <div className="fxs"><div className="fxr">{filas}</div>{mas && tab === 'pend' ? <p className="sxsub">Hay más por revisar. Seguí en la ficha.</p> : null}</div>
         </Tarjeta>
       </div>
@@ -237,7 +238,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
         ]);
         const mapa = new Map<string, MealLog>();
         for (const persona of patients) for (const log of persona.meal_logs ?? []) mapa.set(`${persona.id}:${log.id}`, log);
-        const comidasCola = cola.items.filter(item => item.kind === 'meal');
+        const comidasCola = ordenarColaFotos(cola.items.filter(item => item.kind === 'meal').map(item => ({ ...item, at: item.updated_at })));
         const comidasFeed = feed.items.filter((item): item is Extract<CrmFeedItem, { kind: 'meal' }> => item.kind === 'meal' && item.status !== 'pending_review');
         await completarLogs([...comidasCola, ...comidasFeed].map(item => ({ patientId: item.patient_id, itemId: item.id })), mapa, ac.signal);
         const personaDe = (id: string) => patients.find(persona => persona.id === id) ?? null;
@@ -271,6 +272,11 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     window.addEventListener('keydown', cerrar);
     return () => window.removeEventListener('keydown', cerrar);
   }, [dialog]);
+
+  const ajustar = (meal: ComidaFila) => {
+    if (meal.log) onReview(meal.log);
+    else avisar('Abrí la ficha para ajustar alimentos y macros.');
+  };
 
   const confirmar = async (meal: ComidaFila) => {
     try {
@@ -315,6 +321,7 @@ export function PanelSeguimiento({ patients, onOpen, onReview, onHeader }: {
     pendientes={pendienteTotal} estado={estado} mas={mas} dialog={dialog} toast={toast}
     pedir={{ pacientes: ordenadas, aviso: true, dias: 7, comidas: [...COMIDAS_PEDIDO], pacienteId: ordenadas[0]?.id ?? '' }}
     onConfirm={meal => void confirmar(meal)}
+    onAdjust={ajustar}
     onComment={meal => setDialog({ kind: 'comentar', meal })}
     onVer={meal => { if (meal.log) onReview(meal.log); else setDialog({ kind: 'ver', meal }); }}
     onSentir={row => setDialog({ kind: 'sentir', row })}

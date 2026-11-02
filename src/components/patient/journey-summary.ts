@@ -1,5 +1,6 @@
 import type { HabitLog, MealLog } from '../../types';
 import { argentinaDay } from '../../features/nutrigo/screens/ar-time';
+import { mealCountsForGauge } from '../../lib/meal-review';
 
 export type JourneyInput = {
   meal_logs: readonly MealLog[];
@@ -66,7 +67,7 @@ export function buildJourneySummary(input: JourneyInput, now = new Date()): Jour
 
     day.mealLogIds.push(log.id);
     if (log.status === 'pending_review') day.pendingMeals += 1;
-    else day.reviewedMeals += 1;
+    else if (mealCountsForGauge(log)) day.reviewedMeals += 1;
   }
 
   const reviewedMeals = days.reduce((total, day) => total + day.reviewedMeals, 0);

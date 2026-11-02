@@ -66,7 +66,10 @@ describe('vistas públicas de comidas: aislamiento y sólo lectura',()=>{
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({id:ma,patient_id:pa,description:'Comida A'});
     expect(rows[0]).not.toHaveProperty('note_for_nutri');
+    expect(rows[0]).not.toHaveProperty('reviewed_by');
     expect(rows[0]).not.toHaveProperty('client_id');
+    expect(JSON.stringify(rows)).not.toContain('Nota privada');
+    await expect(asUser(a, 'update public.meal_logs set reviewed_by=$2 where id=$1', [ma, a])).rejects.toMatchObject({ code: '42501' });
     await expect(asUser(a,'select * from public.get_patient_meal_logs($1)',[pb])).rejects.toMatchObject({code:'42501'});
     await expect(asUser('', 'select * from public.get_patient_meal_logs($1)',[pa])).rejects.toMatchObject({code:'42501'});
     await expect(asUser(a,'select * from public.get_patient_meal_logs($1)',[pa],'anon')).rejects.toMatchObject({code:'42501'});

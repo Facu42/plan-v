@@ -1,5 +1,6 @@
 import type { MealLog, Message, Patient } from '../../src/types/index.js';
 import { hasFullPatientAccess, resolveBillingStatus } from '../../src/billing.js';
+import { nutriNameOf, patientMealCopy } from '../../src/lib/meal-review.js';
 
 export type RequestAuthDecision =
   | { kind: 'public' }
@@ -173,7 +174,8 @@ function publicFoods(foods: MealLog['foods']): MealLog['foods'] {
   }));
 }
 
-export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
+export function toPatientSelfMealLog(log: MealLog, nutriName = ''): PatientSelfMealLog {
+  const name = nutriNameOf(log.reviewer_name || nutriName);
   return {
     id: log.id,
     patient_id: log.patient_id,
@@ -192,6 +194,9 @@ export function toPatientSelfMealLog(log: MealLog): PatientSelfMealLog {
     confidence: log.confidence,
     status: log.status,
     logged_at: log.logged_at,
+    ...(log.reviewed_at ? { reviewed_at: log.reviewed_at } : {}),
+    ...(log.reviewer_name ? { reviewer_name: name } : {}),
+    review_label: patientMealCopy(log.status, name),
     ...(log.analysis_status ? { analysis_status: log.analysis_status } : {}),
     ...(log.nutrition_origin ? {nutrition_origin:log.nutrition_origin} : {}),
   };
@@ -319,7 +324,8 @@ export function toPatientSelfView(patient: Patient): PatientSelfView {
     todayPlan: publicTodayPlan(patient.todayPlan),
     weekPlan: publicWeekPlan(patient.weekPlan),
     timeline: [],
-    meal_logs: patient.meal_logs.map(toPatientSelfMealLog),
+    ...(patient.nutritionist_name ? { nutritionist_name: nutriNameOf(patient.nutritionist_name) } : {}),
+    meal_logs: patient.meal_logs.map((log) => toPatientSelfMealLog(log, patient.nutritionist_name ?? '')),
     messages,
   };
 

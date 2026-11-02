@@ -36,6 +36,8 @@ describe('meal review API flow in memory mode', () => {
 
     expect(createResponse.status).toBe(200);
     expect(created.log.status).toBe('pending_review');
+    expect(JSON.stringify(created)).not.toContain('note_for_nutri');
+    expect(created.log.review_label).toMatch(/^Estimación pendiente de /);
     // La adherencia se recalcula en cada mutación; pendientes no suman.
     expect(created.patient.adherence_score).toBe(calculateAdherence(created.patient).score);
     expect(created.patient.meal_logs.filter((log: { status: string }) => log.status === 'pending_review')).toHaveLength(initialPending + 1);

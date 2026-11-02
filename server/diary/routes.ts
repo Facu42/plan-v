@@ -53,6 +53,10 @@ function emitMemoryTimeline(
   });
 }
 
+function patientResponse(patient: NonNullable<ReturnType<typeof getPatient>>) {
+  return { ...toPatientSelfView(patient), timeline: patient.timeline ?? [] };
+}
+
 function photoDataUrl(body: { imageBase64?: string; photoPreview?: string }) {
   if (body.photoPreview) return body.photoPreview;
   if (!body.imageBase64) return null;
@@ -191,7 +195,7 @@ export function registerDiaryRoutes(app: Hono) {
 
     if (persistent) {
       const updated = await sb.sbGetPatientById(patient.id, 'patient');
-      const visibleLog = toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0]);
+      const visibleLog = toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0], updated?.nutritionist_name ?? '');
       return c.json({
         analysis: toPatientMealAnalysis(analysis),
         log: visibleLog,
@@ -200,10 +204,11 @@ export function registerDiaryRoutes(app: Hono) {
       });
     }
 
+    const memoryPatient = getPatient(patientId);
     return c.json({
       analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog(log),
-      patient: getPatient(patientId),
+      log: toPatientSelfMealLog(log, ''),
+      patient: memoryPatient ? patientResponse(memoryPatient) : null,
       source: 'memory',
     });
   });

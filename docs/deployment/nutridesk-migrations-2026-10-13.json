@@ -207,6 +207,11 @@
       "version": "20261101230000",
       "file": "20261101230000_consultation_session_visible.sql",
       "sha256": "ae56cc6084f3966b9d8b3ce34ebb392dcfb0fcf0fa34048690ab2655a934d320"
+    },
+    {
+      "version": "20261102140000",
+      "file": "20261102140000_meal_photo_review_stamp.sql",
+      "sha256": "488228fffe71f9f63df2bacf465304c3a7df4445e106d4fb2206b9525545ad28"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

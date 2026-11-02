@@ -1,3 +1,4 @@
+02/11 · Cursor · Foto confirmada (P1): la paciente ve «Estimación pendiente de {nutri}» o «Confirmada por {nutri}» y nunca la nota interna. El indicador solo suma confirmadas o ajustadas con confianza de al menos 0,45. En Seguimiento la cola de fotos va de la más vieja a la más nueva, con Confirmar y Ajustar. Migración `20261102140000_meal_photo_review_stamp.sql` sin aplicar. El texto legal del permiso de la foto no se tocó: sigue como gap. Rama `cursor/foto-confirmada-p1-3f0e`. Sin producción ni merge. [Nota y paso 10](foto-confirmada-p1.md).
 01/11 · Cursor · Pantallas de campañas, WhatsApp, bioimpedancia y borrador de laboratorio sobre main `48d741a9`. Banderas apagadas: sin ellas la pantalla dice Próximamente y el resto no cambia. No se envía nada ni se guarda sin revisión. Sin merge, sin producción y sin tocar #244, #245, MFA, Mercado Pago ni copias. [Nota](campanias-whatsapp-backend.md).
 01/11 · Cursor · Foto de /slug, estados del audio de la consulta y diagnóstico de avisos de hábitos. La foto queda en borrador hasta «Publicar cambios». La ficha dice permiso, subida, transcripción y si el audio se borró o sigue. La paciente ve permiso, suscripción y, solo en local o staging, un aviso de prueba. Rama `cursor/borrador-foto-audio-avisos-d306`. Sin migraciones, sin merge y sin producción. No toca #244, #245 ni MFA/MP/respaldos. [Informe](borrador-foto-audio-avisos.md).
 02/11 · Cursor · Isotipo elegido por Facundo (cinta blanca → menta) en la misma rama `cursor/nutridash-logo-botones-inicio-bb46`. Favicon, menú, ingreso, página pública y PWA. Botones principales al degradé nuevo; secundarios y la baja quedan. Sin #162, sin #244, sin #245, sin producción ni merge.
@@ -86,6 +87,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Foto confirmada (P1) | Cursor | `cursor/foto-confirmada-p1-3f0e` | Cola de fotos, texto para la paciente y umbral del indicador. Migración sin aplicar. El permiso de la foto ya se exige; el texto legal queda como gap. Sin producción ni merge. [Nota y paso 10](foto-confirmada-p1.md) |
 | Foto de /slug, audio de la consulta y diagnóstico de avisos | Cursor | `cursor/borrador-foto-audio-avisos-d306` | La foto no sale en /slug hasta Publicar cambios. La ficha muestra permiso, subida, transcripción y si el audio se borró o sigue, con Reintentar. La paciente tiene un diagnóstico de avisos; la prueba solo anda en local o staging. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md) |
 | Logo, botones y tarjetas de Inicio | Cursor | `cursor/nutridash-logo-botones-inicio-bb46` | Isotipo elegido (cinta blanca → menta), degradé en la acción principal y números de Inicio arriba. PR en borrador. Sin producción ni merge |
 | Lista de consultas de la profesional (42501) | Cursor | `cursor/consulta-permisos-lista-0be1` | La lectura de las consultas falla por un permiso de Postgres, no por los consentimientos. Migración nueva sin aplicar. Sin producción ni merge |
@@ -151,6 +153,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261102140000_meal_photo_review_stamp` | Cursor | Foto confirmada. Sello de revisión y nombre de la nutri. Escrita y probada en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261101230000_consultation_session_visible` | Cursor | Lista de consultas. Escrita y probada solo en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261026190000_plan_delivery` | Codex, Planes 3f | Escrita y probada solo en PostgreSQL descartable. Sin aplicar en producción |
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
@@ -182,6 +185,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **2/11 · Cursor · Foto confirmada P1 (HOLD)** · La foto ya estaba en main. Este corte deja la cola de la más vieja, Confirmar y Ajustar, el texto con el nombre de la nutri y el indicador desde confianza 0,45. La nota interna no sale en la API de la paciente. Migración nueva, sin aplicar. El texto del permiso de la foto no se reescribió. Veredicto HOLD hasta Facundo y la re-revisión de Cifra. [Nota y paso 10](foto-confirmada-p1.md). Sin producción.
 - **1/11 · Cursor · Pantallas de campañas, WhatsApp, bioimpedancia y laboratorio (HOLD)** · Segmento, vista previa, canal y confirmación; cupo, historial y bajas. En la ficha se ve la baja de WhatsApp y en Ajustes si la cuenta está cargada (si faltan los datos, «No disponible»). Bioimpedancia: texto, cinco medidas editables, «Guardar revisado» y curva. Laboratorio: borrador local con revisión obligatoria. Las banderas salen apagadas. Sin migración nueva, sin envío y sin producción.
 - **1/11 · Cursor · Foto en borrador, estados del audio y diagnóstico de avisos (HOLD)** · Subir la foto ya no la muestra en la página pública antes de «Publicar cambios». En Notas de consulta se ve si hay permiso, si se está subiendo, si se está transcribiendo y si el audio se borró o sigue guardado, con un botón para reintentar. En Avisos de la paciente hay un diagnóstico (permiso y suscripción) y un aviso de prueba que solo funciona en local o staging. Sin migraciones. [Informe y paso 10](borrador-foto-audio-avisos.md). Sin producción ni merge.
 - **1/11 · Cursor · Respaldo diario de la base** · Rama `cursor/respaldos-pgdump-6902`. Un workflow cifra el volcado de Supabase y comprueba que se puede restaurar en un Postgres vacío. Hacen falta dos secretos de GitHub, documentados y sin commitear. El PITR de Supabase queda explicado y no se contrata desde acá. Sin producción.

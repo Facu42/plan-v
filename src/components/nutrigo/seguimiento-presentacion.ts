@@ -15,6 +15,11 @@ export function inicialesDe(name: string, initials?: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => parte[0]?.toUpperCase() ?? '').join('') || '·';
 }
 
+/** Pendientes de todas las pacientes, la más vieja primero. */
+export function ordenarColaFotos<T extends { at: string; id: string }>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id));
+}
+
 export function comidaId(itemId: string) {
   return itemId.startsWith('meal:') ? itemId.slice('meal:'.length) : itemId;
 }

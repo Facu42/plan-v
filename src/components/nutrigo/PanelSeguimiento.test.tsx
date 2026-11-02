@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import type { HabitLog, Patient } from '../../types';
 import { PanelSeguimientoVista } from './PanelSeguimiento';
-import { animoDe, aguaDe, diasEtiqueta, fotoVisible, kcalLabel, mealWhen, sentimientoDe, sintomasDe, textoPedido } from './seguimiento-presentacion';
+import { animoDe, aguaDe, diasEtiqueta, fotoVisible, kcalLabel, mealWhen, ordenarColaFotos, sentimientoDe, sintomasDe, textoPedido } from './seguimiento-presentacion';
 
 const comida = {
   id: 'ml-1', patientId: 'p1', name: 'Sofía Gómez', initials: 'SG', tone: 'mint' as const,
@@ -16,7 +16,7 @@ describe('seguimiento, el dibujo', () => {
     dias={[{ id: 'p1', name: 'Sofía Gómez', initials: 'SG', tone: 'mint', text: '6 de 7', on: 6 }]}
     pendientes={1} estado="ready" mas={false} dialog={tab === 'ok' ? { kind: 'pedir' } : null} toast=""
     pedir={{ pacientes: [{ id: 'p1', name: 'Sofía Gómez', has_account: false } as Patient], aviso: true, dias: 7, comidas: ['Desayuno', 'Almuerzo', 'Merienda', 'Cena'], pacienteId: 'p1' }}
-    onConfirm={vi.fn()} onComment={vi.fn()} onVer={vi.fn()} onSentir={vi.fn()} onClose={vi.fn()} onGuardarComentario={vi.fn()} onPedir={vi.fn()} onAbrir={vi.fn()}
+    onConfirm={vi.fn()} onAdjust={vi.fn()} onComment={vi.fn()} onVer={vi.fn()} onSentir={vi.fn()} onClose={vi.fn()} onGuardarComentario={vi.fn()} onPedir={vi.fn()} onAbrir={vi.fn()}
   />);
 
   it('por revisar muestra Confirmar y Comentar, y no nombra WhatsApp', () => {
@@ -28,6 +28,8 @@ describe('seguimiento, el dibujo', () => {
     expect(html).toContain('class="sxmeal"');
     expect(html).toContain('class="sxpic"');
     expect(html).toContain('Confirmar');
+    expect(html).toContain('Ajustar');
+    expect(html).toContain('Cola fotos');
     expect(html).toContain('Comentar');
     expect(html).not.toContain('WhatsApp');
     expect(html).toContain('sxdays');
@@ -44,6 +46,15 @@ describe('seguimiento, el dibujo', () => {
 });
 
 describe('seguimiento, los datos', () => {
+  it('ordena la cola de fotos de la más vieja a la más nueva, de todas las pacientes', () => {
+    const orden = ordenarColaFotos([
+      { id: 'b', at: '2026-11-02T12:00:00Z', patient: 'b' },
+      { id: 'a2', at: '2026-11-01T12:00:00Z', patient: 'a' },
+      { id: 'a1', at: '2026-11-01T12:00:00Z', patient: 'c' },
+    ]);
+    expect(orden.map(item => item.id)).toEqual(['a1', 'a2', 'b']);
+  });
+
   it('arma el horario del consultorio y no inventa calorías ni fotos', () => {
     expect(mealWhen('2026-10-25T11:10:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toMatch(/^Hoy /);
     expect(mealWhen('2026-10-24T21:00:00.000Z', new Date('2026-10-25T15:00:00.000Z'))).toMatch(/^Ayer /);
