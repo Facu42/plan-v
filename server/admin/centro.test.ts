@@ -47,7 +47,7 @@ function app() {
     isSupabaseEnabled: () => true,
     verifyAuthToken: async (token) => token ? { userId: 'admin-1' } : null,
     allowDemo: () => false,
-    mfa: { enforced: () => false, needsSecondStep: async () => false },
+    mfa: { needsSecondStep: async () => false },
   }));
   registerAdminRoutes(instance);
   return instance;
