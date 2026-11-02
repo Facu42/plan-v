@@ -14,6 +14,7 @@ import { argentinaStart, inVideoCallWindow } from '../../lib/video-call-window';
 import { OfertaGrabarAudioDelTurno } from './MeetAudioBar';
 import { useUnsavedChanges } from './unsaved-changes';
 import { usePanelScheduling } from './use-panel-scheduling';
+import { marcarHechoSiCorresponde } from '../../lib/hoy-sesion';
 import './panel-fase5.css';
 
 export type AgendaHeader = { sufijo: string; cuando: string; actions: ReactNode };
@@ -249,6 +250,15 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
     return () => window.removeEventListener('keydown', onKey);
   }, [blocking, creatingAppt]);
   useEffect(() => { if (section === 'reservas') document.getElementById('pn-reservas')?.focus(); }, [section, pending.length]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('accion') !== 'turno') return;
+    const patientId = params.get('paciente') ?? '';
+    if (!patientId) return;
+    setApptError('');
+    setNewAppt(current => ({ ...current, patientId }));
+    setCreatingAppt(true);
+  }, []);
 
   const abrirNuevoTurno = (slot?: LugarLibre) => {
     setApptError('');
@@ -286,6 +296,7 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
         ...(newAppt.channel === 'video' && meetUrlTrimmed ? { meet_url: meetUrlTrimmed } : {}),
       });
       useAppStore.getState().addPatient(result.patient);
+      await marcarHechoSiCorresponde(newAppt.patientId, 'turno').catch(() => undefined);
       setAnchor(newAppt.day);
       setCreatingAppt(false);
       scheduling.setStatus('Turno agendado.');

@@ -339,6 +339,12 @@ export const api = {
   dismissBrief: (patientId: string) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/brief/dismiss`, { method: 'POST' }),
 
+  listarHechosHoy: () =>
+    request<{ hechos: { patientId: string; action: 'mensaje' | 'ajuste_menu' | 'turno'; sourceKey: string; doneAt: string }[]; hechos_7d: number; persistencia?: 'pendiente' }>('/api/crm/hoy-hechos'),
+
+  registrarHechoHoy: (patientId: string, body: { action: 'mensaje' | 'ajuste_menu' | 'turno'; source_key: string }) =>
+    request<{ hecho: { patientId: string; action: 'mensaje' | 'ajuste_menu' | 'turno'; sourceKey: string; doneAt: string }; hechos_7d: number }>(`/api/patients/${patientId}/hoy/hecho`, { method: 'POST', body: JSON.stringify(body) }),
+
   sendMessage: (
     patientId: string,
     text: string,

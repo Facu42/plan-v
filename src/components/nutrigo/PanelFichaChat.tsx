@@ -10,6 +10,7 @@ import { MESSAGES_READ_EVENT } from './cartera-unread';
 import { dayDividerLabel, messageTime, sameDay } from './message-panel';
 import { messageReceipt, messageReceiptLabel, unreadCount } from './message-receipts';
 import { sendShowroomMessage } from './message-send';
+import { borradorHoy, marcarHechoSiCorresponde } from '../../lib/hoy-sesion';
 
 const ACTIVE_REFRESH_MS = 15000;
 
@@ -32,7 +33,7 @@ export function PanelFichaChat({ patient, open, onClose }: { patient: Patient; o
   const lista = useRef<HTMLDivElement>(null);
   const archivo = useRef<HTMLInputElement>(null);
   const mensajes = enviadosDe(patient);
-  const sugerida = sugerenciaDe(patient);
+  const sugerida = sugerenciaDe(patient) ?? borradorHoy(patient.id);
   const sinLeer = unreadCount(mensajes, 'pro');
 
   useEffect(() => { if (lista.current) lista.current.scrollTop = lista.current.scrollHeight; }, [mensajes.length, open]);
@@ -66,6 +67,7 @@ export function PanelFichaChat({ patient, open, onClose }: { patient: Patient; o
       }, { send: api.sendMessage, refresh });
       clientId.current = crypto.randomUUID();
       setText('');
+      await marcarHechoSiCorresponde(patient.id, 'mensaje').catch(() => undefined);
     } catch { setError('No pudimos enviar el mensaje. Se conserva lo que escribiste para reintentar.'); }
     finally { inFlight.current = false; setBusy(false); if (archivo.current) archivo.current.value = ''; }
   };
