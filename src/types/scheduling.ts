@@ -20,6 +20,8 @@ export const pageExtrasSchema=z.object({
  service_notes:z.record(z.uuid(),z.object({instructions:z.string().trim().max(400),who:z.enum(['any','patients']),insurer:z.boolean()}).strict()).optional(),
  intake:z.array(z.object({text:z.string().trim().min(1).max(100),on:z.boolean()}).strict()).max(12).optional(),
  notices:z.object({confirm:z.boolean(),unconfirmed:z.boolean(),reopen:z.boolean(),review:z.boolean()}).partial().strict().optional(),
+ // Huella de la foto publicada. Sin esta huella, /slug no muestra el logo de la marca.
+ photo_sha256:z.string().regex(/^[a-f0-9]{64}$/).optional(),
 }).strict();
 export type PageExtras=z.infer<typeof pageExtrasSchema>;
 export const PUBLIC_MODALIDADES=['presencial','online','ambas'] as const;

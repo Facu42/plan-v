@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { allowPreMfaProfessionalBootstrap, createAuthMiddleware } from '../middleware/auth.js';
-import { isMfaExemptPath, isPreMfaProfessionalPath, mfaEnforced, tokenAal } from './mfa.js';
+import { hasVerifiedTotp, isMfaExemptPath, isPreMfaProfessionalPath, mfaEnforced, tokenAal, verifiedTotpCount } from './mfa.js';
 
 const jwt = (claims: object) => `Bearer h.${Buffer.from(JSON.stringify(claims)).toString('base64url')}.s`;
 
@@ -32,6 +32,41 @@ describe('verificación en dos pasos', () => {
     expect(isPreMfaProfessionalPath('/api/crm/progress-global')).toBe(false);
     expect(isPreMfaProfessionalPath('/api/patients')).toBe(false);
   });
+
+  it('cuenta solo los TOTP ya verificados', () => {
+    expect(verifiedTotpCount([
+      { factor_type: 'totp', status: 'verified' },
+      { factor_type: 'totp', status: 'unverified' },
+      { factor_type: 'phone', status: 'verified' },
+    ])).toBe(1);
+    expect(verifiedTotpCount(null)).toBe(0);
+    expect(verifiedTotpCount({ totp: [] })).toBe(0);
+  });
+});
+
+describe('consulta de factores a Supabase', () => {
+  it('pide la lista con el token de la sesión y reconoce un TOTP verificado', async () => {
+    const seen: RequestInit[] = [];
+    const fetchImpl = (async (url: string, init?: RequestInit) => {
+      seen.push({ ...init, headers: init?.headers });
+      expect(url).toBe('https://auth.example/auth/v1/factors');
+      return new Response(JSON.stringify([{ factor_type: 'totp', status: 'verified' }]), { status: 200 });
+    }) as typeof fetch;
+    await expect(hasVerifiedTotp('Bearer token-de-sesion', {
+      SUPABASE_URL: 'https://auth.example/',
+      SUPABASE_ANON_KEY: 'anon-publica',
+    }, fetchImpl)).resolves.toBe(true);
+    expect(new Headers(seen[0]?.headers).get('Authorization')).toBe('Bearer token-de-sesion');
+    expect(new Headers(seen[0]?.headers).get('apikey')).toBe('anon-publica');
+  });
+
+  it('sin código verificado, o si Auth no responde, no obliga', async () => {
+    const vacio = (async () => new Response(JSON.stringify([]), { status: 200 })) as typeof fetch;
+    await expect(hasVerifiedTotp('Bearer t', { SUPABASE_URL: 'https://auth.example', SUPABASE_ANON_KEY: 'a' }, vacio)).resolves.toBe(false);
+    const caido = (async () => { throw new Error('red'); }) as typeof fetch;
+    await expect(hasVerifiedTotp('Bearer t', { SUPABASE_URL: 'https://auth.example', SUPABASE_ANON_KEY: 'a' }, caido)).resolves.toBe(false);
+    await expect(hasVerifiedTotp(undefined, { SUPABASE_URL: 'https://auth.example', SUPABASE_ANON_KEY: 'a' }, vacio)).resolves.toBe(false);
+  });
 });
 
 describe('middleware con segundo paso', () => {
@@ -41,16 +76,14 @@ describe('middleware con segundo paso', () => {
   });
   afterEach(() => vi.unstubAllEnvs());
 
-  function app(options: { enforced: boolean; needsSecondStep: boolean; allowProfessionalBootstrap?: boolean }) {
+  function app(options: { needsSecondStep: boolean }) {
     const instance = new Hono();
     instance.use('/api/*', createAuthMiddleware({
       isSupabaseEnabled: () => true,
       verifyAuthToken: async () => ({ userId: 'u1' }),
       allowDemo: () => false,
       mfa: {
-        enforced: () => options.enforced,
         needsSecondStep: async () => options.needsSecondStep,
-        allowProfessionalBootstrap: async () => options.allowProfessionalBootstrap ?? false,
       },
     }));
     instance.get('/api/patients', (c) => c.json({ ok: true }));
@@ -61,48 +94,27 @@ describe('middleware con segundo paso', () => {
   }
   const headers = (aal: string) => ({ Authorization: jwt({ aal }) });
 
-  it('una nutri sin segundo paso recibe 403 cuando está prendido', async () => {
-    const res = await app({ enforced: true, needsSecondStep: true }).request('/api/patients', { headers: headers('aal1') });
-    expect(res.status).toBe(403);
-    expect(await res.json()).toMatchObject({ code: 'mfa_required' });
-  });
-
-  it('con el segundo paso hecho entra', async () => {
-    const res = await app({ enforced: true, needsSecondStep: true }).request('/api/patients', { headers: headers('aal2') });
-    expect(res.status).toBe(200);
-  });
-
-  it('una paciente entra sin segundo paso', async () => {
-    const res = await app({ enforced: true, needsSecondStep: false }).request('/api/patients', { headers: headers('aal1') });
-    expect(res.status).toBe(200);
-  });
-
-  it('apagado no cambia nada para nadie', async () => {
-    const res = await app({ enforced: false, needsSecondStep: true }).request('/api/patients', { headers: headers('aal1') });
-    expect(res.status).toBe(200);
-  });
-
-  it('las rutas de ingreso quedan libres', async () => {
-    const res = await app({ enforced: true, needsSecondStep: true }).request('/api/auth/recover', { headers: headers('aal1') });
-    expect(res.status).toBe(200);
-  });
-
-  it('deja iniciar setup y consultar una cola vacía si el servidor confirma el bootstrap profesional', async () => {
-    for (const path of ['/api/nutritionist/setup', '/api/crm/work-queue']) {
-      const res = await app({ enforced: true, needsSecondStep: true, allowProfessionalBootstrap: true })
-        .request(path, { headers: headers('aal1') });
-      expect(res.status).toBe(200);
-      expect(await res.json()).toMatchObject({ bootstrap: true });
+  it('quien ya activó el código y entra sin él recibe 403, también en el alta del consultorio', async () => {
+    for (const path of ['/api/patients', '/api/nutritionist/setup', '/api/crm/work-queue']) {
+      const res = await app({ needsSecondStep: true }).request(path, { headers: headers('aal1') });
+      expect(res.status).toBe(403);
+      expect(await res.json()).toMatchObject({ code: 'mfa_required' });
     }
   });
 
-  it('no abre otras rutas ni permite el bootstrap si el rol o el estado no califican', async () => {
-    const blockedQueue = await app({ enforced: true, needsSecondStep: true, allowProfessionalBootstrap: false })
-      .request('/api/crm/work-queue', { headers: headers('aal1') });
-    const blockedPatients = await app({ enforced: true, needsSecondStep: true, allowProfessionalBootstrap: true })
-      .request('/api/patients', { headers: headers('aal1') });
-    expect(blockedQueue.status).toBe(403);
-    expect(blockedPatients.status).toBe(403);
+  it('con el segundo paso hecho entra', async () => {
+    const res = await app({ needsSecondStep: true }).request('/api/patients', { headers: headers('aal2') });
+    expect(res.status).toBe(200);
+  });
+
+  it('sin código dado de alta la nutricionista entra: es opcional', async () => {
+    const res = await app({ needsSecondStep: false }).request('/api/patients', { headers: headers('aal1') });
+    expect(res.status).toBe(200);
+  });
+
+  it('las rutas de ingreso quedan libres aunque el código esté activado', async () => {
+    const res = await app({ needsSecondStep: true }).request('/api/auth/recover', { headers: headers('aal1') });
+    expect(res.status).toBe(200);
   });
 });
 
