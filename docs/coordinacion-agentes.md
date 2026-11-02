@@ -177,6 +177,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **1/11 · Cursor · Respaldo diario de la base** · Rama `cursor/respaldos-pgdump-6902`. Un workflow cifra el volcado de Supabase y comprueba que se puede restaurar en un Postgres vacío. Hacen falta dos secretos de GitHub, documentados y sin commitear. El PITR de Supabase queda explicado y no se contrata desde acá. Sin producción.
 - **1/11 · Cursor · Cobro de Nutridash en Mercado Pago, solo prueba** · Rama `cursor/mp-sandbox-suscripcion-6902`. El plan se activa con un pago aprobado del monto justo. Sin pago, a los 30 días queda en solo lectura. Una clave que no es de prueba no llama a Mercado Pago. Pasos a mano en [mercadopago-sandbox.md](mercadopago-sandbox.md). Sin producción y sin cobro real.
 - **1/11 · Cursor · Verificación en dos pasos** · Rama `cursor/mfa-totp-admin-6902`. `/admin` exige el código de la app. La nutricionista lo activa en Ajustes → Seguridad y puede quitarlo. Si lo activó, la API pide el código. No se obliga a todo el consultorio. Sin migración aplicada ni producción.
 - **2/11 · Cursor · Logo elegido (HOLD)** · Facundo cambió el isotipo: cuadrado negro, cinta de blanco a menta y hoja en la «d». Ese archivo reemplaza al anterior en el menú, el ingreso, la página pública, el favicon y la app instalable. Los mismos botones de hacer pasan a ese degradé, con texto oscuro. Los secundarios y «Confirmar baja» siguen igual. Veredicto HOLD hasta el ok de Facundo. Sin producción.
