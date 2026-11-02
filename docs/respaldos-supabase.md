@@ -15,9 +15,9 @@ Esas copias las administra Supabase. Si el proyecto se borra o la cuenta se cier
 
 El workflow `.github/workflows/respaldo-base.yml` corre todos los días a las 03:30 de Argentina.
 
-1. Hace `pg_dump` de la base, solo el esquema `public`.
+1. Hace `pg_dump` de la base, solo el esquema `public`. El cliente es Postgres 17, el mismo mayor que la base de Supabase (17.6). Una versión menor se niega a volcar.
 2. Cifra el archivo (AES-256, la clave no está en el repo).
-3. Lo restaura en un Postgres vacío de la misma corrida y comprueba que haya tablas.
+3. Lo restaura en un Postgres 17 vacío de la misma corrida y comprueba que haya tablas. La prueba de cada pull request usa el mismo cliente y el mismo contenedor.
 4. Guarda solo el archivo cifrado como artifact de GitHub, 14 días.
 
 En cada pull request corre la misma prueba con una base vacía de mentira. No usa secretos y no toca Supabase.
