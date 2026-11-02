@@ -50,6 +50,7 @@ describe('alta con el token de la plataforma', () => {
     rows.clear();
     created.length = 0;
     vi.stubEnv('PUBLIC_SITE_URL', 'https://plan-v.example');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
   });
 
   it('manda el monto calculado en el servidor y la clave de idempotencia', async () => {

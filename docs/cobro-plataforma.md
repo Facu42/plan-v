@@ -31,13 +31,9 @@ También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
 3. En Mercado Pago, apuntar el aviso a `https://<sitio>/api/public/billing/mp/webhook` (con y sin barra final) para los temas `subscription_preapproval`, `subscription_authorized_payment` y `payment`. El secreto tiene que ser el mismo que `MP_PLATFORM_WEBHOOK_SECRET`.
 4. Prender `PLATFORM_BILLING_ENABLED=1` en Railway.
 
-## Prueba en sandbox (pendiente de las claves)
+## Prueba en sandbox
 
-1. Una nutricionista de prueba elige Arranque mensual y llega al enlace de Mercado Pago con 14.940 si entra en las 30, o 24.900 si no.
-2. Con el pago de prueba aprobado, el plan queda al día.
-3. Un aviso con firma inválida responde 401 y no escribe.
-4. El mismo aviso dos veces no duplica el pago.
-5. Un rechazo deja el plan en deuda, con el aviso en Ajustes, y a los 7 días pasa a solo lectura sin cortar a la paciente.
+Los pasos para hacerla a mano, sin cobrar plata de verdad, están en [mercadopago-sandbox.md](mercadopago-sandbox.md). La clave tiene que empezar con `TEST-`. Si es de producción, el servidor no llama a Mercado Pago.
 
 ## Informe Regression Guard (Paso 10)
 
