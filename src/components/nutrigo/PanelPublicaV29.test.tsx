@@ -52,6 +52,13 @@ describe('Página pública con el HTML del boceto v29', () => {
     for (const texto of ['pubpide', 'Obras sociales en la reserva', 'Confirmación y recordatorio', 'Horarios de atención', 'Reglas para reservar']) expect(reservas).toContain(texto);
   });
 
+  it('la foto elegida se muestra como borrador y no como ya publicada', () => {
+    const html = renderToStaticMarkup(<PanelPublicaV29 {...props(0)} marcaLogo="data:image/png;base64,qq" fotoBorrador />);
+    expect(html).toContain('Borrador: se ve en tu página al publicar.');
+    expect(html).toContain('data:image/png;base64,qq');
+    expect(renderToStaticMarkup(<PanelPublicaV29 {...props(0)} marcaLogo="data:image/png;base64,qq" />)).not.toContain('Borrador: se ve en tu página al publicar.');
+  });
+
   it('sin datos extra cada bloque sigue estando con un texto corto', () => {
     const mi = renderToStaticMarkup(<PanelPublicaV29 {...props(0)} />);
     expect(mi).toContain('Todavía no cargaste obras sociales.');

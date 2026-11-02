@@ -1,3 +1,4 @@
+01/11 · Cursor · Foto de /slug, estados del audio de la consulta y diagnóstico de avisos de hábitos. La foto queda en borrador hasta «Publicar cambios». La ficha dice permiso, subida, transcripción y si el audio se borró o sigue. La paciente ve permiso, suscripción y, solo en local o staging, un aviso de prueba. Rama `cursor/borrador-foto-audio-avisos-d306`. Sin migraciones, sin merge y sin producción. No toca #244, #245 ni MFA/MP/respaldos. [Informe](borrador-foto-audio-avisos.md).
 02/11 · Cursor · Isotipo elegido por Facundo (cinta blanca → menta) en la misma rama `cursor/nutridash-logo-botones-inicio-bb46`. Favicon, menú, ingreso, página pública y PWA. Botones principales al degradé nuevo; secundarios y la baja quedan. Sin #162, sin #244, sin #245, sin producción ni merge.
 
 01/11 · Cursor · Logo, botones y Inicio de Nutridash en `cursor/nutridash-logo-botones-inicio-bb46`. Ícono nuevo en favicon, menú, ingreso, página pública y PWA. Botones principales al degradé del logo; secundarios y la baja quedan. Los números de Inicio suben y entran en escalera. Sin fase 6, sin #162, sin #244, sin #245, sin producción ni merge.
@@ -84,6 +85,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Foto de /slug, audio de la consulta y diagnóstico de avisos | Cursor | `cursor/borrador-foto-audio-avisos-d306` | La foto no sale en /slug hasta Publicar cambios. La ficha muestra permiso, subida, transcripción y si el audio se borró o sigue, con Reintentar. La paciente tiene un diagnóstico de avisos; la prueba solo anda en local o staging. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md) |
 | Logo, botones y tarjetas de Inicio | Cursor | `cursor/nutridash-logo-botones-inicio-bb46` | Isotipo elegido (cinta blanca → menta), degradé en la acción principal y números de Inicio arriba. PR en borrador. Sin producción ni merge |
 | Lista de consultas de la profesional (42501) | Cursor | `cursor/consulta-permisos-lista-0be1` | La lectura de las consultas falla por un permiso de Postgres, no por los consentimientos. Migración nueva sin aplicar. Sin producción ni merge |
 | Campañas de reactivación, WhatsApp, audio y bioimpedancia | Codex, autorizado por Facundo el 31/10 | `work/campanias-whatsapp` | Backend bajo banderas apagadas. RLS por consultorio y dos migraciones sin aplicar. [Informe y paso 10](campanias-whatsapp-backend.md). Sin merge ni producción |
@@ -177,6 +179,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **1/11 · Cursor · Foto en borrador, estados del audio y diagnóstico de avisos (HOLD)** · Subir la foto ya no la muestra en la página pública antes de «Publicar cambios». En Notas de consulta se ve si hay permiso, si se está subiendo, si se está transcribiendo y si el audio se borró o sigue guardado, con un botón para reintentar. En Avisos de la paciente hay un diagnóstico (permiso y suscripción) y un aviso de prueba que solo funciona en local o staging. Sin migraciones. [Informe y paso 10](borrador-foto-audio-avisos.md). Sin producción ni merge.
 - **1/11 · Cursor · Respaldo diario de la base** · Rama `cursor/respaldos-pgdump-6902`. Un workflow cifra el volcado de Supabase y comprueba que se puede restaurar en un Postgres vacío. Hacen falta dos secretos de GitHub, documentados y sin commitear. El PITR de Supabase queda explicado y no se contrata desde acá. Sin producción.
 - **1/11 · Cursor · Cobro de Nutridash en Mercado Pago, solo prueba** · Rama `cursor/mp-sandbox-suscripcion-6902`. El plan se activa con un pago aprobado del monto justo. Sin pago, a los 30 días queda en solo lectura. Una clave que no es de prueba no llama a Mercado Pago. Pasos a mano en [mercadopago-sandbox.md](mercadopago-sandbox.md). Sin producción y sin cobro real.
 - **1/11 · Cursor · Verificación en dos pasos** · Rama `cursor/mfa-totp-admin-6902`. `/admin` exige el código de la app. La nutricionista lo activa en Ajustes → Seguridad y puede quitarlo. Si lo activó, la API pide el código. No se obliga a todo el consultorio. Sin migración aplicada ni producción.

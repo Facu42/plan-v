@@ -4,7 +4,7 @@ import {CareError} from '../care/errors.js';
 import {registerDemoState} from '../demo/state.js';
 import {getStore,getPatient,createPatient,setAppointment,DEMO_NUTRITIONIST_ID} from '../store.js';
 import {schedulingDefaultSettings,type SchedulingSettings,type SchedulingBooking,type PublicBookingInput,type BookingChange,type PublicBookingReceipt,type SchedulingInterval,type PublicSchedulingPage} from '../../src/types/scheduling.js';
-import {publicPageProfile} from '../../src/lib/public-page-profile.js';
+import {fotoParaSlug,huellaFoto,publicPageProfile} from '../../src/lib/public-page-profile.js';
 import {getNutritionSettings} from '../nutrition-capabilities/repository.js';
 import {availableSlots} from './logic.js';
 import {openCredentials,sealCredentials} from './credentials.js';
@@ -38,7 +38,9 @@ async function brandPhoto(nid:string,persistent:boolean):Promise<string>{
   }catch{return '';}
 }
 export async function publicPage(p:Profile,persistent:boolean):Promise<PublicSchedulingPage>{
-  const [status,photo]=await Promise.all([connectionStatuses(p.nutritionist_id,persistent),p.config.page.logo_url.startsWith('https://')?Promise.resolve(''):brandPhoto(p.nutritionist_id,persistent)]);
+  const https=p.config.page.logo_url.startsWith('https://');
+  const [status,brand]=await Promise.all([connectionStatuses(p.nutritionist_id,persistent),https?Promise.resolve(''):brandPhoto(p.nutritionist_id,persistent)]);
+  const photo=fotoParaSlug(p.config.page,brand,p.config.page_extras?.photo_sha256,brand.startsWith('data:image/')?await huellaFoto(brand):'');
   return {page:p.config.page,profile:publicPageProfile(p.config.page_extras,photo),calendars:p.config.calendars,types:p.config.types,timezone:p.config.timezone,transfer_alias:p.config.transfer_alias,mercado_pago_connected:status.mercadopago};
 }
 export async function saveProfile(nid:string,expected:number,config:SchedulingSettings,persistent:boolean){if(config.page.enabled)bookingToken(nid,'configuration',persistent);if(!persistent){const old=profiles.get(nid);if((old?.revision??0)!==expected||[...profiles.values()].some(p=>p.slug===config.page.slug&&p.nutritionist_id!==nid))throw new CareError(409,'La configuración cambió o ese enlace ya está en uso.');const p={nutritionist_id:nid,slug:config.page.slug,config:structuredClone(config),revision:expected+1};profiles.set(nid,p);return p;}const r=await getRequestDb().rpc('scheduling_save_config',{target:nid,expected_revision:expected,payload:config});schedulingDbError(r.error);return r.data as Profile;}

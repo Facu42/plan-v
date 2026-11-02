@@ -46,7 +46,7 @@ export function Qr({ link }: { link: string }) {
 }
 
 /** `pubPhone`: la página como la ve una paciente nueva. */
-export function Celular({ config, publicados, marcaLogo = '' }: { config: SchedulingSettings; publicados: SchedulingSettings['types']; marcaLogo?: string }) {
+export function Celular({ config, publicados, marcaLogo = '', fotoBorrador = false }: { config: SchedulingSettings; publicados: SchedulingSettings['types']; marcaLogo?: string; fotoBorrador?: boolean }) {
   const { page, page_extras: extras } = config;
   const obras = (extras?.insurers ?? []).filter(o => o.mode === 'copago' || o.mode === 'reintegro');
   const foto = fotoPublica(page, marcaLogo);
@@ -55,6 +55,7 @@ export function Celular({ config, publicados, marcaLogo = '' }: { config: Schedu
   const subtitulo = [page.contact || 'Nutricionista', extras?.license, extras?.area, modalidad].filter(Boolean).join(' · ');
   return <div className="pubph" aria-label="Vista previa en celular"><div className="pubsc">
     <div className="pubhero">{foto ? <img className="av" src={foto} alt="" width={40} height={40} /> : <span className="av">{iniciales(page.title)}</span>}<b>{page.title}</b><small>{subtitulo}</small>{precio ? <em>{precio}</em> : null}<span className="pubrt"><em>Sin opiniones todavía</em></span></div>
+    {fotoBorrador ? <small className="nthint">Borrador: se ve en tu página al publicar.</small> : null}
     {extras?.specialties?.length ? <div className="pubtg">{extras.specialties.slice(0, 3).map(e => <span key={e}>{e}</span>)}</div> : null}
     <div className="pubsec"><h5>Turnos</h5>{publicados.length ? publicados.slice(0, 3).map(tipo => <div className="pubsvc" key={tipo.id}><span><b>{tipo.name}</b><small>{tipo.duration_min} min · {canal(tipo.channel)}</small></span><em>{plata(tipo.price_minor)}</em></div>) : <small className="pubos">Todavía no cargaste servicios.</small>}</div>
     <div className="pubsec"><h5>Próximos lugares</h5><small className="pubos">Se muestran los lugares libres de tu agenda.</small></div>
@@ -66,7 +67,7 @@ export function Celular({ config, publicados, marcaLogo = '' }: { config: Schedu
 
 type Props = {
   config: SchedulingSettings; reservas: SchedulingBooking[]; publicada: boolean; sinPublicar: boolean; link: string; planes: SubscriptionPlan[] | null; mercadoPago: boolean;
-  marcaLogo?: string;
+  marcaLogo?: string; fotoBorrador?: boolean;
   vista: VistaPublica; servicio: number; cargando: boolean; error: string; estado: string;
   onServicio: (indice: number) => void; onCajon: (cajon: CajonPublica, id?: string) => void; onQuitarServicio: (id: string) => void; onDuplicarServicio: (id: string) => void;
   onCopiar: () => void; onDescargarQr: () => void; onRecordatorios: () => void; onAviso: (aviso: AvisoReserva, activo: boolean) => void; onDia: (dia: number, activo: boolean) => void;
@@ -164,7 +165,7 @@ export function PanelPublicaV29(p: Props) {
   return marco(<div className="fx" style={{ gridTemplateColumns: '1.12fr 312px 1fr' }}>
     <div className="c">
       <FxPanel titulo="Perfil" meta={<span className={`pill ${p.publicada && !p.sinPublicar ? 'p-conf' : 'p-wait'}`}>{p.publicada ? (p.sinPublicar ? 'Cambios sin publicar' : 'Publicada') : 'Sin publicar'}</span>} derecha={<Boton texto="Editar" icono="pen" onClick={() => p.onCajon('perfil')} />}>
-        <div className="pubpf">{fotoPublica(config.page, p.marcaLogo) ? <img className="av" src={fotoPublica(config.page, p.marcaLogo)} alt="" width={40} height={40} /> : <span className="av">{iniciales(config.page.title)}</span>}<span><b>{config.page.title}</b><small>{[config.page.contact || 'Nutricionista', extras?.license, extras?.area, etiquetaModalidad(extras?.modality)].filter(Boolean).join(' · ')}</small></span></div>
+        <div className="pubpf">{fotoPublica(config.page, p.marcaLogo) ? <img className="av" src={fotoPublica(config.page, p.marcaLogo)} alt="" width={40} height={40} /> : <span className="av">{iniciales(config.page.title)}</span>}<span><b>{config.page.title}</b><small>{[config.page.contact || 'Nutricionista', extras?.license, extras?.area, etiquetaModalidad(extras?.modality)].filter(Boolean).join(' · ')}</small></span>{p.fotoBorrador ? <small className="nthint">Borrador: se ve en tu página al publicar.</small> : null}</div>
         <p className="pubbio">{config.page.bio || 'Todavía no escribiste una presentación.'}</p>
         {precioConsulta(extras?.consult_price_minor) ? <p className="pubbio">Consulta {precioConsulta(extras?.consult_price_minor)}</p> : null}
         {extras?.booking_url ? <p className="pubbio">Reserva: {extras.booking_url.replace(/^https?:\/\//, '')}</p> : null}
@@ -180,7 +181,7 @@ export function PanelPublicaV29(p: Props) {
         <p className="sxsub">Todavía no hay opiniones de pacientes. Cuando el pedido esté activo, las verificadas van a aparecer acá.</p>
       </FxPanel>
     </div>
-    <div className="c"><FxPanel titulo="Así la ve una paciente nueva" meta="" derecha={<button className="lnk" type="button" onClick={() => p.onCajon('abrir')}>Abrir <PanelV29Icon name="chev" size={11} /></button>} grande clase="pubprev"><Celular config={config} publicados={config.types} marcaLogo={p.marcaLogo} /></FxPanel></div>
+    <div className="c"><FxPanel titulo="Así la ve una paciente nueva" meta="" derecha={<button className="lnk" type="button" onClick={() => p.onCajon('abrir')}>Abrir <PanelV29Icon name="chev" size={11} /></button>} grande clase="pubprev"><Celular config={config} publicados={config.types} marcaLogo={p.marcaLogo} fotoBorrador={p.fotoBorrador} /></FxPanel></div>
     <div className="c">
       <FxPanel titulo="Compartir" meta="">
         <div className="pubsh">{p.link ? <Qr link={p.link} /> : null}<div><small>Tu link</small><b>{linkCorto || 'Publicá la página para tener link'}</b><div className="pubshb"><Boton texto="Copiar link" icono="copy" clave onClick={p.onCopiar} deshabilitado={!p.link} /><Boton texto="Descargar QR" icono="dl" onClick={p.onDescargarQr} deshabilitado={!p.link} /></div><small className="nthint">El QR sirve para la puerta del consultorio o una tarjeta.</small></div></div>

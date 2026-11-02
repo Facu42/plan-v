@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
+1/11 · Cursor · La foto de la página pública queda en borrador hasta «Publicar cambios». Las notas de consulta muestran permiso, subida, transcripción y si el audio se borró o sigue, con reintento. La paciente tiene un diagnóstico de avisos y una guía para probarlo en el teléfono; el aviso de prueba no sale en la versión publicada. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md).
 1/11 · Cursor · Respaldo diario de la base: volcado cifrado en GitHub y prueba de restauración. Los secretos los carga Facundo. El PITR de Supabase está explicado en [respaldos-supabase.md](respaldos-supabase.md). Rama `cursor/respaldos-pgdump-6902`. Sin producción.
 1/11 · Cursor · Revisión del cobro de Nutridash con Mercado Pago, solo en prueba. Un pago de otro monto no activa la cuenta. Sin pago, a los 30 días el panel queda en solo lectura. Pasos en [mercadopago-sandbox.md](mercadopago-sandbox.md). Rama `cursor/mp-sandbox-suscripcion-6902`. Sin producción.
 1/11 · Cursor · Verificación en dos pasos con el código de la app: obligatoria en `/admin`, opcional para la nutricionista desde Ajustes. Rama `cursor/mfa-totp-admin-6902`. Sin producción. Detalle en [verificacion-dos-pasos-2026-10-17.md](verificacion-dos-pasos-2026-10-17.md).

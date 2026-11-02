@@ -1,12 +1,11 @@
 // Cajones de la Página pública (los de `PUBA` del boceto v29): perfil, lugar, obras sociales, descuentos, servicio, qué se pide, horarios y reglas.
 // Cada uno edita una copia y, al guardar, entrega la configuración nueva; «Publicar cambios» la guarda en la base.
 import { useState } from 'react';
-import { nutritionCapabilityApi } from '../../api/nutrition-capabilities';
 import type { PageExtras, PublicModality, SchedulingSettings } from '../../types/scheduling';
 import { Campo, CajonV29, Chips, Fila, Segmentado, Tildes } from './CajonV29';
 import { FxKv } from './ficha-fx';
 import { validarImagen } from './ficha-ajustes';
-import { MODALIDADES } from '../../lib/public-page-profile';
+import { fotoAlElegir, MODALIDADES } from '../../lib/public-page-profile';
 import { ESPECIALIDADES_SUGERIDAS, MODOS_OBRA_SOCIAL, OBRAS_SUGERIDAS, conHorarioDelDia, leerHorario, pedidosAlReservar, type ModoObraSocial } from './publica-extras';
 import { horariosPorDia } from './PanelPublicaV29';
 
@@ -45,12 +44,11 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
     if (!archivo) return;
     const mal = validarImagen(archivo); if (mal) { setAviso(mal); return; }
     try {
-      const dataUrl = await leerImagen(archivo);
-      const view = await nutritionCapabilityApi.settings();
-      await nutritionCapabilityApi.saveSettings({ ...view.settings, brand: { ...view.settings.brand, logo: dataUrl } }, view.revision);
-      setFoto(dataUrl); onFoto?.(dataUrl); setAviso('Foto guardada en tu marca. Publicá los cambios para que se vea en /' + slug + '.');
+      const decision = fotoAlElegir(await leerImagen(archivo));
+      setFoto(decision.borrador);
+      setAviso('La foto queda como borrador. Se ve en tu página cuando publiques los cambios.');
     } catch (error) {
-      setAviso(error instanceof Error ? error.message : 'No pudimos guardar la foto.');
+      setAviso(error instanceof Error ? error.message : 'No pudimos leer la foto.');
     }
   }
   const guardar = () => {
@@ -63,6 +61,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
     const final = nueva && !especialidades.includes(nueva) ? [...especialidades, nueva] : especialidades;
     if (final.length > 12) { setAviso('Hasta 12 especialidades.'); return false; }
     const centavos = Math.max(0, Math.round(Number(precio.replace(/\D/g, '')) || 0)) * 100;
+    if (foto.startsWith('data:image/') && foto !== fotoInicial) onFoto?.(foto);
     onAplicar(conExtras({ ...config, page: { ...page, title: titulo, bio, slug, contact: contacto, logo_url: logo } }, {
       license: matricula.trim(), area: zona.trim(), specialties: final, modality: modalidad,
       consult_price_minor: centavos || undefined, booking_url: reserva.trim() || undefined,
@@ -83,7 +82,7 @@ export function CajonPerfil({ config, onAplicar, onClose, onFoto, fotoInicial = 
     </Fila>
     <Campo etiqueta="Dirección del link" ayuda="Minúsculas, números y guiones. Queda en nutridash.app/tu-slug"><input className="ai" value={slug} onChange={e => setSlug(e.target.value)} /></Campo>
     <Fila><Campo etiqueta="Contacto público"><input className="ai" value={contacto} maxLength={150} onChange={e => setContacto(e.target.value)} /></Campo><Campo etiqueta="Foto o logo (enlace)"><input className="ai" type="url" value={logo} placeholder="https://" onChange={e => setLogo(e.target.value)} /></Campo></Fila>
-    <Campo etiqueta="Subir foto o logo" ayuda="PNG o JPG de hasta 500 KB. Se guarda en tu marca y sale en el PDF y en tu página.">
+    <Campo etiqueta="Subir foto o logo" ayuda="PNG o JPG de hasta 500 KB. Queda como borrador hasta Publicar cambios. Después sale en tu página y en el PDF.">
       <input className="ai" type="file" accept="image/png,image/jpeg" onChange={e => void subirFoto(e.target.files?.[0])} />
     </Campo>
     {foto ? <img src={foto} alt="" width={56} height={56} style={{ objectFit: 'cover', borderRadius: 8 }} /> : null}
