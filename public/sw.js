@@ -1,5 +1,5 @@
 /* Nutridash shell worker. Never cache /api, Supabase, signed URLs or clinical payloads. */
-const SHELL = 'plan-v-shell-v2';
+const SHELL = 'plan-v-shell-v4';
 const SHELL_URLS = ['/offline.html', '/manifest.webmanifest', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/apple-touch-icon.png'];
 
 function clinicalRequest(url) {

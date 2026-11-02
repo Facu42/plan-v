@@ -40,7 +40,9 @@
   pointer-events: none;
   background: radial-gradient(closest-side, rgba(194, 230, 110, 0.18), transparent);
 }
-.entry-stage-logo { position: relative; z-index: 2; height: 32px; width: auto; align-self: flex-start; }
+.entry-stage-logo { position: relative; z-index: 2; display: inline-flex; align-items: center; gap: 10px; align-self: flex-start; color: var(--es-paper); }
+.entry-stage-logo img { width: 44px; height: 44px; border-radius: 12px; }
+.entry-stage-logo span { font-size: 22px; font-weight: 650; letter-spacing: -0.04em; }
 .entry-stage-scene { position: relative; z-index: 1; display: grid; flex: 1; min-height: 0; place-items: center; }
 .entry-stage-scene svg { width: 100%; height: 100%; max-height: 460px; }
 .entry-stage-copy { position: relative; z-index: 2; display: grid; gap: 8px; }

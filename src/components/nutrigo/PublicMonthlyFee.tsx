@@ -18,7 +18,7 @@ export function PublicMonthlyFeeView({ busy, notice, onSubmit }: {
       onSubmit(String(data.get('correo') ?? ''));
     }}>
       <label>Correo <input name="correo" type="email" required maxLength={254} autoComplete="email" /></label>
-      <button type="submit" disabled={busy}>Pagar este mes</button>
+      <button className="nd-action" type="submit" disabled={busy}>Pagar este mes</button>
     </form>
     {notice && <p role="status">{notice}</p>}
   </section>;

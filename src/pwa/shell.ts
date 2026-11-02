@@ -1,4 +1,4 @@
-export const SHELL_CACHE = 'plan-v-shell-v2';
+export const SHELL_CACHE = 'plan-v-shell-v4';
 export const SHELL_PRECACHE = [
   '/offline.html',
   '/manifest.webmanifest',
