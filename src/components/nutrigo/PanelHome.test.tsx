@@ -64,6 +64,19 @@ describe('Inicio v29', () => {
     // Todo lo animado vive dentro de la consulta de movimiento: afuera no hay `animation:`.
     expect(bloque.slice(0, bloque.indexOf('@media')).includes('animation:')).toBe(false);
   });
+  it('el riel de Hoy ofrece una sola acción y, sin nada, dice que está todo al día', () => {
+    const vacio = renderToStaticMarkup(<PanelHomeView {...props} patients={[]} />);
+    expect(vacio).toContain('id="hoy-list"');
+    expect(vacio).toContain('Todo al día');
+    expect(vacio).toContain('0 hechas en 7 días');
+    const ana = { id: 'ana', name: 'Ana López', initials: 'AL', tone: 'mint', adherence_score: 40, meal_logs: [{ id: 'f1', status: 'pending_review' }], todayPlan: [], weekPlan: [], messages: [], appointment: null, brief: null } as unknown as Patient;
+    const html = renderToStaticMarkup(<PanelHomeView {...props} patients={[ana]} />);
+    expect(html).toContain('Mandarle un mensaje');
+    expect(html).toContain('1 foto sin revisar');
+    expect(html).toContain('accion=mensaje');
+    expect(html).not.toContain('/messages');
+    expect(html).toContain('id="rows"');
+  });
   it('el conteo deja el número final en el texto estático', () => {
     expect(renderToStaticMarkup(<Cuenta valor="$30" />)).toBe('$30');
     expect(renderToStaticMarkup(<Cuenta valor="11:30" />)).toBe('11:30');

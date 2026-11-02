@@ -36,4 +36,14 @@ describe('respaldo de la base', () => {
     expect(texto).toContain('BACKUP_ENCRYPTION_KEY');
     expect(texto).not.toMatch(/postgres:\/\/[^@\s]+:[^@\s]+@db\.[a-z0-9]+\.supabase\.co/);
   });
+
+  it('el cliente y el contenedor de restauración son Postgres 17 en los dos jobs', () => {
+    const workflow = readFileSync('.github/workflows/respaldo-base.yml', 'utf8');
+    expect(workflow.match(/image: postgres:17/g)).toHaveLength(2);
+    expect(workflow.match(/postgresql-client-17/g)?.length).toBeGreaterThanOrEqual(2);
+    expect(workflow).toContain('apt.postgresql.org');
+    expect(workflow).not.toContain('postgres:16');
+    expect(workflow).not.toContain('postgresql-client-16');
+    expect(workflow).not.toContain('postgresql-client)');
+  });
 });

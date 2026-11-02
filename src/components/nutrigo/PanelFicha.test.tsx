@@ -53,6 +53,16 @@ describe('Ficha v29', () => {
     expect(html).toContain('Sin dato');
     expect(html).toContain('Sin acuerdos cargados');
     expect(html).toContain('data-mk="1"');
+    expect(html).toContain('Todo al día');
+  });
+
+  it('la ficha usa la misma acción de Hoy y no la manda sola', () => {
+    const accion = { patientId: 'p1', nombre: 'Sofía Gómez', action: 'ajuste_menu' as const, titulo: 'Ajustar el menú', cuerpo: 'La adherencia de esta semana está baja.', borrador: null, sourceKey: 'menu:50', href: '/crm/ficha?paciente=p1&accion=ajuste_menu&seccion=plan' };
+    const html = renderToStaticMarkup(<PanelFichaResumen patient={paciente} now={ahora} datos={datos()} ir={ir} accionHoy={accion} onAbrirHoy={vi.fn()} />);
+    expect(html).toContain('id="hoy-list"');
+    expect(html).toContain('Ajustar el menú');
+    expect(html).toContain('Para hacer hoy');
+    expect(html).not.toContain('/messages');
   });
 
   it('sin permiso de medidas lo dice en vez de dibujar una curva vacía', () => {

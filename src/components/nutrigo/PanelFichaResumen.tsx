@@ -11,12 +11,14 @@ import { avanceDeIngreso, avanceEnKilos, diaMes, mosaicosDeMedidas, numero, plur
 import type { SolapaFicha } from './ficha-presentacion';
 import { FxBar, FxDk, FxFilas, FxIr, FxKv, FxMedidor, FxMosaico, FxPanel, FxCurva, type FilaFx, type Ir } from './ficha-fx';
 import type { FichaData } from './use-ficha-data';
+import type { ItemHoy } from '../../lib/hoy-accion';
+import { AccionDeHoy } from './AccionDeHoy';
 
 const PLAN_ESTADO = { none: 'Todavía sin plan', draft: 'Plan en borrador', published: 'Plan publicado', scheduled: 'Plan programado' } as const;
 const PUNTOS_DE_CURVA = 6;
 const sbtn = (texto: string, ir: Ir, a: SolapaFicha): ReactNode => <button type="button" className="sbtn" onClick={() => ir(a)}>{texto}</button>;
 
-export function PanelFichaResumen({ patient, now, datos, ir, children }: { patient: Patient; now: Date; datos: FichaData; ir: Ir; children?: ReactNode }) {
+export function PanelFichaResumen({ patient, now, datos, ir, children, accionHoy = null, onAbrirHoy }: { patient: Patient; now: Date; datos: FichaData; ir: Ir; children?: ReactNode; accionHoy?: ItemHoy | null; onAbrirHoy?: (href: string) => void }) {
   const { care, careError, reload, canCare, canDocs, current, refetch } = datos;
   const hoy = homeDay(now);
   const medidas = (careError ? [] : care?.measurements ?? []).filter(m => m.patient_id === patient.id && m.captured_on <= hoy);
@@ -100,6 +102,11 @@ export function PanelFichaResumen({ patient, now, datos, ir, children }: { patie
         </div>
       </FxPanel>
       <FxPanel titulo="Alertas" meta={alertas[0]?.tono === 'l' && alertas.length === 1 ? '0' : String(alertas.length)}><FxFilas filas={alertas} ir={ir} /></FxPanel>
+      <FxPanel titulo="Hoy" meta={accionHoy ? '1' : '0'}>
+        {accionHoy && onAbrirHoy
+          ? <div className="lst" id="hoy-list"><AccionDeHoy item={accionHoy} onAbrir={onAbrirHoy} /></div>
+          : <p className="sxsub">Todo al día</p>}
+      </FxPanel>
       <FxPanel titulo="Para hacer hoy" meta={tareas[0]?.tono === 'l' && tareas.length === 1 ? '0' : String(tareas.length)} grande><div className="fxs"><FxFilas filas={tareas} ir={ir} /></div></FxPanel>
     </div>
     <div className="c">
