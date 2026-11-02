@@ -1,3 +1,10 @@
+02/11 · Cursor · Foto confirmada, rebase sobre main (ya con #268 y #269). La migración de la foto sigue sin aplicar. Sin merge.
+02/11 · Cursor · Foto confirmada, rebase sobre main y la línea de tiempo de la paciente también pierde el texto de la nota interna. Migración sin aplicar. Sin merge.
+02/11 · Cursor · Foto confirmada, la cola y el editor dejan de ir en claro sobre el panel oscuro: usan el fondo, el borde y la letra del tema activo. Confirmar sigue en lima. Sin merge.
+02/11 · Cursor · Foto confirmada, la cola y Ajustar pasan a la tarjeta de Seguimiento (lima y vidrio, esqueleto menta, editor al lado de la foto). El archivo de las 12 reglas no estaba en el disco; se aplicó el resumen escrito. Sin merge. Migración sin aplicar.
+02/11 · Cursor · Foto confirmada, cierre del gap de Cifra: la línea de tiempo que volvía a la paciente ya no arrastra la nota interna ni el id de la revisión. Migración sigue sin aplicar. Misma rama `cursor/foto-confirmada-p1-3f0e`. Sin producción ni merge.
+
+02/11 · Cursor · Foto confirmada (P1): la paciente ve «Estimación pendiente de {nutri}» o «Confirmada por {nutri}» y nunca la nota interna. El indicador solo suma confirmadas o ajustadas con confianza de al menos 0,45. En Seguimiento la cola de fotos va de la más vieja a la más nueva, con Confirmar y Ajustar. Migración `20261102140000_meal_photo_review_stamp.sql` sin aplicar. El texto legal del permiso de la foto no se tocó: sigue como gap. Rama `cursor/foto-confirmada-p1-3f0e`. Sin producción ni merge. [Nota y paso 10](foto-confirmada-p1.md).
 02/11 · Cursor · El respaldo diario instala el cliente de Postgres 17 (repositorio PGDG) y restaura en un contenedor Postgres 17, en la corrida real y en la prueba de cada PR. Supabase está en 17.6 y el cliente 16 se negaba a volcar. Rama `cursor/respaldo-pg17-3f0e`. Sin producción ni merge.
 02/11 · Cursor · Riel Hoy de la nutri: una acción por paciente (mensaje, menú o turno). El clic abre la pantalla real y no manda nada. Se anota al enviar, guardar el menú o guardar el turno. Vacío: «Todo al día». Migración `20261102160000_ai_brief_done_at.sql` sin aplicar. Rama `cursor/hoy-up-next-91ec`. Sin producción ni merge. No toca #244, #245 ni #262–#266. [Nota](hoy-up-next-p3.md).
 
@@ -89,7 +96,8 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
-| Hoy / Up next de la nutri | Cursor | `cursor/hoy-up-next-91ec` | Una acción por paciente. No se envía sola. `done_at` sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). HOLD. Sin producción ni merge |
+| Foto confirmada (P1) | Cursor | `cursor/foto-confirmada-p1-3f0e` | Cola de fotos, texto para la paciente y umbral del indicador. Migración sin aplicar. El permiso de la foto ya se exige; el texto legal queda como gap. Main ya incluye Hoy y el respaldo 17. Sin producción. [Nota y paso 10](foto-confirmada-p1.md) |
+| Hoy / Up next de la nutri | Cursor | `cursor/hoy-up-next-91ec` | Una acción por paciente. No se envía sola. `done_at` sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). En main. Sin producción |
 | Foto de /slug, audio de la consulta y diagnóstico de avisos | Cursor | `cursor/borrador-foto-audio-avisos-d306` | La foto no sale en /slug hasta Publicar cambios. La ficha muestra permiso, subida, transcripción y si el audio se borró o sigue, con Reintentar. La paciente tiene un diagnóstico de avisos; la prueba solo anda en local o staging. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md) |
 | Logo, botones y tarjetas de Inicio | Cursor | `cursor/nutridash-logo-botones-inicio-bb46` | Isotipo elegido (cinta blanca → menta), degradé en la acción principal y números de Inicio arriba. PR en borrador. Sin producción ni merge |
 | Lista de consultas de la profesional (42501) | Cursor | `cursor/consulta-permisos-lista-0be1` | La lectura de las consultas falla por un permiso de Postgres, no por los consentimientos. Migración nueva sin aplicar. Sin producción ni merge |
@@ -155,6 +163,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261102140000_meal_photo_review_stamp` | Cursor | Foto confirmada. Sello de revisión y nombre de la nutri. Escrita y probada en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261102160000_ai_brief_done_at` | Cursor | Hoy. Columna `done_at` para contar acciones hechas. Escrita, sin aplicar. Hace falta la frase de Facundo |
 | `20261101230000_consultation_session_visible` | Cursor | Lista de consultas. Escrita y probada solo en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261026190000_plan_delivery` | Codex, Planes 3f | Escrita y probada solo en PostgreSQL descartable. Sin aplicar en producción |
@@ -187,6 +196,9 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **2/11 · Cursor · Foto confirmada al día con main** · Main ya tiene el riel Hoy (#268) y el respaldo en Postgres 17 (#269). Esta rama los incorpora. La migración de la foto sigue sin aplicar. Sin merge.
+- **2/11 · Cursor · Foto confirmada, gap de la línea de tiempo (HOLD)** · Cifra marcó PASA_CON_GAPS. La respuesta de la paciente recorta la línea de tiempo: no sale la nota interna ni el id de quien revisó. Prueba JSON nueva. Migración sin aplicar. Sin producción.
+- **2/11 · Cursor · Foto confirmada P1 (HOLD)** · La foto ya estaba en main. Este corte deja la cola de la más vieja, Confirmar y Ajustar, el texto con el nombre de la nutri y el indicador desde confianza 0,45. La nota interna no sale en la API de la paciente. Migración nueva, sin aplicar. El texto del permiso de la foto no se reescribió. Veredicto HOLD hasta Facundo y la re-revisión de Cifra. [Nota y paso 10](foto-confirmada-p1.md). Sin producción.
 - **2/11 · Cursor · Hoy / Up next (HOLD)** · Rama `cursor/hoy-up-next-91ec`. En Inicio y en la ficha hay como máximo una acción por paciente. El clic abre el chat, el plan o un turno nuevo. Nada sale sin el botón de enviar, guardar o agendar. Si no hay nada, dice «Todo al día». La migración que anota la fecha queda sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). Sin producción ni merge. No toca #244, #245 ni #262–#266.
 
 - **1/11 · Cursor · Pantallas de campañas, WhatsApp, bioimpedancia y laboratorio (HOLD)** · Segmento, vista previa, canal y confirmación; cupo, historial y bajas. En la ficha se ve la baja de WhatsApp y en Ajustes si la cuenta está cargada (si faltan los datos, «No disponible»). Bioimpedancia: texto, cinco medidas editables, «Guardar revisado» y curva. Laboratorio: borrador local con revisión obligatoria. Las banderas salen apagadas. Sin migración nueva, sin envío y sin producción.

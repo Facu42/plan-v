@@ -293,6 +293,9 @@ function mapPatient(row: Record<string, unknown>, extras: {
     billing_until: billing.billing_until,
     ...(audience === 'professional' && 'user_id' in row ? { has_account: row.user_id != null } : {}),
     ...(audience === 'professional' && typeof row.created_at === 'string' ? { created_at: row.created_at } : {}),
+    ...(audience === 'patient' && typeof row.nutritionist_name === 'string' && row.nutritionist_name.trim()
+      ? { nutritionist_name: row.nutritionist_name.trim() }
+      : {}),
     stage: row.stage as Patient['stage'],
     goal: row.goal as string,
     ...(asGoalStatus(row.goal_status) ? { goal_status: asGoalStatus(row.goal_status) } : {}),
@@ -338,6 +341,8 @@ export function mapMealLog(row: Record<string, unknown>): MealLog {
     note_for_nutri: (row.note_for_nutri as string) ?? '',
     status: row.status as MealLog['status'],
     logged_at: row.logged_at as string,
+    ...(typeof row.reviewer_name === 'string' ? { reviewer_name: row.reviewer_name } : {}),
+    ...(typeof row.reviewed_at === 'string' ? { reviewed_at: row.reviewed_at } : {}),
     ...(row.analysis_status === 'pending' || row.analysis_status === 'succeeded' || row.analysis_status === 'failed' || row.analysis_status === 'skipped'
       ? { analysis_status: row.analysis_status }
       : {}),
@@ -727,7 +732,15 @@ export async function sbGetPatientById(id: string, audience: QueryAudience = 'pr
     return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt.get(String(patientRow.id)) ?? null }, extras, audience);
   }
   const archivedAt = await loadOwnArchivedAt(String(patientRow.id));
-  return mapPatient({ ...patientRow, ...follow, water_goal_glasses: waterGoal, archived_at: archivedAt }, extras, audience);
+  const named = await sb.rpc('my_care_nutritionist_name');
+  const nutritionistName = !named.error && typeof named.data === 'string' ? named.data : null;
+  return mapPatient({
+    ...patientRow,
+    ...follow,
+    water_goal_glasses: waterGoal,
+    archived_at: archivedAt,
+    ...(nutritionistName ? { nutritionist_name: nutritionistName } : {}),
+  }, extras, audience);
 }
 
 export async function sbAddMealLog(patientId: string, log: Omit<MealLog, 'id' | 'patient_id' | 'logged_at' | 'status'>): Promise<MealLog> {

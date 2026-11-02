@@ -134,7 +134,7 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
         </header>
         <div className="mlm-stage" key={step}>
           {step === 'analyzing' && (
-            <AnalyzingView
+            <AnalyzingView nutriName={patient.nutritionist_name}
               mode={draft.mode}
               preview={preview}
               description={draft.description}
@@ -142,9 +142,9 @@ export function MealLogModal({ patient, defaultSlot, close }: Props) {
             />
           )}
           {step === 'review' && result && (
-            <ReviewView result={result} slot={draft.slot} preview={preview} description={draft.description} onConfirm={() => setStep('success')} />
+            <ReviewView result={result} slot={draft.slot} preview={preview} description={draft.description} nutriName={patient.nutritionist_name} onConfirm={() => setStep('success')} />
           )}
-          {step === 'success' && result && <SuccessView name={patient.name} macros={result.macros} withoutAi={result.analysis_status === 'skipped'} onClose={closeSafely} />}
+          {step === 'success' && result && <SuccessView name={patient.name} macros={result.macros} withoutAi={result.analysis_status === 'skipped'} nutriName={patient.nutritionist_name} onClose={closeSafely} />}
           {showCapture && (
             <CaptureView
               draft={draft} error={error} onChange={patchDraft} onFile={handleFile} onAnalyze={() => void analyze()}

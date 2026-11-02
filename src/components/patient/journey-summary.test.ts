@@ -77,6 +77,11 @@ describe('buildJourneySummary', () => {
     }, NOW);
 
     expect(summary.reviewedMeals).toBe(2);
+    const low = meal('floja', 'confirmed', '2026-09-05T15:00:00-03:00');
+    low.confidence = 0.2;
+    const withLow = buildJourneySummary({ meal_logs: [low], habit_logs: [] }, NOW);
+    expect(withLow.reviewedMeals).toBe(0);
+    expect(withLow.pendingMeals).toBe(0);
     expect(summary.pendingMeals).toBe(1);
     expect(summary.days.some((day) => day.reviewedMeals > 0)).toBe(true);
     expect(summary.days.flatMap((day) => day.mealLogIds)).not.toContain('old');

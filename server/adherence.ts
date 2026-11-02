@@ -1,4 +1,5 @@
 import type { Patient } from './store.js';
+import { mealCountsForGauge } from '../src/lib/meal-review.js';
 import { waterGoalOf } from '../src/types/water.js';
 
 export type AdherenceInput = Pick<Patient, 'meal_logs' | 'weekPlan' | 'todayPlan' | 'habit_logs'> & Partial<Pick<Patient, 'water_goal_glasses'>>;
@@ -44,8 +45,8 @@ export function calculateAdherence(patient: AdherenceInput, today = new Date()):
   for (const log of patient.meal_logs) {
     const logged = new Date(log.logged_at);
     if (Number.isNaN(logged.getTime()) || !windowIds.has(dateId(logged))) continue;
-    if (log.status === 'pending_review') pending += 1;
-    else counted += 1;
+    if (mealCountsForGauge(log)) counted += 1;
+    else if (log.status === 'pending_review') pending += 1;
   }
 
   // Agua: promedio semanal; los días sin registro cuentan como 0.

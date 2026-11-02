@@ -2,6 +2,7 @@ import type { Hono, Context } from 'hono';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { analysisOrUnavailable, analyzeMeal } from '../ai/meal-analyzer.js';
+import { hasFullPatientAccess } from '../../src/billing.js';
 import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import { validatePhoto } from '../care/repository.js';
 import { signMealPhotos, uploadMealPhoto } from '../care/meal-photos.js';
@@ -51,6 +52,46 @@ function emitMemoryTimeline(
     title,
     body,
   });
+}
+
+function clinicalSecrets(patient: NonNullable<ReturnType<typeof getPatient>>) {
+  const secrets: string[] = [];
+  for (const log of patient.meal_logs ?? []) {
+    const note = log.note_for_nutri?.trim();
+    if (note && note.length >= 4) secrets.push(note);
+    const reviewer = (log as { reviewed_by?: unknown }).reviewed_by;
+    const reviewerText = typeof reviewer === 'string' ? reviewer.trim() : '';
+    if (reviewerText.length >= 8) secrets.push(reviewerText);
+  }
+  return secrets;
+}
+
+function redactCopy(text: string, secrets: readonly string[]) {
+  let out = text;
+  for (const secret of secrets) out = out.split(secret).join('');
+  return out.replace(/[ \t]{2,}/g, ' ').trim();
+}
+
+function publicTimeline(
+  events: Array<NonNullable<ReturnType<typeof getPatient>>['timeline'][number] & { visibility?: 'professional' | 'patient' }>,
+  secrets: readonly string[],
+) {
+  return events
+    .filter((event) => event.visibility !== 'professional')
+    .map(({ id, kind, atLabel, title, body }) => ({
+      id,
+      kind,
+      atLabel,
+      title: redactCopy(title, secrets),
+      body: redactCopy(body, secrets),
+    }))
+    .filter((event) => event.title || event.body);
+}
+
+function patientResponse(patient: NonNullable<ReturnType<typeof getPatient>>) {
+  const view = toPatientSelfView(patient);
+  if (!hasFullPatientAccess(patient)) return view;
+  return { ...view, timeline: publicTimeline(patient.timeline ?? [], clinicalSecrets(patient)) };
 }
 
 function photoDataUrl(body: { imageBase64?: string; photoPreview?: string }) {
@@ -191,7 +232,7 @@ export function registerDiaryRoutes(app: Hono) {
 
     if (persistent) {
       const updated = await sb.sbGetPatientById(patient.id, 'patient');
-      const visibleLog = toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0]);
+      const visibleLog = toPatientSelfMealLog((await signMealPhotos(patientId, [log]))[0], updated?.nutritionist_name ?? '');
       return c.json({
         analysis: toPatientMealAnalysis(analysis),
         log: visibleLog,
@@ -200,10 +241,11 @@ export function registerDiaryRoutes(app: Hono) {
       });
     }
 
+    const memoryPatient = getPatient(patientId);
     return c.json({
       analysis: toPatientMealAnalysis(analysis),
-      log: toPatientSelfMealLog(log),
-      patient: getPatient(patientId),
+      log: toPatientSelfMealLog(log, ''),
+      patient: memoryPatient ? patientResponse(memoryPatient) : null,
       source: 'memory',
     });
   });

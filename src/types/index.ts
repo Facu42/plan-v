@@ -51,6 +51,10 @@ export type MealLog = {
   note_for_nutri: string;
   status: MealStatus;
   logged_at: string;
+  /** Nombre visible de quien revisó, si la lectura es de la paciente. Nunca el id. */
+  reviewer_name?: string | null;
+  reviewed_at?: string | null;
+  review_label?: string;
   analysis_status?: MealAnalysisStatus;
   nutrition_origin?: 'declared' | 'ai_estimate';
 };
@@ -169,6 +173,8 @@ export type Patient = {
   has_account?: boolean;
   /** Fecha de alta en el consultorio (sólo para la profesional). */
   created_at?: string;
+  /** Nombre de la nutricionista asignada, para los textos de la paciente. */
+  nutritionist_name?: string;
   stage: Stage;
   goal: string;
   goal_status?: GoalStatus;

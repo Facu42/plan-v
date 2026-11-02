@@ -209,6 +209,11 @@
       "sha256": "ae56cc6084f3966b9d8b3ce34ebb392dcfb0fcf0fa34048690ab2655a934d320"
     },
     {
+      "version": "20261102140000",
+      "file": "20261102140000_meal_photo_review_stamp.sql",
+      "sha256": "488228fffe71f9f63df2bacf465304c3a7df4445e106d4fb2206b9525545ad28"
+    },
+    {
       "version": "20261102160000",
       "file": "20261102160000_ai_brief_done_at.sql",
       "sha256": "1b01c1a54e6d1b907e6e31e79900380919d12d4e6a57ed125d718c8461b8d972"

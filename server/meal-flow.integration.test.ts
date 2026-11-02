@@ -36,6 +36,8 @@ describe('meal review API flow in memory mode', () => {
 
     expect(createResponse.status).toBe(200);
     expect(created.log.status).toBe('pending_review');
+    expect(JSON.stringify(created)).not.toContain('note_for_nutri');
+    expect(created.log.review_label).toMatch(/^Estimación pendiente de /);
     // La adherencia se recalcula en cada mutación; pendientes no suman.
     expect(created.patient.adherence_score).toBe(calculateAdherence(created.patient).score);
     expect(created.patient.meal_logs.filter((log: { status: string }) => log.status === 'pending_review')).toHaveLength(initialPending + 1);
@@ -83,6 +85,51 @@ describe('meal review API flow in memory mode', () => {
     expect(stored?.note_for_nutri).toMatch(/no está disponible/i);
     expect(stored?.note_for_nutri).toMatch(/alimentos de demostración/i);
     expect(getPatient('pat-sofia')!.timeline[0].body).toContain('estimación no disponible');
+  });
+
+  it('no devuelve la nota interna ni el id de la revisión en el JSON de la paciente', async () => {
+    grantMealAiConsent('pat-sofia');
+    const note = 'NOTA_SOLO_NUTRI_7f3a';
+    const reviewerId = '44444444-4444-4444-a444-444444444444';
+    const sofia = getPatient('pat-sofia')!;
+    sofia.meal_logs[0].note_for_nutri = note;
+    Object.assign(sofia.meal_logs[0], { reviewed_by: reviewerId });
+    sofia.timeline.unshift(Object.assign({
+      id: 'interna',
+      kind: 'meal_logged' as const,
+      atLabel: 'HOY',
+      title: note,
+      body: reviewerId,
+    }, { visibility: 'professional' as const }));
+    sofia.timeline.unshift(Object.assign({
+      id: 'visible',
+      kind: 'meal_logged' as const,
+      atLabel: 'HOY',
+      title: 'Merienda · foto en revisión',
+      body: `sin detalle interno ${note}`,
+      visibility: 'patient' as const,
+    }, { note_for_nutri: note, reviewed_by: reviewerId }));
+
+    const response = await app.request(
+      '/api/patients/pat-sofia/meals/analyze',
+      jsonRequest('POST', { slot: 'Almuerzo', description: 'arroz con verduras' }),
+    );
+    const body = await response.json();
+    const json = JSON.stringify(body);
+
+    expect(response.status).toBe(200);
+    expect(json).not.toContain(note);
+    expect(json).not.toContain(reviewerId);
+    expect(json).not.toContain('note_for_nutri');
+    expect(json).not.toContain('reviewed_by');
+    expect(body.log).not.toHaveProperty('note_for_nutri');
+    for (const log of body.patient.meal_logs as Array<Record<string, unknown>>) {
+      expect(log).not.toHaveProperty('note_for_nutri');
+      expect(log).not.toHaveProperty('reviewed_by');
+    }
+    expect(body.patient.timeline[0].title).toContain('foto en revisión');
+    expect(body.patient.timeline[0].body).not.toContain(note);
+    expect(body.patient.timeline.some((event: { title: string }) => event.title === note)).toBe(false);
   });
 
   it('never accepts pending_review as a professional review result', async () => {

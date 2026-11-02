@@ -15,8 +15,8 @@ export function mealLogWasKept(log: Pick<MealLog, 'foods' | 'macros' | 'analysis
   return log.analysis_status === 'failed' || (log.foods.length === 0 && !log.macros);
 }
 
-export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Verónica lo revisará. Tu registro no se perdió.';
-export const MEAL_TEXT_COPY = 'Guardamos tu descripción. Verónica la revisa. No usamos IA.';
+export const MEAL_KEPT_COPY = 'No pudimos estimar alimentos ni macros. Tu nutricionista lo revisará. Tu registro no se perdió.';
+export const MEAL_TEXT_COPY = 'Guardamos tu descripción. Tu nutricionista la revisa. No usamos IA.';
 
 /** Hora (0 a 23) en Argentina; con una fecha inválida devuelve 12 (mediodía) para no sugerir nada raro. */
 export function argentinaHour(date: Date): number {

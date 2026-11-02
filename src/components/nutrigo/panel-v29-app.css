@@ -785,3 +785,218 @@
 @media (prefers-reduced-motion: reduce) {
   #pv-panel-v29 .sbtn.k.nd-danger:hover { filter: none; }
 }
+
+/* Cola de fotos y editor Ajustar. Misma tarjeta .fxp que el resto de Seguimiento:
+   fondo, borde y letra salen del tema activo. No hay superficies claras fijas. */
+#pv-panel-v29 #s-seguimiento .cola-fxp,
+#pv-panel-v29 #s-seguimiento .nz-editor {
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px 16px;
+  box-shadow: none;
+  overflow: visible;
+}
+#pv-panel-v29 #s-seguimiento .c > .cola-fxp { flex: none; }
+#pv-panel-v29 #s-seguimiento .cola-fxp > header .m,
+#pv-panel-v29 #s-seguimiento .nz-editor > header .m { color: var(--ink3); }
+#pv-panel-v29 #s-seguimiento .cola {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#pv-panel-v29 #s-seguimiento .cola-fila {
+  display: grid;
+  grid-template-columns: 60px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  height: 72px;
+  min-height: 64px;
+  max-height: 76px;
+}
+#pv-panel-v29 #s-seguimiento .sxpic.cola-foto {
+  width: 60px;
+  height: 60px;
+  border-radius: 13px;
+  background: var(--lima-t);
+  color: var(--lima-ink);
+  overflow: hidden;
+}
+#pv-panel-v29 #s-seguimiento .sxpic.cola-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+#pv-panel-v29 #s-seguimiento .cola-txt { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+#pv-panel-v29 #s-seguimiento .cola-txt b {
+  font-size: 12.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#pv-panel-v29 #s-seguimiento .cola-txt small {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--ink3);
+  font-size: 12px;
+  line-height: 1.2;
+}
+#pv-panel-v29 #s-seguimiento .cola-txt small > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#pv-panel-v29 #s-seguimiento .cola-acts { display: flex; align-items: center; gap: 8px; }
+#pv-panel-v29 #s-seguimiento .cola-pri,
+#pv-panel-v29 #s-seguimiento .cola-sec,
+#pv-panel-v29 #s-seguimiento .cola-link,
+#pv-panel-v29 #s-seguimiento .nz-lima,
+#pv-panel-v29 #s-seguimiento .nz-glass {
+  font: inherit;
+  cursor: pointer;
+  line-height: 1;
+}
+#pv-panel-v29 #s-seguimiento .cola-pri,
+#pv-panel-v29 #s-seguimiento .nz-lima {
+  height: 32px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--lima);
+  color: #141519;
+  font-size: 12.5px;
+  font-weight: 650;
+  box-shadow: none;
+}
+#pv-panel-v29 #s-seguimiento .cola-pri:hover,
+#pv-panel-v29 #s-seguimiento .nz-lima:hover { filter: brightness(1.06); }
+#pv-panel-v29 #s-seguimiento .cola-sec,
+#pv-panel-v29 #s-seguimiento .nz-glass {
+  height: 32px;
+  padding: 0 14px;
+  border: 1px solid var(--line2);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 72%, transparent);
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: none;
+  backdrop-filter: blur(8px);
+}
+#pv-panel-v29 #s-seguimiento .cola-link {
+  flex: none;
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--lima-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+#pv-panel-v29 #s-seguimiento .cola-pri:focus-visible,
+#pv-panel-v29 #s-seguimiento .cola-sec:focus-visible,
+#pv-panel-v29 #s-seguimiento .cola-link:focus-visible,
+#pv-panel-v29 #s-seguimiento .nz-lima:focus-visible,
+#pv-panel-v29 #s-seguimiento .nz-glass:focus-visible,
+#pv-panel-v29 #s-seguimiento .review-editor input:focus-visible,
+#pv-panel-v29 #s-seguimiento .review-editor select:focus-visible {
+  outline: 2px solid var(--lima-ink);
+  outline-offset: 2px;
+}
+#pv-panel-v29 #s-seguimiento .cola-vacio,
+#pv-panel-v29 #s-seguimiento .cola-estado {
+  margin: 8px 0 2px;
+  color: var(--ink3);
+  font-size: 13px;
+}
+#pv-panel-v29 #s-seguimiento .cola-vacio { display: flex; flex-direction: column; gap: 2px; }
+#pv-panel-v29 #s-seguimiento .cola-vacio b { color: var(--ink); font-size: 14px; font-weight: 650; }
+#pv-panel-v29 #s-seguimiento .cola-skel .sk {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--lima-t) 0%, var(--card) 50%, var(--lima-t) 100%);
+  background-size: 200% 100%;
+  animation: cola-mint 1.2s ease-in-out infinite;
+}
+#pv-panel-v29 #s-seguimiento .cola-skel .cola-foto.sk { border-radius: 13px; }
+#pv-panel-v29 #s-seguimiento .cola-skel .cola-txt b.sk { height: 12px; width: 42%; }
+#pv-panel-v29 #s-seguimiento .cola-skel .cola-txt small.sk { height: 10px; width: 68%; }
+#pv-panel-v29 #s-seguimiento .cola-skel .cola-acts .sk { width: 84px; height: 32px; border-radius: 999px; }
+@keyframes cola-mint {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  #pv-panel-v29 #s-seguimiento .cola-skel .sk { animation: none; }
+}
+#pv-panel-v29 #s-seguimiento > .nz-editor { margin-bottom: 12px; }
+#pv-panel-v29 #s-seguimiento .nz-split {
+  display: grid;
+  grid-template-columns: minmax(200px, 280px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+#pv-panel-v29 #s-seguimiento .nz-foto,
+#pv-panel-v29 #s-seguimiento .nz-foto-vacia {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: none;
+  object-fit: cover;
+  border-radius: 16px;
+  background: var(--lima-t);
+  color: var(--lima-ink);
+  font-size: 13px;
+}
+#pv-panel-v29 #s-seguimiento .nz-nota {
+  margin: 8px 0 0;
+  color: var(--ink3);
+  font-size: 12.5px;
+  line-height: 1.4;
+}
+#pv-panel-v29 #s-seguimiento .nz-editor .review-confidence {
+  margin: 8px 0 0;
+  color: var(--ink3);
+  font-size: 12px;
+}
+#pv-panel-v29 #s-seguimiento .nz-editor .review-actions { display: flex; gap: 8px; margin-top: 12px; }
+#pv-panel-v29 #s-seguimiento .nz-editor .review-editor fieldset {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--app);
+}
+#pv-panel-v29 #s-seguimiento .nz-editor .review-editor legend,
+#pv-panel-v29 #s-seguimiento .nz-editor .review-editor label > span { color: var(--ink2); }
+#pv-panel-v29 #s-seguimiento .nz-editor input,
+#pv-panel-v29 #s-seguimiento .nz-editor select {
+  background: var(--app);
+  color: var(--ink);
+  border: 1px solid var(--line2);
+  border-radius: 10px;
+}
+#pv-panel-v29 #s-seguimiento .nz-editor .food-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+#pv-panel-v29 #s-seguimiento .nz-editor .food-tags span {
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--lima-t);
+  color: var(--lima-ink);
+  font-size: 12px;
+}
+@media (max-width: 800px) {
+  #pv-panel-v29 #s-seguimiento .nz-split { grid-template-columns: 1fr; }
+  #pv-panel-v29 #s-seguimiento .nz-foto { max-height: 240px; aspect-ratio: 4 / 3; }
+}

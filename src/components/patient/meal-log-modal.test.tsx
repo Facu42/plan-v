@@ -161,7 +161,7 @@ describe('análisis, revisión y éxito', () => {
     expect(html).toContain('role="status"');
     expect(html).toContain('Analizando tu comida…');
     expect(html).toContain('Mirando tu plato…');
-    expect(html).toContain('Verónica confirma antes de que cuente');
+    expect(html).toContain('Estimación pendiente de tu nutricionista');
   });
 
   it('macros con texto accesible y barras proporcionales', () => {
@@ -183,7 +183,7 @@ describe('análisis, revisión y éxito', () => {
     expect(html).toContain('~120g');
     expect(html).toContain('--mlm-i:1');
     expect(html).toContain('confianza 72%');
-    expect(html).toContain('pendiente de Verónica');
+    expect(html).toContain('Estimación pendiente de tu nutricionista');
     expect(html).toContain('Guardar comida');
     expect(html).not.toContain('dato interno');
   });

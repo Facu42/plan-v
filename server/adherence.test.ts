@@ -70,6 +70,18 @@ describe('calculateAdherence', () => {
     expect(result.why).toContain('2 de 2 comidas revisadas');
   });
 
+  it('no suma una comida confirmada si la confianza queda bajo 0,45', () => {
+    const low = log('confirmed', daysAgoIso(0));
+    low.confidence = 0.44;
+    const result = calculateAdherence(input({
+      meal_logs: [low],
+      todayPlan: [{ slot: 'Almuerzo', title: 'X', time: '13:30' }],
+    }), TODAY);
+
+    expect(result.score).toBe(0);
+    expect(result.why).toContain('0 de 1 comidas revisadas');
+  });
+
   it('ignores reviewed meals older than the 7-day window', () => {
     const result = calculateAdherence(input({
       meal_logs: [log('confirmed', daysAgoIso(8))],

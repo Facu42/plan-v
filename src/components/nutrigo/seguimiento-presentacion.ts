@@ -15,6 +15,11 @@ export function inicialesDe(name: string, initials?: string) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map(parte => parte[0]?.toUpperCase() ?? '').join('') || '·';
 }
 
+/** Pendientes de todas las pacientes, la más vieja primero. */
+export function ordenarColaFotos<T extends { at: string; id: string }>(items: readonly T[]): T[] {
+  return [...items].sort((a, b) => a.at.localeCompare(b.at) || a.id.localeCompare(b.id));
+}
+
 export function comidaId(itemId: string) {
   return itemId.startsWith('meal:') ? itemId.slice('meal:'.length) : itemId;
 }
@@ -31,6 +36,21 @@ function diaClave(fecha: Date) {
 function moverDia(clave: string, delta: number) {
   const [anio, mes, dia] = clave.split('-').map(Number);
   return new Date(Date.UTC(anio, mes - 1, dia + delta)).toISOString().slice(0, 10);
+}
+
+/** «hace 12 min», «hace 3 h», «hace 2 días». Si falta la fecha, no inventa un cero. */
+export function antiguedadDe(iso: string, now = new Date()) {
+  const fecha = new Date(iso);
+  if (Number.isNaN(fecha.getTime())) return '';
+  const minutos = Math.max(0, Math.round((now.getTime() - fecha.getTime()) / 60000));
+  if (minutos < 1) return 'recién';
+  if (minutos < 60) return `hace ${minutos} min`;
+  const horas = Math.round(minutos / 60);
+  if (horas < 24) return horas === 1 ? 'hace 1 h' : `hace ${horas} h`;
+  const dias = Math.round(horas / 24);
+  if (dias === 1) return 'hace 1 día';
+  if (dias < 14) return `hace ${dias} días`;
+  return mealWhen(iso, now);
 }
 
 /** «Hoy 8:10», «Ayer 21:40» o «25/10 13:05», en el huso del consultorio. */
@@ -163,6 +183,8 @@ export type ComidaFila = {
   when: string;
   title: string;
   meta: string;
+  age: string;
+  kcal: string | null;
   photoUrl: string | null;
   href: string;
   log: MealLog | null;
@@ -181,9 +203,9 @@ export function armarComida(input: {
   now?: Date;
 }): ComidaFila {
   const kcal = kcalLabel(input.log?.macros);
-  const nota = input.log?.note_for_nutri?.trim() ?? '';
   const when = mealWhen(input.at, input.now);
-  const partes = [input.patientName, input.slot, when, kcal, nota].filter((parte): parte is string => Boolean(parte));
+  const age = antiguedadDe(input.at, input.now);
+  const partes = [input.patientName, input.slot, age || when, kcal].filter((parte): parte is string => Boolean(parte));
   return {
     id: input.id,
     patientId: input.patientId,
@@ -192,6 +214,8 @@ export function armarComida(input: {
     tone: input.patient?.tone,
     slot: input.slot,
     when,
+    age,
+    kcal,
     title: input.log?.description?.trim() || input.title,
     meta: partes.join(' · '),
     photoUrl: fotoVisible(input.log?.photo_url),

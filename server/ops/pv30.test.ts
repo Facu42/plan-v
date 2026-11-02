@@ -60,6 +60,7 @@ describe('logs without PII', () => {
     expect(redacted).not.toContain('eyJ');
     expect(redacted).not.toContain('abc123');
     expect(redacted).not.toContain('00000000-0000-4000-a000-0000000000a1');
+    expect(redacted).not.toContain('patients/');
     expect(safePath('/api/patients/00000000-0000-4000-a000-0000000000a1/meals')).toBe('/api/patients/[id-redacted]/meals');
   });
 
@@ -68,12 +69,32 @@ describe('logs without PII', () => {
     writeOpsLog('error', 'http_unhandled', {
       authorization: 'Bearer secret-token',
       body: { note: 'Nota clínica' },
+      note_for_nutri: 'Nota clínica privada',
+      photo_path: 'patients/11111111-1111-4111-a111-111111111111/plato.jpg',
       path: '/api/patients/11111111-1111-4111-a111-111111111111',
     });
     const line = String(error.mock.calls[0]?.[0]);
     expect(line).toContain('[redacted]');
     expect(line).not.toContain('secret-token');
     expect(line).not.toContain('Nota clínica');
+    expect(line).toContain('/api/patients/[id-redacted]');
+    expect(line).not.toContain('11111111-1111-4111-a111-111111111111');
+    expect(line).not.toContain('plato.jpg');
+    error.mockRestore();
+  });
+
+  it('limpia rutas de foto e ids aunque vengan anidados', () => {
+    const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    writeOpsLog('error', 'http_unhandled', {
+      detail: {
+        message: 'falló patients/33333333-3333-4333-a333-333333333333/plato.jpg',
+      },
+    });
+    const line = String(error.mock.calls[0]?.[0]);
+    expect(line).not.toContain('patients/');
+    expect(line).not.toContain('33333333-3333-4333-a333-333333333333');
+    expect(line).not.toContain('plato.jpg');
+    expect(line).toContain('[foto-redacted]');
     error.mockRestore();
   });
 });
