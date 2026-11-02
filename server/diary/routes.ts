@@ -54,16 +54,44 @@ function emitMemoryTimeline(
   });
 }
 
-function publicTimeline(events: Array<NonNullable<ReturnType<typeof getPatient>>['timeline'][number] & { visibility?: 'professional' | 'patient' }>) {
+function clinicalSecrets(patient: NonNullable<ReturnType<typeof getPatient>>) {
+  const secrets: string[] = [];
+  for (const log of patient.meal_logs ?? []) {
+    const note = log.note_for_nutri?.trim();
+    if (note && note.length >= 4) secrets.push(note);
+    const reviewer = (log as { reviewed_by?: unknown }).reviewed_by;
+    const reviewerText = typeof reviewer === 'string' ? reviewer.trim() : '';
+    if (reviewerText.length >= 8) secrets.push(reviewerText);
+  }
+  return secrets;
+}
+
+function redactCopy(text: string, secrets: readonly string[]) {
+  let out = text;
+  for (const secret of secrets) out = out.split(secret).join('');
+  return out.replace(/[ \t]{2,}/g, ' ').trim();
+}
+
+function publicTimeline(
+  events: Array<NonNullable<ReturnType<typeof getPatient>>['timeline'][number] & { visibility?: 'professional' | 'patient' }>,
+  secrets: readonly string[],
+) {
   return events
     .filter((event) => event.visibility !== 'professional')
-    .map(({ id, kind, atLabel, title, body }) => ({ id, kind, atLabel, title, body }));
+    .map(({ id, kind, atLabel, title, body }) => ({
+      id,
+      kind,
+      atLabel,
+      title: redactCopy(title, secrets),
+      body: redactCopy(body, secrets),
+    }))
+    .filter((event) => event.title || event.body);
 }
 
 function patientResponse(patient: NonNullable<ReturnType<typeof getPatient>>) {
   const view = toPatientSelfView(patient);
   if (!hasFullPatientAccess(patient)) return view;
-  return { ...view, timeline: publicTimeline(patient.timeline ?? []) };
+  return { ...view, timeline: publicTimeline(patient.timeline ?? [], clinicalSecrets(patient)) };
 }
 
 function photoDataUrl(body: { imageBase64?: string; photoPreview?: string }) {

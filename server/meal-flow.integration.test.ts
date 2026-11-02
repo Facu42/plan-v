@@ -106,7 +106,7 @@ describe('meal review API flow in memory mode', () => {
       kind: 'meal_logged' as const,
       atLabel: 'HOY',
       title: 'Merienda · foto en revisión',
-      body: 'sin detalle interno',
+      body: `sin detalle interno ${note}`,
       visibility: 'patient' as const,
     }, { note_for_nutri: note, reviewed_by: reviewerId }));
 
@@ -122,7 +122,13 @@ describe('meal review API flow in memory mode', () => {
     expect(json).not.toContain(reviewerId);
     expect(json).not.toContain('note_for_nutri');
     expect(json).not.toContain('reviewed_by');
+    expect(body.log).not.toHaveProperty('note_for_nutri');
+    for (const log of body.patient.meal_logs as Array<Record<string, unknown>>) {
+      expect(log).not.toHaveProperty('note_for_nutri');
+      expect(log).not.toHaveProperty('reviewed_by');
+    }
     expect(body.patient.timeline[0].title).toContain('foto en revisión');
+    expect(body.patient.timeline[0].body).not.toContain(note);
     expect(body.patient.timeline.some((event: { title: string }) => event.title === note)).toBe(false);
   });
 

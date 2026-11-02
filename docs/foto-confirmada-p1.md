@@ -2,7 +2,7 @@
 
 Borrador. Rama `cursor/foto-confirmada-p1-3f0e`. No se junta, no se despliega y no se toca la base de producción. Los borradores #262–#266 no se tocaron.
 
-Cifra re-revisó el diff: PASA_CON_GAPS. La línea de tiempo que volvía cruda a la paciente quedó recortada. La migración sigue sin aplicar.
+Cifra re-revisó el diff: PASA_CON_GAPS. La línea de tiempo que volvía cruda a la paciente quedó recortada, y si el texto de la nota interna estaba copiado en un evento visible, también se saca. La migración sigue sin aplicar. El permiso de la foto ya se exige; el texto legal no se escribió.
 
 ## Mapa real (lo que ya estaba en main)
 

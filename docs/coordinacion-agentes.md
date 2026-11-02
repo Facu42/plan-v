@@ -1,3 +1,4 @@
+02/11 · Cursor · Foto confirmada, rebase sobre main y la línea de tiempo de la paciente también pierde el texto de la nota interna. Migración sin aplicar. Sin merge.
 02/11 · Cursor · Foto confirmada, la cola y el editor dejan de ir en claro sobre el panel oscuro: usan el fondo, el borde y la letra del tema activo. Confirmar sigue en lima. Sin merge.
 02/11 · Cursor · Foto confirmada, la cola y Ajustar pasan a la tarjeta de Seguimiento (lima y vidrio, esqueleto menta, editor al lado de la foto). El archivo de las 12 reglas no estaba en el disco; se aplicó el resumen escrito. Sin merge. Migración sin aplicar.
 02/11 · Cursor · Foto confirmada, cierre del gap de Cifra: la línea de tiempo que volvía a la paciente ya no arrastra la nota interna ni el id de la revisión. Migración sigue sin aplicar. Misma rama `cursor/foto-confirmada-p1-3f0e`. Sin producción ni merge.

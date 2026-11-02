@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-02)
 
+2/11 · Cursor · Foto confirmada, rebase sobre main. La respuesta de la paciente saca la nota interna también si estaba copiada en la línea de tiempo. Migración sin aplicar. Sin merge.
 2/11 · Cursor · Foto confirmada, la cola y el editor respetan el tema del panel (oscuro o claro). Sin merge.
 2/11 · Cursor · Foto confirmada, la cola Confirmar/Ajustar y el editor quedan en la tarjeta de Seguimiento. Sin merge. Migración sin aplicar.
 2/11 · Cursor · Foto confirmada, la línea de tiempo de la paciente ya no arrastra la nota interna. Cifra: pasa con gaps. La migración sigue sin aplicar.
