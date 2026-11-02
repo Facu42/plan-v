@@ -1,6 +1,14 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 
 1/11 · Cursor · La foto de la página pública queda en borrador hasta «Publicar cambios». Las notas de consulta muestran permiso, subida, transcripción y si el audio se borró o sigue, con reintento. La paciente tiene un diagnóstico de avisos y una guía para probarlo en el teléfono; el aviso de prueba no sale en la versión publicada. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md).
+1/11 · Cursor · Respaldo diario de la base: volcado cifrado en GitHub y prueba de restauración. Los secretos los carga Facundo. El PITR de Supabase está explicado en [respaldos-supabase.md](respaldos-supabase.md). Rama `cursor/respaldos-pgdump-6902`. Sin producción.
+1/11 · Cursor · Revisión del cobro de Nutridash con Mercado Pago, solo en prueba. Un pago de otro monto no activa la cuenta. Sin pago, a los 30 días el panel queda en solo lectura. Pasos en [mercadopago-sandbox.md](mercadopago-sandbox.md). Rama `cursor/mp-sandbox-suscripcion-6902`. Sin producción.
+1/11 · Cursor · Verificación en dos pasos con el código de la app: obligatoria en `/admin`, opcional para la nutricionista desde Ajustes. Rama `cursor/mfa-totp-admin-6902`. Sin producción. Detalle en [verificacion-dos-pasos-2026-10-17.md](verificacion-dos-pasos-2026-10-17.md).
+2/11 · Cursor · Facundo eligió otro isotipo (cuadrado negro, cinta blanca que pasa a menta, hoja en la «d»). Reemplaza al anterior en favicon, menú, ingreso, página pública y la app instalable. Los botones principales usan ese degradé, con texto oscuro. Misma rama `cursor/nutridash-logo-botones-inicio-bb46`. Sin producción ni merge.
+
+1/11 · Cursor · Logo nuevo de Nutridash en el panel de la nutri: favicon, menú, ingreso, página pública y la app instalable. Los botones de acción principal pasan al degradé del logo; los secundarios y la baja no. En Inicio los cinco números quedan arriba, visibles sin scroll, con una entrada suave. Rama `cursor/nutridash-logo-botones-inicio-bb46`. Sin producción ni merge.
+
+1/11 · Cursor · Lista de consultas de la profesional: con los tres permisos dados igual aparecía «Revisá los permisos de la paciente». La causa es un permiso de Postgres en la lectura de las consultas. Migración `20261101230000_consultation_session_visible.sql` sin aplicar. Sin producción ni merge.
 
 1/11 · Cursor · Página pública /slug, PDF con marca de la nutri y mail de soporte por variable de entorno, en `work/landing-nutri-pdf`. El editor de perfil carga foto, bio, especialidades, modalidad, zona, precio, reserva y colores. El PDF del plan usa logo y esos colores. El centro de ayuda no hardcodea un Gmail: el destinatario sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`. Sin migraciones ni producción.
 # Traspaso del proyecto (actualización vigente: 2026-10-31)

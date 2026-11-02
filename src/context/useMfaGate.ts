@@ -22,8 +22,9 @@ export function useMfaGate(session: Session | null, requiredForAccount: boolean,
         enforced,
       }));
     } catch {
-      // Si Supabase no responde, no dejamos pasar a quien tendría que verificar: el servidor igual lo frena.
-      setStep(null);
+      // Si Supabase no responde, /admin no entra. Quien lo tiene opcional sigue: el servidor frena
+      // solo a quien ya dio de alta el código.
+      setStep(enforced && requiredForAccount ? 'enroll' : null);
     }
   }, [userId, requiredForAccount, enforced]);
 

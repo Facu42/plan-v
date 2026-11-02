@@ -51,7 +51,7 @@ export function PlanVExperience() {
   // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
   const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
   const sessionUserId=session?.user.id??null;
-  const mfa = useMfaGate(session, isNutri || isAdminPath(path), !authLoading && !passwordRecovery, mfaEnforcedForPath(path));
+  const mfa = useMfaGate(session, isAdminPath(path), !authLoading && !passwordRecovery, mfaEnforcedForPath(path));
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
