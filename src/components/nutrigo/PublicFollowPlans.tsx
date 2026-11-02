@@ -44,7 +44,7 @@ export function PublicFollowPlansView({ plans, busy, notice, onSubmit }: {
       <p>Usá el mismo correo con el que vas a pagar.</p>
       <label>Teléfono <input name="telefono" type="tel" required minLength={5} maxLength={40} autoComplete="tel" /></label>
       <label><input type="checkbox" name="contacto" required />Autorizo a este consultorio a guardar mi contacto y escribirme sobre este plan.</label>
-      <button type="submit" disabled={busy}>Ir a Mercado Pago</button>
+      <button className="nd-action" type="submit" disabled={busy}>Ir a Mercado Pago</button>
     </form>
     {notice && <p role="status">{notice}</p>}
   </section>;
