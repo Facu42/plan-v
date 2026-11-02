@@ -1,4 +1,6 @@
 02/11 · Cursor · El respaldo diario instala el cliente de Postgres 17 (repositorio PGDG) y restaura en un contenedor Postgres 17, en la corrida real y en la prueba de cada PR. Supabase está en 17.6 y el cliente 16 se negaba a volcar. Rama `cursor/respaldo-pg17-3f0e`. Sin producción ni merge.
+02/11 · Cursor · Riel Hoy de la nutri: una acción por paciente (mensaje, menú o turno). El clic abre la pantalla real y no manda nada. Se anota al enviar, guardar el menú o guardar el turno. Vacío: «Todo al día». Migración `20261102160000_ai_brief_done_at.sql` sin aplicar. Rama `cursor/hoy-up-next-91ec`. Sin producción ni merge. No toca #244, #245 ni #262–#266. [Nota](hoy-up-next-p3.md).
+
 01/11 · Cursor · Pantallas de campañas, WhatsApp, bioimpedancia y borrador de laboratorio sobre main `48d741a9`. Banderas apagadas: sin ellas la pantalla dice Próximamente y el resto no cambia. No se envía nada ni se guarda sin revisión. Sin merge, sin producción y sin tocar #244, #245, MFA, Mercado Pago ni copias. [Nota](campanias-whatsapp-backend.md).
 01/11 · Cursor · Foto de /slug, estados del audio de la consulta y diagnóstico de avisos de hábitos. La foto queda en borrador hasta «Publicar cambios». La ficha dice permiso, subida, transcripción y si el audio se borró o sigue. La paciente ve permiso, suscripción y, solo en local o staging, un aviso de prueba. Rama `cursor/borrador-foto-audio-avisos-d306`. Sin migraciones, sin merge y sin producción. No toca #244, #245 ni MFA/MP/respaldos. [Informe](borrador-foto-audio-avisos.md).
 02/11 · Cursor · Isotipo elegido por Facundo (cinta blanca → menta) en la misma rama `cursor/nutridash-logo-botones-inicio-bb46`. Favicon, menú, ingreso, página pública y PWA. Botones principales al degradé nuevo; secundarios y la baja quedan. Sin #162, sin #244, sin #245, sin producción ni merge.
@@ -87,6 +89,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Hoy / Up next de la nutri | Cursor | `cursor/hoy-up-next-91ec` | Una acción por paciente. No se envía sola. `done_at` sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). HOLD. Sin producción ni merge |
 | Foto de /slug, audio de la consulta y diagnóstico de avisos | Cursor | `cursor/borrador-foto-audio-avisos-d306` | La foto no sale en /slug hasta Publicar cambios. La ficha muestra permiso, subida, transcripción y si el audio se borró o sigue, con Reintentar. La paciente tiene un diagnóstico de avisos; la prueba solo anda en local o staging. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md) |
 | Logo, botones y tarjetas de Inicio | Cursor | `cursor/nutridash-logo-botones-inicio-bb46` | Isotipo elegido (cinta blanca → menta), degradé en la acción principal y números de Inicio arriba. PR en borrador. Sin producción ni merge |
 | Lista de consultas de la profesional (42501) | Cursor | `cursor/consulta-permisos-lista-0be1` | La lectura de las consultas falla por un permiso de Postgres, no por los consentimientos. Migración nueva sin aplicar. Sin producción ni merge |
@@ -152,6 +155,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261102160000_ai_brief_done_at` | Cursor | Hoy. Columna `done_at` para contar acciones hechas. Escrita, sin aplicar. Hace falta la frase de Facundo |
 | `20261101230000_consultation_session_visible` | Cursor | Lista de consultas. Escrita y probada solo en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261026190000_plan_delivery` | Codex, Planes 3f | Escrita y probada solo en PostgreSQL descartable. Sin aplicar en producción |
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
@@ -182,6 +186,8 @@ prueba gratis, presupuesto de IA en producción, proveedor de correo cuando se u
 del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
+
+- **2/11 · Cursor · Hoy / Up next (HOLD)** · Rama `cursor/hoy-up-next-91ec`. En Inicio y en la ficha hay como máximo una acción por paciente. El clic abre el chat, el plan o un turno nuevo. Nada sale sin el botón de enviar, guardar o agendar. Si no hay nada, dice «Todo al día». La migración que anota la fecha queda sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). Sin producción ni merge. No toca #244, #245 ni #262–#266.
 
 - **1/11 · Cursor · Pantallas de campañas, WhatsApp, bioimpedancia y laboratorio (HOLD)** · Segmento, vista previa, canal y confirmación; cupo, historial y bajas. En la ficha se ve la baja de WhatsApp y en Ajustes si la cuenta está cargada (si faltan los datos, «No disponible»). Bioimpedancia: texto, cinco medidas editables, «Guardar revisado» y curva. Laboratorio: borrador local con revisión obligatoria. Las banderas salen apagadas. Sin migración nueva, sin envío y sin producción.
 - **1/11 · Cursor · Foto en borrador, estados del audio y diagnóstico de avisos (HOLD)** · Subir la foto ya no la muestra en la página pública antes de «Publicar cambios». En Notas de consulta se ve si hay permiso, si se está subiendo, si se está transcribiendo y si el audio se borró o sigue guardado, con un botón para reintentar. En Avisos de la paciente hay un diagnóstico (permiso y suscripción) y un aviso de prueba que solo funciona en local o staging. Sin migraciones. [Informe y paso 10](borrador-foto-audio-avisos.md). Sin producción ni merge.

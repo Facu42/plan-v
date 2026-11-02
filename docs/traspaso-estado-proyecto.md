@@ -1,6 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-02)
 
 2/11 · Cursor · El volcado diario usa el cliente de Postgres 17 y restaura en un Postgres 17 vacío. El cliente 16 no puede leer la base de Supabase 17.6. Rama `cursor/respaldo-pg17-3f0e`. Sin producción ni merge.
+2/11 · Cursor · Hoy, en el inicio de la nutri: una sola cosa por paciente (un mensaje, un ajuste del menú o un turno). Hay que hacer clic para abrirla y otro para enviarla o guardarla. Si no hay nada, dice «Todo al día». La fecha de lo hecho todavía no se guarda en la base real. Rama `cursor/hoy-up-next-91ec`. Sin producción ni merge. [Nota](hoy-up-next-p3.md).
 
 # Traspaso del proyecto (actualización vigente: 2026-11-01)
 

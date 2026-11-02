@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
 import { useTarjetasInicio } from './inicio-tarjetas';
 import type { Patient } from '../../types';
+import { fotosDeCola, railHoy, type HechoAccion } from '../../lib/hoy-accion';
+import { ListaHoy } from './AccionDeHoy';
+import { useHechosHoy } from './use-hechos-hoy';
 import type { IntakeHealthFact } from '../../types/intake';
 import type { CrmWorkResponse } from '../../types/crm-work';
 import type { BillingBoard } from '../../types/fees';
@@ -155,14 +158,14 @@ type ViewProps = {
   patients: Patient[]; now: Date; data: CrmWorkResponse | null; loading: boolean; error: string; kind?: HomeFilter;
   onKind?: (kind: HomeFilter) => void; onRefresh: () => void; onNext: () => void; hasPrevious: boolean;
   board: BillingBoard | null; billingError: boolean; scheduling: SchedulingWorkspaceSnapshot | null; schedulingError: boolean;
-  onOpen: Open;
+  onOpen: Open; hechos?: readonly HechoAccion[];
 };
 
 function Mensaje({ children }: { children: ReactNode }) {
   return <p className="sxsub">{children}</p>;
 }
 
-export function PanelHomeView({ patients, now, data, loading, error, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen }: ViewProps) {
+export function PanelHomeView({ patients, now, data, loading, error, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen, hechos = [] }: ViewProps) {
   const [filtro, setFiltro] = useState<'all' | 'hacer' | 'fel'>('all');
   const [rango, setRango] = useState<RangoConsultas>('hoy');
   const [elegida, setElegida] = useState<string | null>(null);
@@ -187,6 +190,7 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
   const lista = enAtencion ? atencion : visibles;
   const posicion = Math.max(0, lista.findIndex(fila => fila.key === activa?.key)) + 1;
   const consultas = useMemo(() => armarConsultas(patients, now, rango, board), [patients, now, rango, board]);
+  const rail = useMemo(() => railHoy(patients, fotosDeCola(data?.items ?? []), hechos, now), [patients, data, hechos, now]);
   const porVideo = consultas.filter(fila => fila.video).length;
   const kpis = useMemo(() => armarKpis(patients, now, board, billingError), [patients, now, board, billingError]);
   const abrir = (href: string) => (evento: MouseEvent<HTMLAnchorElement>) => {
@@ -260,11 +264,13 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
             : <tr><td colSpan={7} style={{ color: 'var(--ink3)' }}>{rango === 'hoy' ? 'No tenés consultas programadas para hoy.' : rango === 'manana' ? 'No tenés consultas programadas para mañana.' : 'No tenés consultas programadas esta semana.'}</td></tr>}</tbody>
         </table>
       </div>
+      <ListaHoy items={rail} hechos={hechos} now={now} onAbrir={onOpen} />
     </section>
   </div>;
 }
 
 export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now: Date; onOpen: Open }) {
   const state = useHomeData(homeDay(now));
-  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} />;
+  const hechos = useHechosHoy();
+  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} hechos={hechos} />;
 }

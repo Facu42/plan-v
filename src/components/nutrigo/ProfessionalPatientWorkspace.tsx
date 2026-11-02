@@ -21,6 +21,9 @@ import { FichaWhatsappEstado } from './FichaWhatsappEstado';
 import { PanelFichaChat } from './PanelFichaChat';
 import { FxKv, FxPanel } from './ficha-fx';
 import { PanelFichaResumen } from './PanelFichaResumen';
+import { elegirUna } from '../../lib/hoy-accion';
+import { marcarHechoSiCorresponde } from '../../lib/hoy-sesion';
+import { useHechosHoy } from './use-hechos-hoy';
 import { conteoDeSolapas, seccionDe, solapaDe } from './ficha-presentacion';
 import { pendientesDeFicha } from './ficha-pendientes';
 import { useFichaData } from './use-ficha-data';
@@ -60,7 +63,12 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
   const [refreshError,setRefreshError] = useState('');
   const [readyId,setReadyId]=useState<string|null>(null);
   const [chatOpen,setChatOpen]=useState(false);
-  useEffect(()=>setChatOpen(false),[patient.id]);
+  const hechosHoy = useHechosHoy();
+  const accionHoy = elegirUna(patient, [], hechosHoy, now);
+  useEffect(()=>{
+    const params = new URLSearchParams(window.location.search);
+    setChatOpen(params.get('accion') === 'mensaje' && params.get('paciente') === patient.id);
+  },[patient.id]);
   const [patientRevision,setPatientRevision]=useState(0);
   const tabsRef=useRef<HTMLElement>(null);
   const datos=useFichaData(patient);
@@ -93,14 +101,14 @@ export function ProfessionalPatientWorkspace({ patient, patients, onSelect, onEd
     {refreshError && <p role="alert">{refreshError}</p>}
     <div id="fwrap" style={{flex:1,minHeight:0,display:'flex',flexDirection:'column'}}>
     {readyId!==patient.id?<NvState kind={refreshError?'error':'loading'} title={refreshError?'No pudimos cargar la ficha':'Cargando ficha…'} description={refreshError||'Consultando los datos actualizados de la paciente.'} action={refreshError&&<NvButton onClick={()=>setPatientRevision(n=>n+1)}>Reintentar ficha</NvButton>}/>
-    :tab==='resumen'?<PanelFichaResumen key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}>{contacto}</PanelFichaResumen>
+    :tab==='resumen'?<PanelFichaResumen key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))} accionHoy={accionHoy} onAbrirHoy={onOpenHref}>{contacto}</PanelFichaResumen>
     :tab==='evolucion'?<PanelFichaMediciones key={patient.id} patient={patient} now={now} datos={datos} ir={next=>change(seccionDe(next))}><div className="pw-record pn-record"><div className="pw-record-content"><PanelPatientMedicionesExtra patientId={patient.id} patientName={patient.name}/></div></div></PanelFichaMediciones>
     :tab==='planificacion'?<PanelFichaObjetivos key={patient.id} patient={patient} now={now} datos={datos} onChanged={addPatient}><div className="pw-record pn-record"><div className="pw-record-content"><NutritionTargetPanel patientId={patient.id} patientName={patient.name} onOpenPlan={() => change('plan')} /></div></div></PanelFichaObjetivos>
     :<div className="pw-record pn-record"><div key={`${patient.id}:${tab}`} className="pw-record-content">
       {solapa==='plan'&&tab!=='plan'&&<nav className="pn-record-plan-tabs" aria-label="Secciones del plan">{RECORD_PLAN_TABS.filter(([id])=>id!=='planificacion').map(([id,label])=><button type="button" key={id} aria-current={id===tab?'page':undefined} onClick={()=>change(id)}>{label}</button>)}</nav>}
       {tab === 'historia' && <PanelFichaHistoria key={patient.id} patient={patient} now={now} datos={datos}><details id="hc-respuestas" className="pn-record-card" open><summary>Respuestas del formulario, datos importados y primer día</summary><PanelPatientHistory patientId={patient.id} now={now}/></details></PanelFichaHistoria>}
       {tab === 'alimentario' && <PanelPatientFoodDiary patient={patient} now={now} onReview={onReview} onSelect={onSelect}/>}
-      {tab === 'plan' && <PanelFichaPlan key={patient.id} patient={patient} professionalName={professionalName} now={now} onSection={change} onChanged={()=>void refreshPatient(patient.id)}/>}
+      {tab === 'plan' && <PanelFichaPlan key={patient.id} patient={patient} professionalName={professionalName} now={now} onSection={change} onChanged={()=>{ void refreshPatient(patient.id); void marcarHechoSiCorresponde(patient.id, 'ajuste_menu').catch(()=>undefined); }}/>}
       {tab === 'semanal' && <ShowroomMealPlan patient={patient} patients={patients} query="" onSelect={onSelect} onChanged={addPatient} now={now} />}
       {tab === 'compras' && <ShowroomGrocery patient={p} readOnly />}
       {tab === 'archivos' && <PanelPatientFiles key={patient.id} patientId={patient.id} patientName={patient.name}/>}
