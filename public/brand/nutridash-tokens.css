@@ -1,0 +1,13 @@
+/* Marca Nutridash: degradé medido en la cinta del isotipo (blanco verdoso → menta) y tinta AA. */
+:root {
+  --nd-foam: #f3f8e8;
+  --nd-mint: #c8ed88;
+  --nd-foam-deep: #e7f7c0;
+  --nd-mint-deep: #9ed456;
+  --nd-cyan: var(--nd-foam);
+  --nd-cyan-deep: var(--nd-foam-deep);
+  --nd-action-ink: #10241c;
+  --nd-action-ring: #143024;
+  --nd-action: linear-gradient(118deg, var(--nd-foam) 0%, var(--nd-mint) 100%);
+  --nd-action-hover: linear-gradient(118deg, var(--nd-foam-deep) 0%, var(--nd-mint-deep) 100%);
+}

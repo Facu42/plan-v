@@ -5,5 +5,11 @@
 .scheduling-panel .pub-pro ul{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
 .scheduling-panel .pub-pro li{padding:4px 10px;border-radius:999px;background:var(--nv-bg);border:1px solid var(--nv-border);font-size:13px}
 .scheduling-panel .pub-pro a{color:inherit;font-weight:600}.scheduling-panel p{color:var(--nv-ink)}
+.scheduling-panel button.nd-action{background:var(--nd-action);color:var(--nd-action-ink);border-color:transparent;font-weight:650}
+.scheduling-panel button.nd-action:hover{background:var(--nd-action-hover)}
+.scheduling-panel button.nd-action:focus-visible{outline:2px solid var(--nd-action-ring);outline-offset:2px}
+.scheduling-panel button.nd-action:disabled{opacity:.45;cursor:not-allowed}
+.scheduling-panel .pub-nd{display:flex;align-items:center;gap:8px;margin-top:28px;color:var(--nv-muted,#5c6b62);font-size:13px}
+.scheduling-panel .pub-nd img{width:28px;height:28px;border-radius:8px}
 .nv-agenda-settings{padding:12px 20px;background:var(--nv-card);border:1px solid var(--nv-border);border-radius:12px;margin-bottom:16px}
 .nv-agenda-settings summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--nv-ink)}
