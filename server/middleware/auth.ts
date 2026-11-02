@@ -4,13 +4,11 @@ import {
   isSupabaseEnabled as supabaseIsEnabled,
   createActorClient,
   bindActorClient,
-  getRequestDb,
 } from '../db/supabase-client.js';
 import { allowsSyntheticDemo } from '../config/runtime.js';
 import { resolveRequestAuth } from '../security/contracts.js';
-import { isMfaExemptPath, isPreMfaProfessionalPath, MFA_REQUIRED_MESSAGE, mfaEnforced, tokenAal } from '../security/mfa.js';
-import { sbGetActor, sbGetProfileRole } from '../db/supabase-repo.js';
-import { isAdmin } from '../admin/repository.js';
+import { hasVerifiedTotp, isMfaExemptPath, MFA_REQUIRED_MESSAGE, tokenAal } from '../security/mfa.js';
+import { sbGetActor } from '../db/supabase-repo.js';
 
 export type AuthContext = { userId: string } | { demo: true };
 
@@ -25,11 +23,12 @@ type AuthDependencies = {
   isSupabaseEnabled: () => boolean;
   verifyAuthToken: (token: string | undefined) => Promise<{ userId: string } | null>;
   allowDemo: () => boolean;
-  /** Si hay que exigir el segundo paso, y si la cuenta es de nutricionista o administradora. */
+  /**
+   * True cuando esta sesión ya tiene un TOTP verificado y todavía está en aal1.
+   * No depende de MFA_ENFORCE ni del rol: la nutricionista lo elige al activarlo.
+   */
   mfa?: {
-    enforced: () => boolean;
-    needsSecondStep: (userId: string) => Promise<boolean>;
-    allowProfessionalBootstrap?: (userId: string, path: string) => Promise<boolean>;
+    needsSecondStep: (userId: string, authorization: string | undefined) => Promise<boolean>;
   };
 };
 
@@ -79,12 +78,9 @@ export function createAuthMiddleware(dependencies: AuthDependencies) {
       if (actorDb) {
         return bindActorClient(actorDb, async () => {
           const mfa = dependencies.mfa;
-          if (mfa?.enforced() && !isMfaExemptPath(c.req.path) && tokenAal(c.req.header('Authorization')) !== 'aal2'
-            && await mfa.needsSecondStep(decision.userId)) {
-            const bootstrap = isPreMfaProfessionalPath(c.req.path)
-              && await mfa.allowProfessionalBootstrap?.(decision.userId, c.req.path);
-            if (!bootstrap) return c.json({ error: MFA_REQUIRED_MESSAGE, code: 'mfa_required' }, 403);
-            c.set('preMfaProfessional', true);
+          if (mfa && !isMfaExemptPath(c.req.path) && tokenAal(c.req.header('Authorization')) !== 'aal2'
+            && await mfa.needsSecondStep(decision.userId, c.req.header('Authorization'))) {
+            return c.json({ error: MFA_REQUIRED_MESSAGE, code: 'mfa_required' }, 403);
           }
           return next();
         });
@@ -106,15 +102,6 @@ export const authMiddleware = createAuthMiddleware({
   verifyAuthToken: verifySupabaseAuthToken,
   allowDemo: () => allowsSyntheticDemo(),
   mfa: {
-    enforced: () => mfaEnforced(),
-    needsSecondStep: async (userId) => (await sbGetProfileRole(userId)) === 'nutri' || await isAdmin(true),
-    allowProfessionalBootstrap: (userId, path) => allowPreMfaProfessionalBootstrap(userId, path, {
-      getRole: sbGetProfileRole,
-      getActor: sbGetActor,
-      hasPatients: async (nutritionistId) => {
-        const result = await getRequestDb().from('patients').select('id').eq('nutritionist_id', nutritionistId).limit(1);
-        return Boolean(result.error) || (result.data?.length ?? 0) > 0;
-      },
-    }),
+    needsSecondStep: async (_userId, authorization) => hasVerifiedTotp(authorization),
   },
 });

@@ -110,7 +110,7 @@ export function PlanNutridash() {
     {dialogo === 'cancelar' ? <SettingsDialog title="Cancelar el plan" onClose={() => setDialogo(null)}>
       <p className="pubbio">Seguís con acceso hasta el fin de lo que ya pagaste. No se devuelve la plata sola y el cupo de fundadora no vuelve al pozo.</p>
       <label className="af">Motivo<textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} maxLength={200} rows={3} /></label>
-      <button type="button" className="sbtn k" disabled={motivo.trim().length < 2} onClick={() => void cancelar()}>Confirmar baja</button>
+      <button type="button" className="sbtn k nd-danger" disabled={motivo.trim().length < 2} onClick={() => void cancelar()}>Confirmar baja</button>
     </SettingsDialog> : null}
   </>;
 }

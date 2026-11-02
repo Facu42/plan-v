@@ -319,11 +319,10 @@ function mfaFromUser(user: AuthUserLite | undefined): CentroMfaEstado {
 }
 
 function enforceWarnings(): CentroAlerta[] {
-  if (mfaEnforced()) return [];
   return [{
     tone: 'gold',
-    title: 'El interruptor de MFA está apagado',
-    sub: 'El centro de mando igual pide el segundo paso. El resto de la app no lo exige hasta que se prenda MFA_ENFORCE.',
+    title: 'El segundo paso es obligatorio solo en /admin',
+    sub: 'La nutricionista lo activa en Ajustes si quiere. Cuando lo activa, la API le pide el código. MFA_ENFORCE ya no obliga a todo el consultorio.',
   }];
 }
 

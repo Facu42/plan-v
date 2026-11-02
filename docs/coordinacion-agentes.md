@@ -1,3 +1,9 @@
+02/11 · Cursor · Isotipo elegido por Facundo (cinta blanca → menta) en la misma rama `cursor/nutridash-logo-botones-inicio-bb46`. Favicon, menú, ingreso, página pública y PWA. Botones principales al degradé nuevo; secundarios y la baja quedan. Sin #162, sin #244, sin #245, sin producción ni merge.
+
+01/11 · Cursor · Logo, botones y Inicio de Nutridash en `cursor/nutridash-logo-botones-inicio-bb46`. Ícono nuevo en favicon, menú, ingreso, página pública y PWA. Botones principales al degradé del logo; secundarios y la baja quedan. Los números de Inicio suben y entran en escalera. Sin fase 6, sin #162, sin #244, sin #245, sin producción ni merge.
+
+01/11 · Cursor · Lista de consultas: la profesional con los 3 consentimientos veía «Revisá los permisos de la paciente» (42501). La política de las consultas llamaba a un helper interno sin permiso de ejecución. Migración `20261101230000_consultation_session_visible.sql` escrita y sin aplicar. Rama `cursor/consulta-permisos-lista-0be1`. Sin producción ni merge.
+
 01/11 · Codex · PR #256 puesto al día con main `8826ac83` (#247/#248/#250/#251/#253/#254/#255), según autorización de Facundo. Documentación combinada, manifiesto 38+8=46, tests Centro y definer tomados de main y seis firmas nuevas agregadas a definer-allowlist. 100 pruebas puntuales verdes en 13 archivos; manifiesto y migraciones aprobados. Sin tocar #244/#245 ni producción. [Informe](campanias-whatsapp-backend.md).
 
 01/11 · Codex · PR #256: migración de bioimpedancia renombrada a `20261031220000_bioimpedance_reviews.sql` para evitar la colisión con #250; manifiesto y referencias actualizados, contenido SQL sin cambios. 17 pruebas puntuales verdes (bioimpedancia y manifiesto).
@@ -78,6 +84,8 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Logo, botones y tarjetas de Inicio | Cursor | `cursor/nutridash-logo-botones-inicio-bb46` | Isotipo elegido (cinta blanca → menta), degradé en la acción principal y números de Inicio arriba. PR en borrador. Sin producción ni merge |
+| Lista de consultas de la profesional (42501) | Cursor | `cursor/consulta-permisos-lista-0be1` | La lectura de las consultas falla por un permiso de Postgres, no por los consentimientos. Migración nueva sin aplicar. Sin producción ni merge |
 | Campañas de reactivación, WhatsApp, audio y bioimpedancia | Codex, autorizado por Facundo el 31/10 | `work/campanias-whatsapp` | Backend bajo banderas apagadas. RLS por consultorio y dos migraciones sin aplicar. [Informe y paso 10](campanias-whatsapp-backend.md). Sin merge ni producción |
 | Página pública /slug, PDF con marca y mail de soporte | Cursor | `work/landing-nutri-pdf` | Editor de perfil (foto, bio, especialidades, modalidad, zona, precio, reserva, colores). `/slug` muestra ese recorte. El PDF del plan usa logo y colores de la nutri. Centro de ayuda con guías de arranque; el mail de soporte sale de `SUPPORT_EMAIL` / `VITE_SUPPORT_EMAIL`, nunca un Gmail fijo. Sin migraciones ni producción |
 | Recordatorios de comer, agua y dormir | Cursor | `work/recordatorios-push` | La paciente los prende y elige el horario en Avisos. Empiezan apagados. El aviso al teléfono no lleva datos de salud. Migración sin aplicar. Sin producción ni merge |
@@ -138,6 +146,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261101230000_consultation_session_visible` | Cursor | Lista de consultas. Escrita y probada solo en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261026190000_plan_delivery` | Codex, Planes 3f | Escrita y probada solo en PostgreSQL descartable. Sin aplicar en producción |
 | `20261011140000_clinical_ai_budget` … `20261013123000_imported_clinical_export` (17 archivos, manifiesto en `docs/deployment/nutridesk-migrations-2026-10-13.json` de la rama de Codex) | Codex | Sin aplicar |
 | `20261014180000_sara2_catalog` | Codex | Escrita el 14/10 antes de la regla de fechas nuevas; conservada como entrega 8. Sin aplicar |
@@ -169,6 +178,10 @@ del piloto, entidad legal.
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
 - **1/11 · Cursor · Cobro de Nutridash en Mercado Pago, solo prueba** · Rama `cursor/mp-sandbox-suscripcion-6902`. El plan se activa con un pago aprobado del monto justo. Sin pago, a los 30 días queda en solo lectura. Una clave que no es de prueba no llama a Mercado Pago. Pasos a mano en [mercadopago-sandbox.md](mercadopago-sandbox.md). Sin producción y sin cobro real.
+- **1/11 · Cursor · Verificación en dos pasos** · Rama `cursor/mfa-totp-admin-6902`. `/admin` exige el código de la app. La nutricionista lo activa en Ajustes → Seguridad y puede quitarlo. Si lo activó, la API pide el código. No se obliga a todo el consultorio. Sin migración aplicada ni producción.
+- **2/11 · Cursor · Logo elegido (HOLD)** · Facundo cambió el isotipo: cuadrado negro, cinta de blanco a menta y hoja en la «d». Ese archivo reemplaza al anterior en el menú, el ingreso, la página pública, el favicon y la app instalable. Los mismos botones de hacer pasan a ese degradé, con texto oscuro. Los secundarios y «Confirmar baja» siguen igual. Veredicto HOLD hasta el ok de Facundo. Sin producción.
+- **1/11 · Cursor · Logo y Inicio (HOLD)** · El isotipo nuevo reemplaza la «nd» lima en el menú, el ingreso, la página pública, el favicon y la app instalable. Los botones de hacer (Nueva consulta, Nueva paciente, Publicar, Guardar y los de la página pública) usan el degradé del logo con texto oscuro. Los secundarios y «Confirmar baja» no. En Inicio los cinco números quedan arriba y se ven sin scroll, con una entrada en escalera que se apaga si la persona pide menos movimiento. Veredicto HOLD hasta el ok de Facundo. Sin producción.
+- **1/11 · Cursor · Lista de consultas (HOLD)** · En la ficha, la profesional con los tres permisos de la paciente veía un error de permisos al abrir las consultas. La grabación seguía procesándose. La causa es un permiso de la base, no los consentimientos. Migración nueva, sin aplicar. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 - **1/11 · Cursor · Página pública /slug, PDF con marca y mail de soporte (HOLD)** · En Página pública → Editar perfil se cargan foto, bio, especialidades, modalidad, zona, precio, link de reserva y colores. Eso se ve en `nutridash.app/slug` (sin obras ni avisos internos). El PDF del plan toma logo de la marca y colores de esa página; si faltan, usa lima y tinta de Nutridash. El centro de ayuda suma alta, primera paciente, app y cobros; el mail de soporte sale de `SUPPORT_EMAIL` (Railway) o `VITE_SUPPORT_EMAIL` (Vercel), nunca un Gmail en el código. Sin migraciones. Tests de los archivos tocados y tipos en verde. Veredicto HOLD hasta el ok de Facundo. Sin producción.
 - **01/11 · Codex · Destrabe autorizado de #250** · Merge de `origin/main` fb5cb9bb en `work/recordatorios-push`, conservando ambas partes del conflicto documental. Corregidas las causas de verify: manifiesto completo y hashes, conteo exacto 33 pendientes/41 total y política RLS con initplan mediante migración correctiva nueva; original intacta. 30 pruebas focales y `npm run check` verdes. Sigue en borrador, sin merge, despliegue ni base remota.
 
