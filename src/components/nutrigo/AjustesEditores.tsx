@@ -29,8 +29,8 @@ export function EditarMarca({ modo, data, onSaved, onClose }: { modo: ModoMarca;
   const titulo = modo === 'datos' ? 'Datos del consultorio' : modo === 'titulo' ? 'Título y matrícula' : 'Firma y marca';
   return <CajonAjustes titulo={titulo} sub={modo === 'datos' ? 'Salen en certificados y en tu página' : modo === 'titulo' ? 'Se imprimen en certificados' : 'Se usan en certificados e informes'} onGuardar={guardar} onClose={onClose}>
     {modo === 'datos' ? <>
-      <Campo etiqueta="Nombre"><Texto valor={c.name} alCambiar={poner('name')} ayuda="Consultorio Lic. …" /></Campo>
-      <Fila><Campo etiqueta="Matrícula"><Texto valor={c.license} alCambiar={poner('license')} max={40} /></Campo><Campo etiqueta="CUIT"><Texto valor={c.cuit} alCambiar={poner('cuit')} max={20} /></Campo></Fila>
+      <Campo etiqueta="Nombre" ayuda="Así aparece en tus certificados, en los PDF y en tu página de reservas."><Texto valor={c.name} alCambiar={poner('name')} ayuda="Consultorio Lic. …" /></Campo>
+      <Fila><Campo etiqueta="Matrícula" ayuda="Va en cada certificado."><Texto valor={c.license} alCambiar={poner('license')} max={40} /></Campo><Campo etiqueta="CUIT" ayuda="Para tus comprobantes."><Texto valor={c.cuit} alCambiar={poner('cuit')} max={20} /></Campo></Fila>
       <Campo etiqueta="Dirección"><Texto valor={c.address} alCambiar={poner('address')} max={160} /></Campo>
       <Fila><Campo etiqueta="Teléfono"><Texto valor={c.phone} alCambiar={poner('phone')} max={40} /></Campo><Campo etiqueta="Mail"><Texto valor={c.email} alCambiar={poner('email')} tipo="email" /></Campo></Fila>
     </> : modo === 'titulo' ? <>
@@ -43,11 +43,11 @@ export function EditarMarca({ modo, data, onSaved, onClose }: { modo: ModoMarca;
       </Campo>
       {c.signature ? <div className="ajfirma"><img src={c.signature} alt="Tu firma" style={{ maxHeight: 46, maxWidth: 150 }} /></div> : null}
       {c.signature ? <button type="button" className="chip" onClick={() => poner('signature')('')}>Quitar firma</button> : null}
-      <Campo etiqueta="Logo" ayuda="Si no subís uno, se usa la V de Nutridash">
+      <Campo etiqueta="Logo" ayuda="Si no subís uno, se usa el logo de Nutridash">
         <input className="ai" type="file" accept="image/png,image/jpeg" onChange={e => void elegir('logo', e.target.files?.[0])} />
       </Campo>
       {c.logo ? <img src={c.logo} width={40} height={40} alt="Tu logo" /> : null}
-      {c.logo ? <button type="button" className="chip" onClick={() => poner('logo')('')}>Usar la V de Nutridash</button> : null}
+      {c.logo ? <button type="button" className="chip" onClick={() => poner('logo')('')}>Usar el logo de Nutridash</button> : null}
     </>}
     {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
   </CajonAjustes>;

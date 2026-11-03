@@ -31,6 +31,21 @@ export function usePrimerosPasos(activo: boolean): EstadoPrimerosPasos {
   return estado;
 }
 
+/** Avance para Inicio: cuenta solo lo que se puede comprobar y dice cuál es el próximo paso. */
+export type AvancePrimerosPasos = { listos: number; total: number; siguiente: { titulo: string; href: string } | null };
+export function avancePrimerosPasos(estado: EstadoPrimerosPasos, { tienePaciente, vinculada }: { tienePaciente: boolean; vinculada: boolean }): AvancePrimerosPasos | null {
+  if (estado.datos === null || estado.horarios === null || estado.pagina === null) return null;
+  const pasos: Array<[boolean, string, string]> = [
+    [estado.datos, 'Completá los datos de tu consultorio', '/crm/ajustes'],
+    [estado.horarios, 'Cargá tus horarios de atención', '/crm/agenda?agenda=horarios'],
+    [estado.pagina, 'Publicá tu página de reservas', '/crm/agenda?agenda=publica'],
+    [tienePaciente, 'Creá a tu primera paciente', '/crm/pacientes?accion=crear'],
+    [vinculada, 'Invitá a tu paciente a la app', '/crm/pacientes?filtro=unlinked'],
+  ];
+  const pendiente = pasos.find(([hecho]) => !hecho);
+  return { listos: pasos.filter(([hecho]) => hecho).length, total: pasos.length, siguiente: pendiente ? { titulo: pendiente[1], href: pendiente[2] } : null };
+}
+
 type Paso = { titulo: string; texto: string; icono: PanelV29IconName; hecho: boolean | null; accion?: () => void; deshabilitado?: boolean };
 
 /** El nombre ya puede traer el punto final («Sofía R.»): al cerrar la oración no se duplica. */

@@ -72,6 +72,8 @@ export type DatosInicio = {
   novedades: readonly HomePatientNotice[]; atencion: readonly HomePatientNotice[];
   reservas: ReadonlyArray<{ id: string; nombre: string; cuando: string }>;
   rachas: ReadonlyArray<{ patient_id: string; days: number; at_least: boolean }>;
+  /** Primeros pasos sin terminar: se muestran como el primer pendiente hasta completarlos. */
+  preparacion?: { listos: number; total: number; siguiente: { titulo: string; href: string } | null } | null;
 };
 
 function detalleProxima(entrada: HomeAppointment, ahora: Date, extra: DetalleExtra | null): Detalle {
@@ -127,14 +129,30 @@ export function armarPendientes(entrada: DatosInicio, extras: Readonly<Record<st
   const filas: PendienteFila[] = [];
   const proxima = homeAppointments(pacientes, ahora).next;
   const extraDe = (id: string | undefined) => (id ? extras[id] ?? null : null);
+  const prep = entrada.preparacion;
+  if (prep?.siguiente) {
+    filas.push({ key: 'primeros-pasos', filtro: 'hacer', tono: 'l', icono: 'spark', titulo: 'Terminá de preparar tu consultorio', sub: `${prep.listos} de ${prep.total} pasos listos · sigue: ${prep.siguiente.titulo.toLowerCase()}`, tipo: 'Primeros pasos', detalle: {
+      hd: 'Primeros pasos', iniciales: '·', fondo: fondoAvatar(undefined), nombre: 'Tu consultorio', sub: prep.siguiente.titulo,
+      hero: `${prep.listos}/${prep.total}`, unidad: 'pasos', leyenda: 'Se tildan solos cuando el dato ya está cargado',
+      acciones: [{ icono: 'spark', texto: 'Ver los pasos', href: '/crm/inicio?primeros=1' }, { icono: 'chev', texto: 'Hacer el próximo', href: prep.siguiente.href, principal: true }],
+    } });
+  }
   if (proxima) {
     filas.push({ key: `proxima:${proxima.patient.id}`, filtro: 'hacer', tono: 'l', icono: 'steth', titulo: `Preparar la consulta de ${proxima.patient.name}`, sub: `${hora(proxima.at)} · ${modalidad(proxima.channel)}${proxima.patient.goal ? ` · ${proxima.patient.goal}` : ''}`, tipo: 'Próxima', detalle: detalleProxima(proxima, ahora, extraDe(proxima.patient.id)) });
   }
   const porId = new Map(pacientes.map(paciente => [paciente.id, paciente]));
+  // Un renglón por paciente y tipo: «Revisar los registros de Sofía» una vez, con cuántos son.
+  const grupos = new Map<string, CrmWorkItem[]>();
   for (const item of data?.items ?? []) {
     if (item.kind === 'quiet' || (item.kind === 'appointment' && item.status !== 'needs_change')) continue;
+    const clave = `${item.kind}:${item.patient_id}`;
+    grupos.set(clave, [...(grupos.get(clave) ?? []), item]);
+  }
+  for (const [item, ...resto] of grupos.values()) {
+    if (!item || item.kind === 'quiet') continue;
     const cfg = CONFIG[item.kind];
-    filas.push({ key: item.id, filtro: 'hacer', tono: cfg.tono, icono: cfg.icono, titulo: cfg.titulo(item.patient_name), sub: item.title, tipo: cfg.tipo, detalle: detalleTarea(item, porId.get(item.patient_id), data, extraDe(item.patient_id), proxima) });
+    const sub = resto.length ? `${resto.length + 1} ${cfg.unidad} · ${[item, ...resto].map(fila => fila.title).filter((t, i, todos) => todos.indexOf(t) === i).join(' · ')}` : item.title;
+    filas.push({ key: item.id, filtro: 'hacer', tono: cfg.tono, icono: cfg.icono, titulo: cfg.titulo(item.patient_name), sub, tipo: cfg.tipo, detalle: detalleTarea(item, porId.get(item.patient_id), data, extraDe(item.patient_id), proxima) });
   }
   if (entrada.reservas.length) {
     filas.push({ key: 'reservas', filtro: 'hacer', tono: 'a', icono: 'cal', titulo: entrada.reservas.length === 1 ? '1 reserva por confirmar' : `${entrada.reservas.length} reservas por confirmar`, sub: 'Revisá los horarios y vinculá cada paciente', tipo: 'Agenda', detalle: detalleReservas(entrada.reservas) });

@@ -17,6 +17,7 @@ import { useHomeData, type HomeFilter } from './use-home-data';
 import {
   armarAtencion, armarConsultas, armarKpis, armarPendientes, encabezadoInicio, type Detalle, type DetalleExtra, type RangoConsultas,
 } from './inicio-presentacion';
+import type { DatosInicio } from './inicio-presentacion';
 
 type Open = (href: string) => void;
 
@@ -155,6 +156,8 @@ const VACIO: Detalle = {
 };
 
 type ViewProps = {
+  /** Primeros pasos sin terminar (null si ya están o todavía no se sabe). */
+  preparacion?: DatosInicio['preparacion'];
   patients: Patient[]; now: Date; data: CrmWorkResponse | null; loading: boolean; error: string; kind?: HomeFilter;
   onKind?: (kind: HomeFilter) => void; onRefresh: () => void; onNext: () => void; hasPrevious: boolean;
   board: BillingBoard | null; billingError: boolean; scheduling: SchedulingWorkspaceSnapshot | null; schedulingError: boolean;
@@ -165,7 +168,7 @@ function Mensaje({ children }: { children: ReactNode }) {
   return <p className="sxsub">{children}</p>;
 }
 
-export function PanelHomeView({ patients, now, data, loading, error, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen, hechos = [] }: ViewProps) {
+export function PanelHomeView({ patients, now, data, loading, error, onRefresh, onNext, hasPrevious, board, billingError, scheduling, schedulingError, onOpen, hechos = [], preparacion = null }: ViewProps) {
   const [filtro, setFiltro] = useState<'all' | 'hacer' | 'fel'>('all');
   const [rango, setRango] = useState<RangoConsultas>('hoy');
   const [elegida, setElegida] = useState<string | null>(null);
@@ -178,8 +181,8 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
   const extras = useExtraDe(pidiendo, hoy);
   const entrada = useMemo(() => ({
     pacientes: patients, ahora: now, data, reservas, rachas: data?.home?.meal_streaks ?? [],
-    novedades: homeNews(patients, now, data?.home?.meal_streaks), atencion: homeAttention(patients, data?.home?.quiet ?? []),
-  }), [patients, now, data, reservas]);
+    novedades: homeNews(patients, now, data?.home?.meal_streaks), atencion: homeAttention(patients, data?.home?.quiet ?? []), preparacion,
+  }), [patients, now, data, reservas, preparacion]);
   const pendientes = useMemo(() => armarPendientes(entrada, extras), [entrada, extras]);
   const atencion = useMemo(() => armarAtencion(entrada, extras), [entrada, extras]);
   const visibles = pendientes.filter(fila => filtro === 'all' || fila.filtro === filtro);
@@ -269,8 +272,8 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
   </div>;
 }
 
-export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now: Date; onOpen: Open }) {
+export function PanelHome({ patients, now, onOpen, preparacion }: { patients: Patient[]; now: Date; onOpen: Open; preparacion?: DatosInicio['preparacion'] }) {
   const state = useHomeData(homeDay(now));
   const hechos = useHechosHoy();
-  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} hechos={hechos} />;
+  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} hechos={hechos} preparacion={preparacion} />;
 }
