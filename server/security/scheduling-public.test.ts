@@ -28,6 +28,15 @@ describe('integración de reserva pública', () => {
     expect((await app.request(endpoint,{method:'POST'})).status).toBe(429);
     expect((await app.request(endpoint,{method:'GET'})).status).toBe(200);
   });
+  it('limita también los intentos de pedir el enlace de la cuota', async () => {
+    const app=new Hono();
+    app.use('/api/*',createRateLimits({enabled:()=>true,sensitiveLimit:1,clientAddress:()=> '192.0.2.2'}).public);
+    app.all('/api/*',c=>c.json({ok:true}));
+    const endpoint='/api/public/scheduling/consultorio/cuota';
+    expect((await app.request(endpoint,{method:'POST'})).status).toBe(200);
+    expect((await app.request(endpoint,{method:'POST'})).status).toBe(429);
+    expect((await app.request(endpoint,{method:'GET'})).status).toBe(200);
+  });
   it('admite PDF clínico de veinte MB con base64 sólo en el recurso documental', () => {
     expect(maxBodyBytes('/api/patients/a/clinical-workspace/documents')).toBeGreaterThanOrEqual(28_000_000);
     expect(maxBodyBytes('/api/patients/a/clinical-workspace/records')).toBe(1_048_576);
