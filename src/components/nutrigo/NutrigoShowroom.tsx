@@ -90,6 +90,7 @@ import { FigmaDetailContext, FigmaPatientFooter, FigmaPlanCard, PATIENT_FIGMA_NO
 import { NutrigoPatientApp } from '../../features/nutrigo/PatientApp';
 import { ServiceNotice } from './ServiceNotice';
 import { PanelNavigation, panelNavActive, panelNavGroups } from './PanelNavigation';
+import { AdminEntryLink } from './AdminEntryLink';
 import { PanelBocetoShell, type PanelAccountOption, type PanelHeader } from './PanelBocetoShell';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PanelThemePicker } from './PanelThemePicker';
@@ -118,9 +119,11 @@ type NutrigoShowroomProps = {
   allowRoleSwitch?: boolean;
   onSignOut?: () => void;
   userName?: string;
+  /** Quien administra la plataforma y también tiene consultorio ve el acceso, sin salir del panel. */
+  showAdmin?: boolean;
 };
 
-export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, lockedRole = null, allowRoleSwitch = false, onSignOut, userName }: NutrigoShowroomProps) {
+export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, lockedRole = null, allowRoleSwitch = false, onSignOut, userName, showAdmin = false }: NutrigoShowroomProps) {
   const panelTheme = usePanelTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
     try { return panelStorage()?.getItem('plan-v:panel-collapsed') === 'true'; } catch { return false; }
@@ -541,7 +544,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
     return <FigmaDetailContext.Provider value={setFigmaDetail}><div className={`nv-app${page === 'inicio' ? ' nv-home' : ''} nv-pro pn-panel${darkMode ? ' nv-dark' : ''}${professionalIntro ? ' nv-professional-onboarding' : ''}${page === 'ficha' ? ' nv-record' : ''}${page === 'diario' ? ' nv-food-diary' : ''}${page === 'plan' ? ' nv-meal-plan' : ''}${page === 'consultas' ? ' nv-consultation-page' : ''}${page === 'agenda' ? ' nv-agenda-page' : ''}${page === 'objetivos' ? ' nv-goals-page' : ''}${isWorkCenterPage(page) ? ' nv-work-center-page' : ''}${page === 'compras' ? ' nv-grocery-page' : ''}${page === 'progreso' ? ' nv-progress-page' : ''}${page === 'recetas' ? ' nv-healthy-menu' : ''}${page === 'ejercicio' ? ' nv-exercise-page' : ''}${page === 'recursos' ? ' nv-resources-page' : ''}${page === 'cobranzas' ? ' nv-fees-page' : ''}`}>
       <PanelBocetoShell
         dark={darkMode} collapsed={sidebarCollapsed && !compactHeader} onCollapse={toggleSidebar} menuOpen={menuOpen} onMenu={setMenuOpen}
-        nav={<PanelNavigation patients={patients} unread={messageUnread} current={location} collapsed={sidebarCollapsed && !compactHeader} onOpen={openWorkHref} />}
+        nav={<><PanelNavigation patients={patients} unread={messageUnread} current={location} collapsed={sidebarCollapsed && !compactHeader} onOpen={openWorkHref} />{showAdmin ? <AdminEntryLink /> : null}</>}
         brand={userName?.trim() ? `Consultorio de ${userName.trim().split(/\s+/)[0]}` : 'Tu consultorio'} name={displayName} initials={userInitials} account={account} onSignOut={onSignOut ? () => { if (canLeaveWorkspace()) onSignOut(); } : undefined}
         header={header} onSearch={search => openWorkHref(search ? `/crm/pacientes?${new URLSearchParams({ q: search })}` : '/crm/pacientes')}
         bell={<ShowroomConsultAlerts key={alertAudience} audience={alertAudience} alerts={consultAlerts} reminders={habitReminders} patientId={selected?.id} onOpen={(alert) => { selectPatient(alert.patientId); navigate('agenda'); }} onManage={(alert) => { selectPatient(alert.patientId); navigate('consultas'); }} onOpenReminder={openReminder} onOpenCare={(notice) => { selectPatient(notice.patient_id); navigate(notice.target); }} proNotices={proNotices} onOpenProNotice={(notice) => { if (notice.kind !== 'payment' && notice.kind !== 'debt') selectPatient(notice.patientId); navigate(notice.page); }} bell={{ className: 'ibtn', render: badge => <><PanelV29Icon name="bell" />{badge > 0 && <i />}</> }} />}

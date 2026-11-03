@@ -1,3 +1,7 @@
+# Traspaso del proyecto (actualización vigente: 2026-11-03)
+
+3/11 · Cursor · Quien administra la plataforma y entra con Google ya no se queda en «Tu cuenta todavía no está vinculada». Si no tiene consultorio, pasa a `/admin`. Si también es nutri, se queda en el panel y ve Admin. La vuelta de Google no sale de este sitio. Rama `cursor/admin-google-al-centro-4fb6`. Sin producción ni merge. [Nota](admin-ingreso-google.md).
+
 # Traspaso del proyecto (actualización vigente: 2026-11-02)
 
 2/11 · Cursor · Los precios de los planes de Nutridash se editan en /admin (pesos enteros, activo o pausado, historial de quién y cuándo). El plan de prueba queda oculto y no usa el cupo de fundadora. Migración `20261102233000_platform_plan_prices.sql` sin aplicar. Rama `cursor/planes-precios-admin-3f0e`. Sin producción ni merge.

@@ -15,6 +15,10 @@
 .m#pv-panel .ni>a,.m#pv-panel .si>a{display:contents;color:inherit;text-decoration:none}
 .m#pv-panel .ni:has(>a:focus-visible),.m#pv-panel .si:has(>a:focus-visible),.m#pv-panel .me:has(>.pv-me:focus-visible){outline:2px solid #7FA82E;outline-offset:-2px}
 
+/* Acceso al centro de mando: mismo ítem del menú, solo si la cuenta también administra. */
+#pv-panel-v29 a.pv-admin-entry{flex:0 0 auto;text-decoration:none}
+#pv-panel-v29 .app.mcol a.pv-admin-entry .lbl{opacity:0}
+
 /* Cuenta: el bloque `.me` abre el menú de la cuenta y su ícono cierra la sesión. */
 .m#pv-panel .me .pv-me{display:contents;font-family:inherit;color:inherit;cursor:pointer}
 .m#pv-panel .me .pv-out{border:0;background:transparent;color:inherit;padding:0;display:grid;place-items:center;cursor:pointer}
