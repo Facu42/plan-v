@@ -14,37 +14,38 @@
 @font-face { font-family: 'Instrument Serif'; src: url('./fonts/instrument-serif-latin-400-italic.woff2') format('woff2'); font-weight: 400; font-style: italic; font-display: swap; }
 
 .nd-admin-crm {
-  --bg: #f6f2e9;
-  --bg-deep: #efe9dc;
-  --surface: #ffffff;
-  --surface-2: #fcfaf5;
-  --surface-3: #f3efe5;
-  --ink: #14231d;
-  --ink-2: #49564f;
-  --muted: #858f88;
-  --faint: #a9b1aa;
-  --line: #e7e0d2;
-  --line-soft: #f0ebdf;
-  --line-strong: #d8d0bf;
+  --bg: #072f27;
+  --bg-deep: #051f1a;
+  --surface: #0e3d33;
+  --surface-2: #11483c;
+  --surface-3: #0a332b;
+  --ink: #f4f0e4;
+  --ink-2: #d5e4d8;
+  --muted: #9bb5a6;
+  --faint: #7d9a8c;
+  --line: rgba(255, 255, 255, .12);
+  --line-soft: rgba(255, 255, 255, .08);
+  --line-strong: rgba(255, 255, 255, .22);
 
   --deep: #083a30;
   --deep-2: #0d4a3c;
   --green: #1d7a51;
   --green-bright: #23955d;
   --lime: #c2e66e;
-  --lime-soft: #eef7d5;
-  --lime-ink: #3e5c14;
+  --lime-soft: rgba(194, 230, 110, .16);
+  --lime-ink: #d7f09a;
   --gold: #eeb04a;
-  --gold-soft: #fdf0d8;
-  --gold-ink: #7d5410;
+  --gold-soft: rgba(238, 176, 74, .16);
+  --gold-ink: #f6d7a1;
   --coral: #e97a61;
-  --coral-soft: #fde9e2;
-  --coral-ink: #8a3623;
-  --sky: #5b8fa8;
-  --sky-soft: #e6f0f4;
-  --violet: #8a7bb8;
-  --violet-soft: #efecf8;
-  --cream: #f9f6ee;
+  --coral-soft: rgba(233, 122, 97, .16);
+  --coral-ink: #ffc7b8;
+  --sky: #7eb8d2;
+  --sky-soft: rgba(126, 184, 210, .16);
+  --sky-ink: #c5e7f6;
+  --violet: #b0a4e0;
+  --violet-soft: rgba(176, 164, 224, .18);
+  --cream: #e7f6c4;
 
   --r-xs: 8px;
   --r-sm: 12px;
@@ -71,6 +72,7 @@
 .nd-admin-crm {
   background: var(--bg);
   color: var(--ink);
+  color-scheme: dark;
   font-family: var(--font-ui);
   font-size: 14px;
   line-height: 1.5;
@@ -195,7 +197,7 @@ svg { display: block; flex: 0 0 auto; }
   gap: 18px;
   padding: 0 30px;
   border-bottom: 1px solid var(--line);
-  background: rgba(246, 242, 233, .82);
+  background: rgba(7, 47, 39, .92);
   backdrop-filter: blur(14px);
   position: sticky;
   top: 0;
@@ -312,6 +314,7 @@ svg { display: block; flex: 0 0 auto; }
 }
 .nd-card-pad { padding: 20px 22px; }
 .nd-card-head { display: flex; align-items: flex-start; gap: 14px; padding: 20px 22px 0; }
+.nd-card-head.is-stack { flex-direction: column; gap: 4px; }
 .nd-card-head .nd-grow { flex: 1; min-width: 0; }
 .nd-card-title { font-size: 13.5px; font-weight: 600; }
 .nd-card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
@@ -330,8 +333,8 @@ svg { display: block; flex: 0 0 auto; }
 .nd-badge.is-green { background: var(--lime-soft); color: var(--lime-ink); }
 .nd-badge.is-gold { background: var(--gold-soft); color: var(--gold-ink); }
 .nd-badge.is-coral { background: var(--coral-soft); color: var(--coral-ink); }
-.nd-badge.is-sky { background: var(--sky-soft); color: #2e6177; }
-.nd-badge.is-violet { background: var(--violet-soft); color: #5c4d8c; }
+.nd-badge.is-sky { background: var(--sky-soft); color: var(--sky-ink); }
+.nd-badge.is-violet { background: var(--violet-soft); color: #e4dcf8; }
 .nd-badge.is-dark { background: rgba(8, 58, 48, .08); color: var(--deep); }
 
 .nd-chip {
@@ -345,7 +348,7 @@ svg { display: block; flex: 0 0 auto; }
   transition: all .16s var(--ease);
 }
 .nd-chip:hover { border-color: var(--line-strong); }
-.nd-chip.is-active { background: var(--deep); border-color: var(--deep); color: var(--cream); }
+.nd-chip.is-active { background: var(--lime); border-color: var(--lime); color: #10241c; }
 .nd-chip svg { width: 15px; height: 15px; }
 
 .nd-avatar {
@@ -586,7 +589,7 @@ svg { display: block; flex: 0 0 auto; }
 .rule:hover { background: var(--surface-2); }
 .rule-ico { width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: var(--lime-soft); color: var(--green); flex: 0 0 auto; }
 .rule-ico.is-gold { background: var(--gold-soft); color: var(--gold-ink); }
-.rule-ico.is-sky { background: var(--sky-soft); color: #2e6177; }
+.rule-ico.is-sky { background: var(--sky-soft); color: var(--sky-ink); }
 .rule-ico.is-coral { background: var(--coral-soft); color: var(--coral-ink); }
 .rule-ico svg { width: 18px; height: 18px; }
 .rule-title { font-size: 13px; font-weight: 600; }
@@ -930,5 +933,42 @@ svg { display: block; flex: 0 0 auto; }
   font-family: var(--font-ui); font-size: 14px; line-height: 1.5; letter-spacing: -.011em;
   -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
 }
-.nd-app { min-height: 100%; }
+.nd-app { min-height: 100%; background: var(--bg); }
+.nd-shell { background: var(--bg); }
 .nd-service-mount { min-height: 64vh; contain: layout style; }
+
+.nd-card[data-motion="card"], .lead-card, .conn-card {
+  transition: transform .18s var(--ease), border-color .18s, box-shadow .18s;
+}
+.nd-card[data-motion="card"]:hover, .lead-card:hover, .conn-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--line-strong);
+}
+.nd-hub-form { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 14px; }
+.nd-hub-form label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); min-width: 140px; flex: 1; }
+.nd-hub-form input, .nd-hub-form select, .nd-hub-form textarea, .nd-hub-note {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface-3);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+.nd-hub-form input, .nd-hub-form select { height: 40px; }
+.nd-hub-split { display: grid; grid-template-columns: minmax(280px, 1.1fr) minmax(280px, .9fr); gap: 14px; }
+.nd-ficha-block { display: flex; flex-direction: column; gap: 10px; padding: 4px 16px 16px; }
+.nd-health { height: 6px; border-radius: 99px; background: var(--surface-3); overflow: hidden; }
+.nd-health > span { display: block; height: 100%; background: linear-gradient(118deg, #f3f8e8, #9ed456); }
+.conn-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.conn-card { padding: 18px; display: flex; flex-direction: column; gap: 8px; }
+@media (max-width: 900px) {
+  .nd-hub-split, .conn-grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nd-admin-crm *, .nd-admin-crm *::before, .nd-admin-crm *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .nd-card[data-motion="card"]:hover, .lead-card:hover, .conn-card:hover { transform: none; }
+}

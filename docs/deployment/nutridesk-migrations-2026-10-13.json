@@ -222,6 +222,11 @@
       "version": "20261102233000",
       "file": "20261102233000_platform_plan_prices.sql",
       "sha256": "989b1b725516185b6378bebcd81afb6a89ced860e1945a60dc21e53791faf4c7"
+    },
+    {
+      "version": "20261103180000",
+      "file": "20261103180000_platform_hub.sql",
+      "sha256": "e5705bf0bc3e162eceb2cbc9bf30813eefe86b0997f9d5f4b5ff974521766d85"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

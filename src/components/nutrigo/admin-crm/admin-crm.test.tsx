@@ -3,6 +3,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AdminCrm } from './AdminCrm';
 import { CobrosView, NutrisView, PacientesView, ResumenView, SaludView, SeguridadView } from './centro-views';
+import { ConexionesView, FacturacionView, InicioView } from './hub-views';
+import type { HubFacturacion, HubInicio } from '../../../types/hub';
 import { PlanesPrecios } from './PlanesPrecios';
 import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../../../types/centro';
 
@@ -15,6 +17,13 @@ vi.mock('../../../api/client', () => ({
     getCentroSalud: () => new Promise(() => undefined),
     getCentroSeguridad: () => new Promise(() => undefined),
     getPlanes: () => new Promise(() => undefined),
+    getHubInicio: () => new Promise(() => undefined),
+    getHubNutris: () => new Promise(() => undefined),
+    getHubFicha: () => new Promise(() => undefined),
+    getHubLeads: () => new Promise(() => undefined),
+    getHubFacturacion: () => new Promise(() => undefined),
+    getHubBandeja: () => new Promise(() => undefined),
+    getHubConexiones: () => new Promise(() => undefined),
   },
   ApiError: class ApiError extends Error { constructor(public status: number, message: string) { super(message); } },
 }));
@@ -73,9 +82,7 @@ describe('centro de mando en /admin', () => {
     for (const id of ['app', 'sidebar', 'topbar', 'view']) expect(html).toContain(`id="${id}"`);
     expect(html).toContain('class="nd-admin-crm"');
     expect(html).toContain('Centro de mando');
-    for (const label of ['Resumen', 'Nutris', 'Pacientes', 'Cobros', 'Planes y precios', 'Salud', 'Seguridad']) expect(html).toContain(label);
-    expect(html).not.toContain('Pipeline');
-    expect(html).not.toContain('Bandeja');
+    for (const label of ['Inicio', 'Nutris', 'Pipeline', 'Facturación', 'Bandeja', 'Conexiones', 'Planes y precios', 'Salud', 'Seguridad']) expect(html).toContain(label);
     expect(html).not.toContain('Automatizaciones');
     expect(html).not.toContain('Datos de ejemplo');
     expect(html).toContain('Datos reales');
@@ -118,5 +125,47 @@ describe('centro de mando en /admin', () => {
     expect(html).toContain('facu@nutridash.test');
     expect(html).toContain('nd-btn is-action');
     expect(html).toContain('value="100"');
+  });
+
+  it('el inicio y las conexiones no inventan números ni dan por conectado un canal', () => {
+    const inicio: HubInicio = {
+      mrr_pesos: 25000,
+      mrr_nota: 'Sale del precio del servicio por las cuentas activas. Todavía no se leen las suscripciones de Mercado Pago.',
+      cobrado_mes_pesos: 25000,
+      cobrado_nota: 'Pagos manuales confirmados de este mes. Todavía no se leen los cobros de Mercado Pago.',
+      trials_activos: 1,
+      trials_por_vencer: 1,
+      churn_mes: 0,
+      altas_nuevas: 2,
+      alertas: [{ tone: 'gold', title: 'No se leen los pagos de Mercado Pago', sub: 'La tabla de cobros de la plataforma no respondió. No mostramos un cero inventado.' }],
+    };
+    const facturacion: HubFacturacion = {
+      suscripciones_disponibles: false,
+      suscripciones_nota: 'No se pudo leer Mercado Pago. No mostramos un cero en su lugar.',
+      suscripciones: [],
+      webhooks_disponibles: false,
+      webhooks_ok: null,
+      webhooks_fallidos: null,
+      webhooks_nota: 'No se pudo leer el historial de avisos de Mercado Pago.',
+      pagos_fallidos: [],
+      reembolsos: [],
+      pagos_nota: 'No se pudo leer Mercado Pago. No mostramos un cero en su lugar.',
+      afip: { estado: 'proximamente', texto: 'AFIP queda como placeholder. Todavía no hay facturación electrónica.' },
+      cobros,
+    };
+    const html = [
+      renderToStaticMarkup(createElement(InicioView, { data: inicio })),
+      renderToStaticMarkup(createElement(ConexionesView, { data: { nota: 'Canales en Próximamente.', conectores: [
+        { id: 'whatsapp', nombre: 'WhatsApp Business', detalle: 'Cloud API', estado: 'proximamente' },
+        { id: 'instagram', nombre: 'Instagram', detalle: 'Graph API', estado: 'proximamente' },
+        { id: 'email', nombre: 'Email', detalle: 'Bandeja de correo', estado: 'proximamente' },
+      ] } })),
+      renderToStaticMarkup(createElement(FacturacionView, { data: facturacion })),
+    ].join('\n');
+    expect(html).toContain('Ingreso recurrente');
+    expect(html).toContain('Próximamente');
+    expect(html).toContain('AFIP queda como placeholder');
+    expect(html).toContain('No mostramos un cero');
+    expect(html).not.toContain('Datos de ejemplo');
   });
 });

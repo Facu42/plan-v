@@ -15,6 +15,9 @@ const PATHS: Record<string, string> = {
   'arrow-up-right': '<path d="M7 17 17 7"/><path d="M8 7h9v9"/>',
   check_circle: '<circle cx="12" cy="12" r="9"/><path d="m8 12 2.6 2.6L16 9"/>',
   target: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="m15 9 5-5M16 4h4v4"/>',
+  inbox: '<path d="M4 13h4l2 3h4l2-3h4"/><path d="M4 13V7h16v6"/><path d="M4 13v5h16v-5"/>',
+  pipeline: '<path d="M4 6h16M4 12h10M4 18h13"/>',
+  mail: '<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>',
 };
 
 export function NdIcon({ name, size }: { name: string; size?: number }) {

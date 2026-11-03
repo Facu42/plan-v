@@ -10,6 +10,7 @@ import * as centro from './centro.js';
 import { registerAdminAudit } from './audit.js';
 import { adminPlanBoard, adminReplaceTesters, adminUpdatePlan } from '../billing-platform/plan-admin.js';
 import { payerEmail } from '../billing-platform/repository.js';
+import * as hub from './hub.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -46,6 +47,32 @@ const planPriceSchema = z.object({
 }).strict();
 const testersSchema = z.object({
   emails: z.array(z.string().trim().toLowerCase().max(254).pipe(z.email())).max(50),
+}).strict();
+const hubNotaSchema = z.object({ body: z.string().trim().min(1).max(500) }).strict();
+const hubTareaSchema = z.object({
+  title: z.string().trim().min(1).max(140),
+  due_on: dateSchema.nullable().optional(),
+}).strict();
+const hubTareaHechaSchema = z.object({ done: z.boolean() }).strict();
+const hubLeadSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  contact: z.string().trim().max(120).default(''),
+  source: z.enum(['ig', 'wa', 'web', 'referido', 'email']),
+  stage: z.enum(['lead', 'demo', 'trial', 'paga', 'baja']).default('lead'),
+  next_step: z.string().trim().max(200).default(''),
+  nutritionist_id: z.string().uuid().nullable().optional(),
+}).strict();
+const hubLeadPatchSchema = z.object({
+  stage: z.enum(['lead', 'demo', 'trial', 'paga', 'baja']).optional(),
+  next_step: z.string().trim().max(200).optional(),
+  source: z.enum(['ig', 'wa', 'web', 'referido', 'email']).optional(),
+  nutritionist_id: z.string().uuid().nullable().optional(),
+}).strict();
+const hubMensajeSchema = z.object({
+  channel: z.enum(['whatsapp', 'instagram', 'email']),
+  contact_name: z.string().trim().min(1).max(80),
+  contact_handle: z.string().trim().max(120).default(''),
+  body: z.string().trim().min(1).max(2000),
 }).strict();
 
 /** Para las altas: JSON roto es 400; datos que no cumplen, 422. */
@@ -124,6 +151,72 @@ export function registerAdminRoutes(app: Hono) {
   app.get('/api/admin/centro/seguridad', async (c) => {
     const persistent = await requireAdmin(c);
     return c.json({ seguridad: await centro.loadSeguridad(persistent), source: source(persistent) });
+  });
+
+  app.get('/api/admin/hub/inicio', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ inicio: await hub.loadInicio(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/nutris', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ nutris: await hub.loadNutrisHub(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/nutris/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ficha: await hub.loadFicha(persistent, c.req.param('id')), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/nutris/:id/notas', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubNotaSchema);
+    return c.json({ ficha: await hub.addNota(persistent, c.req.param('id'), input.body), source: source(persistent) }, 201);
+  });
+  app.post('/api/admin/hub/nutris/:id/tareas', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubTareaSchema);
+    return c.json({ ficha: await hub.addTarea(persistent, c.req.param('id'), input.title, input.due_on ?? null), source: source(persistent) }, 201);
+  });
+  app.patch('/api/admin/hub/tareas/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubTareaHechaSchema);
+    return c.json({ tarea: await hub.toggleTarea(persistent, c.req.param('id'), input.done), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/leads', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...(await hub.loadLeads(persistent)), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/leads', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubLeadSchema);
+    return c.json({
+      lead: await hub.createLead(persistent, { ...input, nutritionist_id: input.nutritionist_id ?? null }),
+      source: source(persistent),
+    }, 201);
+  });
+  app.patch('/api/admin/hub/leads/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubLeadPatchSchema);
+    return c.json({ lead: await hub.updateLead(persistent, c.req.param('id'), input), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/facturacion', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ facturacion: await hub.loadFacturacion(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/bandeja', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ bandeja: await hub.loadBandeja(persistent), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/bandeja', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubMensajeSchema);
+    return c.json({ bandeja: await hub.anotarMensaje(persistent, input), source: source(persistent) }, 201);
+  });
+  app.post('/api/admin/hub/bandeja/:id/lead', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...(await hub.crearLeadDesdeHilo(persistent, c.req.param('id'))), source: source(persistent) }, 201);
+  });
+  app.get('/api/admin/hub/conexiones', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ conexiones: hub.loadConexiones(), source: source(persistent) });
   });
 
   app.get('/api/admin/planes', async (c) => {
