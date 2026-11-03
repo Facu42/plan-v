@@ -1,8 +1,7 @@
 // Cajón «Etiquetas de …» de la Ficha v29: mismas piezas del boceto (`#actw`, `.ach`, `.ai`), con las etiquetas reales.
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
-import { PanelV29Icon } from './PanelV29Icon';
 import { usePanelBoceto } from './panel-v29-boceto';
+import { CajonMarco } from './CajonV29';
 
 export const ETIQUETAS_SUGERIDAS = ['Celíaca', 'Sin lactosa', 'Hipotiroidismo', 'Programa mensual', 'Deportista', 'Embarazo', 'Vegetariana', 'Prioridad'] as const;
 export const MAX_ETIQUETAS = 8;
@@ -27,18 +26,9 @@ export function FichaEtiquetas({ nombre, actuales, onGuardar, onClose }: { nombr
     setGuardando(false);
     if (ok) cerrar(); else setAviso('No pudimos guardar las etiquetas. Probá de nuevo.');
   };
-  const nodo = <div id="actw" className={clase || undefined}>
-    <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">Etiquetas de {nombre}</h2><p id="acts">Sirven para filtrar en Pacientes</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
-      <div className="abody" id="actb">
+  return <CajonMarco clase={clase} titulo={<>Etiquetas de {nombre}</>} sub="Sirven para filtrar en Pacientes" onSolicitarCerrar={cerrar} pie={<><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={guardando} onClick={() => void guardar()}>Guardar</button></>}>
         <div className="af"><span>Elegí</span><div className="ach">{opciones.map(texto => <button type="button" key={texto} aria-pressed={elegidas.some(e => igual(e, texto))} onClick={() => alternar(texto)}>{texto}</button>)}</div></div>
         <label className="af"><span>Nueva etiqueta</span><input className="ai" type="text" maxLength={LARGO_ETIQUETA} placeholder="Ej.: Running" value={nueva} onChange={event => { setNueva(event.target.value); setAviso(''); }} /></label>
         {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
-      </div>
-      <footer id="actf"><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={guardando} onClick={() => void guardar()}>Guardar</button></footer>
-    </aside>
-  </div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  </CajonMarco>;
 }

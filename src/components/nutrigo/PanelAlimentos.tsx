@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { foodApi } from '../../api/foods';
 import { foodQuantityUnit, type Food } from '../../types/foods';
 import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
@@ -168,9 +169,10 @@ function PanelAlimento({ dialog, error, guardando, onCerrar, onGuardarNuevo, onG
   const [nombre, setNombre] = useState(dialog.kind === 'editar' ? dialog.food.name : '');
   const [kcal, setKcal] = useState(dialog.kind === 'editar' && dialog.food.nutrients.kcal != null ? String(dialog.food.nutrients.kcal) : '');
   const { clase, cerrar } = usePanelBoceto(onCerrar);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header>
         <div>
           <h2 id="actt">{dialog.kind === 'nuevo' ? 'Nuevo alimento' : 'Editar alimento'}</h2>

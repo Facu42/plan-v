@@ -7,6 +7,7 @@ import type { CrmFeedItem } from '../../types/crm-feed';
 import type { CrmWorkItem } from '../../types/crm-work';
 import { MealReviewPanel } from '../crm/MealReviewPanel';
 import { AvisoBoceto, usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { TOAST_DESMONTE_MS } from './panel-v29-motion';
 import { PanelV29Icon } from './PanelV29Icon';
 import {
@@ -161,6 +162,7 @@ function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, on
   const [aviso, setAviso] = useState(pedir.aviso);
   const [falta, setFalta] = useState('');
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const paciente = pedir.pacientes.find(persona => persona.id === pacienteId);
   const titulo = dialog.kind === 'comentar' ? 'Comentar la comida'
     : dialog.kind === 'ver' ? `${dialog.meal.name} · ${dialog.meal.slot}`
@@ -177,7 +179,7 @@ function PanelLateral({ dialog, pedir, onClose, onGuardarComentario, onPedir, on
       : null;
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">{titulo}</h2><p id="acts">{subtitulo}</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         {dialog.kind === 'comentar' && <label className="af"><span>Comentario</span><textarea className="ai" rows={4} placeholder="Ej.: la porción de pizza fue el doble" value={comentario} onChange={event => { setComentario(event.target.value); setFalta(''); }} /></label>}

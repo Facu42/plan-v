@@ -479,3 +479,7 @@ Fase 1 del [plan aprobado](panel-nutri-rediseno/plan.md) entregada por Codex en 
 - Ficha Archivos (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3e).
 - Ficha Cobros (v29): armada con el código del boceto, PR en borrador (ver ficha-v29.md parte 3f).
 - Equipo (v29): tres vistas armadas con el código del boceto, PR en borrador (ver docs/panel-nutri-rediseno/equipo-v29.md).
+
+## Logo nuevo en el panel de la nutri · 3/11/2026
+
+Logo nuevo (cuadro negro con «nd» en cinta azul → celeste → lima). Íconos recortados del archivo de Facundo (menú, favicon, PWA, PDF). Colores medidos en `public/brand/nutridash-tokens.css` (`--nd-blue`, `--nd-cyan`, `--nd-lime`, `--nd-ribbon`): el botón principal usa los tonos suaves de la cinta con tinta AA y la barra del ítem activo del menú usa la cinta plena. «Primeros pasos» se rehízo con las piezas del panel v29 (6 pasos, se tildan con datos reales). Seis cajones laterales ahora retienen el teclado y cierran con Escape (guardia: `cajon-teclado.test.ts`). Fase 2 (mismo PR #276): logo en vectores (`public/brand/nutridash-isotipo.svg` y `nutridash-marca.svg`, para landing y login); 7 cajones usan la misma pieza `CajonMarco` y los 11 cierran con Escape; Inicio muestra la fila «Terminá de preparar tu consultorio» hasta completar los 5 pasos medibles; los avisos repetidos de una misma paciente se agrupan en una fila; ayudas en Nombre, Matrícula y CUIT de Ajustes. Contrato v29: las mismas 14 diferencias que main, ninguna nueva. Falta el ok visual de Facundo y probar con una cuenta real.

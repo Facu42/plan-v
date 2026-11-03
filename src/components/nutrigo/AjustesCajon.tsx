@@ -1,7 +1,6 @@
 // Cajón de edición de Ajustes: las mismas piezas del boceto (`#actw`, `#act`, `.af`, `.ai`, `.aseg`) que ya usa «Etiquetas».
-import { createPortal } from 'react-dom';
 import { useState, type ReactNode } from 'react';
-import { PanelV29Icon } from './PanelV29Icon';
+import { CajonMarco } from './CajonV29';
 import { usePanelBoceto } from './panel-v29-boceto';
 import { friendlyError } from '../../lib/error-messages';
 
@@ -24,14 +23,6 @@ export function CajonAjustes({ titulo, sub, guardar = 'Guardar', sinGuardar, chi
     setOcupado(true); setAviso('');
     try { await onGuardar(); cerrar(); } catch (e) { setAviso(friendlyError(e)); setOcupado(false); }
   }
-  const nodo = <div id="actw" className={clase || undefined}>
-    <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">{titulo}</h2>{sub ? <p id="acts">{sub}</p> : null}</div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
-      <div className="abody" id="actb">{children}{aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}</div>
-      <footer id="actf"><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} />{sinGuardar ? null : <button type="button" className="cta" disabled={ocupado} onClick={() => void aceptar()}>{guardar}</button>}</footer>
-    </aside>
-  </div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  const pie = <><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} />{sinGuardar ? null : <button type="button" className="cta" disabled={ocupado} onClick={() => void aceptar()}>{guardar}</button>}</>;
+  return <CajonMarco clase={clase} titulo={titulo} sub={sub} pie={pie} onSolicitarCerrar={cerrar}>{children}{aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}</CajonMarco>;
 }
