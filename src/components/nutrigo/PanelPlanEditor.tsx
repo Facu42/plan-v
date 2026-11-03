@@ -25,7 +25,7 @@ import {
 import {
   cambiarCantidad, cambiarComida, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
-  finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo, sumarComponente,
+  finVisible, indiceLunes, metasMacros, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo, sumarComponente,
   sumarDias, sumarMacros, type GrupoCompra, type MacrosDia,
 } from './planes-editor';
 
@@ -770,7 +770,7 @@ export function PanelPlanEditor({
               <div className="p28-gauge"><Medidor porcentaje={metaKcal && delDia.kcal != null ? Math.round(delDia.kcal / metaKcal * 100) : null} /></div>
             </div>
             <div className="p28-macros">
-              {([['Carbohidratos', delDia.carbs, metaKcal ? metaKcal * 0.45 / 4 : null], ['Proteínas', delDia.protein, metaKcal ? metaKcal * 0.25 / 4 : null], ['Grasas', delDia.fat, metaKcal ? metaKcal * 0.3 / 9 : null]] as const).map(([nombre, valor, techo]) => <div key={nombre}><span>{nombre}</span><b className="num">{textoMacro(valor, 'g')}</b><Barra porcentaje={valor != null && techo ? valor / techo * 100 : null} /></div>)}
+              {([['Carbohidratos', delDia.carbs, metasMacros(version?.nutrition_target, metaKcal).carbs], ['Proteínas', delDia.protein, metasMacros(version?.nutrition_target, metaKcal).protein], ['Grasas', delDia.fat, metasMacros(version?.nutrition_target, metaKcal).fat]] as const).map(([nombre, valor, techo]) => <div key={nombre}><span>{nombre}</span><b className="num">{textoMacro(valor, 'g')}</b><Barra porcentaje={valor != null && techo ? valor / techo * 100 : null} /></div>)}
             </div>
             <div className="p28-week-head"><b>Equilibrio de la semana</b><small>Energía de cada día</small></div>
             <div className="p28-week pa7" aria-label="Energía de los siete días respecto de la meta">

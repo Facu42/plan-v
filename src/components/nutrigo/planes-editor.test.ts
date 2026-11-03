@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import type { PlanItemView } from '../../types/plans';
 import {
   cambiarCantidad, cambiarComida, comidaDelDia, controlEntrega, copiarPlan, duplicarDia, filasDeVersiones,
-  finVisible, listaDeCompras, lunesDeSemana, pasaElTope, quitarLinea, semanasDelPeriodo, sumarComponente, sumarMacros,
+  finVisible, listaDeCompras, lunesDeSemana, metasMacros, pasaElTope, quitarLinea, semanasDelPeriodo, sumarComponente, sumarMacros,
 } from './planes-editor';
 
 function plato(extra: Partial<PlanItemView> = {}): PlanItemView {
@@ -123,5 +123,11 @@ describe('editor de la semana', () => {
     expect(nuevo).toHaveLength(2);
     expect(nuevo.find(item => item.slot === 'Almuerzo')?.components).toEqual([arroz]);
     expect(nuevo.find(item => item.slot === 'Cena')?.id).toBe('item-2');
+  });
+
+  it('las metas de macros salen de la paciente y, sin ellas, de un reparto de la meta de calorías', () => {
+    expect(metasMacros({ kcal: 1800, protein_g: 110, carbs_g: 190, fat_g: 55 }, 1800)).toEqual({ carbs: 190, protein: 110, fat: 55 });
+    expect(metasMacros(undefined, 2000)).toEqual({ carbs: 225, protein: 125, fat: expect.closeTo(66.67, 1) });
+    expect(metasMacros(undefined, null)).toEqual({ carbs: null, protein: null, fat: null });
   });
 });

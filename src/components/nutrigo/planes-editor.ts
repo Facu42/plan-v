@@ -237,6 +237,13 @@ export function quitarLinea(items: PlanItemView[], clave: string): PlanItemView[
   });
 }
 
+/** Metas diarias en gramos. Usa las de la paciente; si no las hay, un reparto 45/25/30 de la meta de calorías. */
+export function metasMacros(objetivo: { kcal: number; protein_g: number; carbs_g: number; fat_g: number } | undefined | null, kcal: number | null) {
+  if (objetivo) return { carbs: objetivo.carbs_g, protein: objetivo.protein_g, fat: objetivo.fat_g };
+  if (!kcal) return { carbs: null, protein: null, fat: null };
+  return { carbs: kcal * 0.45 / 4, protein: kcal * 0.25 / 4, fat: kcal * 0.3 / 9 };
+}
+
 /** Partes que ya tiene una comida, para poder sumarle otra sin perder lo que había. */
 function partesDe(item: PlanItemView): PlanComponentView[] {
   if (item.components?.length) return item.components;
