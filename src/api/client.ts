@@ -71,6 +71,7 @@ export const api = {
     status: string;
     ai: boolean;
     supabase: boolean;
+    mp_platform_mode?: 'test' | 'live';
     jobs?: { queued: number; leased: number; dead: number; succeeded: number };
   }>('/api/health', init),
   ready: (init?: RequestInit) => request<{

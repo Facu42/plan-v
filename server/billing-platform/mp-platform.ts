@@ -5,13 +5,24 @@ import type { RemoteFact } from './state.js';
 
 type MpResult = Record<string, unknown>;
 
+export type MpPlatformMode = 'test' | 'live';
+
+/** `MP_PLATFORM_LIVE=1` es cobro real. Cualquier otro valor, incluso vacío, queda en prueba. */
+export function mpPlatformMode(env: NodeJS.ProcessEnv = process.env): MpPlatformMode {
+  return env.MP_PLATFORM_LIVE === '1' ? 'live' : 'test';
+}
+
 /**
- * Solo la clave de prueba de Mercado Pago (empieza con TEST-).
- * Una clave de producción no se usa: no se consulta ni se cobra.
+ * Misma regla en el alta (API), el aviso y el worker.
+ * Prueba: solo `TEST-`. Producción (`MP_PLATFORM_LIVE=1`): solo `APP_USR-`. Vacía se rechaza siempre.
  */
-export function sandboxCredentialBlock(token: string | undefined): string | null {
+export function sandboxCredentialBlock(token: string | undefined, env: NodeJS.ProcessEnv = process.env): string | null {
   const value = token?.trim() ?? '';
   if (!value) return 'Falta la configuración de Mercado Pago de la plataforma.';
+  if (mpPlatformMode(env) === 'live') {
+    if (!value.startsWith('APP_USR-')) return 'El cobro de Nutridash en producción solo acepta la clave de Mercado Pago que empieza con APP_USR-.';
+    return null;
+  }
   if (!value.startsWith('TEST-')) return 'El cobro de Nutridash solo acepta la clave de prueba de Mercado Pago. No se cobra plata de verdad.';
   return null;
 }

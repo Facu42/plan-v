@@ -5,6 +5,7 @@ import {registerSchedulingRoutes} from './scheduling/routes.js';
 import {registerPublicSeoRoutes} from './seo/routes.js';
 import {registerPatientSubscriptionRoutes} from './subscriptions/routes.js';
 import { registerPlatformBillingRoutes } from './billing-platform/routes.js';
+import { mpPlatformMode } from './billing-platform/mp-platform.js';
 import { createPlatformReadOnlyGuard } from './billing-platform/guard.js';
 import { assertCanAdd } from './billing-platform/limits.js';
 import {registerSchedulingTeamRoutes} from './scheduling/team-routes.js';
@@ -292,6 +293,7 @@ app.get('/api/health', async (c) => {
     jobs,
     sha: releaseSha(),
     worker: evaluateReadiness(process.env, jobs).worker,
+    mp_platform_mode: mpPlatformMode(),
     // Solo nombres de variables que faltan o tienen formato inválido; nunca valores.
     integrations_missing: integrationsMissing(),
   });

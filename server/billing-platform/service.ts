@@ -279,6 +279,10 @@ export async function receiveWebhook(notice: Notice, invoice: InvoiceIssuer = no
 
 export async function raiseFounderPrices(now = Date.now()) {
   if (!billingEnabled()) return;
+  if (sandboxCredentialBlock(process.env.MP_PLATFORM_ACCESS_TOKEN)) {
+    repo.logBilling('founder_price_retry');
+    return;
+  }
   const due = await repo.listFounderDue(new Date(now).toISOString());
   for (const row of due) {
     const plan = await planByCodeLive(row.plan_code);
