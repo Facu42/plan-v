@@ -5,7 +5,7 @@ import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } fr
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
 import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad, PlanesBoard } from '../types/centro';
-import type { HubBandeja, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri, HubTarea } from '../types/hub';
+import type { HubActivacion, HubBandeja, HubCobranza, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri, HubRiesgo, HubRiesgoMotivo, HubSeguimiento, HubTarea } from '../types/hub';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 import type { HabitReminders } from '../habit-reminders';
@@ -276,7 +276,7 @@ export const api = {
   addHubNota: (id: string, body: string) => request<{ ficha: HubFicha }>(`/api/admin/hub/nutris/${encodeURIComponent(id)}/notas`, { method: 'POST', body: JSON.stringify({ body }) }),
   addHubTarea: (id: string, title: string) => request<{ ficha: HubFicha }>(`/api/admin/hub/nutris/${encodeURIComponent(id)}/tareas`, { method: 'POST', body: JSON.stringify({ title }) }),
   toggleHubTarea: (id: string, done: boolean) => request<{ tarea: HubTarea }>(`/api/admin/hub/tareas/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify({ done }) }),
-  getHubLeads: () => request<{ leads: HubLead[]; disponible: boolean; nota: string }>('/api/admin/hub/leads'),
+  getHubLeads: () => request<{ leads: HubLead[]; seguimientos: HubSeguimiento[]; disponible: boolean; nota: string }>('/api/admin/hub/leads'),
   createHubLead: (input: { name: string; contact: string; source: HubLeadSource; next_step: string }) =>
     request<{ lead: HubLead }>('/api/admin/hub/leads', { method: 'POST', body: JSON.stringify(input) }),
   patchHubLead: (id: string, patch: { stage: HubLeadStage }) =>
@@ -288,6 +288,14 @@ export const api = {
   crearLeadDesdeMensaje: (id: string) =>
     request<{ lead: HubLead; bandeja: HubBandeja }>(`/api/admin/hub/bandeja/${encodeURIComponent(id)}/lead`, { method: 'POST' }),
   getHubConexiones: () => request<{ conexiones: HubConexiones }>('/api/admin/hub/conexiones'),
+  getHubRiesgo: (motivo?: HubRiesgoMotivo) => request<{ items: HubRiesgo[]; dias: number; nota: string }>(`/api/admin/hub/riesgo${motivo ? `?motivo=${motivo}` : ''}`),
+  getHubCobranza: () => request<{ cobranza: HubCobranza }>('/api/admin/hub/cobranza'),
+  cobranzaHub: (paymentId: string, kind: 'aviso' | 'releer') => request<{ cobranza: HubCobranza }>('/api/admin/hub/cobranza', { method: 'POST', body: JSON.stringify({ payment_id: paymentId, kind }) }),
+  getHubActivacion: () => request<{ activacion: HubActivacion }>('/api/admin/hub/activacion'),
+  sugerirHubRespuesta: (id: string) => request<{ bandeja: HubBandeja }>(`/api/admin/hub/bandeja/${encodeURIComponent(id)}/borrador`, { method: 'POST' }),
+  enviarHubRespuesta: (id: string, body: string) => request<{ bandeja: HubBandeja }>(`/api/admin/hub/bandeja/${encodeURIComponent(id)}/enviar`, { method: 'POST', body: JSON.stringify({ body }) }),
+  getActivacionPropia: () => request<{ visible: boolean; nota: string; trabada: boolean; pasos: HubActivacion['filas'][number]['pasos'] }>('/api/me/activacion'),
+  ocultarActivacionPropia: () => request<{ visible: boolean }>('/api/me/activacion/ocultar', { method: 'POST' }),
   getPlanes: () => request<PlanesBoard & { source?: string }>('/api/admin/planes'),
   savePlan: (code: string, body: { monthly_pesos: number; annual_pesos: number; founder_monthly_pesos: number; founder_annual_pesos: number; active: boolean }) =>
     request<PlanesBoard & { source?: string }>(`/api/admin/planes/${code}`, { method: 'PUT', body: JSON.stringify(body) }),

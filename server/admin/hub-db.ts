@@ -122,3 +122,27 @@ export function guardarMensaje(row: HubMensaje) {
 export async function leerTabla<T>(table: string, columns: string): Promise<{ ok: true; rows: T[] } | { ok: false }> {
   return selectAll<T>(table, columns);
 }
+
+const SEGUIMIENTO = 'id, lead_id, title, due_on, done, created_at';
+const AVISO = 'id, payment_id, nutritionist_id, kind, estado, detalle, created_at';
+const BORRADOR = 'id, thread_id, body, origen';
+
+export function guardarSeguimiento(row: { id: string; lead_id: string; title: string; due_on: string; done: boolean; created_at: string }) {
+  return insertOne( 'platform_lead_followups', row, SEGUIMIENTO);
+}
+
+export function guardarAviso(row: { id: string; payment_id: string; nutritionist_id: string | null; kind: string; estado: string; detalle: string; created_at: string }) {
+  return insertOne('platform_dunning_attempts', row, AVISO);
+}
+
+export function guardarBorrador(row: { id: string; thread_id: string; body: string; origen: string }) {
+  return insertOne('platform_inbox_drafts', row, BORRADOR);
+}
+
+export function guardarBrief(row: { day: string; body: string; origen: string }) {
+  return insertOne('platform_daily_briefs', row, 'day, body, origen');
+}
+
+export function ocultarActivacion(nutritionistId: string) {
+  return insertOne('platform_onboarding_dismissals', { nutritionist_id: nutritionistId, dismissed_at: new Date().toISOString() }, 'nutritionist_id, dismissed_at');
+}

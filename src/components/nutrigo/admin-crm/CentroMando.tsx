@@ -1,16 +1,17 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ApiError } from '../../../api/client';
 import type { CentroSalud, CentroSeguridad, PlanesBoard } from '../../../types/centro';
-import type { HubBandeja, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadStage, HubNutri } from '../../../types/hub';
+import type { HubActivacion, HubBandeja, HubCobranza, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadStage, HubNutri, HubRiesgo, HubRiesgoMotivo, HubSeguimiento } from '../../../types/hub';
 import { CentroState, SaludView, SeguridadView } from './centro-views';
 import { BandejaView, ConexionesView, FacturacionView, InicioView, NutrisHubView, PipelineView } from './hub-views';
+import { ActivacionView, CobranzaView, RiesgoView } from './hub-ops-views';
 import { useHubMotion } from './hub-motion';
 import { PlanesPrecios } from './PlanesPrecios';
 import { initials } from './centro-format';
 import { NdIcon } from './nd-icon';
 import './nd-styles.css';
 
-export const CENTRO_VIEWS = ['inicio', 'nutris', 'pipeline', 'facturacion', 'bandeja', 'conexiones', 'planes', 'salud', 'seguridad'] as const;
+export const CENTRO_VIEWS = ['inicio', 'nutris', 'riesgo', 'pipeline', 'facturacion', 'cobranza', 'bandeja', 'conexiones', 'activacion', 'planes', 'salud', 'seguridad'] as const;
 export type CentroView = (typeof CENTRO_VIEWS)[number];
 
 const ALIAS: Record<string, CentroView> = {
@@ -23,10 +24,13 @@ const NAV: { group: string; items: { id: CentroView; label: string; icon: string
   { group: 'Gestión', items: [
     { id: 'inicio', label: 'Inicio', icon: 'home' },
     { id: 'nutris', label: 'Nutris', icon: 'users' },
+    { id: 'riesgo', label: 'Riesgo', icon: 'alert' },
     { id: 'pipeline', label: 'Pipeline', icon: 'pipeline' },
     { id: 'facturacion', label: 'Facturación', icon: 'peso' },
+    { id: 'cobranza', label: 'Cobranza', icon: 'peso' },
     { id: 'bandeja', label: 'Bandeja', icon: 'inbox' },
     { id: 'conexiones', label: 'Conexiones', icon: 'plug' },
+    { id: 'activacion', label: 'Activación', icon: 'check_circle' },
   ] },
   { group: 'Plataforma', items: [
     { id: 'planes', label: 'Planes y precios', icon: 'peso' },
@@ -40,10 +44,13 @@ const NAV: { group: string; items: { id: CentroView; label: string; icon: string
 const TITLES: Record<CentroView, [string, string]> = {
   inicio: ['Gestión', 'Inicio'],
   nutris: ['Cuentas', 'Nutris'],
+  riesgo: ['Cuentas', 'Riesgo de baja'],
   pipeline: ['Comercial', 'Pipeline'],
   facturacion: ['Plataforma', 'Facturación'],
+  cobranza: ['Plataforma', 'Cobranza'],
   bandeja: ['Mensajes', 'Bandeja'],
   conexiones: ['Mensajes', 'Conexiones'],
+  activacion: ['Cuentas', 'Activación'],
   planes: ['Plataforma', 'Planes y precios'],
   salud: ['Sistema', 'Salud'],
   seguridad: ['Sistema', 'Seguridad'],
@@ -61,8 +68,14 @@ type CentroData = {
   nutris?: HubNutri[];
   ficha?: HubFicha | null;
   leads?: HubLead[];
+  seguimientos?: HubSeguimiento[];
   leadsNota?: string;
   leadsOk?: boolean;
+  riesgos?: HubRiesgo[];
+  riesgoDias?: number;
+  riesgoNota?: string;
+  cobranza?: HubCobranza;
+  activacion?: HubActivacion;
   facturacion?: HubFacturacion;
   bandeja?: HubBandeja;
   conexiones?: HubConexiones;
@@ -125,9 +138,18 @@ export function CentroMando({ adminName }: { adminName?: string }) {
         const nutris = (await api.getHubNutris()).nutris;
         const ficha = id ? (await api.getHubFicha(id)).ficha : null;
         setData((current) => ({ ...current, nutris, ficha }));
+      } else if (next === 'riesgo') {
+        const riesgo = await api.getHubRiesgo();
+        setData((current) => ({ ...current, riesgos: riesgo.items, riesgoDias: riesgo.dias, riesgoNota: riesgo.nota }));
       } else if (next === 'pipeline') {
         const leads = await api.getHubLeads();
-        setData((current) => ({ ...current, leads: leads.leads, leadsNota: leads.nota, leadsOk: leads.disponible }));
+        setData((current) => ({ ...current, leads: leads.leads, seguimientos: leads.seguimientos, leadsNota: leads.nota, leadsOk: leads.disponible }));
+      } else if (next === 'cobranza') {
+        const cobranza = (await api.getHubCobranza()).cobranza;
+        setData((current) => ({ ...current, cobranza }));
+      } else if (next === 'activacion') {
+        const activacion = (await api.getHubActivacion()).activacion;
+        setData((current) => ({ ...current, activacion }));
       } else if (next === 'facturacion') {
         const facturacion = (await api.getHubFacturacion()).facturacion;
         setData((current) => ({ ...current, facturacion }));
@@ -206,18 +228,41 @@ export function CentroMando({ adminName }: { adminName?: string }) {
       nota={data.leadsNota ?? ''}
       busy={busy}
       error={formError}
+      seguimientos={data.seguimientos ?? []}
       onCreate={(input) => void run(async () => {
         await api.createHubLead(input);
         const leads = await api.getHubLeads();
-        setData((current) => ({ ...current, leads: leads.leads, leadsNota: leads.nota, leadsOk: leads.disponible }));
+        setData((current) => ({ ...current, leads: leads.leads, seguimientos: leads.seguimientos, leadsNota: leads.nota, leadsOk: leads.disponible }));
       })}
       onStage={(id, stage: HubLeadStage) => void run(async () => {
         await api.patchHubLead(id, { stage });
         const leads = await api.getHubLeads();
-        setData((current) => ({ ...current, leads: leads.leads }));
+        setData((current) => ({ ...current, leads: leads.leads, seguimientos: leads.seguimientos }));
       })}
     />
   );
+  else if (view === 'riesgo' && data.riesgos) body = (
+    <RiesgoView items={data.riesgos} dias={data.riesgoDias ?? 14} nota={data.riesgoNota ?? ''} onFiltrar={(motivo: HubRiesgoMotivo | '') => void run(async () => {
+      const riesgo = await api.getHubRiesgo(motivo || undefined);
+      setData((current) => ({ ...current, riesgos: riesgo.items }));
+    })} />
+  );
+  else if (view === 'cobranza' && data.cobranza) body = (
+    <CobranzaView
+      data={data.cobranza}
+      busy={busy}
+      error={formError}
+      onAviso={(id) => void run(async () => {
+        const cobranza = (await api.cobranzaHub(id, 'aviso')).cobranza;
+        setData((current) => ({ ...current, cobranza }));
+      })}
+      onReleer={(id) => void run(async () => {
+        const cobranza = (await api.cobranzaHub(id, 'releer')).cobranza;
+        setData((current) => ({ ...current, cobranza }));
+      })}
+    />
+  );
+  else if (view === 'activacion' && data.activacion) body = <ActivacionView data={data.activacion} />;
   else if (view === 'facturacion' && data.facturacion) body = <FacturacionView data={data.facturacion} />;
   else if (view === 'bandeja' && data.bandeja) body = (
     <BandejaView
@@ -230,6 +275,14 @@ export function CentroMando({ adminName }: { adminName?: string }) {
       })}
       onLead={(id) => void run(async () => {
         const bandeja = (await api.crearLeadDesdeMensaje(id)).bandeja;
+        setData((current) => ({ ...current, bandeja }));
+      })}
+      onSugerir={(id) => void run(async () => {
+        const bandeja = (await api.sugerirHubRespuesta(id)).bandeja;
+        setData((current) => ({ ...current, bandeja }));
+      })}
+      onEnviar={(id, texto) => void run(async () => {
+        const bandeja = (await api.enviarHubRespuesta(id, texto)).bandeja;
         setData((current) => ({ ...current, bandeja }));
       })}
     />

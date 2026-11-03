@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CentroAlerta } from '../../../types/centro';
-import type { HubBandeja, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri } from '../../../types/hub';
+import type { HubBandeja, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri, HubSeguimiento } from '../../../types/hub';
 import { dateShort, money, num, timeAgo } from './centro-format';
 import { NdIcon } from './nd-icon';
 
@@ -76,6 +76,27 @@ export function InicioView({ data }: { data: HubInicio }) {
           </article>
         ))}
       </div>
+      {data.resumen ? (
+        <section className="nd-card nd-mb-18" data-motion="card">
+          <div className="nd-card-head"><div className="nd-card-title">Hoy en el negocio</div><div className="nd-card-sub">{data.resumen.origen === 'ia' ? 'Lo reescribió la IA' : 'Sale de los números, sin modelo'}</div></div>
+          <div className="nd-card-pad">
+            <p>{data.resumen.texto}</p>
+            <ul>{data.resumen.acciones.map((item) => <li key={item}>{item}</li>)}</ul>
+            <p className="nd-tiny nd-muted">{data.resumen.nota}</p>
+          </div>
+        </section>
+      ) : null}
+      {data.riesgos ? (
+        <section className="nd-card nd-mb-18" data-motion="card">
+          <div className="nd-card-head"><div className="nd-card-title">Riesgo de baja</div><div className="nd-card-sub">{data.riesgos.length} señales</div></div>
+          <div className="nd-card-pad">
+            {data.riesgos.length ? data.riesgos.slice(0, 3).map((row) => (
+              <div key={`${row.nutritionist_id}-${row.motivo}`} className="service-activity"><strong>{row.nombre}</strong><span>{row.detalle}</span></div>
+            )) : <p className="nd-muted">No hay señales con los datos que se pudieron leer.</p>}
+            <a className="nd-btn is-action is-sm" href="#/riesgo">Ver la lista</a>
+          </div>
+        </section>
+      ) : null}
       <section className="nd-card" data-motion="card">
         <div className="nd-card-head"><div className="nd-card-title">Alertas</div><div className="nd-card-sub">Pagos, salud del sistema y verificación en dos pasos</div></div>
         <div style={{ padding: '8px 10px 12px' }}>
@@ -211,6 +232,7 @@ export function PipelineView({
   nota,
   onCreate,
   onStage,
+  seguimientos = [],
   busy,
   error,
 }: {
@@ -219,6 +241,7 @@ export function PipelineView({
   nota: string;
   onCreate: (input: { name: string; contact: string; source: HubLeadSource; next_step: string }) => void;
   onStage: (id: string, stage: HubLeadStage) => void;
+  seguimientos?: HubSeguimiento[];
   busy: boolean;
   error: string;
 }) {
@@ -252,13 +275,23 @@ export function PipelineView({
           {STAGES.map((stage) => {
             const items = leads.filter((row) => row.stage === stage.id);
             return (
-              <section key={stage.id} className="board-col" data-motion="card">
+              <section
+                key={stage.id}
+                className="board-col"
+                data-motion="card"
+                onDragOver={(event) => { if (disponible && !busy) event.preventDefault(); }}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const id = event.dataTransfer.getData('text/plain');
+                  if (id) onStage(id, stage.id);
+                }}
+              >
                 <header className="board-col-head">
                   <div className="board-col-title">{stage.label}<span className="board-col-count">{items.length}</span></div>
                 </header>
                 <div className="board-col-body">
                   {items.length ? items.map((lead) => (
-                    <article key={lead.id} className="lead-card">
+                    <article key={lead.id} className="lead-card" draggable={disponible && !busy} onDragStart={(event) => event.dataTransfer.setData('text/plain', lead.id)}>
                       <div className="lead-card-name">{lead.name}</div>
                       <div className="lead-card-handle">{sourceLabel(lead.source)}{lead.contact ? ` · ${lead.contact}` : ''}</div>
                       <div className="lead-card-note">{lead.next_step || 'Sin próximo paso'}</div>
@@ -269,6 +302,9 @@ export function PipelineView({
                           </select>
                         </label>
                       </div>
+                      {seguimientos.filter((item) => item.lead_id === lead.id && !item.done).map((item) => (
+                        <p key={item.id} className="nd-tiny nd-muted">Seguimiento: {item.title} · {item.due_on}</p>
+                      ))}
                     </article>
                   )) : <div className="nd-empty">Nadie en {stage.label}.</div>}
                 </div>
@@ -338,12 +374,16 @@ export function BandejaView({
   data,
   onAnotar,
   onLead,
+  onSugerir,
+  onEnviar,
   busy,
   error,
 }: {
   data: HubBandeja;
   onAnotar: (input: { channel: 'whatsapp' | 'instagram' | 'email'; contact_name: string; contact_handle: string; body: string }) => void;
   onLead: (id: string) => void;
+  onSugerir?: (id: string) => void;
+  onEnviar?: (id: string, body: string) => void;
   busy: boolean;
   error: string;
 }) {
@@ -355,7 +395,7 @@ export function BandejaView({
   const hilo = data.hilos.find((row) => row.id === activo) ?? data.hilos[0] ?? null;
   return (
     <>
-      {pageHead('Mensajes', 'Bandeja', 'Un solo lugar para WhatsApp, Instagram y el mail. Hoy se anota a mano: los conectores están en Próximamente.')}
+      {pageHead('Mensajes', 'Bandeja', 'WhatsApp y el mail entran y salen si las credenciales están. Si faltan, el canal queda apagado. Instagram está preparado.')}
       <p className="nd-sub nd-mb-14">{data.nota}</p>
       {error ? <p className="nd-planes-msg is-error">{error}</p> : null}
       <form className="nd-hub-form" onSubmit={(event) => {
@@ -378,7 +418,7 @@ export function BandejaView({
       <div className="nd-card inbox" data-motion="card">
         <aside className="inbox-filters">
           <div className="inbox-filter-title">Canales</div>
-          <p className="nd-hint">WhatsApp, Instagram y Email: Próximamente</p>
+          <p className="nd-hint">Si un canal está apagado, el mensaje igual se puede anotar a mano.</p>
         </aside>
         <section className="conv-list">
           <div className="conv-list-body">
@@ -410,6 +450,11 @@ export function BandejaView({
                     <div className="msg-bubble">{message.body}</div>
                   </div>
                 ))}
+              {hilo.borrador ? <p className="nd-tiny">{hilo.borrador.origen === 'ia' ? 'Borrador de la IA' : 'Borrador fijo, la IA está apagada'}: {hilo.borrador.body}</p> : null}
+                <div className="nd-row" style={{ gap: 8, marginTop: 8 }}>
+                  {onSugerir ? <button type="button" className="nd-btn" disabled={busy} onClick={() => onSugerir(hilo.id)}>Sugerir respuesta</button> : null}
+                  {onEnviar && hilo.borrador ? <button type="button" className="nd-btn is-action" disabled={busy} onClick={() => onEnviar(hilo.id, hilo.borrador?.body ?? '')}>Enviar</button> : null}
+                </div>
               </div>
             </>
           ) : <div className="nd-empty">Cuando anotes un mensaje, aparece acá.</div>}
@@ -429,7 +474,7 @@ export function ConexionesView({ data }: { data: HubConexiones }) {
             <NdIcon name={row.id === 'email' ? 'mail' : row.id === 'instagram' ? 'sparkle' : 'inbox'} />
             <h2 className="nd-h3">{row.nombre}</h2>
             <p className="nd-sub">{row.detalle}</p>
-            <span className="nd-badge is-gold">Próximamente</span>
+            <span className={`nd-badge ${row.estado === 'listo' ? 'is-green' : row.estado === 'preparado' ? 'is-sky' : 'is-gold'}`}>{row.estado === 'listo' ? 'Listo' : row.estado === 'preparado' ? 'Preparado' : 'Apagado'}</span>
           </article>
         ))}
       </div>

@@ -63,6 +63,22 @@ export type HubFicha = {
   nota_vacia: string;
 };
 
+export type HubRiesgoMotivo = 'sin_login' | 'pocos_pacientes' | 'pago_rechazado';
+
+export type HubRiesgo = {
+  nutritionist_id: string;
+  nombre: string;
+  motivo: HubRiesgoMotivo;
+  detalle: string;
+};
+
+export type HubResumenDia = {
+  origen: 'numeros' | 'ia';
+  texto: string;
+  acciones: string[];
+  nota: string;
+};
+
 export type HubInicio = {
   mrr_pesos: number;
   mrr_nota: string;
@@ -73,6 +89,8 @@ export type HubInicio = {
   churn_mes: number;
   altas_nuevas: number;
   alertas: CentroAlerta[];
+  riesgos?: HubRiesgo[];
+  resumen?: HubResumenDia;
 };
 
 export type HubLeadStage = 'lead' | 'demo' | 'trial' | 'paga' | 'baja';
@@ -143,6 +161,7 @@ export type HubHilo = {
   nutritionist_id: string | null;
   updated_at: string;
   messages: HubMensaje[];
+  borrador?: HubBorrador | null;
 };
 
 export type HubBandeja = {
@@ -151,11 +170,57 @@ export type HubBandeja = {
   nota: string;
 };
 
+export type HubCanalEstado = 'listo' | 'apagado' | 'preparado';
+
+export type HubSeguimiento = {
+  id: string;
+  lead_id: string;
+  title: string;
+  due_on: string;
+  done: boolean;
+  created_at: string;
+};
+
+export type HubBorrador = {
+  body: string;
+  origen: 'ia' | 'plantilla';
+};
+
+export type HubCobranza = {
+  mrr_pesos: number | null;
+  mrr_nota: string;
+  churn_mes: number | null;
+  churn_nota: string;
+  ltv_pesos: number | null;
+  ltv_nutris: number | null;
+  ltv_nota: string;
+  pagos_fallidos: Array<HubPagoMp & { nutritionist_id: string | null; mail: string }>;
+  avisos: Array<{ id: string; payment_id: string; kind: 'aviso' | 'releer'; estado: string; detalle: string; created_at: string }>;
+  mail: { listo: boolean; nota: string };
+  releer: { listo: boolean; nota: string };
+};
+
+export type HubPasoEstado = 'hecho' | 'pendiente' | 'sin_dato';
+
+export type HubActivacionFila = {
+  nutritionist_id: string;
+  nombre: string;
+  creada: string;
+  trabada: boolean;
+  pasos: Array<{ id: 'perfil' | 'paciente' | 'plan' | 'cobro' | 'pagina'; label: string; estado: HubPasoEstado }>;
+};
+
+export type HubActivacion = {
+  filas: HubActivacionFila[];
+  nota: string;
+  disponible: boolean;
+};
+
 export type HubConector = {
   id: 'whatsapp' | 'instagram' | 'email';
   nombre: string;
   detalle: string;
-  estado: 'proximamente';
+  estado: HubCanalEstado;
 };
 
 export type HubConexiones = {

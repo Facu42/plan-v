@@ -159,8 +159,74 @@ describe('hub en memoria, sin base', () => {
     expect(armado.lead.stage).toBe('lead');
     expect(armado.bandeja.hilos[0].lead_id).toBe(armado.lead.id);
 
-    const conexiones = await api.request('/api/admin/hub/conexiones');
-    const canales = await conexiones.json() as { conexiones: { conectores: { estado: string }[] } };
-    expect(canales.conexiones.conectores.every((row) => row.estado === 'proximamente')).toBe(true);
+    const leads = await api.request('/api/admin/hub/leads');
+    const lista = await leads.json() as { leads: { id: string }[]; seguimientos: { lead_id: string; title: string; due_on: string }[] };
+    expect(lista.seguimientos).toEqual([expect.objectContaining({ lead_id: lead.id, title: 'Escribirle en 3 días', due_on: '2026-10-31' })]);
+    const otra = await api.request(`/api/admin/hub/leads/${lead.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stage: 'demo' }),
+    });
+    expect(otra.status).toBe(200);
+    const repetida = await api.request('/api/admin/hub/leads');
+    expect((await repetida.json() as { seguimientos: unknown[] }).seguimientos).toHaveLength(1);
+
+    const claves = ['WHATSAPP_ACCESS_TOKEN', 'WHATSAPP_PHONE_ID', 'WHATSAPP_BUSINESS_ID', 'WHATSAPP_ENABLED', 'WHATSAPP_APP_SECRET', 'WHATSAPP_VERIFY_TOKEN', 'BREVO_API_KEY', 'BREVO_SENDER_EMAIL', 'MAIL_ENABLED', 'HUB_INBOX_EMAIL_SECRET', 'MP_PLATFORM_ACCESS_TOKEN'];
+    const previo = Object.fromEntries(claves.map((clave) => [clave, process.env[clave]]));
+    for (const clave of claves) delete process.env[clave];
+    try {
+      const conexiones = await api.request('/api/admin/hub/conexiones');
+      const canales = await conexiones.json() as { conexiones: { conectores: { id: string; estado: string }[] } };
+      const porId = Object.fromEntries(canales.conexiones.conectores.map((row) => [row.id, row.estado]));
+      expect(porId).toMatchObject({ whatsapp: 'apagado', email: 'apagado', instagram: 'preparado' });
+    } finally {
+      for (const clave of claves) {
+        if (previo[clave] === undefined) delete process.env[clave];
+        else process.env[clave] = previo[clave];
+      }
+    }
+
+    const cobranza = await api.request('/api/admin/hub/cobranza');
+    expect(await cobranza.json()).toMatchObject({ cobranza: { ltv_pesos: null, ltv_nutris: null } });
+    const aviso = await api.request('/api/admin/hub/cobranza', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ payment_id: 'no-existe', kind: 'aviso' }),
+    });
+    expect(aviso.status).toBe(404);
+
+    const borrador = await api.request(`/api/admin/hub/bandeja/${hilo.id}/borrador`, { method: 'POST' });
+    expect(borrador.status).toBe(200);
+    const conBorrador = await borrador.json() as { bandeja: { hilos: { borrador: { origen: string; body: string } | null }[] } };
+    expect(conBorrador.bandeja.hilos[0].borrador).toMatchObject({ origen: 'plantilla' });
+    expect(conBorrador.bandeja.hilos[0].borrador?.body).toMatch(/Gracias por escribirnos/);
+    const instagram = await api.request(`/api/admin/hub/bandeja/${hilo.id}/enviar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: 'Hola' }),
+    });
+    expect(instagram.status).toBe(503);
+
+    delete process.env.HUB_INBOX_EMAIL_SECRET;
+    expect((await api.request('/webhooks/hub/email', { method: 'POST', body: '{}' })).status).toBe(503);
+    process.env.HUB_INBOX_EMAIL_SECRET = 'secreto-de-prueba';
+    expect((await api.request('/webhooks/hub/email', { method: 'POST', headers: { 'x-hub-inbox-secret': 'otra' }, body: '{}' })).status).toBe(403);
+    const entrante = await api.request('/webhooks/hub/email', {
+      method: 'POST',
+      headers: { 'x-hub-inbox-secret': 'secreto-de-prueba', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from_email: 'mia@x.test', from_name: 'Mia', body: 'Quiero saber el precio.' }),
+    });
+    expect(entrante.status).toBe(200);
+    delete process.env.HUB_INBOX_EMAIL_SECRET;
+    const bandeja = await api.request('/api/admin/hub/bandeja');
+    const textos = (await bandeja.json() as { bandeja: { hilos: { contact_handle: string; messages: { body: string }[] }[] } }).bandeja.hilos
+      .find((row) => row.contact_handle === 'mia@x.test');
+    expect(textos?.messages.some((row) => row.body === 'Quiero saber el precio.')).toBe(true);
+
+    const activacion = await api.request('/api/admin/hub/activacion');
+    const filas = await activacion.json() as { activacion: { filas: { pasos: { id: string; estado: string }[] }[] } };
+    const pasos = filas.activacion.filas[0]?.pasos ?? [];
+    expect(pasos.find((paso) => paso.id === 'plan')?.estado).toBe('sin_dato');
+    expect((await api.request('/api/me/activacion')).status).toBe(200);
   });
 });

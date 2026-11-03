@@ -443,6 +443,7 @@ svg { display: block; flex: 0 0 auto; }
 .board-col-sum { font-family: var(--font-display); font-size: 15px; color: var(--ink-2); }
 .board-col-body { padding: 4px 9px 10px; display: flex; flex-direction: column; gap: 9px; overflow-y: auto; flex: 1; }
 
+.lead-card[draggable='true'] { cursor: grab; }
 .lead-card {
   background: var(--surface);
   border: 1px solid var(--line);

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type MouseEvent, type PointerEvent, type ReactNode } from 'react';
+import { ActivacionCard } from './ActivacionCard';
 import { useTarjetasInicio } from './inicio-tarjetas';
 import type { Patient } from '../../types';
 import { fotosDeCola, railHoy, type HechoAccion } from '../../lib/hoy-accion';
@@ -272,5 +273,5 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
 export function PanelHome({ patients, now, onOpen }: { patients: Patient[]; now: Date; onOpen: Open }) {
   const state = useHomeData(homeDay(now));
   const hechos = useHechosHoy();
-  return <PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} hechos={hechos} />;
+  return <><ActivacionCard /><PanelHomeView {...state} patients={patients} now={now} onOpen={onOpen} hechos={hechos} /></>;
 }

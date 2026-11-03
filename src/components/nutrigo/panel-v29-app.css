@@ -1000,3 +1000,7 @@
   #pv-panel-v29 #s-seguimiento .nz-split { grid-template-columns: 1fr; }
   #pv-panel-v29 #s-seguimiento .nz-foto { max-height: 240px; aspect-ratio: 4 / 3; }
 }
+
+#pv-panel-v29 .activacion-nutri { margin-bottom: 16px; }
+#pv-panel-v29 .activacion-nutri ol { margin: 0 18px 16px; padding-left: 18px; color: var(--ink2); font-size: 13px; line-height: 1.6; }
+#pv-panel-v29 .activacion-nutri p { margin: 0 18px 16px; color: var(--ink3); font-size: 12px; }
