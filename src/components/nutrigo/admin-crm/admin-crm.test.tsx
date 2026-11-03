@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { AdminCrm } from './AdminCrm';
 import { CobrosView, NutrisView, PacientesView, ResumenView, SaludView, SeguridadView } from './centro-views';
+import { PlanesPrecios } from './PlanesPrecios';
 import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../../../types/centro';
 
 vi.mock('../../../api/client', () => ({
@@ -13,6 +14,7 @@ vi.mock('../../../api/client', () => ({
     getCentroCobros: () => new Promise(() => undefined),
     getCentroSalud: () => new Promise(() => undefined),
     getCentroSeguridad: () => new Promise(() => undefined),
+    getPlanes: () => new Promise(() => undefined),
   },
   ApiError: class ApiError extends Error { constructor(public status: number, message: string) { super(message); } },
 }));
@@ -66,12 +68,12 @@ const seguridad: CentroSeguridad = {
 };
 
 describe('centro de mando en /admin', () => {
-  it('arma el armazón Nutridash con las seis secciones reales', () => {
+  it('arma el armazón Nutridash con las secciones reales', () => {
     const html = renderToStaticMarkup(createElement(AdminCrm, { adminName: 'Facundo' }));
     for (const id of ['app', 'sidebar', 'topbar', 'view']) expect(html).toContain(`id="${id}"`);
     expect(html).toContain('class="nd-admin-crm"');
     expect(html).toContain('Centro de mando');
-    for (const label of ['Resumen', 'Nutris', 'Pacientes', 'Cobros', 'Salud', 'Seguridad']) expect(html).toContain(label);
+    for (const label of ['Resumen', 'Nutris', 'Pacientes', 'Cobros', 'Planes y precios', 'Salud', 'Seguridad']) expect(html).toContain(label);
     expect(html).not.toContain('Pipeline');
     expect(html).not.toContain('Bandeja');
     expect(html).not.toContain('Automatizaciones');
@@ -96,5 +98,25 @@ describe('centro de mando en /admin', () => {
     expect(pages).toContain('Worker');
     expect(pages).toContain('MFA_ENFORCE');
     expect(pages).not.toMatch(/peso|síntoma|diagnóstico|Pipeline|Bandeja|Datos de ejemplo/);
+  });
+
+  it('la pantalla de precios muestra el plan oculto, el historial y el botón del degradé', () => {
+    const html = renderToStaticMarkup(createElement(PlanesPrecios, {
+      onSaved: () => undefined,
+      data: {
+        editable: true,
+        testers: ['facu@nutridash.test'],
+        changes: [{ id: 'c1', plan_code: 'arranque', actor_email: 'facu@nutridash.test', monthly_pesos: 24900, annual_pesos: 239040, founder_monthly_pesos: 14940, founder_annual_pesos: 179280, active: true, created_at: '2026-11-02T18:00:00Z' }],
+        plans: [
+          { code: 'arranque', name: 'Arranque', monthly_pesos: 24900, annual_pesos: 239040, founder_monthly_pesos: 14940, founder_annual_pesos: 179280, active: true, listed: true },
+          { code: 'prueba', name: 'Prueba', monthly_pesos: 100, annual_pesos: 100, founder_monthly_pesos: 100, founder_annual_pesos: 100, active: true, listed: false },
+        ],
+      },
+    }));
+    expect(html).toContain('Planes y precios');
+    expect(html).toContain('Oculto. No usa el cupo de fundadora.');
+    expect(html).toContain('facu@nutridash.test');
+    expect(html).toContain('nd-btn is-action');
+    expect(html).toContain('value="100"');
   });
 });

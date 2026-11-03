@@ -217,6 +217,11 @@
       "version": "20261102160000",
       "file": "20261102160000_ai_brief_done_at.sql",
       "sha256": "1b01c1a54e6d1b907e6e31e79900380919d12d4e6a57ed125d718c8461b8d972"
+    },
+    {
+      "version": "20261102233000",
+      "file": "20261102233000_platform_plan_prices.sql",
+      "sha256": "989b1b725516185b6378bebcd81afb6a89ced860e1945a60dc21e53791faf4c7"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

@@ -97,7 +97,7 @@ export function PlanNutridash() {
       <div className="pubhr"><div><b>Ciclo</b><span>{ciclo === 'annual' ? 'Anual, 20% menos. No se suma al 40% de fundadora.' : 'Mensual'}</span><button type="button" className="sbtn" onClick={() => setCiclo(ciclo === 'monthly' ? 'annual' : 'monthly')}>{ciclo === 'monthly' ? 'Ver anual' : 'Ver mensual'}</button></div></div>
       <div className="publk">{data.plans.map((item) => {
         const nueva = !sub || sub.status === 'pending';
-        const conFundadora = nueva && (data.founder_seats_left ?? 0) > 0;
+        const conFundadora = nueva && item.listed !== false && (data.founder_seats_left ?? 0) > 0;
         const monto = ciclo === 'annual' ? (conFundadora ? item.founder_annual_amount_cents : item.annual_amount_cents) : (conFundadora ? item.founder_monthly_amount_cents : item.monthly_amount_cents);
         const lista = ciclo === 'annual' ? item.annual_amount_cents : item.monthly_amount_cents;
         return <div key={item.code}><span className="t"><b>{item.name}</b><small>{pesos(monto)}{monto !== lista ? ` · lista ${pesos(lista)}` : ''} · {item.max_active_patients == null ? 'pacientes sin tope' : `${item.max_active_patients} pacientes`} · {item.max_ai_meal_photos_month == null ? 'fotos sin tope' : `${item.max_ai_meal_photos_month} fotos`}</small></span><button type="button" className="sbtn" onClick={() => void elegir(item.code)}>Elegir</button></div>;

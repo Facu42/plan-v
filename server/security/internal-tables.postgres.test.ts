@@ -13,7 +13,9 @@ const INTERNAL = [
   // Idempotency ledger: only import RPCs; no client grant or read policy.
   // Enlaces de pago único de la cuota: solo el servicio. El libro sigue en patient_payments.
   'patient_fee_checkouts', 'patient_import_applied', 'patient_invite_events', 'patient_subscription_events',
-  'payment_webhook_events', 'platform_admins', 'platform_ai_photo_months', 'platform_billing_events', 'platform_founder_slots', 'platform_settings',
+  'payment_webhook_events', 'platform_admins', 'platform_ai_photo_months', 'platform_billing_events', 'platform_founder_slots',
+  // Historial de precios y mails del plan de prueba: solo el servicio. La nutri no los lee.
+  'platform_plan_changes', 'platform_plan_testers', 'platform_settings',
   'privacy_access_events', 'privacy_export_packages', 'privacy_requests',
   'processing_jobs', 'push_subscriptions', 'recipe_cover_requests', 'recipe_day_assignments', 'recipe_version_cards',
   // Agenda: credenciales, links de un uso, estados de cobro y colas son sólo del servicio.

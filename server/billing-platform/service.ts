@@ -5,7 +5,8 @@ import { MpCallError } from '../subscriptions/mp.js';
 import { billingEnabled } from './flag.js';
 import { noopInvoiceIssuer, type InvoiceIssuer } from './invoicing.js';
 import { loadRemote, minimalRaw, platformMercadoPago, preapprovalBody, sandboxCredentialBlock } from './mp-platform.js';
-import { cycleAmountCents, pesosFromCents, planByCode, catalog } from './pricing.js';
+import { amountOf, isTester, loadPlans, planByCodeLive, visiblePlans, type PlanRow } from './catalog.js';
+import { pesosFromCents } from './pricing.js';
 import * as repo from './repository.js';
 import { accessMode, graceUntil, platformWriteAccess, reduceBilling, signupGraceDaysLeft, signupGraceUntil, type SubscriptionSnap } from './state.js';
 import { argentinaMonth } from './limits.js';
@@ -38,9 +39,27 @@ async function lastPaidAt(subscriptionId: string): Promise<string | null> {
   return dates.length ? dates[dates.length - 1] : null;
 }
 
-export async function planForNutritionist(nutritionistId: string) {
+function publicPlan(plan: PlanRow) {
+  return {
+    code: plan.code,
+    name: plan.name,
+    monthly_amount_cents: plan.monthly_amount_cents,
+    annual_amount_cents: plan.annual_amount_cents,
+    founder_monthly_amount_cents: plan.founder_monthly_amount_cents,
+    founder_annual_amount_cents: plan.founder_annual_amount_cents,
+    max_active_patients: plan.max_active_patients,
+    max_nutritionists: plan.max_nutritionists,
+    max_ai_meal_photos_month: plan.max_ai_meal_photos_month,
+    listed: plan.listed,
+  };
+}
+
+export async function planForNutritionist(nutritionistId: string, userId?: string) {
+  const plans = await loadPlans();
+  const email = userId ? await repo.payerEmail(userId) : null;
+  const tester = await isTester(email);
   const open = await repo.findOpenSubscription(nutritionistId);
-  const plan = open ? planByCode(open.plan_code) : null;
+  const plan = open ? plans.find((item) => item.code === open.plan_code) ?? null : null;
   const usage = await repo.usageOf(nutritionistId, argentinaMonth());
   const payments = open ? await repo.listPayments(open.id) : [];
   const now = Date.now();
@@ -50,7 +69,7 @@ export async function planForNutritionist(nutritionistId: string) {
   return {
     enabled: true,
     founder_seats_left: await repo.founderSeatsLeft(),
-    plans: catalog(),
+    plans: visiblePlans(plans, tester).map(publicPlan),
     subscription: open ? {
       id: open.id,
       plan_code: open.plan_code,
@@ -88,21 +107,21 @@ function assertSandboxCredentials() {
 
 export async function checkout(input: { nutritionistId: string; userId: string; planCode: string; cycle: 'monthly' | 'annual'; clientRequestId: string }) {
   assertSandboxCredentials();
-  const plan = planByCode(input.planCode);
-  if (!plan) throw new CareError(400, 'Elegí Arranque, Pro o Consultorio.');
+  const plan = await planByCodeLive(input.planCode);
   const email = await repo.payerEmail(input.userId);
   if (!email) throw new CareError(409, 'Tu cuenta no tiene un mail para el cobro.');
+  if (!plan || !plan.active || (!plan.listed && !await isTester(email))) throw new CareError(400, 'Elegí Arranque, Pro o Consultorio.');
   const existing = await repo.findByClientRequest(input.nutritionistId, input.clientRequestId);
   if (existing?.init_point) return { init_point: existing.init_point, subscription_id: existing.id };
   const open = existing ?? await repo.findOpenSubscription(input.nutritionistId);
   if (open && open.client_request_id !== input.clientRequestId) throw new CareError(409, 'Ya tenés un plan en curso. Cancelalo antes de elegir otro.');
   let founder = open?.founder ?? false;
   let claimed = false;
-  if (!open) {
+  if (!open && plan.listed) {
     founder = await repo.claimFounder();
     claimed = founder;
   }
-  const amount = cycleAmountCents(plan.monthly_amount_cents, input.cycle, founder);
+  const amount = amountOf(plan, input.cycle, founder && plan.listed);
   const row = open ?? await repo.insertSubscription({
     nutritionist_id: input.nutritionistId,
     plan_code: plan.code,
@@ -140,18 +159,19 @@ export async function checkout(input: { nutritionistId: string; userId: string; 
   }
 }
 
-export async function changePlan(input: { nutritionistId: string; planCode: string; cycle: 'monthly' | 'annual' }) {
+export async function changePlan(input: { nutritionistId: string; userId?: string; planCode: string; cycle: 'monthly' | 'annual' }) {
   assertSandboxCredentials();
   const open = await repo.findOpenSubscription(input.nutritionistId);
   if (!open || (open.status !== 'authorized' && open.status !== 'past_due')) throw new CareError(409, 'Todavía no hay un plan activo para cambiar.');
-  const plan = planByCode(input.planCode);
-  if (!plan) throw new CareError(400, 'Elegí Arranque, Pro o Consultorio.');
+  const plan = await planByCodeLive(input.planCode);
+  const email = input.userId ? await repo.payerEmail(input.userId) : null;
+  if (!plan || !plan.active || (!plan.listed && !await isTester(email))) throw new CareError(400, 'Elegí Arranque, Pro o Consultorio.');
   const usage = await repo.usageOf(input.nutritionistId, argentinaMonth());
   if (plan.max_active_patients != null && usage.active_patients > plan.max_active_patients) throw new CareError(409, 'Llegaste al límite de tu plan. El plan nuevo no alcanza para tus pacientes activas.');
   if (usage.nutritionists > plan.max_nutritionists) throw new CareError(409, 'Llegaste al límite de tu plan. El plan nuevo no alcanza para tu equipo.');
   if (plan.max_ai_meal_photos_month != null && usage.ai_photos > plan.max_ai_meal_photos_month) throw new CareError(409, 'Llegaste al límite de tu plan. Este mes ya usaste más fotos de las que permite el plan nuevo.');
-  const founderActive = open.founder && (!open.founder_until || Date.parse(open.founder_until) > Date.now());
-  const amount = cycleAmountCents(plan.monthly_amount_cents, input.cycle, founderActive);
+  const founderActive = plan.listed && open.founder && (!open.founder_until || Date.parse(open.founder_until) > Date.now());
+  const amount = amountOf(plan, input.cycle, founderActive);
   if (!open.provider_preapproval_id) throw new CareError(409, 'Este plan todavía no está confirmado en Mercado Pago.');
   const pesos = pesosFromCents(amount);
   try {
@@ -166,7 +186,7 @@ export async function changePlan(input: { nutritionistId: string; planCode: stri
   const saved = await repo.casUpdate(open.id, open.revision, { plan_code: plan.code, billing_cycle: input.cycle, current_amount_cents: amount });
   if (!saved) throw new CareError(409, 'Alguien cambió este plan. Volvé a intentar.');
   repo.logBilling('plan_changed');
-  return planForNutritionist(input.nutritionistId);
+  return planForNutritionist(input.nutritionistId, input.userId);
 }
 
 export async function cancelPlan(input: { nutritionistId: string; reason: string }) {
@@ -261,9 +281,9 @@ export async function raiseFounderPrices(now = Date.now()) {
   if (!billingEnabled()) return;
   const due = await repo.listFounderDue(new Date(now).toISOString());
   for (const row of due) {
-    const plan = planByCode(row.plan_code);
-    if (!plan || !row.provider_preapproval_id) continue;
-    const list = cycleAmountCents(plan.monthly_amount_cents, row.billing_cycle, false);
+    const plan = await planByCodeLive(row.plan_code);
+    if (!plan || !plan.listed || !row.provider_preapproval_id) continue;
+    const list = amountOf(plan, row.billing_cycle, false);
     if (row.current_amount_cents === list) continue;
     const pesos = pesosFromCents(list);
     try {

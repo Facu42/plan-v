@@ -7,12 +7,12 @@ import { billingEnabled } from './flag.js';
 import { cancelPlan, checkout, changePlan, disabledPlan, planForNutritionist, receiveWebhook } from './service.js';
 
 const checkoutSchema = z.object({
-  plan_code: z.enum(['arranque', 'pro', 'consultorio']),
+  plan_code: z.enum(['arranque', 'pro', 'consultorio', 'prueba']),
   billing_cycle: z.enum(['monthly', 'annual']),
   client_request_id: z.string().trim().min(8).max(80),
 }).strict();
 const changeSchema = z.object({
-  plan_code: z.enum(['arranque', 'pro', 'consultorio']),
+  plan_code: z.enum(['arranque', 'pro', 'consultorio', 'prueba']),
   billing_cycle: z.enum(['monthly', 'annual']),
 }).strict();
 const cancelSchema = z.object({ reason: z.string().trim().min(2).max(200) }).strict();
@@ -55,7 +55,7 @@ export function registerPlatformBillingRoutes(app: Hono) {
   app.get('/api/billing/plan', async (c) => {
     if (!billingEnabled()) return c.json(disabledPlan());
     const actor = await nutri(c);
-    return c.json(await planForNutritionist(actor.nutritionistId));
+    return c.json(await planForNutritionist(actor.nutritionistId, actor.userId));
   });
   app.post('/api/billing/checkout', async (c) => {
     if (!billingEnabled()) return c.json({ error: 'El cobro de planes todavía no está activado.' }, 501);
@@ -67,7 +67,7 @@ export function registerPlatformBillingRoutes(app: Hono) {
     if (!billingEnabled()) return c.json({ error: 'El cobro de planes todavía no está activado.' }, 501);
     const actor = await nutri(c);
     const input = await body(c, changeSchema);
-    return c.json(await changePlan({ nutritionistId: actor.nutritionistId, planCode: input.plan_code, cycle: input.billing_cycle }));
+    return c.json(await changePlan({ nutritionistId: actor.nutritionistId, userId: actor.userId, planCode: input.plan_code, cycle: input.billing_cycle }));
   });
   app.post('/api/billing/cancel', async (c) => {
     if (!billingEnabled()) return c.json({ error: 'El cobro de planes todavía no está activado.' }, 501);

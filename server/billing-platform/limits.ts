@@ -1,7 +1,7 @@
 import { CareError } from '../care/errors.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import { billingEnabled } from './flag.js';
-import { planByCode } from './pricing.js';
+import { planByCodeLive } from './catalog.js';
 import { findOpenSubscription, logBilling, nutritionistCreatedAt, schemaMissing, tryAiPhoto, usageOf } from './repository.js';
 import { admission, platformWriteAccess } from './state.js';
 
@@ -25,7 +25,7 @@ export async function assertCanAdd(nutritionistId: string, kind: 'patient' | 'nu
       if (mode === 'full') return;
       throw new CareError(403, 'Elegí un plan de Nutridash para seguir cargando. Tus pacientes no pierden el acceso.');
     }
-    const plan = planByCode(open.plan_code);
+    const plan = await planByCodeLive(open.plan_code);
     if (!plan) throw new CareError(403, 'Elegí un plan de Nutridash para seguir cargando. Tus pacientes no pierden el acceso.');
     const usage = await usageOf(nutritionistId, argentinaMonth());
     const decision = admission({
@@ -52,7 +52,7 @@ export async function reserveAiPhoto(nutritionistId: string): Promise<boolean> {
   if (!billingEnabled() || !isSupabaseEnabled()) return true;
   try {
     const open = await findOpenSubscription(nutritionistId);
-    const plan = open ? planByCode(open.plan_code) : null;
+    const plan = open ? await planByCodeLive(open.plan_code) : null;
     if (!plan) return true;
     return await tryAiPhoto(nutritionistId, argentinaMonth(), plan.max_ai_meal_photos_month);
   } catch (error) {

@@ -183,3 +183,87 @@ export async function listFounderDue(nowIso: string): Promise<SubscriptionRow[]>
 export function logBilling(status: string) {
   writeOpsLog('info', 'platform_billing', { status });
 }
+
+const PLAN_COLUMNS = 'code,name,monthly_amount_cents,annual_amount_cents,founder_monthly_amount_cents,founder_annual_amount_cents,max_active_patients,max_nutritionists,max_ai_meal_photos_month,active,listed';
+
+function columnsMissing(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  if (schemaMissing(error) || error.code === '42703' || error.code === 'PGRST204') return true;
+  return /founder_monthly_amount_cents|column .*listed/i.test(error.message ?? '');
+}
+
+/** Null si la base todavía no tiene las columnas de precio. No es un error de cobro. */
+export async function readPlanCatalog(): Promise<Array<Record<string, unknown>> | null> {
+  if (!isSupabaseEnabled()) return null;
+  const row = await db().from('platform_plans').select(PLAN_COLUMNS);
+  if (row.error) {
+    if (columnsMissing(row.error)) return null;
+    throw new CareError(503, 'No se pudieron leer los planes.');
+  }
+  return (row.data ?? []) as Array<Record<string, unknown>>;
+}
+
+export async function isPlanTester(email: string): Promise<boolean> {
+  if (!isSupabaseEnabled()) return false;
+  const row = await db().from('platform_plan_testers').select('email').eq('email', email.trim().toLowerCase()).maybeSingle();
+  if (row.error) {
+    if (columnsMissing(row.error)) return false;
+    throw new CareError(503, 'No se pudo leer la lista de prueba.');
+  }
+  return Boolean(row.data);
+}
+
+export async function listPlanChanges(): Promise<Array<Record<string, unknown>>> {
+  const row = await db().from('platform_plan_changes').select('id,plan_code,actor_email,monthly_amount_cents,annual_amount_cents,founder_monthly_amount_cents,founder_annual_amount_cents,active,created_at').order('created_at', { ascending: false }).limit(40);
+  if (row.error) {
+    if (columnsMissing(row.error)) return [];
+    throw new CareError(503, 'No se pudo leer el historial de precios.');
+  }
+  return (row.data ?? []) as Array<Record<string, unknown>>;
+}
+
+export async function listPlanTesters(): Promise<string[]> {
+  const row = await db().from('platform_plan_testers').select('email').order('email');
+  if (row.error) {
+    if (columnsMissing(row.error)) return [];
+    throw new CareError(503, 'No se pudo leer la lista de prueba.');
+  }
+  return (row.data ?? []).map((item) => String(item.email));
+}
+
+export async function savePlanAmount(code: string, patch: Record<string, unknown>, actor: { userId: string | null; email: string }): Promise<void> {
+  const current = await db().from('platform_plans').select('listed').eq('code', code).maybeSingle();
+  if (current.error) raise(current.error);
+  if (!current.data) throw new CareError(404, 'Ese plan no existe.');
+  const saved = await db().from('platform_plans').update({ ...patch, updated_at: new Date().toISOString() }).eq('code', code);
+  if (saved.error) raise(saved.error);
+  const history = await db().from('platform_plan_changes').insert({
+    plan_code: code,
+    actor_user_id: actor.userId,
+    actor_email: actor.email,
+    monthly_amount_cents: patch.monthly_amount_cents,
+    annual_amount_cents: patch.annual_amount_cents,
+    founder_monthly_amount_cents: patch.founder_monthly_amount_cents,
+    founder_annual_amount_cents: patch.founder_annual_amount_cents,
+    active: patch.active,
+    listed: current.data.listed !== false,
+  });
+  if (history.error) raise(history.error);
+}
+
+export async function replacePlanTesters(emails: string[]): Promise<void> {
+  const current = await db().from('platform_plan_testers').select('email');
+  if (current.error) raise(current.error);
+  const next = new Set(emails);
+  const previous = (current.data ?? []).map((item) => String(item.email));
+  const remove = previous.filter((email) => !next.has(email));
+  const add = emails.filter((email) => !previous.includes(email));
+  if (remove.length) {
+    const deleted = await db().from('platform_plan_testers').delete().in('email', remove);
+    if (deleted.error) raise(deleted.error);
+  }
+  if (add.length) {
+    const inserted = await db().from('platform_plan_testers').insert(add.map((email) => ({ email })));
+    if (inserted.error) raise(inserted.error);
+  }
+}
