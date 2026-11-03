@@ -8,7 +8,7 @@ La cuenta queda activa solo cuando Mercado Pago avisa un pago aprobado por el mo
 
 En Railway, en el servicio de la API, y solo cuando Facundo lo pida por escrito:
 
-1. `MP_PLATFORM_ACCESS_TOKEN`: la clave de **prueba** de Mercado Pago. Empieza con `TEST-`. Si empieza con otra cosa, Nutridash no llama a Mercado Pago.
+1. `MP_PLATFORM_ACCESS_TOKEN`: la clave de **prueba** de Mercado Pago. Empieza con `TEST-`. Si empieza con otra cosa, Nutridash no llama a Mercado Pago. No pongas `MP_PLATFORM_LIVE=1` para esta prueba: ese valor es cobro real y solo acepta una clave `APP_USR-`. La misma regla corre en la API, el aviso y el worker.
 2. `MP_PLATFORM_WEBHOOK_SECRET`: el mismo secreto que vas a poner en el aviso de Mercado Pago.
 3. `PUBLIC_SITE_URL`: la dirección pública del sitio, con `https://`.
 4. `PLATFORM_BILLING_ENABLED=1` recién al final, cuando las tres anteriores ya están.

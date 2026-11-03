@@ -1,13 +1,16 @@
 import { createHmac } from 'node:crypto';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CareError } from '../care/errors.js';
-import { checkout, planForNutritionist, receiveWebhook } from './service.js';
+import { mpPlatformMode, sandboxCredentialBlock } from './mp-platform.js';
+import { checkout, planForNutritionist, raiseFounderPrices, receiveWebhook } from './service.js';
 
 const mem = vi.hoisted(() => ({
   rows: new Map<string, Record<string, unknown>>(),
   events: new Set<string>(),
   payments: [] as Array<Record<string, unknown>>,
   fetches: [] as string[],
+  auths: [] as string[],
+  founderDue: [] as Array<Record<string, unknown>>,
 }));
 
 vi.mock('./repository.js', () => ({
@@ -46,9 +49,23 @@ vi.mock('./repository.js', () => ({
     return 'saved';
   },
   logBilling: () => undefined,
+  listFounderDue: async () => mem.founderDue,
 }));
 
 const SUB = '11111111-1111-4111-8111-111111111111';
+
+function founderRow() {
+  return {
+    id: '33333333-3333-4333-8333-333333333333',
+    revision: 1,
+    plan_code: 'arranque',
+    billing_cycle: 'monthly',
+    provider_preapproval_id: 'pre-fundadora',
+    current_amount_cents: 1_494_000,
+    status: 'authorized',
+    founder: true,
+  };
+}
 
 function signature(id: string, requestId: string, now: number) {
   const ts = String(Math.floor(now / 1000));
@@ -62,13 +79,17 @@ describe('flujo de prueba de Mercado Pago, sin cobro real', () => {
     mem.events.clear();
     mem.payments.length = 0;
     mem.fetches.length = 0;
+    mem.auths.length = 0;
+    mem.founderDue = [];
     vi.stubEnv('PUBLIC_SITE_URL', 'https://plan-v.example');
     vi.stubEnv('MP_PLATFORM_WEBHOOK_SECRET', 'platform-secret');
     vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
+    vi.stubEnv('MP_PLATFORM_LIVE', '');
     vi.stubGlobal('fetch', (async (url: string, init?: RequestInit) => {
       mem.fetches.push(`${init?.method ?? 'GET'} ${url}`);
       const auth = new Headers(init?.headers).get('Authorization') ?? '';
-      if (!auth.startsWith('Bearer TEST-')) return new Response('no', { status: 401 });
+      mem.auths.push(auth);
+      if (!auth.startsWith('Bearer TEST-') && !auth.startsWith('Bearer APP_USR-')) return new Response('no', { status: 401 });
       if (url.endsWith('/preapproval') && init?.method === 'POST') {
         const body = JSON.parse(String(init.body)) as { auto_recurring?: { transaction_amount?: number } };
         expect(body.auto_recurring?.transaction_amount).toBe(14940);
@@ -90,10 +111,77 @@ describe('flujo de prueba de Mercado Pago, sin cobro real', () => {
     vi.restoreAllMocks();
   });
 
+  it('en prueba exige TEST- y rechaza vacío o APP_USR-', () => {
+    expect(mpPlatformMode({})).toBe('test');
+    expect(mpPlatformMode({ MP_PLATFORM_LIVE: 'true' })).toBe('test');
+    expect(mpPlatformMode({ MP_PLATFORM_LIVE: ' 1' })).toBe('test');
+    expect(sandboxCredentialBlock(undefined, {})).toMatch(/Falta/);
+    expect(sandboxCredentialBlock('   ', {})).toMatch(/Falta/);
+    expect(sandboxCredentialBlock('APP_USR-no', {})).toMatch(/clave de prueba/);
+    expect(sandboxCredentialBlock('TEST-sandbox', {})).toBeNull();
+  });
+
+  it('en vivo exige APP_USR- y rechaza vacío o TEST-', () => {
+    const env = { MP_PLATFORM_LIVE: '1' };
+    expect(mpPlatformMode(env)).toBe('live');
+    expect(sandboxCredentialBlock(undefined, env)).toMatch(/Falta/);
+    expect(sandboxCredentialBlock('   ', env)).toMatch(/Falta/);
+    expect(sandboxCredentialBlock('TEST-sandbox', env)).toMatch(/APP_USR-/);
+    expect(sandboxCredentialBlock('APP_USR-live', env)).toBeNull();
+  });
+
   it('rechaza una clave de producción y no llama a Mercado Pago', async () => {
     vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'APP_USR-no');
+    vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
     await expect(checkout({ nutritionistId: 'nutri-1', userId: 'user-1', planCode: 'arranque', cycle: 'monthly', clientRequestId: 'pedido-1234' }))
       .rejects.toBeInstanceOf(CareError);
+    const now = Date.parse('2026-10-15T12:00:00.000Z');
+    const blocked = signature('88', 'aviso-prod', now);
+    expect(await receiveWebhook({ dataId: '88', requestId: 'aviso-prod', signature: blocked.header, topic: 'payment', now })).toBe(501);
+    mem.founderDue = [founderRow()];
+    await raiseFounderPrices(now);
+    expect(mem.fetches).toEqual([]);
+    expect(mem.rows.size).toBe(0);
+  });
+
+  it('con MP_PLATFORM_LIVE=1 acepta APP_USR- en el alta, el aviso y el worker', async () => {
+    vi.stubEnv('MP_PLATFORM_LIVE', '1');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'APP_USR-live');
+    vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
+    vi.spyOn(Date, 'now').mockReturnValue(Date.parse('2026-10-15T12:00:00.000Z'));
+    const started = await checkout({ nutritionistId: 'nutri-1', userId: 'user-1', planCode: 'arranque', cycle: 'monthly', clientRequestId: 'pedido-1234' });
+    expect(started.init_point).toContain('mercadopago.com');
+    expect(mem.auths[0]).toBe('Bearer APP_USR-live');
+
+    const paidNow = Date.parse('2026-10-15T12:04:00.000Z');
+    const paid = signature('88', 'aviso-pago-live', paidNow);
+    expect(await receiveWebhook({ dataId: '88', requestId: 'aviso-pago-live', signature: paid.header, topic: 'payment', now: paidNow })).toBe(200);
+    expect(mem.rows.get(SUB)?.status).toBe('authorized');
+
+    mem.founderDue = [founderRow()];
+    await raiseFounderPrices(paidNow);
+    expect(mem.fetches.some((call) => call === 'PUT https://api.mercadopago.com/preapproval/pre-fundadora')).toBe(true);
+    expect(mem.auths[mem.auths.length - 1]).toBe('Bearer APP_USR-live');
+  });
+
+  it('en vivo rechaza la clave vacía y la de prueba, sin llamar a Mercado Pago', async () => {
+    vi.stubEnv('MP_PLATFORM_LIVE', '1');
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', '   ');
+    vi.stubEnv('PLATFORM_BILLING_ENABLED', '1');
+    const now = Date.parse('2026-10-15T12:00:00.000Z');
+    await expect(checkout({ nutritionistId: 'nutri-1', userId: 'user-1', planCode: 'arranque', cycle: 'monthly', clientRequestId: 'pedido-vacio' }))
+      .rejects.toBeInstanceOf(CareError);
+    const emptyNotice = signature('88', 'aviso-vacio', now);
+    expect(await receiveWebhook({ dataId: '88', requestId: 'aviso-vacio', signature: emptyNotice.header, topic: 'payment', now })).toBe(501);
+    mem.founderDue = [founderRow()];
+    await raiseFounderPrices(now);
+
+    vi.stubEnv('MP_PLATFORM_ACCESS_TOKEN', 'TEST-sandbox');
+    await expect(checkout({ nutritionistId: 'nutri-1', userId: 'user-1', planCode: 'arranque', cycle: 'monthly', clientRequestId: 'pedido-test-en-vivo' }))
+      .rejects.toBeInstanceOf(CareError);
+    const testNotice = signature('88', 'aviso-test-en-vivo', now);
+    expect(await receiveWebhook({ dataId: '88', requestId: 'aviso-test-en-vivo', signature: testNotice.header, topic: 'payment', now })).toBe(501);
+    await raiseFounderPrices(now);
     expect(mem.fetches).toEqual([]);
     expect(mem.rows.size).toBe(0);
   });

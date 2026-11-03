@@ -20,6 +20,7 @@ Fotos con IA por mes: 150 Arranque, 600 Pro, sin tope en Consultorio. Si se pasa
 
 - `MP_PLATFORM_ACCESS_TOKEN`
 - `MP_PLATFORM_WEBHOOK_SECRET`
+- `MP_PLATFORM_LIVE` (solo `1` habilita la clave de producción `APP_USR-`; si no está, sigue exigiendo `TEST-`)
 - `PLATFORM_BILLING_ENABLED`
 
 También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
@@ -33,7 +34,7 @@ También hace falta `PUBLIC_SITE_URL` (ya existe) para el regreso a Ajustes.
 
 ## Prueba en sandbox
 
-Los pasos para hacerla a mano, sin cobrar plata de verdad, están en [mercadopago-sandbox.md](mercadopago-sandbox.md). La clave tiene que empezar con `TEST-`. Si es de producción, el servidor no llama a Mercado Pago.
+Los pasos para hacerla a mano, sin cobrar plata de verdad, están en [mercadopago-sandbox.md](mercadopago-sandbox.md). Sin `MP_PLATFORM_LIVE=1` la clave tiene que empezar con `TEST-` y una de producción no llama a Mercado Pago. Con `MP_PLATFORM_LIVE=1` (cobro real, misma variable en la API, el aviso y el worker, y solo con la frase de Facundo) la clave tiene que empezar con `APP_USR-`. Vacía se rechaza en los dos casos. `GET /api/health` dice `mp_platform_mode` (`test` o `live`) y no muestra la clave.
 
 ## Informe Regression Guard (Paso 10)
 
