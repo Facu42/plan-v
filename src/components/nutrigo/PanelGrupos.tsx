@@ -1,12 +1,10 @@
 // Cajón «Grupos de pacientes» de Pacientes (v29): mismas piezas del boceto (`#actw`, `.aseg`, `.ach`, `.ai`).
 // Un grupo es una etiqueta que comparten varias pacientes; no hay tablas nuevas.
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { Patient } from '../../types';
 import type { TagGroup } from '../../api/crm-work';
-import { PanelV29Icon } from './PanelV29Icon';
 import { usePanelBoceto } from './panel-v29-boceto';
-import { useModalFocus } from './use-modal-focus';
+import { CajonMarco } from './CajonV29';
 import { LARGO_ETIQUETA } from './FichaEtiquetas';
 
 const igual = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -40,7 +38,6 @@ export function PanelGrupos({ pacientes, grupos, actual, total, onVer, onCrear, 
   const [aviso, setAviso] = useState('');
   const [guardando, setGuardando] = useState(false);
   const { clase, cerrar } = usePanelBoceto(onClose);
-  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const alternar = (id: string) => setSumar(lista => lista.includes(id) ? lista.filter(x => x !== id) : [...lista, id]);
   const aplicar = async () => {
     const nuevo = nombre.trim();
@@ -52,11 +49,7 @@ export function PanelGrupos({ pacientes, grupos, actual, total, onVer, onCrear, 
     if (ok) cerrar(); else setAviso('No pudimos armar el grupo completo. Probá de nuevo (cada paciente puede tener hasta 8 etiquetas).');
   };
   const opciones = [{ clave: null as string | null, texto: `Todas · ${total}` }, ...grupos.map(g => ({ clave: g.label as string | null, texto: `${g.label} · ${g.cantidad}` }))];
-  const nodo = <div id="actw" className={clase || undefined}>
-    <div className="ascrim" onClick={cerrar} />
-    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">Grupos de pacientes</h2><p id="acts">Sirven para filtrar y para escribirles a todas juntas</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
-      <div className="abody" id="actb">
+  return <CajonMarco clase={clase} titulo="Grupos de pacientes" sub="Sirven para filtrar y para escribirles a todas juntas" onSolicitarCerrar={cerrar} pie={<><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={guardando} onClick={() => void aplicar()}>Ver este grupo</button></>}>
         <div className="af"><span>Mostrar</span><div className="aseg" role="radiogroup">{opciones.map(o => {
           const activa = mostrar === null ? o.clave === null : o.clave !== null && igual(o.clave, mostrar);
           return <button type="button" role="radio" key={o.texto} aria-label={o.texto} aria-checked={activa} onClick={() => setMostrar(o.clave)}>{o.texto}</button>;
@@ -64,10 +57,5 @@ export function PanelGrupos({ pacientes, grupos, actual, total, onVer, onCrear, 
         <label className="af"><span>Nuevo grupo</span><input className="ai" type="text" maxLength={LARGO_ETIQUETA} placeholder="Por ejemplo: Taller de cocina" value={nombre} onChange={e => { setNombre(e.target.value); setAviso(''); }} /></label>
         <div className="af"><span>Sumar al nuevo grupo</span><div className="ach">{pacientes.map(p => <button type="button" key={p.id} aria-pressed={sumar.includes(p.id)} onClick={() => alternar(p.id)}>{p.name}</button>)}</div><small>Una paciente puede estar en varios grupos.</small></div>
         {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
-      </div>
-      <footer id="actf"><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={guardando} onClick={() => void aplicar()}>Ver este grupo</button></footer>
-    </aside>
-  </div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  </CajonMarco>;
 }

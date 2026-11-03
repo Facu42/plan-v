@@ -1,14 +1,12 @@
 // Cajón «Mensaje a varias» de Mensajes (v29): mismas piezas del boceto (`#actw`, `.ach`, `.ai`). Le llega a cada paciente por separado, como un chat.
 import { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
 import type { Patient } from '../../types';
 import { api, isAbortError } from '../../api/client';
 import { crmWorkApi, type TagGroup } from '../../api/crm-work';
 import type { BillingBoard } from '../../types/fees';
 import { useAppStore } from '../../store/useAppStore';
-import { PanelV29Icon } from './PanelV29Icon';
 import { avisoEnElPanel, usePanelBoceto } from './panel-v29-boceto';
-import { useModalFocus } from './use-modal-focus';
+import { CajonMarco } from './CajonV29';
 import { MAX_MENSAJE, armarAudiencias, destinatarias, enviarAVarias, manianaALas9, programarAVarias } from './mensaje-varias';
 
 const TEXTO_INICIAL = '¡Hola {nombre}! ';
@@ -24,7 +22,6 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
   const [enviando, setEnviando] = useState(false);
   const [cuando, setCuando] = useState<Cuando>('ahora');
   const { clase, cerrar } = usePanelBoceto(onClose);
-  const foco = useModalFocus<HTMLElement>(true, cerrar);
   useEffect(() => {
     const controller = new AbortController();
     crmWorkApi.tagGroups(controller.signal).then(r => setGrupos(r.groups)).catch(() => undefined);
@@ -57,20 +54,11 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
     setElegidas([]);
     setAviso(`Salió a ${r.enviados}. No pudimos mandárselo a: ${r.fallaron.join(', ')}. Elegí a esas y probá de nuevo.`);
   };
-  const nodo = <div id="actw" className={clase || undefined}>
-    <div className="ascrim" onClick={cerrar} />
-    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">Mensaje a varias</h2><p id="acts">Le llega a cada una por separado, como un chat</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
-      <div className="abody" id="actb">
+  return <CajonMarco clase={clase} titulo="Mensaje a varias" sub="Le llega a cada una por separado, como un chat" onSolicitarCerrar={cerrar} pie={<><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={enviando} onClick={() => void enviar()}>{enviando ? 'Enviando…' : 'Enviar'}</button></>}>
         <div className="af"><span>Para</span><div className="ach">{opciones.map(o => <button type="button" key={o.id} aria-pressed={elegidas.includes(o.id)} onClick={() => alternar(o.id)}>{o.texto} · {o.ids.length}</button>)}</div></div>
         <label className="af"><span>Mensaje</span><textarea className="ai" rows={4} maxLength={MAX_MENSAJE} value={texto} onChange={e => { setTexto(e.target.value); setAviso(''); }} /><small>Escribí {'{nombre}'} y se completa con el nombre de cada paciente.</small></label>
         <label className="af"><span>Cuándo</span><div className="aseg" role="radiogroup">{CUANDO.map(([v, t]) => <button type="button" key={v} role="radio" aria-label={t} aria-checked={cuando === v} onClick={() => { setCuando(v); setAviso(''); }}>{t}</button>)}</div></label>
         {ids.length ? <p className="sxsub">Le llega a {ids.length} {ids.length === 1 ? 'paciente' : 'pacientes'}.</p> : null}
         {aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}
-      </div>
-      <footer id="actf"><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={enviando} onClick={() => void enviar()}>{enviando ? 'Enviando…' : 'Enviar'}</button></footer>
-    </aside>
-  </div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  </CajonMarco>;
 }

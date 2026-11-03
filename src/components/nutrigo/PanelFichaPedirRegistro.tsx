@@ -1,11 +1,9 @@
 // «Pedir registro» de la Ficha: el cajón del boceto (`#actw`), que le manda a la paciente el mismo pedido que Seguimiento, por la app.
 import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { api } from '../../api/client';
 import type { Patient } from '../../types';
 import { usePanelBoceto } from './panel-v29-boceto';
-import { useModalFocus } from './use-modal-focus';
-import { PanelV29Icon } from './PanelV29Icon';
+import { CajonMarco } from './CajonV29';
 import { COMIDAS_PEDIDO, textoPedido } from './seguimiento-presentacion';
 
 export function PanelFichaPedirRegistro({ patient, onClose, onSent }: { patient: Patient; onClose: () => void; onSent: (aviso: string) => void }) {
@@ -14,7 +12,6 @@ export function PanelFichaPedirRegistro({ patient, onClose, onSent }: { patient:
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const { clase, cerrar } = usePanelBoceto(onClose);
-  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const primerNombre = patient.name.split(' ')[0] ?? patient.name;
   const enviar = async () => {
     if (!comidas.length) { setError('Elegí al menos una comida.'); return; }
@@ -28,19 +25,10 @@ export function PanelFichaPedirRegistro({ patient, onClose, onSent }: { patient:
       setEnviando(false);
     }
   };
-  const nodo = <div id="actw" className={clase || undefined}>
-    <div className="ascrim" onClick={cerrar} />
-    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
-      <header><div><h2 id="actt">Pedir registro a {primerNombre}</h2><p id="acts">Le llega por la app. No se usa otro canal.</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
-      <div className="abody" id="actb">
+  return <CajonMarco clase={clase} titulo={<>Pedir registro a {primerNombre}</>} sub="Le llega por la app. No se usa otro canal." onSolicitarCerrar={cerrar} pie={<><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={enviando} onClick={() => void enviar()}>{enviando ? 'Enviando…' : 'Pedir registro'}</button></>}>
         <label className="af"><span>Días</span><select className="ai" value={String(dias)} onChange={event => setDias(event.target.value === '14' ? 14 : 7)}><option value="7">7 días</option><option value="14">14 días</option></select></label>
         <div className="af"><span>Qué cargar</span><div className="ach">{COMIDAS_PEDIDO.map(comida => <button type="button" key={comida} aria-pressed={comidas.includes(comida)} onClick={() => { setError(''); setComidas(actual => actual.includes(comida) ? actual.filter(item => item !== comida) : [...actual, comida]); }}>{comida}</button>)}</div></div>
         {patient.has_account === false ? <p className="sxsub">El mensaje queda en el chat hasta que {primerNombre} vincule la app.</p> : null}
         {error ? <p className="sxsub" role="alert">{error}</p> : null}
-      </div>
-      <footer id="actf"><button type="button" className="chip" onClick={cerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={enviando} onClick={() => void enviar()}>{enviando ? 'Enviando…' : 'Pedir registro'}</button></footer>
-    </aside>
-  </div>;
-  const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');
-  return host ? createPortal(nodo, host) : nodo;
+  </CajonMarco>;
 }
