@@ -1,3 +1,4 @@
+03/11 · Cursor · El admin de la plataforma que entra con Google ya no ve «cuenta sin vincular»: si no es nutri, va a `/admin`; si también tiene consultorio, se queda en el panel y ve Admin. La vuelta queda en el mismo sitio. Rama `cursor/admin-google-al-centro-4fb6`. Sin producción ni merge. [Nota](admin-ingreso-google.md).
 02/11 · Cursor · Precios de los planes de Nutridash editables desde /admin, con historial y un plan de prueba oculto que no usa el cupo de fundadora. Migración `20261102233000_platform_plan_prices.sql` sin aplicar. Rama `cursor/planes-precios-admin-3f0e`. Sin producción ni merge.
 02/11 · Cursor · El respaldo diario también guarda las filas de auth.users y auth.identities, y las carga antes que el resto. Sin eso, la clave de notification_preferences no se puede crear. Rama `cursor/respaldo-auth-users-3f0e`. Sin producción ni merge.
 02/11 · Cursor · El respaldo diario también vuelca el esquema private y prepara auth, storage y extensions en el Postgres vacío. La vista que llama a private.patient_goal_updates ya no corta la restauración. El archivo cifrado se guarda aunque esa prueba falle. Rama `cursor/respaldo-schema-private-3f0e`. Sin producción ni merge.
@@ -99,6 +100,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Ingreso del admin de plataforma | Cursor | `cursor/admin-google-al-centro-4fb6` | Quien administra y no es nutri entra a `/admin`. La nutri que también administra ve el acceso. Sin migración ni producción. [Nota y paso 10](admin-ingreso-google.md) |
 | Precios de planes desde /admin | Cursor | `cursor/planes-precios-admin-3f0e` | El alta nuevo lee el monto de la base. El admin edita pesos, activa o pausa, ve quién cambió qué y arma la lista del plan de prueba. Ese plan no sale en el catálogo ni usa cupo de fundadora. Migración sin aplicar. Sin producción ni merge |
 | Foto confirmada (P1) | Cursor | `cursor/foto-confirmada-p1-3f0e` | Cola de fotos, texto para la paciente y umbral del indicador. Migración sin aplicar. El permiso de la foto ya se exige; el texto legal queda como gap. Main ya incluye Hoy y el respaldo 17. Sin producción. [Nota y paso 10](foto-confirmada-p1.md) |
 | Hoy / Up next de la nutri | Cursor | `cursor/hoy-up-next-91ec` | Una acción por paciente. No se envía sola. `done_at` sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). En main. Sin producción |
@@ -201,6 +203,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **3/11 · Cursor · Admin de plataforma al centro de mando (HOLD)** · Quien está en la lista de administración y entra con Google ya no se queda en la pantalla de cuenta sin vincular. Si no tiene consultorio, va a `/admin` (ahí sigue el código de la app y el tema oscuro). Si también es nutri, se queda en el panel y ve Admin. La vuelta de Google no puede irse a otro sitio. [Nota y paso 10](admin-ingreso-google.md). Sin producción ni merge.
 - **2/11 · Cursor · Precios de planes en /admin (HOLD)** · Rama `cursor/planes-precios-admin-3f0e`. El próximo alta toma mensual, anual, fundadora y si está activo desde la base. Lo ya cobrado no se reescribe. En /admin, Planes y precios deja editar los pesos, pausar un plan y ver quién lo cambió. El plan Prueba no aparece para el resto y no consume el cupo de 30. Migración nueva, sin aplicar. Sin producción ni merge.
 - **2/11 · Cursor · Foto confirmada al día con main** · Main ya tiene el riel Hoy (#268) y el respaldo en Postgres 17 (#269). Esta rama los incorpora. La migración de la foto sigue sin aplicar. Sin merge.
 - **2/11 · Cursor · Foto confirmada, gap de la línea de tiempo (HOLD)** · Cifra marcó PASA_CON_GAPS. La respuesta de la paciente recorta la línea de tiempo: no sale la nota interna ni el id de quien revisó. Prueba JSON nueva. Migración sin aplicar. Sin producción.

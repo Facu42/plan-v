@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { readPlatformAdminFlag } from '../context/platform-home';
 
 const url = import.meta.env.VITE_SUPABASE_URL;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -25,6 +26,18 @@ export async function getProfile(userId: string): Promise<Profile | null> {
   if (!supabase) return null;
   const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   return data as Profile | null;
+}
+
+/** La fila de platform_admins, por la función is_platform_admin(). Si falla, no es admin. */
+export function isPlatformAdmin(): Promise<boolean> {
+  if (!supabase) return Promise.resolve(false);
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => resolve(false), 5000);
+    void readPlatformAdminFlag(() => supabase.rpc('is_platform_admin')).then((value) => {
+      clearTimeout(timer);
+      resolve(value);
+    });
+  });
 }
 
 export async function getSessionToken(): Promise<string | null> {

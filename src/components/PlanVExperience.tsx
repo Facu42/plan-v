@@ -26,6 +26,9 @@ import { PwaChrome } from '../pwa/PwaChrome';
 import { LoadingScreen } from './shared/AppStatus';
 import { isAdminPath } from './nutrigo/app-location';
 import { isPublicSlug, publicSlugFromPath } from '../types/public-slug';
+import { isPlatformAdmin } from '../lib/supabase';
+import { sameOriginUrl } from '../context/oauth-return';
+import { shouldRedirectToAdmin, showAdminAccess } from '../context/platform-home';
 
 const AdminCrm = lazy(() => import('./nutrigo/admin-crm/AdminCrm').then(({ AdminCrm }) => ({ default: AdminCrm })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
@@ -51,7 +54,11 @@ export function PlanVExperience() {
   // Sin la aceptación vigente no se carga nada ni se acepta la invitación.
   const legalOk = !session || hasCurrentLegalAcceptance(session.user.user_metadata);
   const sessionUserId=session?.user.id??null;
+  const accountRole = isNutri ? 'nutri' as const : isPatient ? 'paciente' as const : null;
+  const [platformAdmin, setPlatformAdmin] = useState<boolean | null>(null);
   const mfa = useMfaGate(session, isAdminPath(path), !authLoading && !passwordRecovery, mfaEnforcedForPath(path));
+  const redirectAdmin = shouldRedirectToAdmin({ pathname: path, platformAdmin: platformAdmin === true, role: accountRole });
+  const waitingAdmin = Boolean(session && !demoMode && !isNutri && !isAdminPath(path) && platformAdmin === null);
   const toggleTheme = () => setTheme((current) => current === 'dark' ? 'light' : 'dark');
 
   useEffect(() => {
@@ -106,6 +113,22 @@ export function PlanVExperience() {
   }, [sessionUserId, isPatient, legalOk, boot,publicSlug,teamPath]);
 
   useEffect(() => {
+    if (!sessionUserId) { setPlatformAdmin(false); return; }
+    let cancelled = false;
+    setPlatformAdmin(null);
+    void isPlatformAdmin().then((value) => { if (!cancelled) setPlatformAdmin(value); });
+    return () => { cancelled = true; };
+  }, [sessionUserId]);
+
+  useEffect(() => {
+    if (!redirectAdmin || typeof window === 'undefined') return;
+    if (mfa.step === 'checking' || mfa.step === 'verify' || mfa.step === 'enroll') return;
+    const href = sameOriginUrl(window.location.origin, '/admin');
+    if (!href || href === window.location.href) return;
+    window.location.replace(href);
+  }, [redirectAdmin, mfa.step]);
+
+  useEffect(() => {
     if (isNutri) setView('pro');
     if (isPatient) setView('patient');
   }, [isNutri, isPatient]);
@@ -150,15 +173,27 @@ export function PlanVExperience() {
     return <div className={`plan-v-app${darkMode ? ' dark' : ''}`}><PwaChrome install={false} /><ConsentScreen /></div>;
   }
 
+  // Hasta saber si administra la plataforma no se muestra «sin vincular». El código de /admin se pide en esa ruta.
+  if ((waitingAdmin || redirectAdmin) && !mfa.step) {
+    return (
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <PwaChrome install={false} />
+        <EntryStatus title="Cargando…" />
+      </div>
+    );
+  }
+
   if(teamPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace darkMode={darkMode} onSignOut={()=>void signOut()}/></Suspense>;}
 
   // /admin: centro de mando con datos reales de solo lectura.
   if ((session || demoMode) && isAdminPath(window.location.pathname)) {
     return (
-      <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
-        <PwaChrome />
-        <AdminCrm adminName={profile?.full_name || undefined} />
-      </Suspense>
+      <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
+        <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
+          <PwaChrome />
+          <AdminCrm adminName={profile?.full_name || undefined} />
+        </Suspense>
+      </div>
     );
   }
 
@@ -227,6 +262,7 @@ export function PlanVExperience() {
           allowRoleSwitch={canUseDemoRoleSwitch({ demoMode, hasSession: Boolean(session) })}
           onSignOut={session ? signOut : undefined}
           userName={profile?.full_name || undefined}
+          showAdmin={showAdminAccess({ platformAdmin: platformAdmin === true, role: accountRole })}
         />
       </Suspense>
     );

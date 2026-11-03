@@ -3,6 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState, type R
 import { legalAcceptance } from '../legal';
 import { googleSignupMetadata, PENDING_GOOGLE_SIGNUP_KEY, rememberGoogleSignup, takeGoogleSignup } from './google-signup';
 import { rememberAdminReturn } from './admin-return';
+import { rememberReturnPath, sameOriginUrl } from './oauth-return';
 import { rememberTeamReturn } from './team-return';
 import type { Session, User } from '@supabase/supabase-js';
 import { getProfile, googleSignInEnabled, supabase, supabaseConfigured, type Profile } from '../lib/supabase';
@@ -227,10 +228,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (store) rememberGoogleSignup(store, { professional, acceptedLegal });
       if (store && typeof window !== 'undefined') rememberAdminReturn(store, window.location.pathname);
       if (store && typeof window !== 'undefined') rememberTeamReturn(store, window.location.pathname);
+      if (typeof window !== 'undefined') {
+        try { rememberReturnPath(window.sessionStorage, window.location.pathname); } catch { /* Sin almacenamiento se vuelve a la raíz. */ }
+      }
+      const redirectTo = typeof window === 'undefined' ? undefined : sameOriginUrl(window.location.origin, window.location.pathname);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: typeof window === 'undefined' ? undefined : window.location.origin,
+          redirectTo,
           queryParams: { prompt: 'select_account' },
         },
       });
