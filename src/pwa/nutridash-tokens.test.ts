@@ -37,3 +37,15 @@ describe('degradé de los botones principales', () => {
     expect(svg).toContain('<image');
   });
 });
+
+describe('logo en vectores', () => {
+  it('el isotipo SVG usa la cinta azul → celeste → lima y la hoja lima, sin imágenes adentro', () => {
+    for (const archivo of ['nutridash-isotipo.svg', 'nutridash-marca.svg']) {
+      const svg = readFileSync(new URL(`../../public/brand/${archivo}`, import.meta.url), 'utf8');
+      expect(svg, archivo).toContain('#0054D3');
+      expect(svg, archivo).toContain('#00D5FD');
+      expect(svg, archivo).toContain('#9EFA7E');
+      expect(svg, archivo).not.toContain('<image');
+    }
+  });
+});
