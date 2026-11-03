@@ -8,6 +8,8 @@ import { runFullAiCheck } from './ai-check-full.js';
 import { MFA_REQUIRED_MESSAGE, tokenAal } from '../security/mfa.js';
 import * as centro from './centro.js';
 import { registerAdminAudit } from './audit.js';
+import { adminPlanBoard, adminReplaceTesters, adminUpdatePlan } from '../billing-platform/plan-admin.js';
+import { payerEmail } from '../billing-platform/repository.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -34,6 +36,17 @@ const nutritionistCreateSchema = z.object({
 }).strict().refine((input) => input.mode === 'invite' ? input.password === undefined : input.password !== undefined);
 const testAccountsSchema = z.object({ email_base: emailSchema, password: passwordSchema }).strict();
 const noteSchema = z.object({ note: z.string().max(500) }).strict();
+const pesosSchema = z.number().int().positive().max(100_000_000);
+const planPriceSchema = z.object({
+  monthly_pesos: pesosSchema,
+  annual_pesos: pesosSchema,
+  founder_monthly_pesos: pesosSchema,
+  founder_annual_pesos: pesosSchema,
+  active: z.boolean(),
+}).strict();
+const testersSchema = z.object({
+  emails: z.array(z.string().trim().toLowerCase().max(254).pipe(z.email())).max(50),
+}).strict();
 
 /** Para las altas: JSON roto es 400; datos que no cumplen, 422. */
 async function strictBody<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
@@ -111,6 +124,27 @@ export function registerAdminRoutes(app: Hono) {
   app.get('/api/admin/centro/seguridad', async (c) => {
     const persistent = await requireAdmin(c);
     return c.json({ seguridad: await centro.loadSeguridad(persistent), source: source(persistent) });
+  });
+
+  app.get('/api/admin/planes', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...(await adminPlanBoard(persistent)), source: source(persistent) });
+  });
+
+  app.put('/api/admin/planes/:code', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await body(c, planPriceSchema);
+    const auth = c.get('auth');
+    const userId = persistent && 'userId' in auth ? auth.userId : null;
+    const email = userId ? await payerEmail(userId) : 'admin@local';
+    if (!email) throw new repo.CareError(409, 'Tu cuenta no tiene un mail para anotar el cambio.');
+    return c.json({ ...(await adminUpdatePlan(c.req.param('code'), input, { userId, email }, persistent)), source: source(persistent) });
+  });
+
+  app.put('/api/admin/planes-testers', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await body(c, testersSchema);
+    return c.json({ ...(await adminReplaceTesters(input.emails, persistent)), source: source(persistent) });
   });
 
   app.put('/api/admin/service/settings', async (c) => {

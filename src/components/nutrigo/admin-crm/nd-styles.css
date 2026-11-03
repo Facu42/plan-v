@@ -288,6 +288,13 @@ svg { display: block; flex: 0 0 auto; }
 .nd-btn.is-primary { background: var(--deep); border-color: var(--deep); color: #f7f4e9; box-shadow: 0 10px 24px -14px rgba(8, 58, 48, .9); }
 .nd-btn.is-primary:hover { background: #0b4a3c; border-color: #0b4a3c; }
 .nd-btn.is-lime { background: var(--lime); border-color: var(--lime); color: #22380c; }
+.nd-btn.is-action {
+  background: linear-gradient(118deg, #f3f8e8 0%, #c8ed88 100%);
+  border-color: transparent;
+  color: #10241c;
+  font-weight: 650;
+}
+.nd-btn.is-action:hover { background: linear-gradient(118deg, #e7f7c0 0%, #9ed456 100%); }
 .nd-btn.is-lime:hover { background: #cdef7b; }
 .nd-btn.is-ghost { background: transparent; border-color: transparent; color: var(--ink-2); }
 .nd-btn.is-ghost:hover { background: var(--surface-3); }
@@ -869,6 +876,53 @@ svg { display: block; flex: 0 0 auto; }
    Este contenedor ocupa toda la pantalla y define la base que antes
    heredaba el body del prototipo.
    ============================================================ */
+.nd-shell.is-planes {
+  background:
+    radial-gradient(90% 50% at 100% 0%, rgba(200, 237, 136, .16), transparent 46%),
+    #072f27;
+  color: #f4f0e4;
+  --bg: #072f27;
+  --surface: #0e3d33;
+  --surface-2: #11483c;
+  --surface-3: #0a332b;
+  --ink: #f4f0e4;
+  --ink-2: #d5e4d8;
+  --muted: #9bb5a6;
+  --line: rgba(255, 255, 255, .12);
+  --line-soft: rgba(255, 255, 255, .08);
+  --line-strong: rgba(255, 255, 255, .2);
+}
+.nd-shell.is-planes .nd-topbar {
+  background: rgba(7, 47, 39, .92);
+  color: #f4f0e4;
+}
+.nd-shell.is-planes .nd-crumb-title { color: #f4f0e4; }
+.nd-planes-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.nd-planes-card, .nd-planes-side, .nd-planes-history { display: flex; flex-direction: column; gap: 14px; }
+.nd-planes-side, .nd-planes-history { margin-top: 14px; }
+.nd-planes-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.nd-planes label { display: flex; flex-direction: column; gap: 6px; font-size: 12px; color: var(--muted); }
+.nd-planes input, .nd-planes textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: var(--surface-3);
+  color: var(--ink);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font: inherit;
+}
+.nd-planes input { height: 40px; }
+.nd-planes-check { flex-direction: row; align-items: center; color: var(--ink-2); }
+.nd-planes-check input { width: auto; height: auto; }
+.nd-planes-msg { margin: 0 0 14px; color: var(--ink-2); }
+.nd-planes-msg.is-error { color: #ffb4a4; }
+.nd-planes-log { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.nd-planes-log li { display: grid; grid-template-columns: 120px 1fr 1.2fr auto; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+.nd-planes .nd-btn.is-action { align-self: flex-start; }
+@media (max-width: 900px) {
+  .nd-planes-grid, .nd-planes-fields, .nd-planes-log li { grid-template-columns: 1fr; }
+}
+
 .nd-admin-crm {
   position: fixed; inset: 0; z-index: 200;
   overflow: auto; overflow-x: hidden;

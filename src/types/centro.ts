@@ -136,3 +136,33 @@ export type CentroSeguridad = {
   cuentas: CentroCuentaSeguridad[];
   advertencias: CentroAlerta[];
 };
+
+export type PlanPrecio = {
+  code: string;
+  name: string;
+  monthly_pesos: number;
+  annual_pesos: number;
+  founder_monthly_pesos: number;
+  founder_annual_pesos: number;
+  active: boolean;
+  listed: boolean;
+};
+
+export type PlanCambio = {
+  id: string;
+  plan_code: string;
+  actor_email: string;
+  monthly_pesos: number;
+  annual_pesos: number;
+  founder_monthly_pesos: number;
+  founder_annual_pesos: number;
+  active: boolean;
+  created_at: string;
+};
+
+export type PlanesBoard = {
+  plans: PlanPrecio[];
+  changes: PlanCambio[];
+  testers: string[];
+  editable: boolean;
+};

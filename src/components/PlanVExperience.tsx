@@ -153,7 +153,7 @@ export function PlanVExperience() {
   if(teamPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace darkMode={darkMode} onSignOut={()=>void signOut()}/></Suspense>;}
 
   // /admin: centro de mando con datos reales de solo lectura.
-  if (session && isAdminPath(window.location.pathname)) {
+  if ((session || demoMode) && isAdminPath(window.location.pathname)) {
     return (
       <Suspense fallback={<div className="plan-v-app loading-screen" role="status">Cargando…</div>}>
         <PwaChrome />

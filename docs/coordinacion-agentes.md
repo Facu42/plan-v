@@ -1,3 +1,4 @@
+02/11 · Cursor · Precios de los planes de Nutridash editables desde /admin, con historial y un plan de prueba oculto que no usa el cupo de fundadora. Migración `20261102233000_platform_plan_prices.sql` sin aplicar. Rama `cursor/planes-precios-admin-3f0e`. Sin producción ni merge.
 02/11 · Cursor · El respaldo diario también guarda las filas de auth.users y auth.identities, y las carga antes que el resto. Sin eso, la clave de notification_preferences no se puede crear. Rama `cursor/respaldo-auth-users-3f0e`. Sin producción ni merge.
 02/11 · Cursor · El respaldo diario también vuelca el esquema private y prepara auth, storage y extensions en el Postgres vacío. La vista que llama a private.patient_goal_updates ya no corta la restauración. El archivo cifrado se guarda aunque esa prueba falle. Rama `cursor/respaldo-schema-private-3f0e`. Sin producción ni merge.
 02/11 · Cursor · Foto confirmada, rebase sobre main (ya con #268 y #269). La migración de la foto sigue sin aplicar. Sin merge.
@@ -98,6 +99,7 @@ visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
 |---|---|---|---|
+| Precios de planes desde /admin | Cursor | `cursor/planes-precios-admin-3f0e` | El alta nuevo lee el monto de la base. El admin edita pesos, activa o pausa, ve quién cambió qué y arma la lista del plan de prueba. Ese plan no sale en el catálogo ni usa cupo de fundadora. Migración sin aplicar. Sin producción ni merge |
 | Foto confirmada (P1) | Cursor | `cursor/foto-confirmada-p1-3f0e` | Cola de fotos, texto para la paciente y umbral del indicador. Migración sin aplicar. El permiso de la foto ya se exige; el texto legal queda como gap. Main ya incluye Hoy y el respaldo 17. Sin producción. [Nota y paso 10](foto-confirmada-p1.md) |
 | Hoy / Up next de la nutri | Cursor | `cursor/hoy-up-next-91ec` | Una acción por paciente. No se envía sola. `done_at` sin aplicar. [Nota y paso 10](hoy-up-next-p3.md). En main. Sin producción |
 | Foto de /slug, audio de la consulta y diagnóstico de avisos | Cursor | `cursor/borrador-foto-audio-avisos-d306` | La foto no sale en /slug hasta Publicar cambios. La ficha muestra permiso, subida, transcripción y si el audio se borró o sigue, con Reintentar. La paciente tiene un diagnóstico de avisos; la prueba solo anda en local o staging. Sin migraciones ni producción. [Informe](borrador-foto-audio-avisos.md) |
@@ -165,6 +167,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261102233000_platform_plan_prices` | Cursor | Precios editables, historial y lista del plan de prueba. Escrita. Sin aplicar. Hace falta la frase de Facundo |
 | `20261102140000_meal_photo_review_stamp` | Cursor | Foto confirmada. Sello de revisión y nombre de la nutri. Escrita y probada en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
 | `20261102160000_ai_brief_done_at` | Cursor | Hoy. Columna `done_at` para contar acciones hechas. Escrita, sin aplicar. Hace falta la frase de Facundo |
 | `20261101230000_consultation_session_visible` | Cursor | Lista de consultas. Escrita y probada solo en PostgreSQL local. Sin aplicar. Hace falta la frase de Facundo |
@@ -198,6 +201,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **2/11 · Cursor · Precios de planes en /admin (HOLD)** · Rama `cursor/planes-precios-admin-3f0e`. El próximo alta toma mensual, anual, fundadora y si está activo desde la base. Lo ya cobrado no se reescribe. En /admin, Planes y precios deja editar los pesos, pausar un plan y ver quién lo cambió. El plan Prueba no aparece para el resto y no consume el cupo de 30. Migración nueva, sin aplicar. Sin producción ni merge.
 - **2/11 · Cursor · Foto confirmada al día con main** · Main ya tiene el riel Hoy (#268) y el respaldo en Postgres 17 (#269). Esta rama los incorpora. La migración de la foto sigue sin aplicar. Sin merge.
 - **2/11 · Cursor · Foto confirmada, gap de la línea de tiempo (HOLD)** · Cifra marcó PASA_CON_GAPS. La respuesta de la paciente recorta la línea de tiempo: no sale la nota interna ni el id de quien revisó. Prueba JSON nueva. Migración sin aplicar. Sin producción.
 - **2/11 · Cursor · Foto confirmada P1 (HOLD)** · La foto ya estaba en main. Este corte deja la cola de la más vieja, Confirmar y Ajustar, el texto con el nombre de la nutri y el indicador desde confianza 0,45. La nota interna no sale en la API de la paciente. Migración nueva, sin aplicar. El texto del permiso de la foto no se reescribió. Veredicto HOLD hasta Facundo y la re-revisión de Cifra. [Nota y paso 10](foto-confirmada-p1.md). Sin producción.

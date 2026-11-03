@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ApiError } from '../../../api/client';
-import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../../../types/centro';
+import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad, PlanesBoard } from '../../../types/centro';
 import { CobrosView, CentroState, NutrisView, PacientesView, ResumenView, SaludView, SeguridadView } from './centro-views';
+import { PlanesPrecios } from './PlanesPrecios';
 import { initials } from './centro-format';
 import { NdIcon } from './nd-icon';
 import './nd-styles.css';
 
-export const CENTRO_VIEWS = ['resumen', 'nutris', 'pacientes', 'cobros', 'salud', 'seguridad'] as const;
+export const CENTRO_VIEWS = ['resumen', 'nutris', 'pacientes', 'cobros', 'planes', 'salud', 'seguridad'] as const;
 export type CentroView = (typeof CENTRO_VIEWS)[number];
 
 const NAV: { group: string; items: { id: CentroView; label: string; icon: string }[] }[] = [
@@ -15,6 +16,7 @@ const NAV: { group: string; items: { id: CentroView; label: string; icon: string
     { id: 'nutris', label: 'Nutris', icon: 'users' },
     { id: 'pacientes', label: 'Pacientes', icon: 'users' },
     { id: 'cobros', label: 'Cobros', icon: 'peso' },
+    { id: 'planes', label: 'Planes y precios', icon: 'peso' },
   ] },
   { group: 'Sistema', items: [
     { id: 'salud', label: 'Salud', icon: 'bolt' },
@@ -27,6 +29,7 @@ const TITLES: Record<CentroView, [string, string]> = {
   nutris: ['Cuentas', 'Nutris'],
   pacientes: ['Agregados', 'Pacientes'],
   cobros: ['Plataforma', 'Cobros'],
+  planes: ['Plataforma', 'Planes y precios'],
   salud: ['Operación', 'Salud'],
   seguridad: ['Acceso', 'Seguridad'],
 };
@@ -41,6 +44,7 @@ type CentroData = {
   nutris?: CentroNutri[];
   pacientes?: CentroPacientes;
   cobros?: CentroCobros;
+  planes?: PlanesBoard;
   salud?: CentroSalud;
   seguridad?: CentroSeguridad;
 };
@@ -50,6 +54,7 @@ function loadView(view: CentroView) {
   if (view === 'nutris') return api.getCentroNutris().then((row) => ({ nutris: row.nutris }));
   if (view === 'pacientes') return api.getCentroPacientes().then((row) => ({ pacientes: row.pacientes }));
   if (view === 'cobros') return api.getCentroCobros().then((row) => ({ cobros: row.cobros }));
+  if (view === 'planes') return api.getPlanes().then((row) => ({ planes: { plans: row.plans, changes: row.changes, testers: row.testers, editable: row.editable } }));
   if (view === 'salud') return api.getCentroSalud().then((row) => ({ salud: row.salud }));
   return api.getCentroSeguridad().then((row) => ({ seguridad: row.seguridad }));
 }
@@ -111,6 +116,7 @@ export function CentroMando({ adminName }: { adminName?: string }) {
   else if (view === 'nutris' && data.nutris) body = <NutrisView data={data.nutris} />;
   else if (view === 'pacientes' && data.pacientes) body = <PacientesView data={data.pacientes} />;
   else if (view === 'cobros' && data.cobros) body = <CobrosView data={data.cobros} />;
+  else if (view === 'planes' && data.planes) body = <PlanesPrecios data={data.planes} onSaved={(planes) => setData((current) => ({ ...current, planes }))} />;
   else if (view === 'salud' && data.salud) body = <SaludView data={data.salud} />;
   else if (view === 'seguridad' && data.seguridad) body = <SeguridadView data={data.seguridad} />;
   else body = <CentroState title="Cargando…" description="Estamos trayendo los datos reales del servicio." />;
@@ -155,7 +161,7 @@ export function CentroMando({ adminName }: { adminName?: string }) {
             </div>
           </div>
         </aside>
-        <div className="nd-shell">
+        <div className={`nd-shell${view === 'planes' ? ' is-planes' : ''}`}>
           <header className="nd-topbar" id="topbar">
             <button type="button" className="nd-icon-btn nd-menu-btn" aria-label="Abrir menú" onClick={() => setSidebarOpen((open) => !open)}>
               <NdIcon name="menu" />

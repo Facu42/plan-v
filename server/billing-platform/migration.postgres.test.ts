@@ -47,13 +47,23 @@ afterAll(async () => { await db?.close(); });
 describe('cobro de la plataforma', () => {
   it('guarda los tres planes y el cupo de 30 fundadoras con bloqueo', async () => {
     const plans = await db.query<{ code: string; annual_amount_cents: string; max_ai_meal_photos_month: number | null }>(
-      'select code, annual_amount_cents::text, max_ai_meal_photos_month from public.platform_plans order by monthly_amount_cents',
+      'select code, annual_amount_cents::text, max_ai_meal_photos_month from public.platform_plans where listed order by monthly_amount_cents',
     );
     expect(plans.rows.map((row) => [row.code, row.annual_amount_cents, row.max_ai_meal_photos_month])).toEqual([
       ['arranque', '23904000', 150],
       ['pro', '47904000', 600],
       ['consultorio', '86304000', null],
     ]);
+    const hidden = await db.query<{ code: string; monthly: string; listed: boolean }>(
+      "select code, monthly_amount_cents::text as monthly, listed from public.platform_plans where code = 'prueba'",
+    );
+    expect(hidden.rows).toEqual([{ code: 'prueba', monthly: '10000', listed: false }]);
+    expect(await asUser<{ code: string }>(nutriA, 'select code from public.platform_plans order by code')).toEqual([
+      { code: 'arranque' }, { code: 'consultorio' }, { code: 'pro' },
+    ]);
+    await expect(asUser(nutriA, "update public.platform_plans set monthly_amount_cents = 100 where code = 'arranque'")).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, 'select email from public.platform_plan_testers')).rejects.toMatchObject({ code: '42501' });
+    await expect(asUser(nutriA, 'select id from public.platform_plan_changes')).rejects.toMatchObject({ code: '42501' });
     const source = await db.query<{ prosrc: string }>("select prosrc from pg_proc where proname = 'claim_platform_founder_slot'");
     expect(source.rows[0].prosrc.toLowerCase()).toContain('for update');
     for (let i = 0; i < 30; i += 1) expect((await db.query<{ ok: boolean }>('select public.claim_platform_founder_slot() as ok')).rows[0].ok).toBe(true);

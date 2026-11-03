@@ -1,7 +1,7 @@
 import { request } from './client';
 
 export type BillingCycle = 'monthly' | 'annual';
-export type PlanCode = 'arranque' | 'pro' | 'consultorio';
+export type PlanCode = 'arranque' | 'pro' | 'consultorio' | 'prueba';
 
 export type PlatformPlanCard = {
   code: PlanCode;
@@ -13,6 +13,7 @@ export type PlatformPlanCard = {
   max_active_patients: number | null;
   max_nutritionists: number;
   max_ai_meal_photos_month: number | null;
+  listed?: boolean;
 };
 
 export type PlatformBillingView = {

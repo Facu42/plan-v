@@ -4,7 +4,7 @@ import { getSessionToken } from '../lib/supabase';
 import type { ClinicalNoteRecord, PatientIntakeView, ProfessionalIntakeView } from '../types/intake';
 import type { PrivacyRequestKind, PrivacyRequestView } from '../types/privacy';
 import { resolveApiUrl } from './origin';
-import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad } from '../types/centro';
+import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroSalud, CentroSeguridad, PlanesBoard } from '../types/centro';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
 import type { HabitReminders } from '../habit-reminders';
@@ -268,6 +268,11 @@ export const api = {
   getCentroCobros: () => request<{ cobros: CentroCobros }>('/api/admin/centro/cobros'),
   getCentroSalud: () => request<{ salud: CentroSalud }>('/api/admin/centro/salud'),
   getCentroSeguridad: () => request<{ seguridad: CentroSeguridad }>('/api/admin/centro/seguridad'),
+  getPlanes: () => request<PlanesBoard & { source?: string }>('/api/admin/planes'),
+  savePlan: (code: string, body: { monthly_pesos: number; annual_pesos: number; founder_monthly_pesos: number; founder_annual_pesos: number; active: boolean }) =>
+    request<PlanesBoard & { source?: string }>(`/api/admin/planes/${code}`, { method: 'PUT', body: JSON.stringify(body) }),
+  savePlanTesters: (emails: string[]) =>
+    request<PlanesBoard & { source?: string }>('/api/admin/planes-testers', { method: 'PUT', body: JSON.stringify({ emails }) }),
   getServiceBoard: () => request<{ board: ServiceBoard }>('/api/admin/service'),
   saveServiceSettings: (settings: ServiceSettings) =>
     request<{ settings: ServiceSettings }>('/api/admin/service/settings', { method: 'PUT', body: JSON.stringify(settings) }),
