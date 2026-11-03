@@ -151,7 +151,7 @@ export function armarPendientes(entrada: DatosInicio, extras: Readonly<Record<st
   for (const [item, ...resto] of grupos.values()) {
     if (!item || item.kind === 'quiet') continue;
     const cfg = CONFIG[item.kind];
-    const sub = resto.length ? `${resto.length + 1} ${cfg.unidad} · ${[item, ...resto].map(fila => fila.title).filter((t, i, todos) => todos.indexOf(t) === i).join(' · ')}` : item.title;
+    const sub = resto.length ? `${resto.length + 1} ${cfg.unidad} · ${[item, ...resto].map(fila => fila.title.split(' · ').pop() ?? fila.title).filter((t, i, todos) => todos.indexOf(t) === i).join(' · ')}` : item.title;
     filas.push({ key: item.id, filtro: 'hacer', tono: cfg.tono, icono: cfg.icono, titulo: cfg.titulo(item.patient_name), sub, tipo: cfg.tipo, detalle: detalleTarea(item, porId.get(item.patient_id), data, extraDe(item.patient_id), proxima) });
   }
   if (entrada.reservas.length) {
