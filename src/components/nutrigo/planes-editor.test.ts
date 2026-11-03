@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { PlanItemView } from '../../types/plans';
 import {
-  cambiarCantidad, comidaDelDia, controlEntrega, copiarPlan, duplicarDia, filasDeVersiones,
-  finVisible, listaDeCompras, lunesDeSemana, pasaElTope, quitarLinea, semanasDelPeriodo, sumarMacros,
+  cambiarCantidad, cambiarComida, comidaDelDia, controlEntrega, copiarPlan, duplicarDia, filasDeVersiones,
+  finVisible, listaDeCompras, lunesDeSemana, pasaElTope, quitarLinea, semanasDelPeriodo, sumarComponente, sumarMacros,
 } from './planes-editor';
 
 function plato(extra: Partial<PlanItemView> = {}): PlanItemView {
@@ -94,5 +94,34 @@ describe('editor de la semana', () => {
     expect(finVisible('2026-10-19', '2026-11-20', true)).toBe('2026-11-20');
     expect(pasaElTope('2026-10-19', '2026-11-09')).toBe(false);
     expect(pasaElTope('2026-10-19', '2026-11-10')).toBe(true);
+  });
+
+  it('suma un alimento a una comida vacía y a una que ya tiene cosas, sin repetir fecha y comida', () => {
+    const arroz = { kind: 'text', id: 'c-1', free_text: 'Arroz integral', public_note: '', portions: 1 } as const;
+    const solo = sumarComponente([], '2026-10-26', 'Cena', arroz);
+    expect(solo).toHaveLength(1);
+    expect(solo[0]).toMatchObject({ for_date: '2026-10-26', slot: 'Cena', components: [arroz] });
+    const otro = { kind: 'text', id: 'c-2', free_text: 'Ensalada', public_note: '', portions: 1 } as const;
+    const dos = sumarComponente(solo, '2026-10-26', 'Cena', otro);
+    expect(dos).toHaveLength(1);
+    expect(dos[0]?.components?.map(pieza => pieza.id)).toEqual(['c-1', 'c-2']);
+  });
+
+  it('al sumar a una comida que tenía una receta suelta, conserva la receta como parte', () => {
+    const arroz = { kind: 'text', id: 'c-1', free_text: 'Arroz', public_note: '', portions: 1 } as const;
+    const con = sumarComponente([plato()], '2026-10-26', 'Almuerzo', arroz);
+    expect(con).toHaveLength(1);
+    expect(con[0]?.recipe_id).toBeNull();
+    expect(con[0]?.components).toHaveLength(2);
+    expect(con[0]?.components?.[0]).toMatchObject({ kind: 'recipe', recipe_id: 'rec-1', portions: 1 });
+  });
+
+  it('cambiar la comida reemplaza lo que había y no toca otras comidas', () => {
+    const items = [plato(), plato({ id: 'item-2', slot: 'Cena' })];
+    const arroz = { kind: 'text', id: 'c-1', free_text: 'Arroz', public_note: '', portions: 1 } as const;
+    const nuevo = cambiarComida(items, '2026-10-26', 'Almuerzo', arroz);
+    expect(nuevo).toHaveLength(2);
+    expect(nuevo.find(item => item.slot === 'Almuerzo')?.components).toEqual([arroz]);
+    expect(nuevo.find(item => item.slot === 'Cena')?.id).toBe('item-2');
   });
 });

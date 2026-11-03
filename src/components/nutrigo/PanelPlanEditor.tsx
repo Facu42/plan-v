@@ -11,6 +11,8 @@ import { mealPlanDraftSchema, type PlanItemView, type PlanSlot, type PlanVersion
 import { emptyGuidance, type PlanGuidance } from '../../types/plan-guidance';
 import { FigmaRecordDialog } from './FigmaPatientFront';
 import { AtajoAsistente, CajonAsistente, CompartirPlan, GestionPlan, OpcionesImpresion, type EstadoTarjeta, type LineaPropuesta, type MensajeAsistente, type OpcionesPdf, type ViaCompartir } from './PanelPlanAsistente';
+import { componentTitle as componenteTitulo, type PlanComponentView } from '../../types/plan-components';
+import { PanelPlanSumar } from './PanelPlanSumar';
 import { PanelV29Icon } from './PanelV29Icon';
 import { PlanPrintDialog } from './PlanPrintDialog';
 import { AVISO_COMPARTIR_APP, lineasDePropuesta } from './planes-asistente';
@@ -21,13 +23,12 @@ import {
   pedirPropuesta, propuestaDe, publicarPlanRevisado, recortarPreferencias,
 } from './planes-parte-3';
 import {
-  cambiarCantidad, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
+  cambiarCantidad, cambiarComida, cambiarNota, COMIDAS_EDITOR, comidaDelDia, comidasDelDia, controlEntrega,
   copiarPlan, DIAS_CORTOS, DIAS_LARGOS, duplicarDia, fechasDeSemana, filasDeVersiones, HORAS_EDITOR,
-  finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo,
+  finVisible, indiceLunes, listaDeCompras, lunesDeSemana, paraGuardar, pasaElTope, periodoDe, quitarLinea, semanaInicial, semanasDelPeriodo, sumarComponente,
   sumarDias, sumarMacros, type GrupoCompra, type MacrosDia,
 } from './planes-editor';
 
-const AVISO_PLATO = 'Próximamente. Sumar o cambiar un plato queda para después. Las porciones de lo que ya está en el plan se editan acá.';
 
 export function textoListaCompras(grupos: readonly GrupoCompra[], semana: number, nombre: string) {
   const lineas = [`Lista de compras · ${nombre} · semana ${semana}`, ''];
@@ -133,6 +134,7 @@ export function PanelPlanEditor({
   const [deshacer, setDeshacer] = useState<PlanItemView[][]>([]);
   const [rehacer, setRehacer] = useState<PlanItemView[][]>([]);
   const [guardando, setGuardando] = useState<'listo' | 'guardando' | 'error'>('listo');
+  const [sumar, setSumar] = useState<{ fecha: string; slot: PlanSlot; modo: 'sumar' | 'cambiar' } | null>(null);
   const [vacio, setVacio] = useState(false);
   const [publicando, setPublicando] = useState<'listo' | 'publicando' | 'error'>('listo');
   const [propuesta, setPropuesta] = useState<AiJobView | null>(null);
@@ -535,6 +537,16 @@ export function PanelPlanEditor({
     void guardar(siguiente);
   }
 
+  function elegirComponente(componente: PlanComponentView) {
+    if (!sumar) return;
+    const siguiente = sumar.modo === 'cambiar'
+      ? cambiarComida(items, sumar.fecha, sumar.slot, componente)
+      : sumarComponente(items, sumar.fecha, sumar.slot, componente);
+    setSumar(null);
+    aplicar(siguiente);
+    onAviso(`${componenteTitulo(componente)} quedó en ${sumar.slot.toLocaleLowerCase('es-AR')} del borrador.`);
+  }
+
   function elegirDestino(hacia: string) {
     const copia = duplicarDia(items, fecha, hacia);
     setDestino(false);
@@ -577,6 +589,7 @@ export function PanelPlanEditor({
 
   return <>
     <div style={{ display: 'contents' }} inert={armando}>
+    {sumar ? <PanelPlanSumar onElegir={elegirComponente} onCerrar={() => setSumar(null)} /> : null}
     {programar && plan ? <PanelPlanProgramar plan={plan} bloqueo={distinto || guardando === 'guardando' ? 'Guardá los cambios antes de programar.' : bloqueoAlPublicar({ hayPlan: !!plan, esBorrador: version?.status === 'draft', cantidad: items.length, vacias: control.vacias, revisado })} onPlan={onPlan} onAviso={onAviso} onCerrar={() => setProgramar(false)} /> : null}
     {reutilizar === 'guardar' ? <GuardarPlantilla guardar={async () => {
       if (!items.length) { onAviso('Cargá al menos una comida antes de guardar la plantilla.'); return null; }
@@ -722,8 +735,8 @@ export function PanelPlanEditor({
                   <input className="pux-hour" type="text" inputMode="numeric" maxLength={5} data-peh={indice} value={horas[comida.slot] || comida.hora} aria-label={`Hora de ${comida.slot}`} onChange={evento => setHoras(previo => ({ ...previo, [comida.slot]: evento.target.value }))} onBlur={() => { if (items.length) void guardar(items); }} />
                   <span className="pux-meal-kcal num">{comida.macros.kcal == null ? 'Sin dato' : <>{numero(comida.macros.kcal)}<small>kcal</small></>}</span>
                   <div className="pema">
-                    <button type="button" className="ibtn" aria-label={`Cambiar plato de ${comida.slot}`} title="Cambiar plato" onClick={() => onAviso(AVISO_PLATO)}><PanelV29Icon name="swap" size={14} /></button>
-                    <button type="button" className="ibtn" aria-label={`Agregar alimento a ${comida.slot}`} title="Agregar alimento" onClick={() => onAviso(AVISO_PLATO)}><PanelV29Icon name="plus" size={14} /></button>
+                    <button type="button" className="ibtn" aria-label={`Cambiar plato de ${comida.slot}`} title="Cambiar plato" onClick={() => setSumar({ fecha, slot: comida.slot, modo: 'cambiar' })}><PanelV29Icon name="swap" size={14} /></button>
+                    <button type="button" className="ibtn" aria-label={`Agregar alimento a ${comida.slot}`} title="Agregar alimento" onClick={() => setSumar({ fecha, slot: comida.slot, modo: 'sumar' })}><PanelV29Icon name="plus" size={14} /></button>
                   </div>
                 </div>
                 {comida.lineas.length ? <div className="peis" id={`pux-ingredients-${indice}`} hidden={!abierta}>
@@ -798,7 +811,7 @@ export function PanelPlanEditor({
         <div className="r29-note"><PanelV29Icon name="file" size={15} /><span><b>{publicado ? 'La paciente conserva su plan publicado.' : 'Este plan todavía no se entregó.'}</b><br />Los cambios se preparan en borrador hasta que los revises y publiques.</span></div>
         </div>
       </div> : null}
-      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={() => void abrirImpresion()} /> : null}
+      {pestana === 'semana' && modo === 'semana' ? <Semana items={items} fechas={fechas} horas={horas} metaKcal={metaKcal} dia={dia} onDia={indice => { setDia(indice); setModo('dia'); }} onAviso={onAviso} onImprimir={() => void abrirImpresion()} onColacion={() => setSumar({ fecha, slot: 'Colación', modo: 'sumar' })} /> : null}
       {pestana === 'ind' ? <Indicaciones guidance={guidance} onChange={siguiente => { setGuidance(siguiente); if (items.length) void guardar(items, { guidance: siguiente }); else onAviso('El borrador necesita al menos una comida para guardar las indicaciones.'); }} /> : null}
       {pestana === 'compras' ? <Compras items={items} fechas={fechasDeSemana(inicio, fin, semana)} semana={semana + 1} onEntrega={() => setPestana('entrega')} onAviso={onAviso} onDescargar={descargarCompras} /> : null}
       {pestana === 'ver' ? <Versiones nombre={primer} filas={filasDeVersiones(version, historial)} historial={historial.length ? historial : version ? [version] : []} borrador={version?.status === 'draft' ? 'Pendientes de publicar' : 'Sin cambios nuevos'} titulo={tituloPlan} onRestaurar={id => {
@@ -846,7 +859,7 @@ function parte(macros: MacrosDia, clave: 'carbs' | 'protein' | 'fat') {
   return Math.round((macros[clave] ?? 0) / total * 100);
 }
 
-function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimir }: {
+function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimir, onColacion }: {
   items: PlanItemView[];
   fechas: string[];
   horas: Partial<Record<PlanSlot, string>>;
@@ -855,6 +868,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimi
   onDia: (indice: number) => void;
   onAviso: (texto: string) => void;
   onImprimir: () => void;
+  onColacion: () => void;
 }) {
   return <div className="fx"><div className="c"><section className="fxp g">
     <header><h3>Semana</h3><span className="m">tocá un día o una comida</span><span className="sp" /></header>
@@ -873,7 +887,7 @@ function Semana({ items, fechas, horas, metaKcal, dia, onDia, onAviso, onImprimi
       })}
     </div>
     <div className="pfoot">
-      <button type="button" className="sbtn" onClick={() => onAviso(AVISO_PLATO)}>Agregar colación</button>
+      <button type="button" className="sbtn" onClick={onColacion}>Agregar colación</button>
       <button type="button" className="sbtn" onClick={() => onAviso('Próximamente. Duplicar la semana completa queda para después. Duplicar un día ya está en la vista Día.')}>Duplicar semana</button>
       <button type="button" className="sbtn" onClick={onImprimir}><PanelV29Icon name="dl" size={13} />Descargar PDF</button>
     </div>

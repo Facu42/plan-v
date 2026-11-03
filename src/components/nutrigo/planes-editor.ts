@@ -237,6 +237,41 @@ export function quitarLinea(items: PlanItemView[], clave: string): PlanItemView[
   });
 }
 
+/** Partes que ya tiene una comida, para poder sumarle otra sin perder lo que había. */
+function partesDe(item: PlanItemView): PlanComponentView[] {
+  if (item.components?.length) return item.components;
+  if (item.recipe_id && item.recipe_version != null && item.portions != null) {
+    return [{ kind: 'recipe', id: crypto.randomUUID(), recipe_id: item.recipe_id, recipe_version: item.recipe_version, portions: item.portions, public_note: item.public_note, ...(item.recipe ? { recipe_snapshot: item.recipe } : {}) }];
+  }
+  if (item.free_text) {
+    return [{ kind: 'text', id: crypto.randomUUID(), free_text: item.free_text, public_note: item.public_note, ...(item.recipe_proposal && item.portions ? { recipe_proposal: item.recipe_proposal, portions: item.portions } : {}) }];
+  }
+  return [];
+}
+
+/** Suma un alimento, receta o intercambio a una comida. Hay una sola entrada por día y comida. */
+export function sumarComponente(items: PlanItemView[], fecha: string, slot: PlanSlot, componente: PlanComponentView): PlanItemView[] {
+  const actual = items.find(item => item.for_date === fecha && item.slot === slot);
+  if (!actual) {
+    const nuevo: PlanItemView = {
+      id: crypto.randomUUID(), for_date: fecha, slot, recipe_id: null, recipe_version: null, recipe_title: null,
+      recipe: null, free_text: null, portions: null, public_note: '', components: [componente],
+    };
+    return [...items, nuevo];
+  }
+  return items.map(item => item !== actual ? item : {
+    ...item,
+    components: [...partesDe(item), componente],
+    recipe_id: null, recipe_version: null, recipe_title: null, recipe: null, free_text: null, portions: null,
+    recipe_proposal: undefined,
+  });
+}
+
+/** Cambia lo que tiene una comida por una sola cosa nueva. Las otras comidas no se tocan. */
+export function cambiarComida(items: PlanItemView[], fecha: string, slot: PlanSlot, componente: PlanComponentView): PlanItemView[] {
+  return sumarComponente(items.filter(item => !(item.for_date === fecha && item.slot === slot)), fecha, slot, componente);
+}
+
 function clonarItem(item: PlanItemView, fecha: string): PlanItemView {
   return {
     ...structuredClone(item),

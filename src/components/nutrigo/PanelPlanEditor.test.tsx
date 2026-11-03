@@ -64,6 +64,7 @@ describe('editor del plan', () => {
     expect(html).toContain('Comidas del día');
     expect(html).toContain('Duplicar día');
     expect(html).toContain('Cambiar plato de Almuerzo');
+    expect(html).toContain('Agregar alimento a Almuerzo');
     expect(html).toContain('Pollo al horno');
     expect(html).toContain('1.800 kcal');
     expect(html).toContain('Asistente IA');
