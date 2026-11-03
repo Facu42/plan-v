@@ -16,18 +16,17 @@ function contrast(foreground: string, background: string): number {
 describe('degradé de los botones principales', () => {
   const css = readFileSync(new URL('../../public/brand/nutridash-tokens.css', import.meta.url), 'utf8');
 
-  it('usa el blanco verdoso y la menta de la cinta nueva, no el celeste anterior', () => {
-    expect(css).toContain('--nd-foam: #f3f8e8');
-    expect(css).toContain('--nd-mint: #c8ed88');
-    expect(css).toContain('--nd-foam-deep: #e7f7c0');
-    expect(css).toContain('--nd-mint-deep: #9ed456');
-    expect(css).not.toContain('#07d2fd');
-    expect(css).not.toContain('#03eac5');
-    expect(css).not.toContain('#00b7fa');
+  it('toma los colores del logo nuevo: azul, celeste y lima', () => {
+    expect(css).toContain('--nd-blue: #0054d3');
+    expect(css).toContain('--nd-cyan: #00d5fd');
+    expect(css).toContain('--nd-lime: #9efa7e');
+    expect(css).toContain('--nd-ribbon');
+    expect(css).not.toContain('#f3f8e8');
   });
 
-  it('mantiene tinta oscura con contraste AA sobre los cuatro tramos', () => {
-    for (const stop of ['#f3f8e8', '#c8ed88', '#e7f7c0', '#9ed456']) {
+  it('mantiene tinta oscura con contraste AA sobre los cuatro tramos del botón', () => {
+    for (const stop of ['#c9f4ff', '#b7f7a0', '#9fe9fb', '#8cec72']) {
+      expect(css).toContain(stop);
       expect(contrast('#10241c', stop)).toBeGreaterThanOrEqual(4.5);
     }
   });
@@ -35,6 +34,6 @@ describe('degradé de los botones principales', () => {
   it('el favicon publicado es el ícono nuevo', () => {
     const svg = readFileSync(new URL('../../public/favicon.svg', import.meta.url), 'utf8');
     expect(svg).toContain('data:image/png;base64,');
-    expect(svg).not.toContain('pWbeZxk');
+    expect(svg).toContain('<image');
   });
 });

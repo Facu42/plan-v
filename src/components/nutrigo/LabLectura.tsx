@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PanelV29Icon } from './PanelV29Icon';
 import { avisoEnElPanel, usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { FxKv } from './ficha-fx';
 import { fechaCorta } from './ficha-laboratorio';
 import type { Lectura } from './lab-lectura';
@@ -21,13 +22,14 @@ export function LabLectura({ lectura, onClose, pedirIA }: { lectura: Lectura; on
     finally { setEsperando(false); }
   };
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const copiar = async () => {
     try { await navigator.clipboard.writeText(texto.trim()); avisoEnElPanel('Lectura copiada.'); cerrar(); }
     catch { setAviso('No pudimos copiar. Seleccioná el texto y copialo a mano.'); }
   };
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">Lectura de los valores</h2><p id="acts">Calculada con lo que ya revisaste. No se guarda</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         {lectura.filas.length ? <div className="af"><span>{lectura.previa ? `Comparado con el ${fechaCorta(lectura.previa)}` : `Análisis del ${fechaCorta(lectura.ultima!)}`}</span>

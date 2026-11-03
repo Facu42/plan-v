@@ -6,6 +6,7 @@ import type { Patient } from '../../types';
 import type { TagGroup } from '../../api/crm-work';
 import { PanelV29Icon } from './PanelV29Icon';
 import { usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { LARGO_ETIQUETA } from './FichaEtiquetas';
 
 const igual = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase();
@@ -39,6 +40,7 @@ export function PanelGrupos({ pacientes, grupos, actual, total, onVer, onCrear, 
   const [aviso, setAviso] = useState('');
   const [guardando, setGuardando] = useState(false);
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const alternar = (id: string) => setSumar(lista => lista.includes(id) ? lista.filter(x => x !== id) : [...lista, id]);
   const aplicar = async () => {
     const nuevo = nombre.trim();
@@ -52,7 +54,7 @@ export function PanelGrupos({ pacientes, grupos, actual, total, onVer, onCrear, 
   const opciones = [{ clave: null as string | null, texto: `Todas · ${total}` }, ...grupos.map(g => ({ clave: g.label as string | null, texto: `${g.label} · ${g.cantidad}` }))];
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">Grupos de pacientes</h2><p id="acts">Sirven para filtrar y para escribirles a todas juntas</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         <div className="af"><span>Mostrar</span><div className="aseg" role="radiogroup">{opciones.map(o => {

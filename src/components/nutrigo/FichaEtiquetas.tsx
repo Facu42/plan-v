@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { PanelV29Icon } from './PanelV29Icon';
 import { usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 
 export const ETIQUETAS_SUGERIDAS = ['Celíaca', 'Sin lactosa', 'Hipotiroidismo', 'Programa mensual', 'Deportista', 'Embarazo', 'Vegetariana', 'Prioridad'] as const;
 export const MAX_ETIQUETAS = 8;
@@ -16,6 +17,7 @@ export function FichaEtiquetas({ nombre, actuales, onGuardar, onClose }: { nombr
   const [aviso, setAviso] = useState('');
   const [guardando, setGuardando] = useState(false);
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const opciones = [...ETIQUETAS_SUGERIDAS, ...actuales.filter(a => !ETIQUETAS_SUGERIDAS.some(s => igual(s, a)))];
   const alternar = (texto: string) => { setAviso(''); setElegidas(actual => actual.some(e => igual(e, texto)) ? actual.filter(e => !igual(e, texto)) : [...actual, texto]); };
   const guardar = async () => {
@@ -29,7 +31,7 @@ export function FichaEtiquetas({ nombre, actuales, onGuardar, onClose }: { nombr
   };
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">Etiquetas de {nombre}</h2><p id="acts">Sirven para filtrar en Pacientes</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         <div className="af"><span>Elegí</span><div className="ach">{opciones.map(texto => <button type="button" key={texto} aria-pressed={elegidas.some(e => igual(e, texto))} onClick={() => alternar(texto)}>{texto}</button>)}</div></div>

@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 import { api } from '../../api/client';
 import type { Patient } from '../../types';
 import { usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { PanelV29Icon } from './PanelV29Icon';
 import { COMIDAS_PEDIDO, textoPedido } from './seguimiento-presentacion';
 
@@ -13,6 +14,7 @@ export function PanelFichaPedirRegistro({ patient, onClose, onSent }: { patient:
   const [error, setError] = useState('');
   const [enviando, setEnviando] = useState(false);
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   const primerNombre = patient.name.split(' ')[0] ?? patient.name;
   const enviar = async () => {
     if (!comidas.length) { setError('Elegí al menos una comida.'); return; }
@@ -28,7 +30,7 @@ export function PanelFichaPedirRegistro({ patient, onClose, onSent }: { patient:
   };
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">Pedir registro a {primerNombre}</h2><p id="acts">Le llega por la app. No se usa otro canal.</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         <label className="af"><span>Días</span><select className="ai" value={String(dias)} onChange={event => setDias(event.target.value === '14' ? 14 : 7)}><option value="7">7 días</option><option value="14">14 días</option></select></label>

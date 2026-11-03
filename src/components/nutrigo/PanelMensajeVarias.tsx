@@ -8,6 +8,7 @@ import type { BillingBoard } from '../../types/fees';
 import { useAppStore } from '../../store/useAppStore';
 import { PanelV29Icon } from './PanelV29Icon';
 import { avisoEnElPanel, usePanelBoceto } from './panel-v29-boceto';
+import { useModalFocus } from './use-modal-focus';
 import { MAX_MENSAJE, armarAudiencias, destinatarias, enviarAVarias, manianaALas9, programarAVarias } from './mensaje-varias';
 
 const TEXTO_INICIAL = '¡Hola {nombre}! ';
@@ -23,6 +24,7 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
   const [enviando, setEnviando] = useState(false);
   const [cuando, setCuando] = useState<Cuando>('ahora');
   const { clase, cerrar } = usePanelBoceto(onClose);
+  const foco = useModalFocus<HTMLElement>(true, cerrar);
   useEffect(() => {
     const controller = new AbortController();
     crmWorkApi.tagGroups(controller.signal).then(r => setGrupos(r.groups)).catch(() => undefined);
@@ -57,7 +59,7 @@ export function PanelMensajeVarias({ pacientes, ahora, onClose }: { pacientes: r
   };
   const nodo = <div id="actw" className={clase || undefined}>
     <div className="ascrim" onClick={cerrar} />
-    <aside id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
+    <aside ref={foco} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">Mensaje a varias</h2><p id="acts">Le llega a cada una por separado, como un chat</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={cerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">
         <div className="af"><span>Para</span><div className="ach">{opciones.map(o => <button type="button" key={o.id} aria-pressed={elegidas.includes(o.id)} onClick={() => alternar(o.id)}>{o.texto} · {o.ids.length}</button>)}</div></div>

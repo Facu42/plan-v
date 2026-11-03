@@ -21,7 +21,7 @@ import { MealReviewPanel } from '../crm/MealReviewPanel';
 import { MealLogModal } from '../patient/MealLogModal';
 import { buildShowroomPatient, filterShowroomPatients } from './showroom-model';
 import { NvBadge, NvState } from './primitives';
-import { FirstSteps } from './FirstSteps';
+import { FirstSteps, usePrimerosPasos } from './FirstSteps';
 import { PAGE_LABELS, ShowroomDetail, type ShowroomPage } from './ShowroomPanels';
 import type { CrmEntry } from '../crm/crm-entry';
 import { MealThumbnail, PatientOverview } from './PatientOverview';
@@ -171,6 +171,7 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   const menuWasOpen = useRef(false);
   const [onboardingOpen, setOnboardingOpen] = useState(() => !lockedRole && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('onboarding') === '1');
   const [professionalIntro, setProfessionalIntro] = useState(false);
+  const primerosPasos = usePrimerosPasos(role === 'pro' && professionalIntro);
   const [directoryAction, setDirectoryAction] = useState<DirectoryAction | null>(null);
   const [introInviteBusy, setIntroInviteBusy] = useState(false);
   const [introInviteError, setIntroInviteError] = useState('');
@@ -468,6 +469,8 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
   if (role === 'patient' && p) return <NutrigoPatientApp key={`${p.id}:${page}`} patient={p} page={page} query={query} now={now} onNavigate={navigate} onSignOut={onSignOut ? () => { if (canLeaveWorkspace()) onSignOut(); } : undefined} onEditIntake={()=>setOnboardingOpen(true)} onConfirm={confirmAppointment} onReschedule={rescheduleAppointment} demoRoleSwitch={demoSwitch?()=>switchRole('pro'):undefined}/>;
 
   const firstSteps = <FirstSteps
+    estado={primerosPasos}
+    onOpen={openWorkHref}
     patientName={selected?.name}
     busy={introInviteBusy}
     error={introInviteError}
