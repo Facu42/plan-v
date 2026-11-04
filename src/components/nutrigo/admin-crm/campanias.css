@@ -1,0 +1,19 @@
+.nd-admin-crm .nd-campaigns { display: grid; gap: 20px; min-width: 0; }
+.nd-admin-crm .nd-campaign-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.nd-admin-crm .nd-campaign-form { padding: 24px; display: grid; gap: 16px; min-width: 0; }
+.nd-admin-crm .nd-campaign-form fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 14px; min-width: 0; }
+.nd-admin-crm .nd-campaign-form label { display: grid; gap: 7px; font-size: 13px; }
+.nd-admin-crm .nd-campaign-form input:not([type=checkbox]), .nd-admin-crm .nd-campaign-form textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); padding: 11px 12px; font: inherit; }
+.nd-admin-crm .nd-campaign-form textarea { resize: vertical; }
+.nd-admin-crm .nd-campaign-form :focus-visible, .nd-admin-crm .nd-campaign-tabs :focus-visible { outline: 2px solid var(--lime); outline-offset: 3px; }
+.nd-admin-crm .nd-campaign-form button { justify-self: start; }
+.nd-admin-crm .nd-campaign-form :disabled { opacity: .55; cursor: not-allowed; }
+.nd-admin-crm .nd-campaign-tabs { display: flex; flex-wrap: wrap; gap: 10px; }
+.nd-admin-crm .nd-campaign-scroll { overflow-x: auto; }
+.nd-admin-crm .nd-campaign-form table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+.nd-admin-crm .nd-campaign-form th, .nd-admin-crm .nd-campaign-form td { padding: 12px; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.nd-admin-crm .nd-campaign-form th { color: var(--muted); }
+.nd-admin-crm .nd-campaign-source { white-space: pre-wrap; overflow-wrap: anywhere; padding: 16px; background: var(--bg); border-radius: 10px; max-height: 360px; overflow: auto; }
+.nd-admin-crm .nd-campaign-form .nd-campaign-confirm { display: flex; align-items: start; gap: 10px; }
+.nd-admin-crm .nd-campaign-notice { padding: 20px; }
+@media (max-width: 700px) { .nd-admin-crm .nd-campaign-grid { grid-template-columns: 1fr; } .nd-admin-crm .nd-campaign-form { padding: 16px; } }

@@ -20,7 +20,7 @@ describe('baja obligatoria', () => {
   it('exige un enlace utilizable y visible con el marcador exacto', () => {
     expect(() => validateUnsubscribe('<a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Dar de baja</a>')).not.toThrow();
   });
-  it.each(['hola', '{{{RESEND_UNSUBSCRIBE_URL}}}', '<!-- <a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a> -->', '<a href="{{RESEND_UNSUBSCRIBE_URL}}">Baja</a>', '<a href="{{{RESEND_UNSUBSCRIBE_URL}}}"></a>'])('bloquea baja inválida: %s', (html) => expect(() => validateUnsubscribe(html)).toThrow());
+  it.each([`<a title=' href="{{{RESEND_UNSUBSCRIBE_URL}}}"'>Baja</a>`, `<div title='<a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a>'></div>`, '<a href="https://example.com" href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a>', '<a data-href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a>', '<script><a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a></script>', '<style><a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a></style>', '<template><a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a></template>', 'hola', '{{{RESEND_UNSUBSCRIBE_URL}}}', '<!-- <a href="{{{RESEND_UNSUBSCRIBE_URL}}}">Baja</a> -->', '<a href="{{RESEND_UNSUBSCRIBE_URL}}">Baja</a>', '<a href="{{{RESEND_UNSUBSCRIBE_URL}}}"></a>'])('bloquea baja inválida: %s', (html) => expect(() => validateUnsubscribe(html)).toThrow());
 });
 describe('cliente Resend', () => {
   it('usa credencial solo en el servidor y contratos REST; no reintenta escrituras', async () => {

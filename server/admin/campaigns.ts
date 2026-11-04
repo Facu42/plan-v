@@ -11,11 +11,26 @@ export const contactSchema = z.object({
 }).strict();
 export const draftSchema = z.object({ name: z.string().trim().min(1).max(100), subject: z.string().trim().min(1).max(200), html: z.string().min(1).max(100_000) }).strict();
 
+/** Lee etiquetas y atributos completos: un href dentro de title/data-href no cuenta. */
 export function validateUnsubscribe(html: string) {
-  const visible = html.replace(/<!--[\s\S]*?-->/g, '');
-  if (!/<a\b[^>]*\bhref\s*=\s*(["'])\{\{\{RESEND_UNSUBSCRIBE_URL\}\}\}\1[^>]*>\s*[^<\s][\s\S]*?<\/a\s*>/i.test(visible)) {
-    throw new CareError(400, 'Agregá un enlace de baja con {{{RESEND_UNSUBSCRIBE_URL}}} antes de enviar.');
+  const visible = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|template|textarea|title|xmp)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  const tags = /<([a-z][a-z0-9]*)\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi;
+  for (const tag of visible.matchAll(tags)) {
+    if (tag[1].toLowerCase() !== 'a') continue;
+    let remaining = tag[2];
+    const attributes = new Map<string, string>();
+    // Consumir cada atributo desde el principio impide saltar comillas inválidas.
+    while (remaining.trim()) {
+      const attribute = /^\s+([^\s"'<>/=]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/.exec(remaining);
+      if (!attribute) break;
+      const name = attribute[1].toLowerCase();
+      if (!attributes.has(name)) attributes.set(name, attribute[2] ?? attribute[3] ?? attribute[4] ?? '');
+      remaining = remaining.slice(attribute[0].length);
+    }
+    const content = visible.slice(tag.index! + tag[0].length).match(/^([\s\S]*?)<\/a\s*>/i)?.[1];
+    if (!remaining.trim() && attributes.get('href') === UNSUBSCRIBE && content?.replace(/<[^>]*>/g, '').trim()) return;
   }
+  throw new CareError(400, 'Agregá un enlace de baja con {{{RESEND_UNSUBSCRIBE_URL}}} antes de enviar.');
 }
 
 /** CSV acotado, con comillas RFC 4180. Valida el archivo completo antes de escribir. */
@@ -84,7 +99,7 @@ export function campaignService(client?: ResendClient) {
     const query = new URLSearchParams({ limit: '100' });
     if (after) query.set('after', after);
     const result = await resend.call<{ data: T[]; has_more: boolean }>(`${path}?${query}`);
-    return { data: result.data.filter(filter), has_more: result.has_more, next: result.has_more ? result.data.at(-1)?.id ?? null : null };
+    return { data: result.data.filter(filter), has_more: result.has_more, next: result.has_more ? result.data[result.data.length - 1]?.id ?? null : null };
   };
   const isOurs = (broadcast: CampaignBroadcast) => (broadcast.segment_id ?? broadcast.audience_id) === audience();
   const broadcast = async (id: string) => {
