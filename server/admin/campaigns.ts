@@ -13,7 +13,7 @@ export const draftSchema = z.object({ name: z.string().trim().min(1).max(100), s
 
 /** Lee etiquetas y atributos completos: un href dentro de title/data-href no cuenta. */
 export function validateUnsubscribe(html: string) {
-  const visible = html.replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|template|textarea|title|xmp)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  const visible = html.replace(/<!--[\s\S]*?(?:-->|$)/g, '').replace(/<(script|style|template|textarea|title|xmp|iframe|noembed|noframes|noscript|select)\b[^>]*>[\s\S]*?(?:<\/\1\s*>|$)/gi, '');
   const tags = /<([a-z][a-z0-9]*)\b((?:"[^"]*"|'[^']*'|[^'">])*)>/gi;
   for (const tag of visible.matchAll(tags)) {
     if (tag[1].toLowerCase() !== 'a') continue;

@@ -1,3 +1,5 @@
+04/11 · Codex · Campañas comerciales de Resend en `/admin`, rama `feat/admin-campaigns`: contactos, CSV, borradores y envío con confirmación/baja obligatoria; avisos transaccionales solo metadatos de lectura. Admin y MFA, demo bloqueada. 90 pruebas focales y 2 recorridos de navegador aprobados; tipos y build verdes. Revisión independiente sin P1/P2 pendientes. [Guía y paso 10](admin-campaigns-resend.md). Suite final: 666 archivos, 4101 pruebas aprobadas y 5 omitidas; sin migraciones, envíos reales, merge ni producción.
+
 03/11 · Cursor · El centro de `/admin` suma bandeja de WhatsApp y mail (apagados sin credenciales), riesgo de baja, cobranza, pipeline con arrastre y seguimientos, activación por nutri y un resumen del día. Instagram queda preparado. AFIP no se toca. Migraciones `20261103180000` y `20261103233000` sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
 03/11 · Cursor · Cobro de la plataforma: `MP_PLATFORM_LIVE=1` acepta la clave `APP_USR-` en la API, el aviso y el worker. Sin ese valor exacto sigue `TEST-`. `GET /api/health` expone `mp_platform_mode` (`test` o `live`) y no la clave. Rama `cursor/mp-platform-live-65b4`. Sin producción ni merge.
 03/11 · Cursor · El admin de la plataforma que entra con Google ya no ve «cuenta sin vincular»: si no es nutri, va a `/admin`; si también tiene consultorio, se queda en el panel y ve Admin. La vuelta queda en el mismo sitio. Rama `cursor/admin-google-al-centro-4fb6`. Sin producción ni merge. [Nota](admin-ingreso-google.md).
@@ -101,6 +103,7 @@ Un carril es un tema con dueño. Nadie trabaja en el carril de otro sin anotarlo
 visto bueno de Facundo.
 
 | Carril | Dueño | Dónde vive | Estado |
+| Campañas comerciales Resend en /admin | Codex, brief autorizado por Facundo el 04/11 | `feat/admin-campaigns` | Contactos, borradores, envío y estado transaccional. Sin campañas nuevas en el panel nutri, migraciones, producción ni merge. |
 |---|---|---|---|
 | Ingreso del admin de plataforma | Cursor | `cursor/admin-google-al-centro-4fb6` | Quien administra y no es nutri entra a `/admin`. La nutri que también administra ve el acceso. Sin migración ni producción. [Nota y paso 10](admin-ingreso-google.md) |
 | Precios de planes desde /admin | Cursor | `cursor/planes-precios-admin-3f0e` | El alta nuevo lee el monto de la base. El admin edita pesos, activa o pausa, ve quién cambió qué y arma la lista del plan de prueba. Ese plan no sale en el catálogo ni usa cupo de fundadora. Migración sin aplicar. Sin producción ni merge |
