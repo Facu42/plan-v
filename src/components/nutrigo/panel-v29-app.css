@@ -399,7 +399,7 @@
 #pv-panel-v29 #s-inicio .xobs .ob.p0 b { font-weight: 400; color: var(--fg2); }
 /* Inicio: la hoja vieja pisa tarjetas, números y avatares. Vuelven las medidas del boceto v29. */
 #pv-panel-v29 #s-inicio .card { padding: 0; }
-#pv-panel-v29 #s-inicio .kpis { grid-template-columns: repeat(5, 1fr); gap: 16px; height: auto; }
+#pv-panel-v29 #s-inicio .kpis { grid-template-columns: .95fr .9fr .9fr 1.5fr 1.1fr; gap: 16px; height: auto; }
 #pv-panel-v29 #s-inicio .kpi { padding: 13px 15px 12px; height: 96px; }
 #pv-panel-v29 #s-inicio .av { color: #141519; }
 /* Inicio llena la columna como en el boceto: la tabla de consultas se estira y los números quedan abajo. */
@@ -1004,3 +1004,5 @@
 #pv-panel-v29 .activacion-nutri { margin-bottom: 16px; }
 #pv-panel-v29 .activacion-nutri ol { margin: 0 18px 16px; padding-left: 18px; color: var(--ink2); font-size: 13px; line-height: 1.6; }
 #pv-panel-v29 .activacion-nutri p { margin: 0 18px 16px; color: var(--ink3); font-size: 12px; }
+/* Celular: la mini barra de semanas tapa el número cuando la tarjeta es angosta. */
+#pv-panel-v29.mob #s-inicio .kweek { display: none; }

@@ -502,7 +502,8 @@ export function NutrigoShowroom({ darkMode: incomingDarkMode, onToggleTheme, loc
       ? { when: 'Tu cuenta, plantillas, avisos y seguridad del consultorio', title: 'Ajustes', search: 'Buscar', actions: ajustesActions }
       : page === 'inicio'
       ? { ...panelHomeHeading(userName ?? '', activePatients, now), search: 'Buscar paciente, plan o receta', wideSearch: true, actions: <>
-          {([['/crm/plan', 'clip', 'Nuevo plan'], ['/crm/cobranzas', 'coin', 'Cargar pago'], ['/crm/mensajes', 'chat', 'Mensaje']] as const).map(([href, glyph, label]) => <a key={href} className="chip" href={href} onClick={event => { event.preventDefault(); openWorkHref(href); }}><PanelV29Icon name={glyph} />{label}</a>)}
+          <details className="crear"><summary className="chip"><PanelV29Icon name="plus" />Crear<svg viewBox="0 0 24 24" className="i car" aria-hidden="true" style={{ width: 12, height: 12 }}><path d="M6 9l6 6 6-6" /></svg></summary>
+            <div className="crear-menu">{([['/crm/plan', 'clip', 'Nuevo plan'], ['/crm/cobranzas', 'coin', 'Cargar pago'], ['/crm/mensajes', 'chat', 'Mensaje']] as const).map(([href, glyph, label]) => <button key={href} type="button" onClick={event => { event.currentTarget.closest('details')?.removeAttribute('open'); openWorkHref(href); }}><PanelV29Icon name={glyph} />{label}</button>)}</div></details>
           <a className="cta" href="/crm/agenda" onClick={event => { event.preventDefault(); openWorkHref('/crm/agenda'); }}><PanelV29Icon name="plus" />Nueva consulta</a></> }
       : page === 'agenda' && panelQuery.get('agenda') !== 'publica'
       ? { title: 'Agenda', titleSuffix: agendaHeader?.sufijo, when: agendaHeader?.cuando, search: 'Buscar paciente', actions: agendaHeader?.actions }
