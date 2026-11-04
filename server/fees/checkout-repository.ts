@@ -153,7 +153,7 @@ export async function patientsByEmail(nutritionistId: string, email: string): Pr
   for (const invite of invites.data ?? []) {
     if (String(invite.email ?? '').trim().toLowerCase() === normalized) ids.add(String(invite.patient_id));
   }
-  const users = await db().schema('auth').from('users').select('id,email').ilike('email', normalized).limit(5);
+  const users = await db().schema('auth').from('users').select('id,email').eq('email', normalized).limit(5);
   if (!users.error) {
     const userIds = (users.data ?? []).map(user => String(user.id)).filter(Boolean);
     if (userIds.length) {

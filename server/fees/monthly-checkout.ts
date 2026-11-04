@@ -11,7 +11,6 @@ import { subscriptionsAllowed } from '../subscriptions/flag.js';
 import * as repo from './checkout-repository.js';
 
 const MISSING = 'Si tenés una cuota de este mes, revisá el correo o pedile el enlace a tu nutricionista.';
-const DEBIT = 'Tu cuota se cobra sola con el débito automático.';
 
 export type FeeLink = {
   id: string;
@@ -134,15 +133,15 @@ export async function createForPublic(slug: string, input: { email: string; clie
   const ids = await repo.patientsByEmail(nutritionistId, input.email);
   if (!ids.length) return { found: false as const, message: MISSING };
   let chosen: { id: string; due_on: string } | null = null;
-  let sawDebit = false;
   for (const id of ids) {
-    if (await repo.liveDebit(id)) { sawDebit = true; continue; }
+    if (await repo.liveDebit(id)) continue;
     const ledger = await repo.loadLedger(id);
     const open = payableFeeCharges(ledger, localBillingDate());
     const current = open.find(charge => charge.due_on.startsWith(localBillingDate().slice(0, 7))) ?? open[0];
     if (current) { chosen = { id, due_on: current.due_on }; break; }
   }
-  if (!chosen) return { found: false as const, message: sawDebit ? DEBIT : 'No hay una cuota abierta para ese correo.' };
+  // Misma respuesta que con un correo desconocido: así nadie puede averiguar quién es paciente de la nutri.
+  if (!chosen) return { found: false as const, message: MISSING };
   const link = await ensureLink(nutritionistId, chosen.id, chosen.due_on, input.client_request_id);
   return { found: true as const, ...link };
 }

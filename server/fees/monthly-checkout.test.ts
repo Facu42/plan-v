@@ -116,4 +116,15 @@ describe('enlace de la cuota del mes', () => {
     expect(mem.payments).toHaveLength(1);
     expect(mem.payments[0]).toMatchObject({ source: 'checkout', provider_payment_id: '88', covers_due_on: '2026-10-10', method: 'mercado_pago' });
   });
+
+  it('pedir el enlace público no distingue entre sin cuota, débito automático o correo desconocido', async () => {
+    const { createForPublic } = await import('./monthly-checkout.js');
+    const pedido = { email: 'sofia@example.com', client_request_id: REQUEST };
+    mem.ledger = { ...mem.ledger, charges: [] };
+    const sinCuota = await createForPublic('consultorio', pedido);
+    mem.live = true;
+    const conDebito = await createForPublic('consultorio', pedido);
+    expect(sinCuota).toMatchObject({ found: false });
+    expect(conDebito).toEqual(sinCuota);
+  });
 });
