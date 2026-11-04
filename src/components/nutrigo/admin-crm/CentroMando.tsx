@@ -1,3 +1,6 @@
+import { Campanias } from './Campanias';
+import { campaignApi } from '../../../api/admin-campaigns';
+import type { CampaignConfig } from '../../../types/admin-campaigns';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { api, ApiError } from '../../../api/client';
 import type { CentroSalud, CentroSeguridad, PlanesBoard } from '../../../types/centro';
@@ -11,7 +14,7 @@ import { initials } from './centro-format';
 import { NdIcon } from './nd-icon';
 import './nd-styles.css';
 
-export const CENTRO_VIEWS = ['inicio', 'nutris', 'riesgo', 'pipeline', 'facturacion', 'cobranza', 'bandeja', 'conexiones', 'activacion', 'planes', 'salud', 'seguridad'] as const;
+export const CENTRO_VIEWS = ['inicio', 'nutris', 'riesgo', 'pipeline', 'facturacion', 'cobranza', 'bandeja', 'conexiones', 'activacion', 'campanias', 'planes', 'salud', 'seguridad'] as const;
 export type CentroView = (typeof CENTRO_VIEWS)[number];
 
 const ALIAS: Record<string, CentroView> = {
@@ -31,6 +34,7 @@ const NAV: { group: string; items: { id: CentroView; label: string; icon: string
     { id: 'bandeja', label: 'Bandeja', icon: 'inbox' },
     { id: 'conexiones', label: 'Conexiones', icon: 'plug' },
     { id: 'activacion', label: 'Activación', icon: 'check_circle' },
+    { id: 'campanias', label: 'Campañas', icon: 'inbox' },
   ] },
   { group: 'Plataforma', items: [
     { id: 'planes', label: 'Planes y precios', icon: 'peso' },
@@ -51,6 +55,7 @@ const TITLES: Record<CentroView, [string, string]> = {
   bandeja: ['Mensajes', 'Bandeja'],
   conexiones: ['Mensajes', 'Conexiones'],
   activacion: ['Cuentas', 'Activación'],
+  campanias: ['Comercial', 'Campañas'],
   planes: ['Plataforma', 'Planes y precios'],
   salud: ['Sistema', 'Salud'],
   seguridad: ['Sistema', 'Seguridad'],
@@ -64,6 +69,7 @@ function parseHash(hash: string): { view: CentroView; id: string } {
 }
 
 type CentroData = {
+  campaigns?: CampaignConfig;
   inicio?: HubInicio;
   nutris?: HubNutri[];
   ficha?: HubFicha | null;
@@ -159,6 +165,9 @@ export function CentroMando({ adminName }: { adminName?: string }) {
       } else if (next === 'conexiones') {
         const conexiones = (await api.getHubConexiones()).conexiones;
         setData((current) => ({ ...current, conexiones }));
+      } else if (next === 'campanias') {
+        const campaigns = await campaignApi.config();
+        setData((current) => ({ ...current, campaigns }));
       } else if (next === 'planes') {
         const row = await api.getPlanes();
         setData((current) => ({ ...current, planes: { plans: row.plans, changes: row.changes, testers: row.testers, editable: row.editable } }));
@@ -288,6 +297,7 @@ export function CentroMando({ adminName }: { adminName?: string }) {
     />
   );
   else if (view === 'conexiones' && data.conexiones) body = <ConexionesView data={data.conexiones} />;
+  else if (view === 'campanias' && data.campaigns) body = <Campanias config={data.campaigns} />;
   else if (view === 'planes' && data.planes) body = <PlanesPrecios data={data.planes} onSaved={(planes) => setData((current) => ({ ...current, planes }))} />;
   else if (view === 'salud' && data.salud) body = <SaludView data={data.salud} />;
   else if (view === 'seguridad' && data.seguridad) body = <SeguridadView data={data.seguridad} />;

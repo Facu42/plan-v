@@ -1,3 +1,4 @@
+import { registerCampaignRoutes } from './campaigns-routes.js';
 import type { Context, Hono } from 'hono';
 import { z } from 'zod';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
@@ -161,6 +162,7 @@ async function enviarCanal(channel: 'whatsapp' | 'instagram' | 'email', handle: 
 
 export function registerAdminRoutes(app: Hono) {
   registerAdminAudit(app, requireAdmin);
+  registerCampaignRoutes(app, requireAdmin);
   // Para mostrar el acceso al panel en el menú. En demo sólo con ?audience=admin.
   app.get('/api/admin/me', async (c) => {
     const auth = c.get('auth');
