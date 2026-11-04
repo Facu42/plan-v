@@ -1,5 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-03)
 
+3/11 · Cursor · El centro de `/admin` ahora también tiene riesgo de baja, cobranza, activación y un resumen del día. La bandeja puede usar WhatsApp y mail si están las credenciales; si no, queda apagada. Instagram está preparado y no envía. AFIP no se tocó. Hay una migración nueva, sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
 3/11 · Cursor · El cobro de Nutridash a las nutricionistas puede usar la clave real de Mercado Pago solo si `MP_PLATFORM_LIVE=1`. Si no, sigue exigiendo la de prueba. La salud de la API dice si está en prueba o en vivo, sin mostrar la clave. Rama `cursor/mp-platform-live-65b4`. Sin producción ni merge.
 3/11 · Cursor · Quien administra la plataforma y entra con Google ya no se queda en «Tu cuenta todavía no está vinculada». Si no tiene consultorio, pasa a `/admin`. Si también es nutri, se queda en el panel y ve Admin. La vuelta de Google no sale de este sitio. Rama `cursor/admin-google-al-centro-4fb6`. Sin producción ni merge. [Nota](admin-ingreso-google.md).
 

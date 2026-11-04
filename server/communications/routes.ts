@@ -93,7 +93,7 @@ export function registerCommunicationRoutes(app:Hono) {
   if(!webhook.success)return c.text('Ignored',200);
   for(const entry of webhook.data.entry){if(entry.id!==config.businessId)continue;for(const change of entry.changes){if(change.value.metadata.phone_number_id!==config.phoneId)continue;
    for(const status of change.value.statuses??[]){const result=await privilegedDb().rpc('ops_whatsapp_event',{p_provider:status.id,p_status:status.status,p_optout_phone:null});rpcError(result.error);}
-   for(const message of change.value.messages??[]){if(message.text&&isOptOut(message.text.body)&&normalPhone('+'+message.from)){const result=await privilegedDb().rpc('ops_whatsapp_event',{p_provider:null,p_status:null,p_optout_phone:'+'+message.from});rpcError(result.error);}}
+   for(const message of change.value.messages??[]){if(message.text&&isOptOut(message.text.body)&&normalPhone('+'+message.from)){const result=await privilegedDb().rpc('ops_whatsapp_event',{p_provider:null,p_status:null,p_optout_phone:'+'+message.from});rpcError(result.error);}if(message.text?.body){try{const {anotarWhatsAppEntrante}=await import('../admin/hub.js');await anotarWhatsAppEntrante(message.from,message.text.body);}catch{/* la bandeja no frena el aviso de la paciente */}}}
   }}
   return c.text('OK');
  });

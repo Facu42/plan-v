@@ -10,6 +10,7 @@ import * as centro from './centro.js';
 import { registerAdminAudit } from './audit.js';
 import { adminPlanBoard, adminReplaceTesters, adminUpdatePlan } from '../billing-platform/plan-admin.js';
 import { payerEmail } from '../billing-platform/repository.js';
+import * as hub from './hub.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const settingsSchema = z.object({
@@ -46,6 +47,32 @@ const planPriceSchema = z.object({
 }).strict();
 const testersSchema = z.object({
   emails: z.array(z.string().trim().toLowerCase().max(254).pipe(z.email())).max(50),
+}).strict();
+const hubNotaSchema = z.object({ body: z.string().trim().min(1).max(500) }).strict();
+const hubTareaSchema = z.object({
+  title: z.string().trim().min(1).max(140),
+  due_on: dateSchema.nullable().optional(),
+}).strict();
+const hubTareaHechaSchema = z.object({ done: z.boolean() }).strict();
+const hubLeadSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  contact: z.string().trim().max(120).default(''),
+  source: z.enum(['ig', 'wa', 'web', 'referido', 'email']),
+  stage: z.enum(['lead', 'demo', 'trial', 'paga', 'baja']).default('lead'),
+  next_step: z.string().trim().max(200).default(''),
+  nutritionist_id: z.string().uuid().nullable().optional(),
+}).strict();
+const hubLeadPatchSchema = z.object({
+  stage: z.enum(['lead', 'demo', 'trial', 'paga', 'baja']).optional(),
+  next_step: z.string().trim().max(200).optional(),
+  source: z.enum(['ig', 'wa', 'web', 'referido', 'email']).optional(),
+  nutritionist_id: z.string().uuid().nullable().optional(),
+}).strict();
+const hubMensajeSchema = z.object({
+  channel: z.enum(['whatsapp', 'instagram', 'email']),
+  contact_name: z.string().trim().min(1).max(80),
+  contact_handle: z.string().trim().max(120).default(''),
+  body: z.string().trim().min(1).max(2000),
 }).strict();
 
 /** Para las altas: JSON roto es 400; datos que no cumplen, 422. */
@@ -86,6 +113,52 @@ function source(persistent: boolean) {
   return persistent ? 'supabase' : 'memory';
 }
 
+async function completarBorrador(): Promise<((texto: string) => Promise<string>) | undefined> {
+  try {
+    const { resolveAiMode } = await import('../ai/mode.js');
+    if (resolveAiMode() !== 'live') return undefined;
+    const { generateText } = await import('ai');
+    const { getAiModel } = await import('../ai/provider.js');
+    return async (texto: string) => (await generateText({
+      model: getAiModel(),
+      prompt: `Proponé una respuesta corta en español rioplatense. No inventes precios ni datos que no estén en el mensaje. Mensaje: ${texto.slice(0, 500)}`,
+      abortSignal: AbortSignal.timeout(12_000),
+    })).text;
+  } catch {
+    return undefined;
+  }
+}
+
+async function enviarCanal(channel: 'whatsapp' | 'instagram' | 'email', handle: string, texto: string): Promise<void> {
+  if (channel === 'instagram') throw new repo.CareError(503, 'Instagram está preparado y todavía no envía.');
+  if (channel === 'whatsapp') {
+    const { whatsappConfig } = await import('../communications/provider.js');
+    const config = whatsappConfig();
+    if (!config?.enabled) throw new repo.CareError(503, 'WhatsApp está apagado. Faltan las credenciales o WHATSAPP_ENABLED no está en true.');
+    const response = await fetch(`https://graph.facebook.com/${config.version}/${config.phoneId}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${config.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ messaging_product: 'whatsapp', to: handle.replace(/\D/g, ''), type: 'text', text: { preview_url: false, body: texto } }),
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!response.ok) throw new repo.CareError(503, 'WhatsApp no aceptó el mensaje. No se reintentó.');
+    return;
+  }
+  const { mailListo } = await import('./hub-ops.js');
+  if (!mailListo()) throw new repo.CareError(503, 'El mail está apagado.');
+  const asunto = 'Mensaje de Nutridash';
+  const { brevoConfig, sendBrevoEmail } = await import('../mail/brevo.js');
+  const brevo = brevoConfig();
+  if (brevo) {
+    await sendBrevoEmail(brevo, { to: { email: handle }, subject: asunto, text: texto, html: `<p>${texto}</p>` });
+    return;
+  }
+  const { mailTransportConfig, sendOperationalMail } = await import('../mail/transport.js');
+  const smtp = mailTransportConfig();
+  if (!smtp) throw new repo.CareError(503, 'El mail está apagado.');
+  await sendOperationalMail(smtp, { to: { email: handle }, subject: asunto, text: texto, html: `<p>${texto}</p>` }, async () => true);
+}
+
 export function registerAdminRoutes(app: Hono) {
   registerAdminAudit(app, requireAdmin);
   // Para mostrar el acceso al panel en el menú. En demo sólo con ?audience=admin.
@@ -124,6 +197,132 @@ export function registerAdminRoutes(app: Hono) {
   app.get('/api/admin/centro/seguridad', async (c) => {
     const persistent = await requireAdmin(c);
     return c.json({ seguridad: await centro.loadSeguridad(persistent), source: source(persistent) });
+  });
+
+  app.get('/api/admin/hub/inicio', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ inicio: await hub.loadInicio(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/nutris', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ nutris: await hub.loadNutrisHub(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/nutris/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ficha: await hub.loadFicha(persistent, c.req.param('id')), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/nutris/:id/notas', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubNotaSchema);
+    return c.json({ ficha: await hub.addNota(persistent, c.req.param('id'), input.body), source: source(persistent) }, 201);
+  });
+  app.post('/api/admin/hub/nutris/:id/tareas', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubTareaSchema);
+    return c.json({ ficha: await hub.addTarea(persistent, c.req.param('id'), input.title, input.due_on ?? null), source: source(persistent) }, 201);
+  });
+  app.patch('/api/admin/hub/tareas/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubTareaHechaSchema);
+    return c.json({ tarea: await hub.toggleTarea(persistent, c.req.param('id'), input.done), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/leads', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...(await hub.loadLeads(persistent)), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/leads', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubLeadSchema);
+    return c.json({
+      lead: await hub.createLead(persistent, { ...input, nutritionist_id: input.nutritionist_id ?? null }),
+      source: source(persistent),
+    }, 201);
+  });
+  app.patch('/api/admin/hub/leads/:id', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubLeadPatchSchema);
+    return c.json({ lead: await hub.updateLead(persistent, c.req.param('id'), input), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/facturacion', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ facturacion: await hub.loadFacturacion(persistent), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/bandeja', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ bandeja: await hub.loadBandeja(persistent), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/bandeja', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, hubMensajeSchema);
+    return c.json({ bandeja: await hub.anotarMensaje(persistent, input), source: source(persistent) }, 201);
+  });
+  app.post('/api/admin/hub/bandeja/:id/lead', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ ...(await hub.crearLeadDesdeHilo(persistent, c.req.param('id'))), source: source(persistent) }, 201);
+  });
+  app.get('/api/admin/hub/conexiones', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ conexiones: hub.loadConexiones(), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/riesgo', async (c) => {
+    const persistent = await requireAdmin(c);
+    const motivo = z.enum(['sin_login', 'pocos_pacientes', 'pago_rechazado']).optional().safeParse(c.req.query('motivo') || undefined);
+    return c.json({ ...(await hub.loadRiesgos(persistent, motivo.success ? motivo.data : undefined)), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/cobranza', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ cobranza: await hub.loadCobranza(persistent), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/cobranza', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, z.object({ payment_id: z.string().trim().min(1).max(80), kind: z.enum(['aviso', 'releer']) }).strict());
+    return c.json({ cobranza: await hub.registrarCobranza(persistent, input), source: source(persistent) });
+  });
+  app.get('/api/admin/hub/activacion', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ activacion: await hub.loadActivacion(persistent), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/bandeja/:id/borrador', async (c) => {
+    const persistent = await requireAdmin(c);
+    return c.json({ bandeja: await hub.sugerirRespuesta(persistent, c.req.param('id'), await completarBorrador()), source: source(persistent) });
+  });
+  app.post('/api/admin/hub/bandeja/:id/enviar', async (c) => {
+    const persistent = await requireAdmin(c);
+    const input = await strictBody(c, z.object({ body: z.string().trim().min(1).max(500) }).strict());
+    const bandeja = await hub.enviarRespuesta(persistent, c.req.param('id'), input.body, (hilo, texto) => enviarCanal(hilo.channel, hilo.contact_handle, texto));
+    return c.json({ bandeja, source: source(persistent) });
+  });
+  app.post('/webhooks/hub/email', async (c) => {
+    const secret = process.env.HUB_INBOX_EMAIL_SECRET?.trim();
+    if (!secret) return c.text('Apagado', 503);
+    if (c.req.header('x-hub-inbox-secret') !== secret) return c.text('Forbidden', 403);
+    const parsed = z.object({
+      from_email: z.string().trim().pipe(z.email()),
+      from_name: z.string().trim().max(80).default(''),
+      body: z.string().trim().min(1).max(2000),
+    }).safeParse(await c.req.json().catch(() => null));
+    if (!parsed.success) return c.text('Invalid', 400);
+    await hub.anotarMailEntrante(parsed.data, isSupabaseEnabled());
+    return c.text('OK');
+  });
+  app.get('/api/me/activacion', async (c) => {
+    const auth = c.get('auth');
+    if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ visible: false, nota: 'Sin cuenta vinculada no hay checklist.', trabada: false, pasos: [] });
+    const { privilegedDb } = await import('../db/supabase-client.js');
+    const nutri = await privilegedDb().from('nutritionists').select('id').eq('user_id', auth.userId).maybeSingle();
+    if (nutri.error || !nutri.data?.id) return c.json({ visible: false, nota: 'Esta cuenta no es de una nutricionista.', trabada: false, pasos: [] });
+    const ocultas = await privilegedDb().from('platform_onboarding_dismissals').select('nutritionist_id').eq('nutritionist_id', nutri.data.id).maybeSingle();
+    const oculta = !ocultas.error && Boolean(ocultas.data);
+    return c.json(await hub.activacionPropia(true, nutri.data.id as string, oculta));
+  });
+  app.post('/api/me/activacion/ocultar', async (c) => {
+    const auth = c.get('auth');
+    if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ visible: false });
+    const { privilegedDb } = await import('../db/supabase-client.js');
+    const nutri = await privilegedDb().from('nutritionists').select('id').eq('user_id', auth.userId).maybeSingle();
+    if (nutri.error || !nutri.data?.id) return c.json({ visible: false }, 404);
+    await hub.ocultarActivacion(true, nutri.data.id as string);
+    return c.json({ visible: false });
   });
 
   app.get('/api/admin/planes', async (c) => {
