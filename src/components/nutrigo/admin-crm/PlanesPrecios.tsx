@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { api, ApiError } from '../../../api/client';
 import type { PlanesBoard, PlanPrecio } from '../../../types/centro';
+import type { HubNutri } from '../../../types/hub';
+import { money, num } from './centro-format';
+import { PlanesCuentas, SIN_PLAN, planDe, venceProntoCount } from './PlanesCuentas';
 
 const pesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 const cuando = new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Argentina/Buenos_Aires' });
@@ -24,12 +27,36 @@ function campos(plan: PlanPrecio) {
   };
 }
 
+function resumen(nutris: HubNutri[] | null) {
+  if (!nutris) return [];
+  const conPlan = nutris.filter((n) => planDe(n) !== SIN_PLAN).length;
+  const prueba = nutris.filter((n) => n.state === 'prueba').length;
+  const sinPlan = nutris.filter((n) => planDe(n) === SIN_PLAN).length;
+  return [
+    { label: 'Con plan de pago', value: num(conPlan), note: `de ${num(nutris.length)} cuentas` },
+    { label: 'En prueba', value: num(prueba), note: 'Todavía sin cobro' },
+    { label: 'Vencen en 7 días', value: num(venceProntoCount(nutris)), note: 'Conviene avisarles' },
+    { label: 'Sin plan de pago', value: num(sinPlan), note: 'Prueba, bajas o servicio sin plan' },
+  ];
+}
+
 export function PlanesPrecios({ data, onSaved }: { data: PlanesBoard; onSaved: (next: PlanesBoard) => void }) {
   const [drafts, setDrafts] = useState<Record<string, ReturnType<typeof campos>>>({});
   const [mails, setMails] = useState(data.testers.join('\n'));
   const [error, setError] = useState('');
   const [ok, setOk] = useState('');
   const [busy, setBusy] = useState('');
+  const [nutris, setNutris] = useState<HubNutri[] | null>(null);
+  const [nutrisError, setNutrisError] = useState(false);
+  const [filtro, setFiltro] = useState('todos');
+
+  useEffect(() => {
+    let vivo = true;
+    api.getHubNutris()
+      .then((row) => { if (vivo) setNutris(row.nutris.filter((n) => !n.is_test)); })
+      .catch(() => { if (vivo) setNutrisError(true); });
+    return () => { vivo = false; };
+  }, []);
 
   useEffect(() => {
     setDrafts(Object.fromEntries(data.plans.map((plan) => [plan.code, campos(plan)])));
@@ -80,10 +107,20 @@ export function PlanesPrecios({ data, onSaved }: { data: PlanesBoard; onSaved: (
       </section>
       {error ? <p className="nd-planes-msg is-error" role="alert">{error}</p> : null}
       {ok ? <p className="nd-planes-msg" role="status">{ok}</p> : null}
+      <section className="nd-grid nd-kpis nd-planes-kpis" aria-label="Resumen de planes">
+        {resumen(nutris).map((item) => (
+          <article key={item.label} className="nd-card kpi">
+            <span className="kpi-label">{item.label}</span>
+            <div className="kpi-value">{item.value}</div>
+            <div className="kpi-foot"><span>{item.note}</span></div>
+          </article>
+        ))}
+      </section>
       <div className="nd-planes-grid">
         {data.plans.map((plan) => {
           const draft = drafts[plan.code] ?? campos(plan);
           const set = (key: keyof typeof draft, value: number | boolean) => setDrafts((current) => ({ ...current, [plan.code]: { ...draft, [key]: value } }));
+          const cuentas = nutris ? nutris.filter((n) => planDe(n) === plan.code).length : null;
           return (
             <article key={plan.code} className="nd-card nd-planes-card">
               <div className="nd-card-head">
@@ -93,18 +130,32 @@ export function PlanesPrecios({ data, onSaved }: { data: PlanesBoard; onSaved: (
                 </div>
                 <span className={`nd-badge${draft.active ? ' is-green' : ''}`}>{draft.active ? 'Activo' : 'Pausado'}</span>
               </div>
-              <div className="nd-planes-fields">
-                <label>Mensual<input inputMode="numeric" type="number" min={1} step={1} value={draft.monthly_pesos} onChange={(event) => set('monthly_pesos', Number(event.target.value))} /></label>
-                <label>Anual<input inputMode="numeric" type="number" min={1} step={1} value={draft.annual_pesos} onChange={(event) => set('annual_pesos', Number(event.target.value))} /></label>
-                <label>Fundadora mensual<input inputMode="numeric" type="number" min={1} step={1} value={draft.founder_monthly_pesos} onChange={(event) => set('founder_monthly_pesos', Number(event.target.value))} /></label>
-                <label>Fundadora anual<input inputMode="numeric" type="number" min={1} step={1} value={draft.founder_annual_pesos} onChange={(event) => set('founder_annual_pesos', Number(event.target.value))} /></label>
+              <div className="nd-planes-precio">
+                <div className="nd-planes-cuentas-n">{cuentas == null ? '—' : num(cuentas)}<small>{cuentas === 1 ? 'nutri' : 'nutris'}</small></div>
+                <dl className="nd-planes-lista">
+                  <div><dt>Mensual</dt><dd>{money(draft.monthly_pesos)}</dd></div>
+                  <div><dt>Anual</dt><dd>{money(draft.annual_pesos)}</dd></div>
+                  <div><dt>Fundadora mensual</dt><dd>{money(draft.founder_monthly_pesos)}</dd></div>
+                </dl>
               </div>
-              <label className="nd-planes-check"><input type="checkbox" checked={draft.active} onChange={(event) => set('active', event.target.checked)} /> Activo para altas nuevas</label>
-              <button type="button" className="nd-btn is-action" disabled={!data.editable || busy === plan.code} onClick={() => void guardar(plan)}>{busy === plan.code ? 'Guardando…' : 'Guardar montos'}</button>
+              <button type="button" className="nd-btn is-sm" onClick={() => setFiltro(plan.code)} disabled={!cuentas}>Ver las nutris de este plan</button>
+              <details className="nd-planes-editar">
+                <summary>Editar montos</summary>
+                <div className="nd-planes-fields">
+                  <label>Mensual<input inputMode="numeric" type="number" min={1} step={1} value={draft.monthly_pesos} onChange={(event) => set('monthly_pesos', Number(event.target.value))} /></label>
+                  <label>Anual<input inputMode="numeric" type="number" min={1} step={1} value={draft.annual_pesos} onChange={(event) => set('annual_pesos', Number(event.target.value))} /></label>
+                  <label>Fundadora mensual<input inputMode="numeric" type="number" min={1} step={1} value={draft.founder_monthly_pesos} onChange={(event) => set('founder_monthly_pesos', Number(event.target.value))} /></label>
+                  <label>Fundadora anual<input inputMode="numeric" type="number" min={1} step={1} value={draft.founder_annual_pesos} onChange={(event) => set('founder_annual_pesos', Number(event.target.value))} /></label>
+                </div>
+                <label className="nd-planes-check"><input type="checkbox" checked={draft.active} onChange={(event) => set('active', event.target.checked)} /> Activo para altas nuevas</label>
+                <button type="button" className="nd-btn is-action" disabled={!data.editable || busy === plan.code} onClick={() => void guardar(plan)}>{busy === plan.code ? 'Guardando…' : 'Guardar montos'}</button>
+              </details>
             </article>
           );
         })}
       </div>
+      {nutrisError ? <p className="nd-planes-msg is-error" role="alert">No se pudo leer la lista de nutris. Los planes y los montos siguen andando.</p> : null}
+      {nutris ? <PlanesCuentas plans={data.plans} nutris={nutris} filtro={filtro} onFiltro={setFiltro} /> : null}
       <section className="nd-card nd-planes-side">
         <div className="nd-card-head">
           <div className="nd-grow">

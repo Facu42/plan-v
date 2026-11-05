@@ -288,3 +288,52 @@
 @media (max-width: 720px) {
   .nd-crumb .nd-badge { display: none; }
 }
+
+/* ---------- Planes y precios: quién tiene cada plan ---------- */
+.nd-planes { display: flex; flex-direction: column; gap: 16px; }
+.nd-planes .nd-page-head { margin-bottom: 8px; }
+.nd-planes-msg { margin: 0; }
+.nd-planes-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; align-items: start; }
+.nd-planes-card, .nd-planes-side, .nd-planes-history { gap: 16px; padding-bottom: 20px; }
+.nd-planes-side, .nd-planes-history { margin-top: 0; }
+.nd-planes-side > :not(.nd-card-head), .nd-planes-history > :not(.nd-card-head) { margin: 0 24px; }
+.nd-planes-card > :not(.nd-card-head) { margin: 0 24px; }
+.nd-planes-card .nd-planes-fields { margin: 0; }
+.nd-planes-precio { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; }
+.nd-planes-cuentas-n { font-size: 32px; line-height: 1; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.nd-planes-cuentas-n small { margin-left: 8px; font-size: 13px; font-weight: 400; letter-spacing: 0; color: var(--muted); }
+.nd-planes-lista { margin: 0; display: flex; flex-direction: column; gap: 4px; font-size: 13px; text-align: right; }
+.nd-planes-lista > div { display: flex; justify-content: flex-end; gap: 12px; }
+.nd-planes-lista dt { color: var(--muted); }
+.nd-planes-lista dd { margin: 0; color: var(--ink); font-variant-numeric: tabular-nums; }
+.nd-planes .nd-planes-card > .nd-btn { align-self: flex-start; }
+.nd-planes-editar { border-top: 1px solid var(--line-soft); padding-top: 12px; display: flex; flex-direction: column; gap: 16px; }
+.nd-planes-editar > summary { cursor: pointer; list-style: none; font-size: 13px; color: var(--ink-2); display: flex; align-items: center; gap: 8px; }
+.nd-planes-editar > summary::-webkit-details-marker { display: none; }
+.nd-planes-editar > summary::before { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(-45deg); transition: transform var(--t-fast) var(--ease); }
+.nd-planes-editar[open] > summary::before { transform: rotate(45deg); }
+.nd-planes-editar[open] > summary { margin-bottom: 16px; }
+.nd-planes-editar[open] { gap: 0; }
+.nd-planes-editar > .nd-planes-fields, .nd-planes-editar > .nd-planes-check { margin-bottom: 16px; }
+.nd-planes-cuentas .nd-card-head { align-items: center; }
+.nd-planes-buscar { width: 240px; height: 36px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); font-size: 14px; }
+.nd-planes-buscar::placeholder { color: var(--muted); }
+.nd-planes-chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 24px; }
+.nd-planes-chip-n { margin-left: 4px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.nd-planes-cuentas .nd-table th:first-child, .nd-planes-cuentas .nd-table td:first-child { padding-left: 24px; }
+.nd-planes-cuentas .nd-table td { padding: 12px 16px; vertical-align: middle; }
+.nd-planes-nutri { display: flex; flex-direction: column; gap: 2px; }
+.nd-planes-nutri strong { color: var(--ink); }
+.nd-planes-nutri small { color: var(--muted); font-size: 12px; }
+.nd-planes-nutri:hover strong { color: var(--accent-ink); }
+@media (max-width: 720px) {
+  .nd-planes-buscar { width: 100%; }
+  .nd-planes-cuentas .nd-card-head { flex-wrap: wrap; }
+  .nd-planes-chips { padding: 16px; }
+}
+.nd-planes .nd-planes-buscar { width: 240px; flex: 0 0 240px; }
+.nd-planes .nd-planes-card > .nd-btn.is-sm { border-color: var(--line-strong); }
+@media (max-width: 720px) { .nd-planes .nd-planes-buscar { width: 100%; flex-basis: 100%; } }
+.nd-admin-crm .nd-table th, .nd-admin-crm .nd-table td { letter-spacing: 0; }
+.nd-planes .nd-planes-side textarea { width: calc(100% - 48px); }
+@media (max-width: 720px) { .nd-planes .nd-planes-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nd-planes .nd-planes-kpis .kpi { padding: 16px; } }
