@@ -149,3 +149,6 @@
   .pn-panel .p5-btn,.pn-panel .p5-switch::after { transition:none; }
   .pn-panel .p5-btn:active { transform:none; }
 }
+
+/* Sedes: campos de cada sede en Horarios y precios. */
+.pn-panel .pn-sede { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:8px; align-items:end; }

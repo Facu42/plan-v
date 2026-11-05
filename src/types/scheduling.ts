@@ -43,7 +43,8 @@ export const publicPageProfileSchema=z.object({
 export type PublicPageProfile=z.infer<typeof publicPageProfileSchema>;
 export const schedulingSettingsSchema=z.object({
  timezone:z.literal('America/Argentina/Buenos_Aires'),
- calendars:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80)}).strict()).min(1).max(10),
+ // Cada agenda es una sede del consultorio: nombre, y opcionalmente dirección y si atiende presencial u online.
+ calendars:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80),address:z.string().trim().max(200).optional(),modality:z.enum(['presencial','online']).optional()}).strict()).min(1).max(10),
  types:z.array(z.object({id:z.uuid(),name:z.string().trim().min(1).max(80),calendar_id:z.uuid(),duration_min:z.number().int().min(10).max(180),channel:z.enum(['video','presencial']),price_minor:z.number().int().min(0).max(100000000),deposit_minor:z.number().int().min(0).max(100000000)}).strict()).max(30),
  weekly:z.array(z.object({calendar_id:z.uuid(),weekday:z.number().int().min(0).max(6),start:time,end:time}).strict()).max(100),
  blocks:z.array(z.object({id:z.uuid(),calendar_id:z.uuid(),start:timestamp,end:timestamp,label:z.string().trim().max(80)}).strict()).max(300),

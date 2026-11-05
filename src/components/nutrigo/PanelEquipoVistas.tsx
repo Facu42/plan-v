@@ -45,7 +45,7 @@ export function EquipoIntegrantes({ personas, seleccionada, irAVista, alElegir, 
       <div className="eqmods">{MODULOS_EQUIPO.map((m, i) => <span key={m} className={`l${nivelesDeRol(p.role)[i]}`}>{m}</span>)}</div>
       <div className="eqsub"><small>Sesiones abiertas</small><Vacio texto="Todavía no se registran las sesiones." /></div>
       <div className="eqsub"><small>Lo último que hizo</small><Vacio texto="Todavía no hay actividad registrada." /></div>
-      <div className="fxfoot pubft">{p.role === 'Dueña' ? <span className="ntsig n">La dueña no se puede pausar</span> : p.reception && p.state !== 'Revocada' && dueña ? <Boton texto="Quitar acceso de recepción" disabled={ocupado} onClick={() => alQuitar(p)} /> : null}<span style={{ flex: 1 }} /><Boton texto="Ver sus accesos" icono="eye" clase="k" onClick={() => irAVista(2)} /></div>
+      <div className="fxfoot pubft">{p.role === 'Dueña' ? <span className="ntsig n">La dueña no se puede pausar</span> : p.reception && p.state !== 'Revocada' && dueña ? <Boton texto="Quitar acceso de secretaria" disabled={ocupado} onClick={() => alQuitar(p)} /> : null}<span style={{ flex: 1 }} /><Boton texto="Ver sus accesos" icono="eye" clase="k" onClick={() => irAVista(2)} /></div>
     </FxPanel> : <FxPanel titulo="Detalle de la persona" grande><Vacio texto="Elegí una persona para consultar su acceso." /></FxPanel>}</div>
   </>;
 }

@@ -242,6 +242,11 @@
       "version": "20261105210000",
       "file": "20261105210000_patient_packs_own.sql",
       "sha256": "90235a9cb3f695f151c79b7fb00eac04712e7812d2968f2735488b95f4ac8ef8"
+    },
+    {
+      "version": "20261106100000",
+      "file": "20261106100000_appointment_locations.sql",
+      "sha256": "3c7a3bb73a776eda86b2a2c48374b5ab230c078d985d3c6b0b4c717d7835a067"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

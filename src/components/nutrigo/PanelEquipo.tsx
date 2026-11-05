@@ -1,24 +1,35 @@
 import { useEffect, useRef, useState, type ReactNode, type FormEvent } from 'react';
-import { teamApi, type Workplace } from '../../api/team';
+import { teamApi, type StaffInvite, type Workplace } from '../../api/team';
 import type { OrganizationView } from '../../types/orgs';
 import { friendlyError } from '../../lib/error-messages';
-import { TeamWorkspace } from './TeamWorkspace';
+import { TeamWorkspace, codigoDelEnlace } from './TeamWorkspace';
 import { SectionTabs, SettingsDialog } from './EquipoAjustesShared';
 import { EquipoIntegrantes, EquipoPermisos, EquipoRegistro, type Persona } from './PanelEquipoVistas';
 
 const TABS = ['Integrantes', 'Permisos', 'Registro de accesos'];
+
+/** Qué pasó con la invitación de la secretaria, en una frase. */
+export function avisoDeInvitacion(email: string, r: Pick<StaffInvite, 'mail' | 'expires_in_days' | 'link'>): string {
+  const vence = `vence en ${r.expires_in_days} días y sirve una sola vez`;
+  if (r.mail === 'enviado') return `Le mandamos un mail a ${email} con el enlace para entrar; ${vence}.`;
+  const compartir = r.link ? 'Copiá el enlace y mandáselo' : 'Compartí el código';
+  return `${r.mail === 'fallo' ? 'No pudimos mandar el mail. ' : 'El correo de Nutridash todavía no está prendido. '}${compartir} por un canal privado a ${email}; ${vence}.`;
+}
 type Person = Persona;
 type Member = { user_id: string; email: string; revoked: boolean };
 export function PanelEquipo({ onHeader, onCount, initialView = 0 }: { onHeader?: (actions: ReactNode) => void; onCount?: (count: number | null) => void; initialView?: number }) {
-  const [view, setView] = useState(initialView), [filter, setFilter] = useState(0), [inviting, setInviting] = useState(false), [advanced, setAdvanced] = useState(false);
+  const [view, setView] = useState(initialView), [filter, setFilter] = useState(0), [inviting, setInviting] = useState(false), [advanced, setAdvanced] = useState(() => Boolean(codigoDelEnlace()));
   const [workplaces, setWorkplaces] = useState<Workplace[]>([]), [nid, setNid] = useState(''), [orgs, setOrgs] = useState<OrganizationView[]>([]), [orgId, setOrgId] = useState('');
   const [members, setMembers] = useState<Member[]>([]), [professionals, setProfessionals] = useState<Array<{ nutritionist_id: string; name: string; status: 'active'|'invited'; is_self: boolean }>>([]);
   const [selectedId, setSelectedId] = useState(''), [error, setError] = useState(''), [notice, setNotice] = useState(''), [loaded, setLoaded] = useState(false), [revision, setRevision] = useState(0), [busy, setBusy] = useState(false);
-  const [email, setEmail] = useState(''), [role, setRole] = useState('Recepción'), [token, setToken] = useState('');
+  const [email, setEmail] = useState(''), [role, setRole] = useState('Secretaria'), [token, setToken] = useState(''), [link, setLink] = useState('');
   const lock = useRef(false);
-  const [advancedMounted, setAdvancedMounted] = useState(false);
+  const [advancedMounted, setAdvancedMounted] = useState(() => Boolean(codigoDelEnlace()));
   const [directoryReady, setDirectoryReady] = useState(false);
   const owner = Boolean(workplaces.find(w => w.nutritionist_id === nid)?.owner);
+  // La secretaria (o quien llega con un código) ve su espacio de trabajo abierto: agenda, contactos y cobros.
+  const secretaria = loaded && !workplaces.some(w => w.owner);
+  useEffect(() => { if (secretaria) { setAdvanced(true); setAdvancedMounted(true); } }, [secretaria]);
   useEffect(() => { let alive = true; teamApi.workplaces().then(r => { if (alive) { setWorkplaces(r.workplaces); setNid(old => r.workplaces.some(w => w.nutritionist_id === old) ? old : r.workplaces.find(w => w.owner)?.nutritionist_id ?? r.workplaces[0]?.nutritionist_id ?? ''); if (!r.workplaces.length) setLoaded(true); } }).catch(e => { if (alive) setError(friendlyError(e)); }); return () => { alive = false; }; }, [revision]);
   useEffect(() => {
     let alive = true; setLoaded(false); setMembers([]); setProfessionals([]); setOrgs([]); setError('');
@@ -31,22 +42,22 @@ export function PanelEquipo({ onHeader, onCount, initialView = 0 }: { onHeader?:
   const people: Person[] = [
     ...(owner ? [{ id: nid, name: workplaces.find(w => w.nutritionist_id === nid)?.name ?? 'Tu cuenta', role: 'Dueña', scope: 'Tu cartera', state: 'Activa' }] : []),
     ...professionals.filter(p => !p.is_self).map(p => ({ id: p.nutritionist_id, name: p.name, role: 'Nutricionista', scope: 'Su cartera y asignaciones explícitas', state: p.status === 'active' ? 'Activa' : 'Invitada' })),
-    ...members.map(m => ({ id: m.user_id, name: m.email, email: m.email, role: 'Recepción', scope: 'Solo datos de contacto, turnos y cobros', state: m.revoked ? 'Revocada' : 'Activa', reception: m.user_id })),
+    ...members.map(m => ({ id: m.user_id, name: m.email, email: m.email, role: 'Secretaria', scope: 'Solo datos de contacto, turnos y cobros', state: m.revoked ? 'Revocada' : 'Activa', reception: m.user_id })),
   ];
   const selected = people.find(p => p.id === selectedId) ?? people[0];
   useEffect(() => { onCount?.(loaded && directoryReady ? people.filter(p => p.state !== 'Revocada').length : null); }, [onCount, loaded, directoryReady, nid, professionals, members]);
-  useEffect(() => { onHeader?.(<><SectionTabs labels={TABS} value={view} onChange={setView} label="Equipo"/><button type="button" className="cta" onClick={() => { setToken(''); setInviting(true); }}>Invitar a alguien</button></>); }, [onHeader, view]);
+  useEffect(() => { onHeader?.(<><SectionTabs labels={TABS} value={view} onChange={setView} label="Equipo"/><button type="button" className="cta" onClick={() => { setToken(''); setLink(''); setInviting(true); }}>Invitar a alguien</button></>); }, [onHeader, view]);
   useEffect(() => () => { onHeader?.(null); onCount?.(null); }, [onHeader, onCount]);
   async function invite(event: FormEvent) {
     event.preventDefault(); if (lock.current || !owner) return; lock.current = true; setBusy(true); setNotice('');
     try {
-      if (role === 'Recepción') { const r = await teamApi.invite(nid, email.trim()); setToken(r.token); setNotice(`Invitación preparada. Compartí el código con ${email.trim()}; vence en ${r.expires_in_days} días. No se envió un mail.`); }
+      if (role === 'Secretaria') { const r = await teamApi.invite(nid, email.trim()); setToken(r.token); setLink(r.link ?? ''); setNotice(avisoDeInvitacion(email.trim(), r)); }
       else { await teamApi.inviteProfessionalByEmail(orgId, email.trim()); setNotice('Si el correo pertenece a una cuenta profesional confirmada, verá la invitación en Equipo. No se envía un mail.'); setInviting(false); setRevision(r => r + 1); }
     } catch (e) { setNotice(friendlyError(e)); } finally { lock.current = false; setBusy(false); }
   }
   async function revoke(person: Person) {
-    if (!person.reception || lock.current || !window.confirm(`¿Querés quitar el acceso de recepción de ${person.name}?`)) return;
-    lock.current = true; setBusy(true); try { await teamApi.revoke(nid, person.reception); setMembers(old => old.map(m => m.user_id === person.reception ? { ...m, revoked: true } : m)); setNotice('Acceso de recepción revocado.'); } catch (e) { setNotice(friendlyError(e)); } finally { lock.current = false; setBusy(false); }
+    if (!person.reception || lock.current || !window.confirm(`¿Querés quitar el acceso de secretaria de ${person.name}?`)) return;
+    lock.current = true; setBusy(true); try { await teamApi.revoke(nid, person.reception); setMembers(old => old.map(m => m.user_id === person.reception ? { ...m, revoked: true } : m)); setNotice('Acceso de secretaria revocado.'); } catch (e) { setNotice(friendlyError(e)); } finally { lock.current = false; setBusy(false); }
   }
   return <div id="s-equipo" className="ea-screen">
     {!onHeader && <header className="ea-local"><h1>Equipo{loaded && directoryReady ? ` · ${people.filter(p => p.state !== 'Revocada').length} personas` : ''}</h1><p>Cada persona ve solo lo que le habilitás · todo queda registrado</p><SectionTabs labels={TABS} value={view} onChange={setView} label="Equipo"/><button type="button" className="cta" onClick={() => setInviting(true)}>Invitar a alguien</button></header>}
@@ -60,7 +71,7 @@ export function PanelEquipo({ onHeader, onCount, initialView = 0 }: { onHeader?:
       : view === 1 ? <EquipoPermisos personas={people} seleccionada={selected} irAVista={setView}/>
       : <EquipoRegistro personas={people} filtro={filter} alFiltrar={setFilter}/>}
     </div>
-    <details className="ea-advanced" open={advanced} onToggle={e => { setAdvanced(e.currentTarget.open); if (e.currentTarget.open) setAdvancedMounted(true); }}><summary>Asignaciones clínicas, organizaciones y recepción</summary>{advancedMounted && <TeamWorkspace/>}</details>
-    {inviting && <SettingsDialog title="Invitar a alguien" onClose={() => { if (!busy) { setInviting(false); setToken(''); } }}><form className="ea-form" onSubmit={e => void invite(e)}><label>Nombre<input maxLength={120} autoComplete="name" placeholder="Solo para identificar a quién invitás"/></label><small>El nombre no se guarda en la invitación; se toma de su cuenta al aceptar.</small><label>Mail<input type="email" required maxLength={200} autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setToken(''); }}/></label><label>Rol<select value={role} disabled={busy || Boolean(token)} onChange={e => setRole(e.target.value)}><option>Recepción</option><option>Nutricionista</option><option disabled>Contador · próximamente</option></select></label>{role === 'Nutricionista' && <label>Equipo<select disabled={busy} value={orgId} required onChange={e => setOrgId(e.target.value)}><option value="">Elegí un equipo</option>{orgs.filter(o => o.my_status === 'active' && (o.my_role === 'owner' || o.my_role === 'admin')).map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select></label>}<label>Pacientes que ve<select disabled value={role}><option value="Recepción">Solo contacto, turnos y cobros</option><option value="Nutricionista">Su cartera y asignaciones explícitas</option></select></label><p>Los permisos por módulo y la exigencia de dos pasos para el equipo están pendientes. {role === 'Nutricionista' ? 'Necesita una cuenta profesional confirmada y una organización.' : 'Compartí el código por un canal privado con ese correo.'}</p>{!owner && <p>Solo la dueña del consultorio puede preparar invitaciones desde esta pantalla.</p>}{notice && <p role="status">{notice}</p>}{token && <p>Código de invitación: <code>{token}</code></p>}<div className="ea-foot"><button className="chip" type="button" disabled={busy} onClick={() => setInviting(false)}>Cerrar</button><button className="cta" disabled={busy || !owner || Boolean(token) || (role === 'Nutricionista' && !orgId)}>{busy ? 'Preparando…' : 'Preparar invitación'}</button></div></form></SettingsDialog>}
+    <details className="ea-advanced" open={advanced} onToggle={e => { setAdvanced(e.currentTarget.open); if (e.currentTarget.open) setAdvancedMounted(true); }}><summary>Asignaciones clínicas, organizaciones y secretaria</summary>{advancedMounted && <TeamWorkspace/>}</details>
+    {inviting && <SettingsDialog title="Invitar a alguien" onClose={() => { if (!busy) { setInviting(false); setToken(''); } }}><form className="ea-form" onSubmit={e => void invite(e)}><label>Nombre<input maxLength={120} autoComplete="name" placeholder="Solo para identificar a quién invitás"/></label><small>El nombre no se guarda en la invitación; se toma de su cuenta al aceptar.</small><label>Mail<input type="email" required maxLength={200} autoComplete="email" value={email} onChange={e => { setEmail(e.target.value); setToken(''); }}/></label><label>Rol<select value={role} disabled={busy || Boolean(token)} onChange={e => setRole(e.target.value)}><option>Secretaria</option><option>Nutricionista</option><option disabled>Contador · próximamente</option></select></label>{role === 'Nutricionista' && <label>Equipo<select disabled={busy} value={orgId} required onChange={e => setOrgId(e.target.value)}><option value="">Elegí un equipo</option>{orgs.filter(o => o.my_status === 'active' && (o.my_role === 'owner' || o.my_role === 'admin')).map(o => <option key={o.id} value={o.id}>{o.name}</option>)}</select></label>}<label>Pacientes que ve<select disabled value={role}><option value="Secretaria">Agenda, contactos y cobros; nunca la ficha clínica</option><option value="Nutricionista">Su cartera y asignaciones explícitas</option></select></label><p>{role === 'Nutricionista' ? 'Necesita una cuenta profesional confirmada y una organización.' : 'La secretaria no ocupa lugar de profesional en tu plan. Le llega un mail con el enlace (si el correo de Nutridash está prendido) y entra con ese mismo correo.'}</p>{!owner && <p>Solo la dueña del consultorio puede preparar invitaciones desde esta pantalla.</p>}{notice && <p role="status">{notice}</p>}{token && link && <p>Enlace para entrar: <code>{link}</code> <button className="chip" type="button" onClick={() => void navigator.clipboard.writeText(link).then(() => setNotice('Enlace copiado.'), () => setNotice('No pudimos copiar el enlace: seleccionalo y copialo a mano.'))}>Copiar enlace</button></p>}{token && <p>Código de invitación: <code>{token}</code></p>}<div className="ea-foot"><button className="chip" type="button" disabled={busy} onClick={() => setInviting(false)}>Cerrar</button><button className="cta" disabled={busy || !owner || Boolean(token) || (role === 'Nutricionista' && !orgId)}>{busy ? 'Preparando…' : 'Preparar invitación'}</button></div></form></SettingsDialog>}
   </div>;
 }

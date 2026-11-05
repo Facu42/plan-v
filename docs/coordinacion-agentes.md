@@ -187,6 +187,7 @@ visto bueno de Facundo.
 | `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
+| `20261106100000_appointment_locations` | Claude | Sede de cada turno que agenda la nutri. Escrita el 5/11. Sin aplicar. Hace falta la frase de Facundo |
 | `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261030120000_platform_billing` | Cursor | Cobro de Nutridash a la nutri. Escrita el 30/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261031180000_habit_reminders` | Cursor | Recordatorios de comer, agua y dormir. Escrita el 31/10. Sin aplicar. Hace falta la frase de Facundo |
@@ -210,6 +211,7 @@ del piloto, entidad legal.
 
 ## 5. Bitácora de traspaso (la más nueva arriba)
 
+- **5/11 · Claude · Secretaria, sedes y estadísticas (HOLD)** · Rama `claude/project-thread-447kpm`. Varias sedes sobre las agendas existentes, estadísticas del consultorio y secretaria invitada por mail sin ocupar lugar. Migración `20261106100000` sin aplicar. [Nota](panel-nutri-rediseno/secretaria-sedes-estadisticas.md). Espera ok visual y frase de la base.
 - **3/11 · Cursor · Centro de gestión, segunda parte (HOLD)** · Bandeja de WhatsApp y mail detrás de credenciales, con borrador que el admin envía. Riesgo de baja, cobranza sin un segundo débito, pipeline que se arrastra y deja un seguimiento a 3 días, checklist de arranque en el panel y en `/admin`, y un resumen del día. Instagram preparado. AFIP sin tocar. Migración `20261103233000` sin aplicar. [Nota y paso 10](hub-gestion.md). Sin producción ni merge.
 - **3/11 · Cursor · Centro de gestión en `/admin` (HOLD)** · Inicio, Nutris, Pipeline, Facturación, Bandeja y Conexiones, con Planes, Salud y Seguridad. Los números son reales o dicen que no se pudieron leer. Los canales y AFIP dicen Próximamente. Migración nueva, sin aplicar. [Nota y paso 10](hub-gestion.md). Sin producción ni merge.
 - **3/11 · Cursor · Admin de plataforma al centro de mando (HOLD)** · Quien está en la lista de administración y entra con Google ya no se queda en la pantalla de cuenta sin vincular. Si no tiene consultorio, va a `/admin` (ahí sigue el código de la app y el tema oscuro). Si también es nutri, se queda en el panel y ve Admin. La vuelta de Google no puede irse a otro sitio. [Nota y paso 10](admin-ingreso-google.md). Sin producción ni merge.

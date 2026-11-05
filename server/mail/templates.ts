@@ -40,6 +40,18 @@ export function nutritionistInviteEmail(input: { name: string; link: string }): 
   };
 }
 
+/** Invitación a la secretaria del consultorio: solo el enlace, sin datos de pacientes. */
+export function secretaryInviteEmail(input: { clinic: string; link: string; days: number }): MailContent {
+  const clinic = input.clinic.trim() || 'Un consultorio';
+  const lead = `${clinic} te invita a Nutridash como secretaria.`;
+  const how = `Vas a ver la agenda, los contactos y los cobros del consultorio, sin las fichas clínicas. Entrá con este enlace usando este mismo mail; vence en ${input.days} días y sirve una sola vez.`;
+  return {
+    subject: `${clinic} te invita a Nutridash`,
+    html: layout(['Hola,', escape(lead), escape(how)], { label: 'Aceptar la invitación', href: input.link }),
+    text: `Hola,\n\n${lead}\n${how}\n\n${input.link}\n`,
+  };
+}
+
 export function appointmentReminderEmail(input: { patientName: string; nutritionistName: string; startsAt: string; channel: 'video' | 'presencial'; meetUrl: string | null; site: string }): MailContent {
   const name = firstName(input.patientName);
   const pro = input.nutritionistName.trim() || 'tu nutricionista';

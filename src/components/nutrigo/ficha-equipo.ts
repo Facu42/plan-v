@@ -2,34 +2,34 @@ export const MODULOS_EQUIPO = ['Inicio', 'Pacientes', 'Ficha clínica', 'Planes'
 export const NIVELES_EQUIPO = ['Todo', 'Ver', 'Sin acceso'] as const;
 export const FILTROS_REGISTRO = ['Todo', 'Fichas', 'Cambios', 'Ingresos'] as const;
 
-export type RolEquipo = 'Dueña' | 'Nutricionista' | 'Recepción' | 'Contador';
+export type RolEquipo = 'Dueña' | 'Nutricionista' | 'Secretaria' | 'Contador';
 
 /** Nivel por módulo según el rol (0 todo, 1 ver, 2 sin acceso): la referencia del boceto, no un permiso guardado por persona. */
 const NIVELES_POR_ROL: Record<RolEquipo, readonly number[]> = {
   'Dueña': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   Nutricionista: [0, 0, 0, 0, 0, 1, 1, 1, 2, 2],
-  'Recepción': [1, 1, 2, 2, 0, 0, 0, 1, 2, 2],
+  'Secretaria': [1, 1, 2, 2, 0, 0, 0, 1, 2, 2],
   Contador: [2, 2, 2, 2, 2, 2, 1, 2, 2, 2],
 };
-const COLOR_POR_ROL: Record<RolEquipo, string> = { 'Dueña': 'azaf', Nutricionista: 'lima', 'Recepción': 'azul', Contador: 'rojo' };
-const DETALLE_POR_ROL: Record<RolEquipo, string> = { 'Dueña': 'Nutricionista', Nutricionista: 'Asociada', 'Recepción': 'Turnos y cobros', Contador: 'Planillas para facturar' };
+const COLOR_POR_ROL: Record<RolEquipo, string> = { 'Dueña': 'azaf', Nutricionista: 'lima', 'Secretaria': 'azul', Contador: 'rojo' };
+const DETALLE_POR_ROL: Record<RolEquipo, string> = { 'Dueña': 'Nutricionista', Nutricionista: 'Asociada', 'Secretaria': 'Turnos y cobros', Contador: 'Planillas para facturar' };
 
 export const ROLES_EQUIPO: ReadonlyArray<readonly [RolEquipo, string]> = [
   ['Dueña', 'Todo, incluido Equipo y Ajustes'],
   ['Nutricionista', 'Fichas, planes y mensajes de sus pacientes'],
-  ['Recepción', 'Agenda, cobros y mensajes; nunca la ficha clínica'],
+  ['Secretaria', 'Agenda, cobros y mensajes; nunca la ficha clínica'],
   ['Contador', 'Solo ve Cobranzas y descarga planillas'],
 ];
 
 export const REGLAS_EQUIPO = [
   'La ficha clínica solo la ven nutricionistas',
-  'Recepción ve el contacto, nunca las notas',
+  'La secretaria ve el contacto, nunca las notas',
   'Compartir fichas requiere una asignación explícita',
-  'Quitar la recepción corta su acceso operativo',
+  'Quitar a la secretaria corta su acceso operativo',
 ] as const;
 
 const esRol = (rol: string): rol is RolEquipo => rol in NIVELES_POR_ROL;
-export const nivelesDeRol = (rol: string): readonly number[] => (esRol(rol) ? NIVELES_POR_ROL[rol] : NIVELES_POR_ROL['Recepción']);
+export const nivelesDeRol = (rol: string): readonly number[] => (esRol(rol) ? NIVELES_POR_ROL[rol] : NIVELES_POR_ROL['Secretaria']);
 export const colorDeRol = (rol: string) => (esRol(rol) ? COLOR_POR_ROL[rol] : 'lima');
 export const detalleDeRol = (rol: string) => (esRol(rol) ? DETALLE_POR_ROL[rol] : '');
 

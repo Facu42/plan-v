@@ -32,6 +32,7 @@ import { shouldRedirectToAdmin, showAdminAccess } from '../context/platform-home
 
 const AdminCrm = lazy(() => import('./nutrigo/admin-crm/AdminCrm').then(({ AdminCrm }) => ({ default: AdminCrm })));
 const NutrigoShowroom = lazy(() => import('./nutrigo/NutrigoShowroom').then(({ NutrigoShowroom }) => ({ default: NutrigoShowroom })));
+import { SecretariaHint } from './auth/SecretariaHint';
 const StandaloneWorkspace = lazy(() => import('./nutrigo/StandaloneWorkspace').then(({ StandaloneWorkspace }) => ({ default: StandaloneWorkspace })));
 const SubscriptionPreview = import.meta.env.DEV
   ? lazy(() => import('./nutrigo/SubscriptionPreview').then(module => ({ default: module.SubscriptionPreview })))
@@ -205,6 +206,7 @@ export function PlanVExperience() {
           title="Tu cuenta todavía no está vinculada"
           subtitle="Cuando aceptes la invitación de tu nutricionista vas a ver tu plan. No se listan pacientes de otras cuentas."
           action={{ label: 'Cerrar sesión', onClick: () => { void signOut(); } }}
+          hint={<SecretariaHint />}
         />
       </div>
     );
@@ -221,7 +223,7 @@ export function PlanVExperience() {
     return (
       <div className={`plan-v-app${darkMode ? ' dark' : ''}`}>
         <PwaChrome install={false} />
-        <EntryStatus title="Tu cuenta todavía no está vinculada" subtitle={waiting} action={{ label: 'Cerrar sesión', onClick: () => { void signOut(); } }} />
+        <EntryStatus title="Tu cuenta todavía no está vinculada" subtitle={waiting} hint={inviteStatus === 'accepting' ? undefined : <SecretariaHint />} action={{ label: 'Cerrar sesión', onClick: () => { void signOut(); } }} />
       </div>
     );
   }

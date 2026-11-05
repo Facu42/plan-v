@@ -11,9 +11,9 @@ describe('ficha equipo',()=>{
   expect(nombreCorto('lucia@x.com')).toBe('lucia');
  });
  it('da niveles por rol y recepción nunca ve la ficha clínica',()=>{
-  expect(nivelesDeRol('Recepción')[2]).toBe(2);
+  expect(nivelesDeRol('Secretaria')[2]).toBe(2);
   expect(nivelesDeRol('Dueña').every(n=>n===0)).toBe(true);
-  expect(nivelesDeRol('Rol raro')).toEqual(nivelesDeRol('Recepción'));
+  expect(nivelesDeRol('Rol raro')).toEqual(nivelesDeRol('Secretaria'));
   expect(colorDeRol('Contador')).toBe('rojo');
  });
  it('resume personas e invitaciones sin contar las revocadas',()=>{
