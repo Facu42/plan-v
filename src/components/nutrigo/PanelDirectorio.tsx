@@ -15,7 +15,7 @@ export const LINK_DIRECTORIO = '/profesionales';
 export function textoDirectorio(listing: DirectoryListingView | null, publicada: boolean): string {
   if (!listing) return 'Gratis para nutris matriculadas. Subí tu matrícula: la revisamos y salís en el directorio con el sello de verificada.';
   if (listing.status === 'rejected') return `No pudimos verificarla: ${listing.reject_reason || 'revisá el archivo'}. Subila de nuevo con «Cambiar».`;
-  if (listing.status === 'pending') return 'La estamos revisando. Te avisamos cuando esté lista; no hace falta que hagas nada.';
+  if (listing.status === 'pending') return 'La estamos revisando. Cuando la verifiquemos vas a ver el sello acá; no hace falta que hagas nada.';
   if (!publicada) return 'Verificada. Publicá tu página para salir en el directorio.';
   return listing.listed ? 'Verificada. Salís en el directorio de Nutridash.' : 'Verificada. Elegiste no salir en el directorio.';
 }
