@@ -8,7 +8,8 @@ import insights from '../../features/nutrigo/source/263-6588.json';
 import { EntryStatus } from './entry-shell';
 import { EntryStage } from './entry-stage';
 import pieces from './entry-source.json';
-import { LoginScreen } from './LoginScreen';
+import { LoginScreen, NutriSignupWhatsapp } from './LoginScreen';
+import { NUTRI_SIGNUP_MESSAGE, nutriSignupWhatsappUrl } from '../../contact';
 
 const auth = vi.hoisted(() => ({
   signIn: vi.fn(),
@@ -74,6 +75,15 @@ describe('pantalla de ingreso', () => {
     expect(html).toContain('data-entrada="paciente"');
     expect(html).toContain('Entrá a tu plan y a tu progreso.');
     expect(html).not.toContain('Tipo de cuenta');
+  });
+
+  it('el registro de nutricionista no tiene formulario: lleva al WhatsApp de Nutridash', () => {
+    const html = renderToStaticMarkup(<NutriSignupWhatsapp onLogin={vi.fn()} />);
+    expect(html).toContain('Escribinos por WhatsApp');
+    expect(html).toContain('Ya tengo cuenta');
+    expect(html).not.toContain('Contraseña');
+    expect(html).not.toContain('Crear cuenta');
+    expect(nutriSignupWhatsappUrl('+54 9 351 123-4567')).toBe(`https://wa.me/5493511234567?text=${encodeURIComponent(NUTRI_SIGNUP_MESSAGE)}`);
   });
 
   it('la escena de nutricionistas habla de las funciones del panel', () => {

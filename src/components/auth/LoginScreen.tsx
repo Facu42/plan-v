@@ -3,6 +3,7 @@ import { api } from '../../api/client';
 import { useAuth } from '../../context/AuthContext';
 import { pendingInviteIdFromLocation } from '../../context/invite-link';
 import { PRIVACY_URL, TERMS_URL } from '../../legal';
+import { nutriSignupWhatsappUrl } from '../../contact';
 import { EntryButton, EntryChrome, EntryField, EntrySegments } from './entry-shell';
 import { EntryStage, type EntryEntrada } from './entry-stage';
 
@@ -83,6 +84,9 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
     }
   };
 
+  // El alta de consultorios ya no es por la app: se habla por WhatsApp y la cuenta la crea Nutridash.
+  const nutriSignupClosed = mode === 'signup' && professional;
+
   const backToLogin = () => { setSignupOk(false); setRecoverOk(false); setMode('login'); };
 
   if (loading) {
@@ -106,14 +110,14 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
     );
   }
 
-  const title = mode === 'login' ? 'Iniciar sesión' : mode === 'signup' ? 'Crear cuenta' : 'Recuperar cuenta';
+  const title = mode === 'login' ? 'Iniciar sesión' : mode === 'signup' ? (professional ? 'Sumá tu consultorio' : 'Crear cuenta') : 'Recuperar cuenta';
   const subtitle = mode === 'login'
     ? (invitePending
       ? 'Entrá con el email invitado. La cuenta tiene que estar verificada para vincularte.'
       : professional ? 'Entrá a tu panel de consultorio.' : 'Entrá a tu plan y a tu progreso.')
     : mode === 'signup'
       ? (professional
-        ? 'Creás tu consultorio y después invitás a tus pacientes con un enlace.'
+        ? 'El alta de consultorios la hacemos con vos. Escribinos por WhatsApp y te dejamos la cuenta lista para invitar a tus pacientes.'
         : 'Si tu nutricionista te mandó un enlace, abrilo primero para quedar vinculada.')
       : 'Ingresá el email de la cuenta. No vamos a decir si el correo existe o no.';
 
@@ -130,6 +134,9 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
         ]} />
       )}
 
+      {nutriSignupClosed ? (
+        <NutriSignupWhatsapp onLogin={() => { setError(null); setMode('login'); }} />
+      ) : (<>
       <div className="entry-fields">
         {mode === 'signup' && (
           <EntryField label={professional ? 'Nombre profesional' : 'Nombre completo'} autoComplete="name" placeholder={professional ? 'Nombre profesional' : 'Nombre completo'} value={fullName} onChange={(event) => setFullName(event.target.value)} />
@@ -173,6 +180,7 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
           {mode === 'signup' && !acceptedLegal && <p className="entry-note">Para registrarte con Google, primero marcá la casilla de arriba.</p>}
         </>
       )}
+      </>)}
 
       {demoAllowed && (
         <>
@@ -183,6 +191,16 @@ export function LoginScreen({ darkMode, onToggleTheme }: { darkMode: boolean; on
       )}
       <p className="entry-legal"><a href={PRIVACY_URL} target="_blank" rel="noreferrer">Privacidad</a> · <a href={TERMS_URL} target="_blank" rel="noreferrer">Términos</a></p>
     </EntryChrome>
+  );
+}
+
+/** Registro de nutricionista: en lugar del formulario, el botón que abre el WhatsApp de Nutridash. */
+export function NutriSignupWhatsapp({ onLogin }: { onLogin: () => void }) {
+  return (
+    <div className="entry-actions">
+      <EntryButton label="Escribinos por WhatsApp" onClick={() => { window.open(nutriSignupWhatsappUrl(), '_blank', 'noopener,noreferrer'); }} />
+      <EntryButton tone="secondary" label="Ya tengo cuenta" onClick={onLogin} />
+    </div>
   );
 }
 

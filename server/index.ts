@@ -752,6 +752,11 @@ app.get('/api/nutritionist/setup', async (c) => {
 // paciente (el rol nunca viene del cliente); con la cuenta ya verificada, quien
 // eligió "Soy nutricionista" abre su consultorio vacío. RLS la aísla: sólo ve
 // las pacientes que ella misma cree.
+/** Alta propia de nutricionistas: cerrada salvo `NUTRI_SELF_SIGNUP=1` (pruebas o si se vuelve a abrir). */
+export function nutriSelfSignupOpen(env: NodeJS.ProcessEnv = process.env): boolean {
+  return ['1', 'true', 'on'].includes((env.NUTRI_SELF_SIGNUP ?? '').trim().toLowerCase());
+}
+
 app.post('/api/me/professional', async (c) => {
   const auth = c.get('auth');
   if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ error: 'Requiere una cuenta real' }, 400);
@@ -764,6 +769,10 @@ app.post('/api/me/professional', async (c) => {
     return c.json({ nutritionist_id: await sb.sbEnsureNutritionist(auth.userId, displayName) });
   }
   if (role !== 'paciente') return c.json({ error: 'Prohibido' }, 403);
+  // Desde el 5/11/2026 el alta de consultorios la hace Nutridash desde /admin, después de hablar por WhatsApp.
+  if (!nutriSelfSignupOpen()) {
+    return c.json({ code: 'nutri_signup_closed', error: 'El alta de consultorios se hace por WhatsApp con Nutridash. Escribinos y te dejamos la cuenta lista.' }, 403);
+  }
   if (await sb.sbUserHasPatientLink(auth.userId)) {
     return c.json({ error: 'Esta cuenta ya está vinculada como paciente. Registrate con otro email para tu consultorio.' }, 409);
   }

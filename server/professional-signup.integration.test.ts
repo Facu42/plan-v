@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const sbMocks = vi.hoisted(() => ({
   sbGetProfileRole: vi.fn(),
@@ -32,13 +32,29 @@ const claim = (body: unknown, token = 'test-token') => app.request('/api/me/prof
 });
 
 describe('PV-47 alta propia de nutricionistas', () => {
+  afterEach(() => { vi.unstubAllEnvs(); });
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv('NUTRI_SELF_SIGNUP', '1');
     sbMocks.sbGetProfileRole.mockResolvedValue('paciente');
     sbMocks.sbUserHasPatientLink.mockResolvedValue(false);
     sbMocks.sbProvisionNutritionist.mockResolvedValue('nutri-9');
     sbMocks.sbEnsureNutritionist.mockResolvedValue('nutri-9');
     sbMocks.sbGetNutritionistId.mockResolvedValue('nutri-9');
+  });
+
+  it('con el alta propia cerrada (por defecto) la cuenta nueva no abre consultorio y se la manda a WhatsApp', async () => {
+    vi.stubEnv('NUTRI_SELF_SIGNUP', '');
+    const response = await claim({ display_name: 'Lic. Ana Gómez' });
+    expect(response.status).toBe(403);
+    expect(await response.json()).toMatchObject({ code: 'nutri_signup_closed' });
+    expect(sbMocks.sbProvisionNutritionist).not.toHaveBeenCalled();
+  });
+
+  it('con el alta cerrada, la nutri que creó Nutridash desde /admin sigue entrando', async () => {
+    vi.stubEnv('NUTRI_SELF_SIGNUP', '');
+    sbMocks.sbGetProfileRole.mockResolvedValue('nutri');
+    expect((await claim({ display_name: 'Ana' })).status).toBe(200);
   });
 
   it('una cuenta nueva sin paciente vinculada abre su consultorio', async () => {
