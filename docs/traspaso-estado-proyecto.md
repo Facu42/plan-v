@@ -123,6 +123,9 @@ Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, en
 ## 5/11 · Letra legible del panel
 En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
 
+## 5/11 · Ventana «Agregar a la comida» con el estilo del boceto
+El editor de planes (#277: agregar y cambiar alimentos, recetas e intercambios) reusa los buscadores del editor viejo; su ventana ahora se ve como el panel lateral del boceto v29 (tarjeta con borde, campos `.ai`, botón principal negro `.cta`, secundario `.sbtn`, pestañas en píldora). Estilos solo en `panel-v29-app.css` bajo `#pv-panel-v29 dialog.plan-recipe-picker`. Regla de Facundo: todo elemento nuevo sigue el estilo del boceto.
+
 ## 5/11 · Barra de abajo del celular
 En el boceto v29 la barra `.mnav` del celular es más alta (íconos 24px, letra 12px) y flota sobre el contenido con fondo semitransparente y desenfoque; la pantalla suma 110px de espacio abajo para que nada quede tapado. Se regeneró `panel-v29.css`.
 

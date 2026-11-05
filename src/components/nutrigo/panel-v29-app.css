@@ -986,3 +986,35 @@
 #pv-panel-v29.mob #s-inicio .kweek { display: none; }
 /* Celular: si el nombre de la tarjeta ocupa dos líneas, la tarjeta crece y no corta el pie. */
 #pv-panel-v29.mob #s-inicio .kpi { height: auto; min-height: 96px; }
+
+/* Ventana «Agregar a la comida» del editor de planes: mismo estilo que el panel lateral del boceto
+   (#act: tarjeta con borde, campos .ai, botón principal negro .cta y secundario .sbtn). */
+#pv-panel-v29 dialog.plan-recipe-picker { width: min(860px, calc(100vw - 48px)); max-height: calc(100dvh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); box-shadow: 0 18px 50px rgba(16,17,20,.16); font-size: 13px; overflow: auto; }
+#pv-panel-v29 dialog.plan-recipe-picker::backdrop { background: rgba(16,17,20,.18); }
+#pv-panel-v29 dialog.plan-recipe-picker > * { margin-inline: 22px; }
+#pv-panel-v29 dialog.plan-recipe-picker > header { display: flex; align-items: center; gap: 12px; margin: 0; padding: 20px 22px 14px; border-bottom: 1px solid var(--line); background: var(--card); color: var(--ink); }
+#pv-panel-v29 dialog.plan-recipe-picker > header h2 { flex: 1; margin: 0; font-size: 17px; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+#pv-panel-v29 dialog.plan-recipe-picker > header button { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line2); border-radius: 999px; background: var(--card); color: var(--ink); font-size: 16px; line-height: 1; cursor: pointer; }
+#pv-panel-v29 dialog.plan-recipe-picker > :nth-child(2) { margin-top: 16px; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-analysis-switch { display: flex; flex-wrap: wrap; gap: 6px; background: none; border: 0; padding: 0; margin-bottom: 14px; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-analysis-switch button { border: 1px solid var(--line2); background: var(--card); color: var(--ink); border-radius: 999px; padding: 6px 13px; font: inherit; font-size: 12px; cursor: pointer; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-analysis-switch button[aria-pressed="true"] { background: var(--dark); color: var(--dark-ink); border-color: var(--dark); }
+#pv-panel-v29 dialog.plan-recipe-picker label { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; font-size: 11.5px; font-weight: 500; color: var(--ink2); }
+#pv-panel-v29 dialog.plan-recipe-picker :is(input, select) { font: inherit; font-size: 13px; font-weight: 400; color: var(--ink); background: var(--card); border: 1px solid var(--line2); border-radius: 10px; padding: 0 12px; height: 38px; width: 100%; min-width: 0; }
+#pv-panel-v29 dialog.plan-recipe-picker :is(input, select):focus { outline: none; border-color: var(--ink); box-shadow: 0 0 0 3px var(--lima-t); }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-columns { gap: 18px; margin-bottom: 14px; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-results { padding-right: 2px; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-results button { border: 1px solid var(--line); border-radius: 12px; background: var(--card); color: var(--ink); padding: 10px 12px; font-size: 12.5px; flex: none; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-results button:hover { border-color: var(--ink); }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-results button[aria-pressed="true"] { border-color: var(--ink); background: var(--lima-t); }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-results small { color: var(--ink3); font-size: 11px; }
+#pv-panel-v29 dialog.plan-recipe-picker h3 { margin: 0 0 4px; font-size: 15px; font-weight: 500; }
+#pv-panel-v29 dialog.plan-recipe-picker p { color: var(--ink3); font-size: 12px; margin: 4px 0 10px; }
+#pv-panel-v29 dialog.plan-recipe-picker dl { color: var(--ink); font-size: 12px; }
+#pv-panel-v29 dialog.plan-recipe-picker dt { color: var(--ink3); }
+#pv-panel-v29 dialog.plan-recipe-picker nav { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; font-size: 12px; color: var(--ink3); }
+#pv-panel-v29 dialog.plan-recipe-picker .nv-button { font: inherit; font-size: 12.5px; font-weight: 500; display: inline-flex; align-items: center; gap: 7px; background: var(--dark); color: var(--dark-ink); border: 1px solid var(--dark); border-radius: 999px; padding: 9px 15px; cursor: pointer; box-shadow: none; }
+#pv-panel-v29 dialog.plan-recipe-picker .nv-button.nv-ghost, #pv-panel-v29 dialog.plan-recipe-picker nav .nv-button { background: var(--card); color: var(--ink); border: 1px solid var(--line2); border-radius: 8px; padding: 5px 10px; font-size: 11.5px; font-weight: 400; }
+#pv-panel-v29 dialog.plan-recipe-picker .nv-button[disabled] { opacity: .35; cursor: not-allowed; }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-actions { position: sticky; bottom: 0; display: flex; align-items: center; gap: 8px; margin: 0; padding: 14px 22px; border-top: 1px solid var(--line); background: var(--card); }
+#pv-panel-v29 dialog.plan-recipe-picker .plan-recipe-picker-actions .nv-ghost { border-radius: 999px; padding: 9px 15px; font-size: 12.5px; }
