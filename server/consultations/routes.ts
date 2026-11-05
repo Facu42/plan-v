@@ -6,6 +6,7 @@ import * as sb from '../db/supabase-repo.js';
 import { authorizePatientAction } from '../security/authorization.js';
 import { CareError } from '../care/errors.js';
 import { consultationCommandSchema,consultationChunkSchema,consultationCompletionSchema,type ConsultationScope } from '../../src/types/consultations.js';
+import { syncAppointment as syncPackUse } from '../packs/repository.js';
 import { commandConsultation,consultationView,enqueueConsultationAudio,consultationCompletionView,completeConsultationAppointment } from './repository.js';
 
 async function access(c:Context,patientId:string,professionalOnly:boolean,ownerOnly=false) {
@@ -30,7 +31,12 @@ export function registerConsultationRoutes(app:Hono) {
  });
  app.post('/api/patients/:id/consultations/completions',async c=>{
   const {persistent,scope}=await access(c,c.req.param('id'),true,true);const input=await body(c,consultationCompletionSchema,4096);
-  return c.json({completion:await completeConsultationAppointment(scope,input,persistent)});
+  const completion=await completeConsultationAppointment(scope,input,persistent);
+  // Paquete de consultas: marcar realizada descuenta una (si hay paquete vigente) y desmarcar la devuelve.
+  // Nunca hace fallar la consulta: si el paquete no se pudo tocar, la nutri lo ajusta desde Cobros.
+  try{await syncPackUse(scope.patientId,input.appointment_id,completion.completed,completion.appointment_starts_at,persistent);}
+  catch(error){console.warn('[packs] no se pudo sincronizar la consulta con el paquete',error instanceof Error?error.message:error);}
+  return c.json({completion});
  });
  app.get('/api/patients/:id/consultations',async c=>{
   const id=c.req.param('id'), {persistent,professional}=await access(c,id,false);
