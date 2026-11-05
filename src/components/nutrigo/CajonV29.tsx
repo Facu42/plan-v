@@ -5,7 +5,7 @@ import type { ReactNode } from 'react';
 import { PanelV29Icon } from './PanelV29Icon';
 import { usePanelBoceto } from './panel-v29-boceto';
 
-export function CajonV29({ titulo, sub, ok = 'Guardar', aviso, onGuardar, onClose, antesDeCerrar, children }: { titulo: string; sub?: string; ok?: string | false; aviso?: string; onGuardar?: () => boolean | void; onClose: () => void; antesDeCerrar?: () => boolean; children: ReactNode }) {
+export function CajonV29({ titulo, sub, ok = 'Guardar', aviso, bloqueado = false, onGuardar, onClose, antesDeCerrar, children }: { titulo: string; sub?: string; ok?: string | false; aviso?: string; /** `o.lock` del boceto: el botón principal queda deshabilitado. */ bloqueado?: boolean; onGuardar?: () => boolean | void; onClose: () => void; antesDeCerrar?: () => boolean; children: ReactNode }) {
   const { clase, cerrar } = usePanelBoceto(onClose);
   const solicitarCerrar = () => { if (antesDeCerrar?.() !== false) cerrar(); };
   const focus = useModalFocus<HTMLElement>(true, solicitarCerrar);
@@ -15,7 +15,7 @@ export function CajonV29({ titulo, sub, ok = 'Guardar', aviso, onGuardar, onClos
     <aside ref={focus} tabIndex={-1} id="act" role="dialog" aria-modal="true" aria-labelledby="actt">
       <header><div><h2 id="actt">{titulo}</h2><p id="acts">{sub ?? ''}</p></div><button type="button" className="ibtn" aria-label="Cerrar" onClick={solicitarCerrar}><PanelV29Icon name="x" size={13} /></button></header>
       <div className="abody" id="actb">{children}{aviso ? <p className="sxsub" role="alert">{aviso}</p> : null}</div>
-      <footer id="actf">{ok === false ? <button type="button" className="chip" onClick={solicitarCerrar}>Cerrar</button> : <><button type="button" className="chip" onClick={solicitarCerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" onClick={guardar}>{ok}</button></>}</footer>
+      <footer id="actf">{ok === false ? <button type="button" className="chip" onClick={solicitarCerrar}>Cerrar</button> : <><button type="button" className="chip" onClick={solicitarCerrar}>Cancelar</button><span style={{ flex: 1 }} /><button type="button" className="cta" disabled={bloqueado} onClick={guardar}>{ok}</button></>}</footer>
     </aside>
   </div>;
   const host = typeof document === 'undefined' ? null : document.querySelector('#pv-panel-v29 .app');

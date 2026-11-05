@@ -3,6 +3,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { PanelEquipo } from './PanelEquipo';
 import { PanelAjustes } from './PanelAjustes';
 import { AjustesAvisos, AjustesPlantillas } from './PanelAjustesVistas';
+import { DescargarMisDatos } from './AjustesExportar';
 import { panelNavGroups, panelNavCurrent } from './PanelNavigation';
 import { isAllowedPage } from './app-location';
 
@@ -30,6 +31,12 @@ describe('Equipo y Ajustes v29', () => {
     const html = renderToStaticMarkup(<PanelAjustes onOpen={vi.fn()}/>);
     for (const label of ['Obras sociales y reservas', 'Tu servicio de Nutridash', 'Apariencia', 'Idioma y horario', 'Avisos para vos', 'Tus datos', 'Sin completar', 'role="switch"', 'class="fx"']) expect(html).toContain(label);
     for (const falso of ['MN 4521', '27-28.456.912-4', 'Av. Cabildo', 'OSDE']) expect(html).not.toContain(falso);
+  });
+  it('Tus datos abre el cajón del boceto con las tres partes tildadas y Preparar', () => {
+    const html = renderToStaticMarkup(<DescargarMisDatos onClose={vi.fn()}/>);
+    for (const pieza of ['id="actw"', 'id="act"', 'Descargar mis datos', 'class="abody"', 'class="ack"', 'Pacientes (planilla de Excel)', 'Turnos (planilla de Excel)', 'Historia clínica de cada paciente (PDF)', 'class="mhelp"', '>Preparar</button>', '>Cancelar</button>']) expect(html).toContain(pieza);
+    expect(html.match(/type="checkbox" checked=""/g)).toHaveLength(3);
+    expect(html).not.toContain('disabled');
   });
   const plantillas = [
     { id: 'c0000000-0000-4000-8000-000000000001', kind: 'Formulario' as const, name: 'Control de embarazo', when_text: 'Antes de cada turno' as const, questions: ['¿Cómo dormiste?', '¿Náuseas?'], updated_at: '' },
