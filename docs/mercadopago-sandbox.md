@@ -2,7 +2,7 @@
 
 Esto es el cobro de Nutridash a la nutricionista. No es el cobro de la paciente. No uses la clave de producción y no confirmes un pago con una tarjeta real.
 
-La cuenta queda activa solo cuando Mercado Pago avisa un pago aprobado por el monto del plan. Si ella no paga, a los 30 días del alta el panel pasa a solo lectura: ve todo y no puede cargar. No se borra nada y la paciente sigue entrando.
+La cuenta queda activa solo cuando Mercado Pago avisa un pago aprobado por el monto del plan. Si ella no paga, a los 3 días del alta el panel pasa a solo lectura (las cuentas creadas antes del 6/11/2026 conservan 30 días): ve todo y no puede cargar. No se borra nada y la paciente sigue entrando.
 
 ## Antes de empezar
 
@@ -25,7 +25,7 @@ Creá una usuaria de prueba compradora en Mercado Pago (no uses tu usuario real)
 
 ## Pasos
 
-1. Entrá con una nutricionista de prueba que tenga menos de 30 días de alta.
+1. Entrá con una nutricionista de prueba que tenga menos de 3 días de alta.
 2. En Ajustes, elegí Arranque mensual. El enlace tiene que abrir Mercado Pago. Si es de las primeras 30, el monto es $14.940. Si no, $24.900. El servidor calcula el monto: la pantalla no lo puede cambiar.
 3. Pagá con la usuaria de prueba y una tarjeta de prueba de Mercado Pago (estado aprobado). No uses una tarjeta propia.
 4. Al volver a Ajustes, el plan tiene que decir que está al día. La nutricionista puede cargar.
@@ -35,7 +35,7 @@ Creá una usuaria de prueba compradora en Mercado Pago (no uses tu usuario real)
 ## Si no paga
 
 - Del día 0 al 29 puede usar el panel completo.
-- Al cumplirse 30 días desde el alta, sin un pago aprobado, el panel queda en solo lectura.
+- Al cumplirse 3 días desde el alta (30 si la cuenta es anterior al 6/11/2026), sin un pago aprobado, el panel queda en solo lectura.
 - Un pago aprobado de otro monto no activa la cuenta.
 - Si más adelante un cobro se rechaza, hay 7 días para reintentar y después también queda en solo lectura. La paciente no pierde Mensajes ni sus datos.
 
