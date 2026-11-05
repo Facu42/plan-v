@@ -12,6 +12,7 @@ export function PublicProfessionalHeader({ page }: { page: PublicSchedulingPage 
   return <header className="pub-pro" style={{ color: tinta, ['--pub-accent' as string]: acento }}>
     {foto ? <img src={foto} alt="" width={96} height={96} /> : null}
     <h1>{page.page.title}</h1>
+    {page.verified_license ? <p className="pub-verif">Matrícula verificada por Nutridash · {page.verified_license}</p> : null}
     {page.page.bio ? <p>{page.page.bio}</p> : null}
     {detalle ? <p>{detalle}</p> : null}
     {page.profile.specialties.length ? <ul>{page.profile.specialties.map(item => <li key={item}>{item}</li>)}</ul> : null}

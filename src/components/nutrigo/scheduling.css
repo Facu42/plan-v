@@ -13,3 +13,16 @@
 .scheduling-panel .pub-nd img{width:28px;height:28px;border-radius:8px}
 .nv-agenda-settings{padding:12px 20px;background:var(--nv-card);border:1px solid var(--nv-border);border-radius:12px;margin-bottom:16px}
 .nv-agenda-settings summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--nv-ink)}
+/* Directorio público «Nutris verificadas» y sello en la página de cada nutri. */
+.scheduling-panel .pub-verif{color:var(--nv-ink);font-weight:600}
+.pub-dir-buscar{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+.pub-dir-buscar label{display:grid;gap:4px;flex:1 1 220px;font-size:13px}
+.pub-dir-buscar :is(input,select){min-height:40px;padding:8px 12px;border-radius:12px;border:1px solid var(--nv-border);font:inherit}
+.pub-dir-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;margin:0 0 16px;padding:0;list-style:none}
+.pub-dir-lista>li>a.pub-pro{display:grid;grid-template-columns:56px 1fr;align-items:center;gap:8px 12px;height:100%;margin:0;padding:16px;border-radius:16px;border:1px solid var(--nv-border);background:var(--nv-card);text-decoration:none;font-weight:400}
+.pub-dir-lista>li>a.pub-pro:hover,.pub-dir-lista>li>a.pub-pro:focus-visible{border-color:var(--nv-ink)}
+.pub-dir-lista>li>a.pub-pro>span{display:grid;gap:2px;min-width:0}
+.pub-dir-lista>li>a.pub-pro small{font-size:13px}
+.pub-dir-lista>li>a.pub-pro img{width:56px;height:56px;border-radius:14px}
+.pub-dir-lista>li>a.pub-pro>ul{grid-column:1/-1}
+.pub-dir-av{display:grid;place-items:center;width:56px;height:56px;border-radius:14px;background:#C2E66E;color:#2C3B07;font-weight:700}

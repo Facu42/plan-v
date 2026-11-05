@@ -110,6 +110,9 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 5/11 · Directorio de nutris matriculadas (rama `claude/project-thread-j8e7t7`)
+Decisión de Facundo (plan Nutreando, 5/11): directorio público gratis con nombre propio, solo para nutris matriculadas. Página pública **/profesionales** («Nutris verificadas»): solo nutris con matrícula verificada, que eligieron aparecer y con su página prendida; busca por zona o especialidad y por modalidad. En Página pública › Mi página, bloque «Directorio de nutris» (piezas del boceto v29: fxp, fxkv, pill, pubask, sw y cajón #act): sube foto o PDF de la matrícula (privado, bucket `license-files`, hasta 5 MB, se revisa la cabecera del archivo), ve el estado y elige si aparece. Cambiar la matrícula la vuelve a «En revisión». La página /slug muestra «Matrícula verificada por Nutridash». El administrador revisa con `/api/admin/licenses`, `/api/admin/nutritionists/:id/license/file` (enlace firmado de 1 minuto) y `.../license/review` (con dos pasos y auditoría). `/api/directory` queda abierto aunque el plan esté en solo lectura. Migración aditiva `20261105190000_directory_listings.sql` **sin aplicar** (espera la frase de Facundo; base primero, main después).
+
 ## 5/11 · Paquetes de consultas (rama `claude/project-thread-vq6ihd`, PR en borrador)
 Ficha › Cobros suma el panel «Paquete de consultas» (piezas del boceto v29: fxP, medidor con fxkv, sbtn y cajón #act). La nutri vende un paquete de N consultas (con cobro suelto «Paquete: …» en Cobranzas o «ya está cobrado»), y cada consulta marcada como realizada descuenta una sola del paquete vigente más viejo; desmarcarla la devuelve. También se descuenta a mano, se deshace y se da de baja. Migración aditiva `20261105150000_patient_packs.sql` **sin aplicar** (espera la frase de Facundo). La paciente todavía no ve su saldo de consultas.
 

@@ -5,6 +5,7 @@ export const RESERVED_PUBLIC_SLUGS: ReadonlySet<string> = new Set([
   'app', 'crm', 'pacientes', 'consultorio', 'equipo', 'admin', 'api', 'legal', 'nutris',
   'assets', 'static', 'icons', 'img', 'brand', 'fonts', 'sw', 'manifest', 'robots',
   'favicon', 'offline', 'index', 'login', 'signup', 'register', 'health', 'status',
+  'profesionales',
 ]);
 
 export function isPublicSlug(value: string): boolean {

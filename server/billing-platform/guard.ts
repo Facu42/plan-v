@@ -3,7 +3,7 @@ import { billingEnabled } from './flag.js';
 import { findOpenSubscription, nutritionistForUser } from './repository.js';
 import { platformWriteAccess } from './state.js';
 
-const OPEN = ['/api/billing', '/api/public/billing', '/api/auth', '/api/me', '/api/admin', '/api/notices', '/api/notification-preferences'];
+const OPEN = ['/api/billing', '/api/public/billing', '/api/auth', '/api/me', '/api/admin', '/api/notices', '/api/notification-preferences', '/api/directory'];
 
 export const PLATFORM_READ_ONLY_MESSAGE = 'Tu plan está en solo lectura. Podés ver a tus pacientes y exportar tus datos. Regularizá el pago para volver a cargar. Tus pacientes no pierden el acceso.';
 

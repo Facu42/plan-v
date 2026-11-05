@@ -42,6 +42,7 @@ export function PlanVExperience() {
   const subscriptionReturn=/^\/consultorio\/([a-z0-9][a-z0-9-]{2,59})\/suscripcion\/([0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12})\/?$/i.exec(path);
   const publicSlug=subscriptionReturn?.[1]??publicSlugFromPath(path);
   const teamPath=/^\/equipo\/?$/.test(path);
+  const directoryPath=/^\/profesionales\/?$/.test(path);
   const { session, demoMode, passwordRecovery, isNutri, isPatient, profile, signOut, loading: authLoading } = useAuth();
   const [view, setView] = useState<'patient' | 'pro'>('patient');
   const [inviteStatus, setInviteStatus] = useState<'idle' | 'accepting' | 'unconfirmed' | 'unavailable' | 'linked'>('idle');
@@ -77,7 +78,7 @@ export function PlanVExperience() {
   }, [publicSlug, subscriptionReturn?.[2]]);
 
   useEffect(() => {
-    if(publicSlug||teamPath){reset();return;}
+    if(publicSlug||teamPath||directoryPath){reset();return;}
     if (authLoading || passwordRecovery) return;
     if (!session && !demoMode) {
       reset();
@@ -86,11 +87,11 @@ export function PlanVExperience() {
     if (session && !isNutri && !isPatient) return;
     if (!legalOk || mfa.step) return;
     void boot({ isNutri, isPatient });
-  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, mfa.step, boot, reset, passwordRecovery,publicSlug,teamPath]);
+  }, [authLoading, session, demoMode, isNutri, isPatient, legalOk, mfa.step, boot, reset, passwordRecovery,publicSlug,teamPath,directoryPath]);
 
   useEffect(() => {
     setInviteStatus('idle');
-    if (publicSlug||teamPath||!sessionUserId || !isPatient || !legalOk) return;
+    if (publicSlug||teamPath||directoryPath||!sessionUserId || !isPatient || !legalOk) return;
     const stored = typeof window === 'undefined' ? null : window.sessionStorage.getItem(PENDING_INVITE_STORAGE_KEY);
     const inviteId = pendingInviteIdFromLocation(typeof window === 'undefined' ? '' : window.location.search, stored);
     if (!inviteId) return;
@@ -110,7 +111,7 @@ export function PlanVExperience() {
       setInviteStatus(message.includes('Confirmá tu email') ? 'unconfirmed' : 'unavailable');
     });
     return () => { cancelled = true; };
-  }, [sessionUserId, isPatient, legalOk, boot,publicSlug,teamPath]);
+  }, [sessionUserId, isPatient, legalOk, boot,publicSlug,teamPath,directoryPath]);
 
   useEffect(() => {
     if (!sessionUserId) { setPlatformAdmin(false); return; }
@@ -142,6 +143,7 @@ export function PlanVExperience() {
   if (SubscriptionPreview && typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('vista') === 'suscripciones') {
     return <Suspense fallback={<LoadingScreen/>}><SubscriptionPreview /></Suspense>;
   }
+  if(directoryPath){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace directory/></Suspense>;}
   if(publicSlug){return <Suspense fallback={<LoadingScreen/>}><PwaChrome install={false}/><StandaloneWorkspace slug={publicSlug} subscriptionId={subscriptionReturn?.[2]}/></Suspense>;}
 
   if (authLoading) {

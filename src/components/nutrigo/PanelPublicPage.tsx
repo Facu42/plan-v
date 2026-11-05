@@ -17,6 +17,7 @@ import { PlanForm } from './PanelDebit';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
 import { useUnsavedChanges } from './unsaved-changes';
 import { usePanelScheduling } from './use-panel-scheduling';
+import { PanelDirectorio } from './PanelDirectorio';
 import { PanelPublicaV29, Celular, PESTANAS_PUBLICA, type CajonPublica, type VistaPublica } from './PanelPublicaV29';
 import { CajonV29 } from './CajonV29';
 import { CajonDescuentos, CajonHorarios, CajonLugar, CajonObras, CajonPerfil, CajonPide, CajonReglas, CajonServicio, conExtras } from './PanelPublicaCajones';
@@ -210,6 +211,7 @@ export function PanelPublicPage({ onHeader, onAgenda }: { onHeader?: (actions: R
       onReservar={onAgenda ?? (() => setVista(2))} onReintentar={() => void scheduling.load()}
       reviewLink={googleReviewLink(config.page_extras?.google_business_url ?? '') ?? ''}
       pacientes={pacientes} pacienteId={pacienteId} onPaciente={setPacienteId}
+      directorio={<PanelDirectorio publicada={published} matriculaSugerida={config.page_extras?.license ?? ''} />}
       onPedirResena={() => {
         const link = googleReviewLink(config.page_extras?.google_business_url ?? '');
         if (!link) { scheduling.setStatus('Cargá en Editar perfil un link https de Google (g.page o el de reseña).'); return; }
