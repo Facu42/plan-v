@@ -61,13 +61,13 @@ svg.i{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.6;stro
 .srch{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:8px 10px;color:var(--ink3)}
 .srch kbd{margin-left:auto;font:inherit;font-size:10.5px;border:1px solid var(--line2);border-radius:5px;padding:1px 5px}
 .grp{display:flex;flex-direction:column;gap:1px}
-.grp h6{margin:0 0 4px;padding:0 8px;font-size:10.5px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.06em}
+.grp h6{margin:0 0 4px;padding:0 8px;font-size:10.5px;font-weight:500;color:var(--ink3);text-transform:none;letter-spacing:0}
 .nv{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:9px;color:var(--ink2);cursor:pointer;font-size:13px;border:0;background:none;width:100%;text-align:left}
 .nv:hover{background:var(--line)}
 .nv.on{background:var(--lima-t);color:var(--ink);font-weight:500}
 .nv.on svg{color:var(--lima-ink)}
 .nv .ct{margin-left:auto;font-size:11px;background:var(--line);color:var(--ink2);border-radius:999px;padding:1px 7px}
-.nv .ct.hot{background:var(--azaf);color:#141519}
+.nv .ct.hot{background:var(--line);color:var(--ink2)}
 .sub{margin:1px 0 2px 24px;padding-left:10px;border-left:1px solid var(--line2);display:flex;flex-direction:column}
 .sub .nv{padding:5px 8px;font-size:12.5px}
 .acct{margin-top:auto;display:flex;align-items:center;gap:12px;padding:10px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
@@ -866,7 +866,7 @@ tr.oor td:first-child{box-shadow:inset 2px 0 0 var(--rojo-ink)}
 .dvx .xname{font-size:13px;color:var(--fg2)}.dvx .xname b{color:var(--fg);font-weight:500}
 .dv-h{--base:#FFEBDD;--b1:#FFD9BD;--b2:#FFCB65;--b3:#FFF5EA;--b4:#F7B79B;--b5:#FFE3A6;--ov:linear-gradient(165deg,rgba(255,250,245,.6),rgba(255,250,245,.15) 70%);--fg:#2B1B0E;--fg2:#80604A;--glass:rgba(255,255,255,.5);--gline:rgba(122,78,0,.16);--acc:#D9822B;--btn:#2B1B0E;--btnfg:#FFF4E6;--shape:rgba(150,90,20,.38)}
 .dv-i{--base:#ECE8FA;--b1:#DAD2F6;--b2:#C8D7F7;--b3:#F4F0FF;--b4:#F5D8E8;--b5:#FFECC6;--ov:linear-gradient(165deg,rgba(250,248,255,.55),rgba(250,248,255,.12) 70%);--fg:#1E1A3A;--fg2:#625C8C;--glass:rgba(255,255,255,.52);--gline:rgba(60,50,120,.15);--acc:#7C6BD6;--btn:#1E1A3A;--btnfg:#fff;--shape:rgba(90,78,170,.34)}
-.dv-j{--base:#14161F;--b1:#1B1F33;--b2:#2D3660;--b3:#FFCB65;--b4:#F08A5D;--b5:#46558C;--ov:linear-gradient(165deg,rgba(10,12,20,.88),rgba(10,12,20,.5) 55%,rgba(10,12,20,.08));--fg:#F4F1EA;--fg2:rgba(244,241,234,.66);--glass:rgba(255,255,255,.09);--gline:rgba(255,255,255,.14);--acc:#FFCB65;--btn:#fff;--btnfg:#14161F;--shape:rgba(255,236,200,.5)}
+.dv-j{--base:#14161F;--b1:#0A1636;--b2:#0042B0;--b3:#00D5FD;--b4:#6DF895;--b5:#0054D3;--ov:linear-gradient(165deg,rgba(10,12,20,.88),rgba(10,12,20,.5) 55%,rgba(10,12,20,.08));--fg:#F4F1EA;--fg2:rgba(244,241,234,.66);--glass:rgba(255,255,255,.09);--gline:rgba(255,255,255,.14);--acc:#9EFA7E;--btn:#fff;--btnfg:#14161F;--shape:rgba(255,236,200,.5)}
 .dv-k{--base:#E2F3EE;--b1:#CBEAE0;--b2:#B5E0D3;--b3:#F2FBF7;--b4:#FFE6B5;--b5:#D3ECF6;--ov:linear-gradient(165deg,rgba(248,253,251,.55),rgba(248,253,251,.12) 70%);--fg:#0F2A24;--fg2:#4C7268;--glass:rgba(255,255,255,.52);--gline:rgba(15,80,64,.15);--acc:#2E9C80;--btn:#0F2A24;--btnfg:#fff;--shape:rgba(20,110,90,.32)}
 
 /* Detalle: gráficos nuevos. */
@@ -3018,6 +3018,46 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .mob .sxtools .tabs{flex-wrap:wrap;max-width:100%;height:auto;overflow:visible}
 #s-seguimiento .sxwho small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 </style>
+<style>
+/* Inicio pulido (criterio unslop, aprobado por Facundo el 4/11/2026) */
+.kpis{grid-template-columns:.95fr .9fr .9fr 1.5fr 1.1fr}
+.kpis .kpi:nth-child(3) .v small{margin-left:0}
+#s-inicio th{text-transform:none;letter-spacing:0}
+#plist .ico{background:var(--app);color:var(--ink2)}
+#plist .li.pick.sel{background:var(--app)}
+#plist .li.pick.sel .ico{background:var(--card)}
+.dv-j .gbg .b1{background:var(--b1)}.dv-j .gbg .b2{background:var(--b2)}.dv-j .gbg .b3{background:var(--b3)}.dv-j .gbg .b4{background:var(--b4)}.dv-j .gbg .b5{background:var(--b5)}
+.top .crear{position:relative}
+.top .crear summary{list-style:none;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.top .crear summary::-webkit-details-marker{display:none}
+.top .crear-menu{position:absolute;right:0;top:40px;z-index:50;min-width:200px;padding:6px;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow)}
+.top .crear-menu button{display:flex;gap:10px;align-items:center;padding:10px;border:0;background:none;color:var(--ink);text-align:left;border-radius:8px;cursor:pointer;font:inherit}
+.top .crear-menu button:hover{background:var(--app)}
+/* Contadores: degradé azul del logo; en la Ficha van en la esquina de arriba a la derecha de la palabra. */
+.nv .ct,.nv .ct.hot,.ftabs .n,.ftabs .n.hot{background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff}
+.ftabs button{gap:0}
+.ftabs .n,#ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:9.5px;line-height:13px;padding:0 5px;font-weight:500}
+.logo img.mk{display:block;object-fit:cover;background:none;padding:0}
+.side .fold{bottom:84px}
+/* Ficha pulida (unslop, 5/11): lo que ya no repite o grita. */
+.fxtile svg.mini{display:none}
+.fxtile:hover{transform:none;box-shadow:none;background:var(--app)}
+#s-ficha .fh.ntfh{background:var(--card)}
+#s-ficha .fh .tg2:not(.add){background:var(--app);color:var(--ink2);font-weight:400;border:1px solid var(--line)}
+.dprog{display:flex;flex-direction:column;justify-content:center;gap:10px;flex:1;min-width:0}
+.dprog b{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.dprog b small{font-size:14px;color:var(--ink3);margin-left:2px}
+.dprog .tr{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.dprog .tr i{display:block;height:100%;border-radius:99px;background:var(--hatch)}
+.dprog span{font-size:11.5px;color:var(--ink3)}
+#s-ficha .fxr>*{border-left-width:1px;border-left-color:var(--line)}
+#s-ficha .fxs .fxr .n .sbtn{border:0;background:none;box-shadow:none;color:var(--ink2);padding:4px 2px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
+#s-ficha .fxs .fxr .n .sbtn:hover{color:var(--ink)}
+#s-ficha .fxdk{background:radial-gradient(120% 140% at 100% 0%,rgba(0,213,253,.38),transparent 55%),radial-gradient(90% 130% at 90% 120%,rgba(109,248,149,.32),transparent 60%),linear-gradient(160deg,#0A1636 0%,#0B1F4D 55%,#0042B0 100%);color:#F4F5F0}
+#s-ficha .fxdk::after{display:none}
+#s-ficha .fxdk>small,#s-ficha .fxdk>span,#s-ficha .fxdk .fxdk2 span{color:rgba(244,245,240,.72)}
+#s-ficha .fxdk .fxdk2{border-top-color:rgba(255,255,255,.18)}
+</style>
 </head>
 <body>
 
@@ -3033,15 +3073,15 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 <div class="stagewrap" id="wrap"><div class="stage" id="stage"><div class="app">
 
 <aside class="side">
-  <div class="logo"><span class="mk">V</span><div><b>Plan V</b><small>Consultorio de Verónica</small></div></div>
+  <div class="logo"><img class="mk" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjE0MCAxMDAgOTc0IDk0NCIgcm9sZT0iaW1nIiBhcmlhLWxhYmVsPSJOdXRyaWRhc2giPjxkZWZzPgo8bGluZWFyR3JhZGllbnQgaWQ9InRpbGUiIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBzdG9wLWNvbG9yPSIjNDE0NTQ4Ii8+PHN0b3Agb2Zmc2V0PSIuNCIgc3RvcC1jb2xvcj0iIzE5MWMxZSIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzA5MGQwZSIvPjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icmliYm9uIiB4MT0iMCIgeTE9Ii41IiB4Mj0iMSIgeTI9Ii41Ij48c3RvcCBzdG9wLWNvbG9yPSIjMDA0MmFjIi8+PHN0b3Agb2Zmc2V0PSIuMzgiIHN0b3AtY29sb3I9IiMwMGQzZmIiLz48c3RvcCBvZmZzZXQ9Ii43IiBzdG9wLWNvbG9yPSIjMTlkOWQ1Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjODNmZDgwIi8+PC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJmb2xkIiB4MT0iMCIgeTE9IjAiIHgyPSIwIiB5Mj0iMSI+PHN0b3Agc3RvcC1jb2xvcj0iIzAwMjU3NSIgc3RvcC1vcGFjaXR5PSIuNyIvPjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzAwNDJhYyIgc3RvcC1vcGFjaXR5PSIwIi8+PC9saW5lYXJHcmFkaWVudD4KPGZpbHRlciBpZD0ic2hhZG93IiB4PSItMzAlIiB5PSItMzAlIiB3aWR0aD0iMTcwJSIgaGVpZ2h0PSIxNzAlIj48ZmVHYXVzc2lhbkJsdXIgaW49IlNvdXJjZUFscGhhIiBzdGREZXZpYXRpb249IjE5Ii8+PGZlT2Zmc2V0IGR5PSIxOCIgZHg9IjgiLz48ZmVDb21wb25lbnRUcmFuc2Zlcj48ZmVGdW5jQSB0eXBlPSJsaW5lYXIiIHNsb3BlPSIuNTUiLz48L2ZlQ29tcG9uZW50VHJhbnNmZXI+PGZlTWVyZ2U+PGZlTWVyZ2VOb2RlLz48ZmVNZXJnZU5vZGUgaW49IlNvdXJjZUdyYXBoaWMiLz48L2ZlTWVyZ2U+PC9maWx0ZXI+CjxmaWx0ZXIgaWQ9Im91dGVyIiB4PSItMjAlIiB5PSItMjAlIiB3aWR0aD0iMTUwJSIgaGVpZ2h0PSIxNjAlIj48ZmVHYXVzc2lhbkJsdXIgaW49IlNvdXJjZUFscGhhIiBzdGREZXZpYXRpb249IjIyIi8+PGZlT2Zmc2V0IGR5PSIyMiIvPjxmZUNvbXBvbmVudFRyYW5zZmVyPjxmZUZ1bmNBIHR5cGU9ImxpbmVhciIgc2xvcGU9Ii4yMiIvPjwvZmVDb21wb25lbnRUcmFuc2Zlcj48ZmVNZXJnZT48ZmVNZXJnZU5vZGUvPjxmZU1lcmdlTm9kZSBpbj0iU291cmNlR3JhcGhpYyIvPjwvZmVNZXJnZT48L2ZpbHRlcj4KPC9kZWZzPjxyZWN0IHg9IjE4MCIgeT0iMTM5IiB3aWR0aD0iODk0IiBoZWlnaHQ9Ijg2NCIgcng9IjE5MCIgZmlsbD0idXJsKCN0aWxlKSIgc3Ryb2tlPSIjMGIwZDBlIiBzdHJva2Utd2lkdGg9IjQiIGZpbHRlcj0idXJsKCNvdXRlcikiLz4KPGcgZmlsdGVyPSJ1cmwoI3NoYWRvdykiPgo8cGF0aCBmaWxsPSJ1cmwoI3JpYmJvbikiIGQ9Ik0zMDUgNzM5IEwzMDUgNjAwIEMzMDUgNTA5IDM2OCA0NDAgNDYzIDQ0MCBDNTMyIDQ0MCA1NzQgNDcwIDYwNiA1MjMgQzY0MiA0NzQgNjk1IDQ0MCA3NTkgNDQwIEM3ODMgNDQwIDgwMyA0NDMgODIzIDQ1MiBMODIzIDM3MiBDODIzIDMzOSA4NDYgMzEzIDg4MSAzMTMgQzkxNiAzMTMgOTQyIDMzOSA5NDIgMzcyIEw5NDIgNjU2IEM5NDIgNzQ1IDg3NiA4MTUgNzczIDgxNSBDNjgxIDgxNSA2MjkgNzgwIDU5NCA3MTAgTDUzMyA1OTQgQzUyMCA1NjYgNTAwIDU1MSA0NzAgNTUxIEM0MzcgNTUxIDQxNSA1NzMgNDE1IDYwOSBMNDE1IDczOSBDNDE1IDc3MiAzOTMgNzk0IDM2MCA3OTQgQzMyNyA3OTQgMzA1IDc3MiAzMDUgNzM5IFoiLz4KPHBhdGggZmlsbD0idXJsKCNmb2xkKSIgZD0iTTMwNSA2MDAgQzMwNSA1MDkgMzY4IDQ0MCA0NjMgNDQwIEM1MTQgNDQwIDU1MCA0NTkgNTc4IDQ5MCBDNTUwIDQ3OSA1MjEgNDc3IDQ5MiA0ODIgQzQyOCA0OTIgMzc5IDUzMSAzNTUgNTY4IEMzMzQgNTc0IDMxOCA1ODMgMzA1IDYwMCBaIi8+CjxwYXRoIGQ9Ik02NzEgNjU3IEM2NzIgNTkyIDcxMSA1NDAgNzY4IDUzMSBDNzkxIDUyNyA4MDggNTMyIDgyOCA1MjUgQzgzNiA1MjIgODM5IDUyOCA4MzYgNTM2IEM4MzEgNTUxIDgzMyA1NjYgODMxIDU3OSBDODI1IDY0MyA3ODYgNjg2IDcyNCA2OTAgQzcwNCA2OTEgNjkwIDY4NyA2NzYgNjkzIEM2NjkgNjk2IDY2NyA2OTEgNjcwIDY4MSBDNjcyIDY3NCA2NzEgNjY1IDY3MSA2NTcgWiIgZmlsbD0iIzgzZmQ4MCIgc3Ryb2tlPSIjMGIxNjE1IiBzdHJva2Utd2lkdGg9IjYiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4KPC9nPjwvc3ZnPgo=" alt="" width="32" height="32"><div><b>Nutridash</b><small>Consultorio de Verónica</small></div></div>
   <button class="fold" type="button" aria-label="Plegar menú"><svg viewBox="0 0 24 24" class="i"><path d="M15 6l-6 6 6 6"/></svg></button>
   <div class="srch"><svg viewBox="0 0 24 24" class="i"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg><span class="lbl">Buscar…</span><kbd>⌘K</kbd></div>
   <div class="navs"><span class="nvpill" aria-hidden="true"></span>
   <nav class="grp" aria-label="Gestión"><h6>Gestión</h6>
     <button class="nv on" type="button" data-go="inicio" data-ic="grid"><span class="lbl">Inicio</span></button>
-    <button class="nv" type="button" data-go="pacientes" aria-expanded="false" data-ic="users"><span class="lbl">Pacientes</span><span class="ct num">48</span><svg viewBox="0 0 24 24" class="i car" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="nv" type="button" data-go="pacientes" aria-expanded="false" data-ic="users"><span class="lbl">Pacientes</span><svg viewBox="0 0 24 24" class="i car" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="subw"><div class="subi"><button class="si" type="button" style="--i:0"><span>Todas</span></button><button class="si" type="button" style="--i:1"><span>Necesitan atención</span><b>4</b></button><button class="si" type="button" style="--i:2"><span>Primera vez</span></button><button class="si" type="button" style="--i:3"><span>Etiquetas</span></button></div></div>
-    <button class="nv" type="button" data-go="agenda" aria-expanded="false" data-ic="cal"><span class="lbl">Agenda</span><span class="ct num">6</span><svg viewBox="0 0 24 24" class="i car" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+    <button class="nv" type="button" data-go="agenda" aria-expanded="false" data-ic="cal"><span class="lbl">Agenda</span><svg viewBox="0 0 24 24" class="i car" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="subw"><div class="subi"><button class="si" type="button" style="--i:0"><span>Semana</span></button><button class="si" type="button" style="--i:1"><span>Pedidos de turno</span><b>3</b></button><button class="si" type="button" style="--i:2"><span>Lugares libres</span></button><button class="si" type="button" style="--i:3"><span>Horarios de atención</span></button></div></div>
     <button class="nv" type="button" data-go="cobranzas" aria-expanded="false" data-ic="coin"><span class="lbl">Cobranzas</span><span class="ct hot num">3</span><svg viewBox="0 0 24 24" class="i car" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
     <div class="subw"><div class="subi"><button class="si" type="button" style="--i:0"><span>Movimientos</span></button><button class="si" type="button" style="--i:1"><span>Vencidas</span><b>3</b></button><button class="si" type="button" style="--i:2"><span>Programas y precios</span></button></div></div>
@@ -3069,13 +3109,29 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
   <div class="top">
     <div><h1>Buen día, Verónica <span>· 6 consultas hoy</span></h1><div class="date">Martes 21 de octubre · la próxima es a las 10:30</div></div>
     <div class="sp"></div>
-    <button class="chip" type="button" data-ic="clip">Nuevo plan</button>
-    <button class="chip" type="button" data-ic="coin">Cargar pago</button>
-    <button class="chip" type="button" data-ic="chat">Mensaje</button>
+    <details class="crear"><summary class="chip" data-ic="plus">Crear<svg viewBox="0 0 24 24" class="i car" aria-hidden="true" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg></summary>
+      <div class="crear-menu"><button type="button" data-go="planes" data-ic="clip">Nuevo plan</button><button type="button" data-go="cobranzas" data-ic="coin">Cargar pago</button><button type="button" data-go="mensajes" data-ic="chat">Mensaje</button></div></details>
     <button class="ibtn" type="button" aria-label="Avisos" data-ic="bell"><i></i></button>
     <button class="cta" type="button" data-ic="plus">Nueva consulta</button>
   </div>
 
+  <section class="kpis">
+    <div class="card kpi"><div class="lb" data-ic="cal">Consultas de hoy</div>
+      <div class="row"><div class="v num">6<small>/ 8 lugares</small></div></div>
+      <div class="ft"><span class="dl up">2 hechas</span>4 por atender</div></div>
+    <div class="card kpi"><div class="lb" data-ic="users">Pacientes activas</div>
+      <div class="row"><div class="v num">48</div></div>
+      <div class="ft"><span class="dl up">+4</span>este mes</div></div>
+    <div class="card kpi"><div class="lb" data-ic="heart">Adherencia al plan</div>
+      <div class="row"><div class="v num">82<small>%</small></div></div>
+      <div class="ft"><span class="dl up">+3 pts</span>promedio de 7 días</div></div>
+    <div class="card kpi"><div class="lb" data-ic="coin">Cobrado en octubre</div>
+      <div class="row"><div class="v num">$1.280.000</div><div class="kv kweek" aria-hidden="true"><small>85% de la meta</small><div><i style="width:19%"></i><i style="width:23%"></i><i style="width:20%"></i><i style="width:23%"></i></div><span>S1</span></div></div>
+      <div class="ft"><span class="dl up">+12%</span>vs. septiembre</div></div>
+    <div class="card kpi"><div class="lb" data-ic="clock">Por cobrar</div>
+      <div class="row"><div class="v num">$162.000</div></div>
+      <div class="ft"><span class="dl wa">3 vencidas</span>la más vieja, 12 días</div></div>
+  </section>
   <section class="iup">
     <div class="card">
       <div class="ch"><h2>Pendientes</h2><span class="meta num" id="pcount">10</span><span class="sp"></span>
@@ -3098,23 +3154,6 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
         <tbody id="rows"></tbody>
       </table>
     </div>
-  </section>
-  <section class="kpis">
-    <div class="card kpi"><div class="lb" data-ic="cal">Consultas de hoy</div>
-      <div class="row"><div class="v num">6<small>/ 8 lugares</small></div><div class="kv kslots" aria-hidden="true"><i class="s1"></i><i class="s1"></i><i class="s2"></i><i class="s2"></i><i class="s2"></i><i class="s2"></i><i class="s0"></i><i class="s0"></i></div></div>
-      <div class="ft"><span class="dl up">2 hechas</span>4 por atender</div></div>
-    <div class="card kpi"><div class="lb" data-ic="users">Pacientes activas</div>
-      <div class="row"><div class="v num">48</div><div class="kv kcols" aria-hidden="true"><span><i style="height:12px"></i><small>may</small></span><span><i style="height:14px"></i><small>jun</small></span><span><i style="height:15px"></i><small>jul</small></span><span><i style="height:16px"></i><small>ago</small></span><span><i style="height:18px"></i><small>sep</small></span><span><i style="height:20px"></i><small>oct</small></span></div></div>
-      <div class="ft"><span class="dl up">+4</span>este mes</div></div>
-    <div class="card kpi"><div class="lb" data-ic="heart">Adherencia al plan</div>
-      <div class="row"><div class="v num">82<small>%</small></div><div class="kv kring" aria-hidden="true"><svg viewBox="0 0 40 40"><circle class="bg" cx="20" cy="20" r="15"/><circle class="fg" cx="20" cy="20" r="15" pathLength="100" stroke-dasharray="100" stroke-dashoffset="18"/></svg><span>7 días</span></div></div>
-      <div class="ft"><span class="dl up">+3 pts</span>promedio de 7 días</div></div>
-    <div class="card kpi"><div class="lb" data-ic="coin">Cobrado en octubre</div>
-      <div class="row"><div class="v num">$1,28<small>M</small></div><div class="kv kweek" aria-hidden="true"><small>85% de la meta</small><div><i style="width:19%"></i><i style="width:23%"></i><i style="width:20%"></i><i style="width:23%"></i></div><span>S1</span></div></div>
-      <div class="ft"><span class="dl up">+12%</span>vs. septiembre</div></div>
-    <div class="card kpi"><div class="lb" data-ic="clock">Por cobrar</div>
-      <div class="row"><div class="v num">$162<small>mil</small></div><div class="kv klol" aria-hidden="true"><span><i style="height:100%"></i><b></b><small>12d</small></span><span><i style="height:55%"></i><b></b><small>6d</small></span><span><i style="height:22%"></i><b></b><small>2d</small></span></div></div>
-      <div class="ft"><span class="dl wa">3 vencidas</span>la más vieja, 12 días</div></div>
   </section>
 </div>
 <div class="scr" id="s-pacientes" hidden>
@@ -3201,7 +3240,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
       <div class="tagsr"><span class="tg2">Celíaca</span><span class="tg2">Sin lactosa</span><span class="tg2 n">Hipotiroidismo</span><span class="tg2 n">Programa mensual</span><button class="tg2 add" type="button">+ etiqueta</button></div></div>
     <span class="sp"></span>
     <div class="appst"><b><i></i>App conectada · hoy 8:10</b>Anamnesis 86% · consentimiento firmado</div>
-    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:var(--azaf);color:#141519;border-radius:999px;padding:0 6px;font-size:10.5px">1</span></button>
+    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff;border-radius:999px;padding:0 6px;font-size:10.5px">1</span></button>
     <button class="chip" type="button" data-ic="cal">Agendar</button>
     <button class="cta" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
   </div>
@@ -3703,7 +3742,7 @@ resumen:()=>`<div class="fx" style="grid-template-columns:1.3fr 1fr .95fr">
   ${fxP('Qué cambió desde la última consulta','14/10 · hace 7 días','',`<div class="fxs">${fxRows([['l','Objetivo al 74%','faltan 1,9 kg · adherencia 86% (+6 puntos)','','objetivos'],['l','Registró 19 de 21 comidas','la merienda le falta 3 veces','','alimentario'],['a','Ánimo bien 5 de 7 días','hinchazón después del almuerzo 3 días','','objetivos'],['l','Agua 1,9 L por día','meta 2 L · sueño 6,2 h','','objetivos'],['b','Laboratorio nuevo del 12/10','2 valores alterados: ferritina y vitamina D','','laboratorio'],['b','2 mensajes y un pedido de cambio','cena del jueves','','plan']])}</div>`,'g')}
  </div>
  <div class="c">
-  ${fxP('Avance al objetivo','bajar a 66,5 kg','',`<div class="fxsplit">${fxGauge(74,'74','%',{w:150})}${fxKv([['Inicio','74,0 kg'],['Hoy','68,4 kg'],['Faltan','1,9 kg'],['Adherencia','86%']])}</div>`)}
+  ${fxP('Avance al objetivo','bajar a 66,5 kg','',`<div class="fxsplit"><div class="dprog"><b>74<small>%</small></b><div class="tr"><i style="width:74%"></i></div><span>de 74,0 a 66,5 kg</span></div>${fxKv([['Inicio','74,0 kg'],['Hoy','68,4 kg'],['Faltan','1,9 kg'],['Adherencia','86%']])}</div>`)}
   ${fxP('Alertas','3','',fxRows([['r','Ferritina baja','14 ng/ml, mínimo 30','','laboratorio'],['a','El plan vence el 4/11','renovar en esta consulta','','plan'],['a','Pedido de cambio sin responder','desde ayer','','plan']]))}
   ${fxP('Para hacer hoy','4','',`<div class="fxs">${fxRows([['n','Aprobar la nota del 14/10','',`<button type="button" class="sbtn" data-ft="consultas">Revisar</button>`],['n','Responder el pedido de cambio','',`<button type="button" class="sbtn" data-ft="plan">Responder</button>`],['n','Pedir análisis de hierro','',`<button type="button" class="sbtn" data-ft="laboratorio">Pedir</button>`],['n','Renovar el plan','',`<button type="button" class="sbtn" data-ft="plan">Renovar</button>`]])}</div>`,'g')}
  </div>
@@ -3880,6 +3919,7 @@ function go(id){document.querySelectorAll('.scr').forEach(s=>s.hidden=s.id!=='s-
  document.querySelectorAll('.seg [data-go]').forEach(n=>n.setAttribute('aria-pressed',n.dataset.go===id));
  if(id==='agenda')layout();}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+document.querySelectorAll('.crear-menu button').forEach(b=>b.addEventListener('click',()=>b.closest('details').removeAttribute('open')));
 const h0=(location.hash||'').slice(1);if(['pacientes','agenda','ficha','cobranzas','mensajes','planes'].includes(h0))go(h0);
 
 

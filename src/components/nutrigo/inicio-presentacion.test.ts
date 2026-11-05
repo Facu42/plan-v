@@ -68,13 +68,13 @@ describe('Inicio: lo que se dibuja sale de datos reales', () => {
     expect(sinCobros.porCobrar.pie.destacado).toBe('Consultando…');
     expect(armarKpis([a], ahora, null, true).porCobrar).toMatchObject({ reintentar: true });
     const conCobros = armarKpis([a], ahora, tablero([libro({ fee: { amount: 54000 }, charges: [{ id: '1', due_on: '2026-10-07', amount: 54000, status: 'open' }], payments: [{ id: 'p', status: 'confirmed', amount: 30000, paid_on: '2026-10-12' }] })]), false);
-    expect(conCobros.cobrado).toMatchObject({ valor: '$30', unidad: 'mil', semanas: [0, 100, 0, 0], pie: { destacado: 'Sin dato' } });
+    expect(conCobros.cobrado).toMatchObject({ valor: '$30.000', semanas: [0, 100, 0, 0], pie: { destacado: 'Sin dato' } });
     expect(conCobros.porCobrar.pie).toEqual({ clase: 'wa', destacado: '1 vencida', resto: 'la más vieja, 12 días' });
     expect(conCobros.porCobrar.barras).toEqual([{ alto: 24, dias: 12 }]);
   });
-  it('abrevia los montos como el boceto', () => {
-    expect(compacto(1_280_000)).toEqual({ valor: '$1,28', unidad: 'M' });
-    expect(compacto(162_000)).toEqual({ valor: '$162', unidad: 'mil' });
+  it('muestra los montos completos con un solo formato', () => {
+    expect(compacto(1_280_000)).toEqual({ valor: '$1.280.000' });
+    expect(compacto(162_000)).toEqual({ valor: '$162.000' });
     expect(compacto(0)).toEqual({ valor: '$0' });
   });
 });

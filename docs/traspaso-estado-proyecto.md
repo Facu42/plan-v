@@ -106,6 +106,12 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 4/11 · Inicio pulido y menú lateral (desde el boceto v29)
+El boceto `design/panel-nutri/v29/panel-trabajo.html` se actualizó primero (Inicio con los números arriba, un solo gráfico, plata completa con un solo formato, botón «Crear» que junta Nuevo plan / Cargar pago / Mensaje, títulos de grupo sin mayúsculas, contadores del menú en gris y sin el número de Pacientes) y `panel-v29.css` se regeneró de ahí. La app lo copia: sin minigráficos de consultas, pacientes, adherencia y por cobrar (queda la barra de semanas de «Cobrado»), grilla de cinco tarjetas del boceto. No se tocó lo que producción ya tenía (animación GSAP de #266, botones menta, logo, riel «Hoy»). Ficha y Planes van en PRs aparte (Planes después de #277).
+
+## 5/11 · Ficha pulida (mismo PR #280)
+Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, encabezado liso con etiquetas en un solo tono, «Avance al objetivo» con una barra en vez del medidor, listas sin franja de color, «Para hacer hoy» con acciones como enlaces y «Próximo turno» con los colores del logo. Contadores en degradé azul (menú y solapas). «Nueva consulta» vuelve al negro del boceto; logo vectorial de Nutridash y flecha de la barra sobre la caja de la cuenta.
+
 ## 29/10 · Verificar la IA desde el panel de administrador
 Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
 OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /

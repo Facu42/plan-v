@@ -223,11 +223,9 @@ export type KpiAdherencia = Kpi & { anillo: number; leyenda: string };
 export type KpiCobrado = Kpi & { semanas: number[]; leyenda: string };
 export type KpiPorCobrar = Kpi & { barras: Array<{ alto: number; dias: number }>; reintentar: boolean };
 
+/** Un solo formato de plata en todo el Inicio: el monto completo con puntos, sin abreviar. */
 export function compacto(monto: number): { valor: string; unidad?: string } {
-  const redondeo = (valor: number) => valor.toLocaleString('es-AR', { maximumFractionDigits: 2 });
-  if (monto >= 1_000_000) return { valor: `$${redondeo(monto / 1_000_000)}`, unidad: 'M' };
-  if (monto >= 10_000) return { valor: `$${Math.round(monto / 1000).toLocaleString('es-AR')}`, unidad: 'mil' };
-  return { valor: `$${monto.toLocaleString('es-AR')}` };
+  return { valor: `$${Math.round(monto).toLocaleString('es-AR')}` };
 }
 
 const MESES = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];

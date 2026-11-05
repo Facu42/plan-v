@@ -15,7 +15,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, opt
   return [
     { title: 'Gestión', items: [
       { label: 'Inicio', glyph: 'grid', href: '/crm/inicio' },
-      { label: 'Pacientes', glyph: 'users', href: '/crm/pacientes', count: active.length, children: [
+      { label: 'Pacientes', glyph: 'users', href: '/crm/pacientes', children: [
         { label: 'Todas', href: '/crm/pacientes', count: active.length },
         { label: 'Necesitan atención', href: '/crm/pacientes?filtro=attention', count: active.every(p => p.weekly_registration) ? active.filter(p => (p.weekly_registration?.pending_review ?? 0) > 0).length : undefined },
         { label: 'Acceso pendiente', href: '/crm/pacientes?filtro=unlinked', count: active.filter(p => p.has_account === false).length },

@@ -26,7 +26,7 @@ describe('menú profesional', () => {
     const items = panelNavGroups([], 0).flatMap(group => group.items);
     const pacientes = items.find(item => item.label === 'Pacientes')!;
     const seguimiento = items.find(item => item.label === 'Seguimiento')!;
-    expect(pacientes.count).toBe(0);
+    expect(pacientes.count).toBeUndefined();
     expect(pacientes.hot).toBeUndefined();
     expect(seguimiento.count).toBe(0);
     expect(seguimiento.hot).toBe(true);

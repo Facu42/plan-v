@@ -87,7 +87,7 @@ describe('flecha de plegar el menú', () => {
     expect(winningFold(both, 'background', open)).toBe('var(--card)');
     expect(winningFold(both, 'width', open)).toBe('24px');
     expect(winningFold(both, 'height', open)).toBe('24px');
-    expect(winningFold(both, 'bottom', open)).toBe('34px');
+    expect(winningFold(both, 'bottom', open)).toBe('84px');
     expect(winningFold(both, 'right', open)).toBe('-12px');
   });
 

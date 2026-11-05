@@ -204,22 +204,20 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
   return <div className="scr nd-gsap" id="s-inicio" ref={raiz}>
     <section className="kpis" data-mk="2">
       <div className="card kpi" style={{ '--i': 0 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.consultas.icono} />{kpis.consultas.etiqueta}</div>
-        <div className="row"><div className="v num"><Cuenta valor={kpis.consultas.valor} /><small>{kpis.consultas.unidad}</small></div><div className="kv kslots" aria-hidden="true">{kpis.consultas.puntos.map((clase, i) => <i key={i} className={clase} style={{ '--i': i } as CSSProperties} />)}</div></div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.consultas.valor} /><small>{kpis.consultas.unidad}</small></div></div>
         <div className="ft"><span className={`dl ${kpis.consultas.pie.clase}`}>{kpis.consultas.pie.destacado}</span>{kpis.consultas.pie.resto}</div></div>
       <div className="card kpi" style={{ '--i': 1 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.pacientes.icono} />{kpis.pacientes.etiqueta}</div>
-        <div className="row"><div className="v num"><Cuenta valor={kpis.pacientes.valor} /></div><div className="kv kcols" aria-hidden="true">{kpis.pacientes.columnas.map(col => <span key={col.mes}><i style={{ height: col.alto }} /><small>{col.mes}</small></span>)}</div></div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.pacientes.valor} /></div></div>
         <div className="ft"><span className={`dl ${kpis.pacientes.pie.clase}`}>{kpis.pacientes.pie.destacado}</span>{kpis.pacientes.pie.resto}</div></div>
       <div className="card kpi" style={{ '--i': 2 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.adherencia.icono} />{kpis.adherencia.etiqueta}</div>
-        <div className="row"><div className="v num"><Cuenta valor={kpis.adherencia.valor} />{kpis.adherencia.unidad ? <small>{kpis.adherencia.unidad}</small> : null}</div>
-          <div className="kv kring" aria-hidden="true"><svg viewBox="0 0 40 40"><circle className="bg" cx="20" cy="20" r="15" /><circle className="fg" cx="20" cy="20" r="15" pathLength={100} strokeDasharray={100} strokeDashoffset={100 - kpis.adherencia.anillo} /></svg><span>{kpis.adherencia.leyenda}</span></div></div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.adherencia.valor} />{kpis.adherencia.unidad ? <small>{kpis.adherencia.unidad}</small> : null}</div></div>
         <div className="ft"><span className="dl">{kpis.adherencia.pie.destacado}</span>{kpis.adherencia.pie.resto}</div></div>
       <div className="card kpi" style={{ '--i': 3 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.cobrado.icono} />{kpis.cobrado.etiqueta}</div>
         <div className="row"><div className="v num"><Cuenta valor={kpis.cobrado.valor} />{kpis.cobrado.unidad ? <small>{kpis.cobrado.unidad}</small> : null}</div>
           <div className="kv kweek" aria-hidden="true"><small>{kpis.cobrado.leyenda}</small><div>{kpis.cobrado.semanas.map((ancho, i) => <i key={i} style={{ width: `${ancho}%` }} />)}</div></div></div>
         <div className="ft"><span className={`dl ${kpis.cobrado.pie.clase}`}>{kpis.cobrado.pie.destacado}</span>{kpis.cobrado.pie.resto}</div></div>
       <div className="card kpi" style={{ '--i': 4 } as CSSProperties}><div className="lb"><PanelV29Icon name={kpis.porCobrar.icono} />{kpis.porCobrar.etiqueta}</div>
-        <div className="row"><div className="v num"><Cuenta valor={kpis.porCobrar.valor} />{kpis.porCobrar.unidad ? <small>{kpis.porCobrar.unidad}</small> : null}</div>
-          <div className="kv klol" aria-hidden="true">{kpis.porCobrar.barras.map((barra, i) => <span key={i}><i style={{ height: barra.alto }} /><b /><small>{barra.dias}d</small></span>)}</div></div>
+        <div className="row"><div className="v num"><Cuenta valor={kpis.porCobrar.valor} />{kpis.porCobrar.unidad ? <small>{kpis.porCobrar.unidad}</small> : null}</div></div>
         <div className="ft"><span className={`dl ${kpis.porCobrar.pie.clase}`}>{kpis.porCobrar.pie.destacado}</span>{kpis.porCobrar.pie.resto}{kpis.porCobrar.reintentar ? <button type="button" className="lnk" onClick={onRefresh}>Reintentar cobros</button> : null}</div></div>
     </section>
     <section className="iup" data-mk="1">
