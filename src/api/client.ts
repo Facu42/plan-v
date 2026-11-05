@@ -57,6 +57,18 @@ export async function request<T>(path: string, init?: ApiRequestInit, originOver
   return res.json() as Promise<T>;
 }
 
+/** Igual que `request`, pero para descargas: devuelve el archivo y el nombre que manda la API. */
+export async function requestFile(path: string, init?: ApiRequestInit): Promise<{ blob: Blob; filename: string }> {
+  const { accessToken, ...fetchInit } = init ?? {};
+  const res = await fetch(resolveApiUrl(path), { ...fetchInit, headers: { ...await authHeaders(accessToken), ...fetchInit.headers } });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new ApiError(res.status, err || `HTTP ${res.status}`);
+  }
+  const filename = /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ?? 'descarga';
+  return { blob: await res.blob(), filename };
+}
+
 export function isAbortError(error: unknown): boolean {
   return (error instanceof DOMException || error instanceof Error) && error.name === 'AbortError';
 }

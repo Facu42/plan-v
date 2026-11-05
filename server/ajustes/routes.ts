@@ -6,6 +6,9 @@ import { DEMO_NUTRITIONIST_ID } from '../store.js';
 import { CareError } from '../care/errors.js';
 import { noticeSaveSchema, templateInputSchema } from '../../src/types/ajustes.js';
 import { deleteTemplate, listNotices, listTemplates, saveNotice, saveTemplate } from './repository.js';
+import { resolveWorkScope } from '../crm/repository.js';
+import { consumeRateLimit } from '../ops/rate-limit.js';
+import { buildDataExport, readExportParts } from './export.js';
 
 async function professional(c: Context) {
   const auth = c.get('auth');
@@ -32,6 +35,14 @@ export function registerAjustesRoutes(app: Hono) {
     const a = await professional(c), id = z.uuid().safeParse(c.req.param('id'));
     if (!id.success) throw new CareError(400, 'Plantilla inválida.');
     await deleteTemplate(a.owner, id.data, a.persistent); return c.json({ ok: true });
+  });
+  // Tus datos › Descargar: GET para que funcione también en solo lectura (la nutri siempre puede llevarse sus datos).
+  app.get('/api/ajustes/export', async c => {
+    const a = await professional(c), parts = readExportParts(key => c.req.query(key));
+    if (!consumeRateLimit(`ajustes-export:${a.owner}`, 3, 60_000).ok) throw new CareError(429, 'Ya pediste varias descargas. Esperá un minuto y probá de nuevo.');
+    const auth = c.get('auth'), scope = await resolveWorkScope('userId' in auth ? auth.userId : null, a.persistent);
+    const file = await buildDataExport(scope, parts);
+    return c.body(file.bytes as Uint8Array<ArrayBuffer>, 200, { 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="${file.filename}"`, 'Cache-Control': 'no-store' });
   });
   app.get('/api/ajustes/notices', async c => { const a = await professional(c); return c.json({ notices: await listNotices(a.owner, a.persistent) }); });
   app.put('/api/ajustes/notices', async c => {

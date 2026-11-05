@@ -1,3 +1,7 @@
+# Traspaso del proyecto (actualización vigente: 2026-11-05)
+
+5/11 · Claude · Ajustes › Tus datos › Descargar baja un .zip real: pacientes y turnos en Excel, la historia clínica de cada paciente en PDF (solo con permiso de atención, sin notas privadas) y un LEEME. Ruta `GET /api/ajustes/export`, funciona también en solo lectura. Rama `claude/project-thread-8m5643`, sin base, espera el ok visual. Detalle en `docs/panel-nutri-rediseno/exportar-datos-v29.md`.
+
 # Traspaso del proyecto (actualización vigente: 2026-11-03)
 
 3/11 · Cursor · El centro de `/admin` ahora también tiene riesgo de baja, cobranza, activación y un resumen del día. La bandeja puede usar WhatsApp y mail si están las credenciales; si no, queda apagada. Instagram está preparado y no envía. AFIP no se tocó. Hay una migración nueva, sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
