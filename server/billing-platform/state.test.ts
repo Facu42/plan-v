@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { accessMode, admission, photoAllowed, platformWriteAccess, reduceBilling, signupGraceDaysLeft, type SubscriptionSnap } from './state.js';
+import { accessMode, admission, photoAllowed, platformWriteAccess, reduceBilling, SHORT_TRIAL_FROM, signupGraceDays, signupGraceDaysLeft, signupGraceUntil, type SubscriptionSnap } from './state.js';
 
 const SIETE_DIAS = 7 * 24 * 60 * 60 * 1000;
 
@@ -48,7 +48,29 @@ describe('estado del cobro', () => {
     expect(photoAllowed(10_000, null)).toBe(true);
   });
 
-  it('sin suscripción el día 0 y el 29 son acceso completo; el 31 es solo lectura', () => {
+  it('alta nueva: prueba gratis de 3 días; el cuarto día pasa a solo lectura', () => {
+    const created = Date.parse('2026-11-10T15:00:00.000Z');
+    const day = (n: number) => created + n * 86_400_000;
+    expect(signupGraceDays(created)).toBe(3);
+    expect(platformWriteAccess(null, created, day(0))).toBe('full');
+    expect(platformWriteAccess(null, created, day(2))).toBe('full');
+    expect(platformWriteAccess(null, created, day(3) - 1)).toBe('full');
+    expect(platformWriteAccess(null, created, day(3))).toBe('read_only');
+    expect(platformWriteAccess(null, created, day(4))).toBe('read_only');
+    expect(signupGraceDaysLeft(created, day(0))).toBe(3);
+    expect(signupGraceDaysLeft(created, day(2))).toBe(1);
+    expect(signupGraceDaysLeft(created, day(5))).toBe(0);
+    expect(signupGraceUntil(created)).toBe('2026-11-13T15:00:00.000Z');
+    expect(platformWriteAccess({ status: 'authorized', past_due_since: null, current_period_end: null }, created, day(10))).toBe('full');
+  });
+
+  it('el corte es el 6/11 a las 00:00 de Argentina: antes, 30 días; desde ahí, 3', () => {
+    expect(signupGraceDays(SHORT_TRIAL_FROM - 1)).toBe(30);
+    expect(signupGraceDays(SHORT_TRIAL_FROM)).toBe(3);
+    expect(new Date(SHORT_TRIAL_FROM).toISOString()).toBe('2026-11-06T03:00:00.000Z');
+  });
+
+  it('cuenta vieja (alta antes del cambio): conserva 30 días; el día 0 y el 29 son acceso completo, el 31 solo lectura', () => {
     const created = Date.parse('2026-10-01T12:00:00.000Z');
     const day = (n: number) => created + n * 86_400_000;
     expect(platformWriteAccess(null, created, day(0))).toBe('full');

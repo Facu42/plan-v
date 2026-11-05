@@ -1,7 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it, vi } from 'vitest';
 import { OpcionesImpresion } from './PanelPlanAsistente';
-import { PanelPlanArmar } from './PanelPlanArmar';
+import { PanelPlanArmar, PlanAnteriorReconocido } from './PanelPlanArmar';
+import { planDesdeDocumento } from './planes-importar';
 
 const sofia = {
   id: 'pat-sofia', name: 'Sofía R.', initials: 'SR', tone: 'mint' as const,
@@ -30,6 +31,21 @@ describe('armar un plan con IA', () => {
     expect(html).not.toContain('US$ 1,20');
     expect(html).not.toContain('US$ 1.20');
     expect(html).toContain('no recibe nada hasta que lo publiques');
+  });
+});
+
+describe('plan anterior reconocido', () => {
+  it('dice cuánto reconoció, que no salió a una IA y qué reemplaza', () => {
+    const plan = planDesdeDocumento({ pages: [{ page: 1, text: 'Lunes\nDesayuno: té\nCena: sopa\nMartes\nAlmuerzo: arroz' }], tables: [] });
+    const html = renderToStaticMarkup(<PlanAnteriorReconocido nombre="Sofía" plan={plan} importando={false} onUsar={vi.fn()} onDescartar={vi.fn()} />);
+    expect(html).toContain('Plan anterior: 2 días · 3 comidas');
+    expect(html).toContain('no se mandó a ninguna IA');
+    expect(html).toContain('Reemplaza el borrador de Sofía; su plan publicado se conserva.');
+    expect(html).toContain('class="sbtn k"');
+    expect(html).toContain('Usar como borrador');
+    expect(html).toContain('Solo como referencia');
+    const ocupado = renderToStaticMarkup(<PlanAnteriorReconocido nombre="Sofía" plan={plan} importando onUsar={vi.fn()} onDescartar={vi.fn()} />);
+    expect(ocupado).toContain('Creando borrador…');
   });
 });
 

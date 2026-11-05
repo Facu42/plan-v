@@ -26,7 +26,7 @@ function app() {
   hono.all('*', c => c.json({ ok: true }));
   return hono;
 }
-it.each([0, 29, 30, 31])('día %i: guardia y alta aplican el mismo vencimiento', async day => {
+it.each([0, 29, 30, 31])('cuenta vieja, día %i: guardia y alta aplican el mismo vencimiento de 30 días', async day => {
   vi.spyOn(Date, 'now').mockReturnValue(created + day * 86_400_000);
   expect((await app().request('/api/patients', { method: 'POST' })).status).toBe(day < 30 ? 200 : 403);
   if (day < 30) await expect(assertCanAdd('nutri-1', 'patient', 1)).resolves.toBeUndefined();
@@ -42,7 +42,18 @@ it('la paciente sin perfil profesional puede escribir y la bandera apagada no li
   await expect(assertCanAdd('nutri-1', 'patient', 1)).resolves.toBeUndefined();
   expect((await app().request('/api/patients', { method: 'POST' })).status).toBe(200);
 });
-it('el plan pago conserva su tope durante los primeros 30 días', async () => {
+it.each([0, 2, 3, 4])('alta nueva, día %i: con 3 días de prueba la guardia y el alta cortan juntas', async day => {
+  const nuevo = Date.parse('2026-11-10T15:00:00Z');
+  mocks.nutritionistForUser.mockResolvedValue({ id: 'nutri-1', created_at: new Date(nuevo).toISOString() });
+  mocks.nutritionistCreatedAt.mockResolvedValue(nuevo);
+  vi.spyOn(Date, 'now').mockReturnValue(nuevo + day * 86_400_000);
+  expect((await app().request('/api/patients', { method: 'POST' })).status).toBe(day < 3 ? 200 : 403);
+  if (day < 3) await expect(assertCanAdd('nutri-1', 'patient', 1)).resolves.toBeUndefined();
+  else await expect(assertCanAdd('nutri-1', 'patient', 1)).rejects.toMatchObject({ status: 403 });
+  expect((await app().request('/api/patients')).status).toBe(200);
+  expect((await app().request('/api/billing/checkout', { method: 'POST' })).status).toBe(200);
+});
+it('el plan pago conserva su tope durante la prueba', async () => {
   vi.spyOn(Date, 'now').mockReturnValue(created);
   mocks.findOpenSubscription.mockResolvedValue({ status: 'authorized', plan_code: 'arranque', past_due_since: null, current_period_end: null });
   await expect(assertCanAdd('nutri-1', 'patient', 1)).rejects.toMatchObject({ status: 409 });
