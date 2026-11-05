@@ -14,6 +14,8 @@ import { PanelPlanArmar } from './PanelPlanArmar';
 import { PanelPlanEditor } from './PanelPlanEditor';
 import { periodoDesdeDuracion, type DuracionArmado } from './planes-asistente';
 import { pedirPropuesta } from './planes-parte-3';
+import { borradorImportado, type PlanImportado } from './planes-importar';
+import { careErrorMessage } from '../../api/care';
 import {
   conteoFiltro, etiquetaAlta, filaDePlan, filaProvisoria, filasVisibles, fondoAvatar, hoyArgentina,
   primerNombrePlanes, proximasAcciones, textoAccion, FILTROS_PLANES,
@@ -270,6 +272,22 @@ export function PanelPlanes({ patients, selectedId = '', initialVista, enfocarPe
     }
     if (resultado.aviso) setAviso(resultado.aviso);
   }, [pacienteArmar, editorId, pacienteDe, armando, hoy]);
+  const importarPlan = useCallback(async (planAnterior: PlanImportado) => {
+    const id = pacienteArmar || editorId || pacienteDe();
+    if (!id) return false;
+    try {
+      const { plan: destino } = await plansApi.professional(id);
+      const { plan } = await plansApi.save(id, borradorImportado(planAnterior, hoy, destino));
+      setCargados(previo => ({ ...previo, [id]: plan }));
+      setCreando(false);
+      abrirEditor(id);
+      setAviso('El plan anterior quedó como borrador. Revisá cada comida antes de publicarlo: la paciente no recibe nada hasta entonces.');
+      return true;
+    } catch (error) {
+      setAviso(careErrorMessage(error));
+      return false;
+    }
+  }, [pacienteArmar, editorId, pacienteDe, hoy, abrirEditor]);
   const alta = etiquetaAlta(vista);
   const planAbierto = editorId ? cargados[editorId] : undefined;
   const enEditor = vista === 'plan' && Boolean(planAbierto);
@@ -341,6 +359,7 @@ export function PanelPlanes({ patients, selectedId = '', initialVista, enfocarPe
       }}
       onAviso={setAviso}
       onCrear={(preferencias, duracion) => void crearPropuesta(preferencias, duracion)}
+      onImportar={importarPlan}
     /> : null}
     plantillas={<CatalogoPlantillas pacientes={patients} hoy={hoy} onAviso={setAviso} onPlan={guardado => {
       setCargados(previo => ({ ...previo, [guardado.patient_id]: guardado }));

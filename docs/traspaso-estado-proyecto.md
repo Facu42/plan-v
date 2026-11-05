@@ -1,4 +1,8 @@
-# Traspaso del proyecto (actualización vigente: 2026-11-03)
+# Traspaso del proyecto (actualización vigente: 2026-11-05)
+
+5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
+
+# Traspaso del proyecto (2026-11-03)
 
 3/11 · Cursor · El centro de `/admin` ahora también tiene riesgo de baja, cobranza, activación y un resumen del día. La bandeja puede usar WhatsApp y mail si están las credenciales; si no, queda apagada. Instagram está preparado y no envía. AFIP no se tocó. Hay una migración nueva, sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
 3/11 · Claude · Pedir el enlace de la cuota en la página pública ya no deja saber si un correo es de una paciente: sin cuota abierta, con débito o desconocido dan el mismo mensaje. La búsqueda del correo es exacta (antes el guion bajo valía como comodín) y esa ruta entra al límite estricto de 5 pedidos cada 15 minutos por conexión. Sigue pendiente: si el correo tiene cuota abierta, el enlace se muestra en pantalla; cerrarlo del todo pide mandarlo por mail, cuando los mails de Nutridash estén prendidos.
