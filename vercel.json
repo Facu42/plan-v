@@ -105,6 +105,10 @@
       "destination": "/nutris/index.html"
     },
     {
+      "source": "/profesionales",
+      "destination": "/index.html"
+    },
+    {
       "source": "/pacientes",
       "destination": "/pacientes/index.html"
     },

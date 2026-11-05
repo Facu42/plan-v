@@ -75,6 +75,8 @@ type Props = {
   onPedirResena: () => void; reviewLink: string;
   pacientes?: { id: string; name: string }[]; pacienteId?: string; onPaciente?: (id: string) => void;
   onNuevoPlan?: () => void; onPlan?: (plan: SubscriptionPlan, visible: boolean) => void; conexiones?: ReactNode;
+  /** Bloque «Directorio de nutris» (matrícula verificada); va debajo de Compartir. */
+  directorio?: ReactNode;
 };
 
 const Boton = ({ texto, onClick, icono, clave, deshabilitado }: { texto: string; onClick: () => void; icono?: 'pen' | 'copy' | 'dl'; clave?: boolean; deshabilitado?: boolean }) => <button type="button" className={`sbtn${clave ? ' k' : ''} cbtn`} onClick={onClick} disabled={deshabilitado}>{icono ? <PanelV29Icon name={icono} size={13} /> : null}{texto}</button>;
@@ -191,6 +193,7 @@ export function PanelPublicaV29(p: Props) {
       <FxPanel titulo="Compartir" meta="">
         <div className="pubsh">{p.link ? <Qr link={p.link} /> : null}<div><small>Tu link</small><b>{linkCorto || 'Publicá la página para tener link'}</b><div className="pubshb"><Boton texto="Copiar link" icono="copy" clave onClick={p.onCopiar} deshabilitado={!p.link} /><Boton texto="Descargar QR" icono="dl" onClick={p.onDescargarQr} deshabilitado={!p.link} /></div><small className="nthint">El QR sirve para la puerta del consultorio o una tarjeta.</small></div></div>
       </FxPanel>
+      {p.directorio}
       <FxPanel titulo="Links por servicio" meta="para Instagram o tu estado">
         {config.types.length ? <div className="publk">{config.types.slice(0, 4).map(tipo => <div key={tipo.id}><span className="t"><b>{tipo.name}</b><small>{linkCorto || 'Sin publicar'}</small></span><button type="button" className="ibtn" onClick={p.onCopiar} disabled={!p.link} aria-label={`Copiar link de ${tipo.name}`}><PanelV29Icon name="copy" size={14} /></button></div>)}</div> : <p className="sxsub">Todavía no hay servicios.</p>}
         <small className="nthint">Por ahora todos los links abren tu página y la paciente elige el servicio ahí.</small>

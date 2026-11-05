@@ -97,7 +97,7 @@ async function body<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
  * Sólo el administrador del servicio. En la base lo decide platform_admins (cada función lo vuelve
  * a validar); en modo demo no hay sesión y el panel se ve con los ejemplos, salvo desde la vista de paciente.
  */
-async function requireAdmin(c: Context): Promise<boolean> {
+export async function requireAdmin(c: Context): Promise<boolean> {
   const auth = c.get('auth');
   const persistent = 'userId' in auth && isSupabaseEnabled();
   if (!persistent) {
