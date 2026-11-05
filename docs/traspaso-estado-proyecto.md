@@ -112,6 +112,9 @@ El boceto `design/panel-nutri/v29/panel-trabajo.html` se actualizó primero (Ini
 ## 5/11 · Ficha pulida (mismo PR #280)
 Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, encabezado liso con etiquetas en un solo tono, «Avance al objetivo» con una barra en vez del medidor, listas sin franja de color, «Para hacer hoy» con acciones como enlaces y «Próximo turno» con los colores del logo. Contadores en degradé azul (menú y solapas). «Nueva consulta» vuelve al negro del boceto; logo vectorial de Nutridash y flecha de la barra sobre la caja de la cuenta.
 
+## 5/11 · Letra legible del panel
+En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
+
 ## 29/10 · Verificar la IA desde el panel de administrador
 Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
 OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /
