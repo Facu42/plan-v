@@ -3039,6 +3039,24 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .ftabs .n,#ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:9.5px;line-height:13px;padding:0 5px;font-weight:500}
 .logo img.mk{display:block;object-fit:cover;background:none;padding:0}
 .side .fold{bottom:84px}
+/* Ficha pulida (unslop, 5/11): lo que ya no repite o grita. */
+.fxtile svg.mini{display:none}
+.fxtile:hover{transform:none;box-shadow:none;background:var(--app)}
+#s-ficha .fh.ntfh{background:var(--card)}
+#s-ficha .fh .tg2:not(.add){background:var(--app);color:var(--ink2);font-weight:400;border:1px solid var(--line)}
+.dprog{display:flex;flex-direction:column;justify-content:center;gap:10px;flex:1;min-width:0}
+.dprog b{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.dprog b small{font-size:14px;color:var(--ink3);margin-left:2px}
+.dprog .tr{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.dprog .tr i{display:block;height:100%;border-radius:99px;background:var(--hatch)}
+.dprog span{font-size:11.5px;color:var(--ink3)}
+#s-ficha .fxr>*{border-left-width:1px;border-left-color:var(--line)}
+#s-ficha .fxs .fxr .n .sbtn{border:0;background:none;box-shadow:none;color:var(--ink2);padding:4px 2px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
+#s-ficha .fxs .fxr .n .sbtn:hover{color:var(--ink)}
+#s-ficha .fxdk{background:radial-gradient(120% 140% at 100% 0%,rgba(0,213,253,.38),transparent 55%),radial-gradient(90% 130% at 90% 120%,rgba(109,248,149,.32),transparent 60%),linear-gradient(160deg,#0A1636 0%,#0B1F4D 55%,#0042B0 100%);color:#F4F5F0}
+#s-ficha .fxdk::after{display:none}
+#s-ficha .fxdk>small,#s-ficha .fxdk>span,#s-ficha .fxdk .fxdk2 span{color:rgba(244,245,240,.72)}
+#s-ficha .fxdk .fxdk2{border-top-color:rgba(255,255,255,.18)}
 </style>
 </head>
 <body>
@@ -3222,7 +3240,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
       <div class="tagsr"><span class="tg2">Celíaca</span><span class="tg2">Sin lactosa</span><span class="tg2 n">Hipotiroidismo</span><span class="tg2 n">Programa mensual</span><button class="tg2 add" type="button">+ etiqueta</button></div></div>
     <span class="sp"></span>
     <div class="appst"><b><i></i>App conectada · hoy 8:10</b>Anamnesis 86% · consentimiento firmado</div>
-    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:var(--azaf);color:#141519;border-radius:999px;padding:0 6px;font-size:10.5px">1</span></button>
+    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff;border-radius:999px;padding:0 6px;font-size:10.5px">1</span></button>
     <button class="chip" type="button" data-ic="cal">Agendar</button>
     <button class="cta" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
   </div>
@@ -3724,7 +3742,7 @@ resumen:()=>`<div class="fx" style="grid-template-columns:1.3fr 1fr .95fr">
   ${fxP('Qué cambió desde la última consulta','14/10 · hace 7 días','',`<div class="fxs">${fxRows([['l','Objetivo al 74%','faltan 1,9 kg · adherencia 86% (+6 puntos)','','objetivos'],['l','Registró 19 de 21 comidas','la merienda le falta 3 veces','','alimentario'],['a','Ánimo bien 5 de 7 días','hinchazón después del almuerzo 3 días','','objetivos'],['l','Agua 1,9 L por día','meta 2 L · sueño 6,2 h','','objetivos'],['b','Laboratorio nuevo del 12/10','2 valores alterados: ferritina y vitamina D','','laboratorio'],['b','2 mensajes y un pedido de cambio','cena del jueves','','plan']])}</div>`,'g')}
  </div>
  <div class="c">
-  ${fxP('Avance al objetivo','bajar a 66,5 kg','',`<div class="fxsplit">${fxGauge(74,'74','%',{w:150})}${fxKv([['Inicio','74,0 kg'],['Hoy','68,4 kg'],['Faltan','1,9 kg'],['Adherencia','86%']])}</div>`)}
+  ${fxP('Avance al objetivo','bajar a 66,5 kg','',`<div class="fxsplit"><div class="dprog"><b>74<small>%</small></b><div class="tr"><i style="width:74%"></i></div><span>de 74,0 a 66,5 kg</span></div>${fxKv([['Inicio','74,0 kg'],['Hoy','68,4 kg'],['Faltan','1,9 kg'],['Adherencia','86%']])}</div>`)}
   ${fxP('Alertas','3','',fxRows([['r','Ferritina baja','14 ng/ml, mínimo 30','','laboratorio'],['a','El plan vence el 4/11','renovar en esta consulta','','plan'],['a','Pedido de cambio sin responder','desde ayer','','plan']]))}
   ${fxP('Para hacer hoy','4','',`<div class="fxs">${fxRows([['n','Aprobar la nota del 14/10','',`<button type="button" class="sbtn" data-ft="consultas">Revisar</button>`],['n','Responder el pedido de cambio','',`<button type="button" class="sbtn" data-ft="plan">Responder</button>`],['n','Pedir análisis de hierro','',`<button type="button" class="sbtn" data-ft="laboratorio">Pedir</button>`],['n','Renovar el plan','',`<button type="button" class="sbtn" data-ft="plan">Renovar</button>`]])}</div>`,'g')}
  </div>

@@ -3024,3 +3024,21 @@
 #pv-panel-v29 .ftabs .n,#pv-panel-v29 #ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:9.5px;line-height:13px;padding:0 5px;font-weight:500}
 #pv-panel-v29 .logo img.mk{display:block;object-fit:cover;background:none;padding:0}
 #pv-panel-v29 .side .fold{bottom:84px}
+/* Ficha pulida (unslop, 5/11): lo que ya no repite o grita. */
+#pv-panel-v29 .fxtile svg.mini{display:none}
+#pv-panel-v29 .fxtile:hover{transform:none;box-shadow:none;background:var(--app)}
+#pv-panel-v29 #s-ficha .fh.ntfh{background:var(--card)}
+#pv-panel-v29 #s-ficha .fh .tg2:not(.add){background:var(--app);color:var(--ink2);font-weight:400;border:1px solid var(--line)}
+#pv-panel-v29 .dprog{display:flex;flex-direction:column;justify-content:center;gap:10px;flex:1;min-width:0}
+#pv-panel-v29 .dprog b{font-size:34px;font-weight:300;letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+#pv-panel-v29 .dprog b small{font-size:14px;color:var(--ink3);margin-left:2px}
+#pv-panel-v29 .dprog .tr{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+#pv-panel-v29 .dprog .tr i{display:block;height:100%;border-radius:99px;background:var(--hatch)}
+#pv-panel-v29 .dprog span{font-size:11.5px;color:var(--ink3)}
+#pv-panel-v29 #s-ficha .fxr>*{border-left-width:1px;border-left-color:var(--line)}
+#pv-panel-v29 #s-ficha .fxs .fxr .n .sbtn{border:0;background:none;box-shadow:none;color:var(--ink2);padding:4px 2px;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--line2)}
+#pv-panel-v29 #s-ficha .fxs .fxr .n .sbtn:hover{color:var(--ink)}
+#pv-panel-v29 #s-ficha .fxdk{background:radial-gradient(120% 140% at 100% 0%,rgba(0,213,253,.38),transparent 55%),radial-gradient(90% 130% at 90% 120%,rgba(109,248,149,.32),transparent 60%),linear-gradient(160deg,#0A1636 0%,#0B1F4D 55%,#0042B0 100%);color:#F4F5F0}
+#pv-panel-v29 #s-ficha .fxdk::after{display:none}
+#pv-panel-v29 #s-ficha .fxdk>small,#pv-panel-v29 #s-ficha .fxdk>span,#pv-panel-v29 #s-ficha .fxdk .fxdk2 span{color:rgba(244,245,240,.72)}
+#pv-panel-v29 #s-ficha .fxdk .fxdk2{border-top-color:rgba(255,255,255,.18)}

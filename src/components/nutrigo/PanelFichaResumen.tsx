@@ -9,7 +9,7 @@ import { intakeMissingItems, intakeStatusLabel, healthFactLabel } from './intake
 import { metaEnKg, pacienteDesde, planPorVencer, proximaConsulta, serieDePeso, turnoDetalle, UMBRAL_ADHERENCIA_BAJA } from './pacientes-presentacion';
 import { avanceDeIngreso, avanceEnKilos, diaMes, mosaicosDeMedidas, numero, plural } from './ficha-presentacion';
 import type { SolapaFicha } from './ficha-presentacion';
-import { FxBar, FxDk, FxFilas, FxIr, FxKv, FxMedidor, FxMosaico, FxPanel, FxCurva, type FilaFx, type Ir } from './ficha-fx';
+import { FxBar, FxDk, FxFilas, FxIr, FxKv, FxMosaico, FxPanel, FxCurva, type FilaFx, type Ir } from './ficha-fx';
 import type { FichaData } from './use-ficha-data';
 import type { ItemHoy } from '../../lib/hoy-accion';
 import { AccionDeHoy } from './AccionDeHoy';
@@ -97,7 +97,7 @@ export function PanelFichaResumen({ patient, now, datos, ir, children, accionHoy
     <div className="c">
       <FxPanel titulo="Avance al objetivo" meta={patient.goal || 'Objetivo sin definir'}>
         <div className="fxsplit">
-          <FxMedidor pct={pctAvance ?? 0} texto={pctAvance !== null ? String(pctAvance) : '—'} sub={pctAvance !== null ? '%' : undefined} />
+          <div className="dprog"><b>{pctAvance !== null ? pctAvance : '—'}{pctAvance !== null ? <small>%</small> : null}</b><div className="tr"><i style={{ width: `${pctAvance ?? 0}%` }} /></div><span>{peso && avance ? `de ${numero(peso.first.value)} a ${numero(avance.meta)} kg` : 'sin avance medido'}</span></div>
           <FxKv filas={[['Inicio', peso ? `${numero(peso.first.value)} ${peso.unit}` : 'Sin medir'], ['Hoy', peso ? `${numero(peso.last.value)} ${peso.unit}` : 'Sin medir'], ['Faltan', avance ? `${numero(avance.faltan)} kg` : 'Sin dato'], ['Adherencia', adherencia !== null ? `${adherencia}%` : 'Sin dato']]} />
         </div>
       </FxPanel>
