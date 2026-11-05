@@ -80,6 +80,7 @@
   "public.finish_recipe_cover(uuid, uuid, text, text, text)",
   "public.get_ai_job(uuid)",
   "public.get_billing_board()",
+  "public.get_my_patient_packs(uuid)",
   "public.get_my_subscriptions()",
   "public.get_notification_preferences()",
   "public.get_organization_subscription(uuid)",

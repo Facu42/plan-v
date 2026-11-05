@@ -5,6 +5,8 @@ import { feeCheckoutApi, type FeeOffer } from '../../api/fee-checkout';
 import { friendlyError } from '../../lib/error-messages';
 import { formatFeeDate, formatPesos, PAYMENT_METHOD_LABELS, summarizeLedger } from '../../fees';
 import type { PatientLedgerView, PaymentInput } from '../../types/fees';
+import { ownCurrentPack, type OwnPack } from '../../types/packs';
+import { localBillingDate } from '../../billing';
 import { Icon } from '../shared/Icon';
 import { NvBadge, NvButton, NvCard, NvState } from './primitives';
 import { FeeStateBadge, PAYMENT_STATUS_LABELS, PaymentForm } from './cobranzas-shared';
@@ -20,7 +22,17 @@ export function CopyAlias({ alias }: { alias: string }) {
   return <button type="button" className="nv-button nv-soft cbz-copy" onClick={() => void copy()} aria-label="Copiar alias">{copied ? 'Copiado' : 'Copiar'}</button>;
 }
 
-export function PagosScreen({ ledger, onLedger, today, monthlyPay }: {
+/** Paquete de consultas: cuántas le quedan a la paciente. Solo aparece si tiene un paquete vigente. */
+export function PackCard({ pack }: { pack: OwnPack }) {
+  const left = Math.max(0, pack.sessions - pack.used);
+  return <NvCard title="Tus consultas" action={<Icon name="calendar" size={16} />}>
+    <div className="cbz-alias"><div><small>{pack.name}</small><strong>{left === 1 ? 'Te queda 1 consulta' : `Te quedan ${left} consultas`} de {pack.sessions}</strong></div></div>
+    <p className="cbz-muted">{pack.expires_on ? `Las podés usar hasta el ${formatFeeDate(pack.expires_on)}.` : 'Sin fecha de vencimiento.'} Cada consulta realizada se descuenta sola.</p>
+  </NvCard>;
+}
+
+export function PagosScreen({ ledger, onLedger, today, monthlyPay, pack = null }: {
+  pack?: OwnPack | null;
   ledger: PatientLedgerView;
   onLedger: (ledger: PatientLedgerView) => void;
   today?: string;
@@ -33,7 +45,7 @@ export function PagosScreen({ ledger, onLedger, today, monthlyPay }: {
   const report = async (input: PaymentInput) => { onLedger((await api.addPatientPayment(ledger.patient_id, input, 'patient')).ledger); };
 
   if (!ledger.fee && !ledger.payments.length) {
-    return <div className="cbz cbz-patient"><NvState title="Todavía no tenés una cuota" description={info?.nutritionist_name ? `Cuando ${info.nutritionist_name} defina tu cuota mensual, la vas a ver acá.` : 'Cuando tu nutricionista defina tu cuota mensual, la vas a ver acá.'} /></div>;
+    return <div className="cbz cbz-patient">{pack && <PackCard pack={pack} />}<NvState title="Todavía no tenés una cuota" description={info?.nutritionist_name ? `Cuando ${info.nutritionist_name} defina tu cuota mensual, la vas a ver acá.` : 'Cuando tu nutricionista defina tu cuota mensual, la vas a ver acá.'} /></div>;
   }
 
   const headline = summary.state === 'debe' ? `Debés ${formatPesos(summary.owed)}${summary.debt_since ? ` desde el ${formatFeeDate(summary.debt_since)}` : ''}`
@@ -50,6 +62,8 @@ export function PagosScreen({ ledger, onLedger, today, monthlyPay }: {
         {monthlyPay?.notice && <p role="status">{monthlyPay.notice}</p>}
       </div>
     </section>
+
+    {pack && <PackCard pack={pack} />}
 
     <div className="cbz-patient-grid">
       <NvCard title="Cómo pagar" action={<Icon name="wallet" size={16} />}>
@@ -82,6 +96,12 @@ export function ShowroomPagos({ patientId }: { patientId: string }) {
   const [offer, setOffer] = useState<FeeOffer | null>(null);
   const [payBusy, setPayBusy] = useState(false);
   const [payNotice, setPayNotice] = useState('');
+  const [packs, setPacks] = useState<OwnPack[]>([]);
+  useEffect(() => {
+    let active = true;
+    api.getOwnPacks(patientId).then(result => { if (active) setPacks(result.packs); }).catch(() => { if (active) setPacks([]); });
+    return () => { active = false; };
+  }, [patientId]);
   const load = useCallback(() => {
     setError(''); setLedger(null);
     api.getPatientLedger(patientId, 'patient').then((result) => setLedger(result.ledger)).catch((reason) => setError(feeErrorMessage(reason, 'No pudimos cargar tus pagos.')));
@@ -109,5 +129,5 @@ export function ShowroomPagos({ patientId }: { patientId: string }) {
 
   if (error) return <NvState kind="error" title="No pudimos cargar tus pagos" description={error} action={<NvButton className="nv-soft" onClick={load}>Reintentar</NvButton>} />;
   if (!ledger) return <NvState kind="loading" title="Cargando tus pagos…" description="Un momento." />;
-  return <PagosScreen ledger={ledger} onLedger={setLedger} monthlyPay={monthlyPay} />;
+  return <PagosScreen ledger={ledger} onLedger={setLedger} monthlyPay={monthlyPay} pack={ownCurrentPack(packs, localBillingDate())} />;
 }
