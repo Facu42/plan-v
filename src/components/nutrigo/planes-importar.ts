@@ -5,6 +5,7 @@ import { extractImportFile } from '../../lib/patient-import-files';
 import type { LocalDocument } from '../../lib/patient-import';
 import { mealPlanDraftSchema, type MealPlanDraftInput, type PlanSlot, type ProfessionalMealPlan } from '../../types/plans';
 import { COMIDAS_EDITOR, sumarDias } from './planes-editor';
+import type { PlanComponentInput } from '../../types/plan-components';
 
 export const MAX_TEXTO_COMIDA = 150;
 const MAX_COMIDAS = 42;
@@ -225,17 +226,17 @@ function fechasDe(plan: PlanImportado, inicio: string) {
 }
 
 /** Borrador listo para guardar: reemplaza el borrador de la paciente y conserva su plan publicado. */
-export function borradorImportado(plan: PlanImportado, hoy: string, destino: ProfessionalMealPlan | null): MealPlanDraftInput {
+export function borradorImportado(plan: PlanImportado, hoy: string, destino: ProfessionalMealPlan | null, componentes?: Map<string, PlanComponentInput[]>): MealPlanDraftInput {
   if (!plan.comidas) throw new Error(AVISO_SIN_COMIDAS);
   const inicio = inicioDelPlan(plan, hoy);
   const fechas = fechasDe(plan, inicio);
   const limite = sumarDias(inicio, MAX_DIAS);
-  const items = plan.dias.flatMap((d, indice) => fechas[indice] > limite ? [] : COMIDAS_EDITOR.filter(slot => d.comidas[slot]).map(slot => ({
-    for_date: fechas[indice],
-    slot,
-    free_text: d.comidas[slot]!,
-    public_note: '',
-  })));
+  const items = plan.dias.flatMap((d, indice) => fechas[indice] > limite ? [] : COMIDAS_EDITOR.filter(slot => d.comidas[slot]).map(slot => {
+    const medidos = componentes?.get(`${indice}|${slot}`);
+    return medidos
+      ? { for_date: fechas[indice], slot, components: medidos, public_note: '' }
+      : { for_date: fechas[indice], slot, free_text: d.comidas[slot]!, public_note: '' };
+  }));
   const fin = items.reduce((max, item) => item.for_date > max ? item.for_date : max, inicio);
   return mealPlanDraftSchema.parse({
     id: destino?.id ?? crypto.randomUUID(),

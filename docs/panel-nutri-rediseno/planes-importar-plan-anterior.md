@@ -45,3 +45,11 @@ Función 3 del [plan para superar a Nutreando](https://claude.ai/artifact/A4nZGV
   aprobadas y 5 omitidas; `npm run check` verde. Recorrido en el navegador (local, modo demo, 1440 y 390) con un PDF y
   con una foto leída por OCR: 2 días y 7 comidas, borrador abierto en el editor.
 - Veredicto: SHIP para ok visual de Facundo.
+
+## Paso 2 (5/11): alimentos de la base con calorías
+
+Al «Usar como borrador», cada comida se corta en partes («2 rebanadas de pan · 200 g de pollo») y se busca cada una en SARA 2.
+Solo se convierte lo medible: gramos o mililitros, o una cantidad con una medida que el alimento ya tiene («1 taza»).
+Sin cantidad, sin coincidencia o con búsqueda caída, la parte queda como texto dentro de la misma comida; si ninguna parte se mide, la comida sigue como texto simple.
+El aviso dice cuántos alimentos se cargaron. La nutri revisa en el editor antes de publicar. No hay pantalla nueva ni migración.
+Código: `planes-importar-alimentos.ts` (+ test) y `borradorImportado(..., componentes)`.

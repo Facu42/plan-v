@@ -15,6 +15,7 @@ import { PanelPlanEditor } from './PanelPlanEditor';
 import { periodoDesdeDuracion, type DuracionArmado } from './planes-asistente';
 import { pedirPropuesta } from './planes-parte-3';
 import { borradorImportado, type PlanImportado } from './planes-importar';
+import { alimentosDelPlan, buscarEnLaBase, resumenAlimentos } from './planes-importar-alimentos';
 import { careErrorMessage } from '../../api/care';
 import {
   conteoFiltro, etiquetaAlta, filaDePlan, filaProvisoria, filasVisibles, fondoAvatar, hoyArgentina,
@@ -277,11 +278,12 @@ export function PanelPlanes({ patients, selectedId = '', initialVista, enfocarPe
     if (!id) return false;
     try {
       const { plan: destino } = await plansApi.professional(id);
-      const { plan } = await plansApi.save(id, borradorImportado(planAnterior, hoy, destino));
+      const medidos = await alimentosDelPlan(planAnterior, buscarEnLaBase);
+      const { plan } = await plansApi.save(id, borradorImportado(planAnterior, hoy, destino, medidos.componentes));
       setCargados(previo => ({ ...previo, [id]: plan }));
       setCreando(false);
       abrirEditor(id);
-      setAviso('El plan anterior quedó como borrador. Revisá cada comida antes de publicarlo: la paciente no recibe nada hasta entonces.');
+      setAviso(`El plan anterior quedó como borrador. ${resumenAlimentos(medidos)} Revisá cada comida antes de publicarlo: la paciente no recibe nada hasta entonces.`);
       return true;
     } catch (error) {
       setAviso(careErrorMessage(error));

@@ -1,6 +1,6 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-05)
 
-5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
+5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Además busca cada alimento medible en SARA 2 y lo carga con calorías; lo demás queda como texto. Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
 
 # Traspaso del proyecto (2026-11-03)
 
