@@ -17,6 +17,10 @@ export type PublicSeoSource = {
   photo: string;
   consultPriceMinor?: number;
   sameAs?: string;
+  /** Matrícula revisada por Nutridash (por ejemplo «MN 4521»). Vacío si nadie la verificó. */
+  verifiedLicense?: string;
+  /** Servicios publicados: entran al JSON-LD y al texto que lee Google. */
+  services?: ReadonlyArray<{ name: string; durationMin: number; priceMinor: number; channel: 'video' | 'presencial' }>;
 };
 
 export type PublicSeo = {
@@ -75,6 +79,8 @@ export function seoSourceFromPublic(origin: string, page: PublicSchedulingPage, 
     photo: page.profile.photo,
     consultPriceMinor: page.profile.consult_price_minor,
     sameAs: isGoogleBusinessUrl(sameAs) && sameAs.trim() ? sameAs.trim() : '',
+    verifiedLicense: page.verified_license ?? '',
+    services: page.types.map(type => ({ name: type.name, durationMin: type.duration_min, priceMinor: type.price_minor, channel: type.channel })),
   };
 }
 
@@ -85,7 +91,8 @@ export function publicSeo(source: PublicSeoSource): PublicSeo {
   const title = `${name} · Nutricionista`;
   const description = clip(source.bio, 160) || clip(`Consultorio de ${name}${source.area.trim() ? ` en ${source.area.trim()}` : ''}.`, 160);
   const canonical = slug ? `${origin}/${slug}` : origin;
-  const image = httpsPhoto(source.photo);
+  const photo = httpsPhoto(source.photo);
+  const image = photo || `${origin}/brand/nutridash-icon.png`;
   const price = precioConsulta(source.consultPriceMinor);
   const sameAs = source.sameAs && isGoogleBusinessUrl(source.sameAs) ? source.sameAs.trim() : '';
   const phone = PHONE.test(source.contact.trim()) ? source.contact.trim() : '';
@@ -97,25 +104,42 @@ export function publicSeo(source: PublicSeoSource): PublicSeo {
     name,
     description,
     url: canonical,
-    ...(image ? { image } : {}),
+    ...(photo ? { image: photo } : {}),
     ...(price ? { priceRange: price } : {}),
     ...(sameAs ? { sameAs: [sameAs] } : {}),
     ...(specialties.length ? { medicalSpecialty: specialties } : {}),
     ...(source.location.trim() || source.area.trim() ? { address } : {}),
     ...(phone ? { telephone: phone } : {}),
   };
+  const verified = source.verifiedLicense?.trim() ?? '';
   const dietitian: Record<string, unknown> = {
     '@type': 'Dietitian',
     '@id': `${canonical}#dietitian`,
     ...shared,
-    ...(source.license.trim() ? { identifier: { '@type': 'PropertyValue', name: 'Matrícula', value: clip(source.license, 60) } } : {}),
+    ...(verified || source.license.trim() ? { identifier: { '@type': 'PropertyValue', name: verified ? 'Matrícula verificada por Nutridash' : 'Matrícula', value: clip(verified || source.license, 60) } } : {}),
   };
   const business: Record<string, unknown> = {
     '@type': 'MedicalBusiness',
     '@id': `${canonical}#business`,
     ...shared,
   };
-  const jsonLd = { '@context': 'https://schema.org', '@graph': [dietitian, business] };
+  const services = (source.services ?? []).filter(item => item.name.trim()).slice(0, 12);
+  const offers = services.map(item => ({
+    '@type': 'Offer',
+    itemOffered: { '@type': 'MedicalProcedure', name: clip(item.name, 80), description: `${item.channel === 'video' ? 'Videollamada' : 'Consulta presencial'} de ${item.durationMin} minutos` },
+    ...(item.priceMinor > 0 ? { price: String(Math.round(item.priceMinor / 100)), priceCurrency: 'ARS' } : {}),
+    url: canonical,
+  }));
+  const catalog = offers.length ? { hasOfferCatalog: { '@type': 'OfferCatalog', name: 'Consultas', itemListElement: offers } } : {};
+  const crumbs = verified && slug ? [{
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Nutridash', item: origin },
+      { '@type': 'ListItem', position: 2, name: 'Nutris verificadas', item: `${origin}/profesionales` },
+      { '@type': 'ListItem', position: 3, name, item: canonical },
+    ],
+  }] : [];
+  const jsonLd = { '@context': 'https://schema.org', '@graph': [{ ...dietitian, ...catalog, areaServed: { '@type': 'Country', name: 'Argentina' } }, business, ...crumbs] };
   const jsonLdText = JSON.stringify(jsonLd).replace(/</g, '\\u003c');
   const metas = [
     `<title>${esc(title)}</title>`,
@@ -127,20 +151,27 @@ export function publicSeo(source: PublicSeoSource): PublicSeo {
     `<meta property="og:type" content="profile">`,
     `<meta property="og:url" content="${esc(canonical)}">`,
     `<meta property="og:locale" content="es_AR">`,
-    `<meta name="twitter:card" content="${image ? 'summary_large_image' : 'summary'}">`,
-    ...(image ? [`<meta property="og:image" content="${esc(image)}">`] : []),
+    `<meta property="og:site_name" content="Nutridash">`,
+    `<meta property="og:image" content="${esc(image)}">`,
+    `<meta name="twitter:card" content="${photo ? 'summary_large_image' : 'summary'}">`,
+    `<meta name="twitter:title" content="${esc(title)}">`,
+    `<meta name="twitter:description" content="${esc(description)}">`,
+    `<meta name="twitter:image" content="${esc(image)}">`,
+    `<meta name="theme-color" content="#C2E66E">`,
     `<script type="application/ld+json">${jsonLdText}</script>`,
   ];
   const head = metas.join('');
   const specialtyList = specialties.map(item => `<li>${esc(item)}</li>`).join('');
-  const document = `<!DOCTYPE html><html lang="es-AR"><head><meta charset="utf-8">${head}</head><body><main><h1>${esc(name)}</h1><p>${esc(description)}</p>${source.area.trim() || source.location.trim() ? `<p>${esc([source.location.trim(), source.area.trim()].filter(Boolean).join(' · '))}</p>` : ''}${specialtyList ? `<ul>${specialtyList}</ul>` : ''}</main></body></html>`;
+  const serviceList = services.map(item => `<li>${esc(item.name)} · ${item.durationMin} min · ${esc(item.channel === 'video' ? 'Videollamada' : 'Presencial')}${item.priceMinor > 0 ? ` · ${esc(precioConsulta(item.priceMinor))}` : ''}</li>`).join('');
+  const body = `<header><p>Nutricionista${verified ? ` · Matrícula verificada por Nutridash ${esc(verified)}` : ''}</p><h1>${esc(name)}</h1></header><p>${esc(description)}</p>${source.area.trim() || source.location.trim() ? `<address>${esc([source.location.trim(), source.area.trim()].filter(Boolean).join(' · '))}</address>` : ''}${specialtyList ? `<h2>Especialidades</h2><ul>${specialtyList}</ul>` : ''}${serviceList ? `<h2>Consultas y precios</h2><ul>${serviceList}</ul>` : ''}${canonical ? `<p><a href="${esc(canonical)}">Reservar turno con ${esc(name)}</a></p>` : ''}<nav><a href="${esc(origin)}/profesionales">Más nutris verificadas</a></nav>`;
+  const document = `<!DOCTYPE html><html lang="es-AR"><head><meta charset="utf-8">${head}</head><body><main>${body}</main></body></html>`;
   return { title, description, canonical, jsonLd, jsonLdText, head, document };
 }
 
 export function sitemapXml(origin: string, rows: readonly { slug: string; enabled: boolean }[]): string {
   const base = originOf(origin);
   const locs = [...new Set(rows.filter(row => row.enabled && isPublicSlug(row.slug)).map(row => row.slug))].sort();
-  const body = locs.map(slug => `<url><loc>${esc(`${base}/${slug}`)}</loc></url>`).join('');
+  const body = [`${base}/profesionales`, ...locs.map(slug => `${base}/${slug}`)].map(loc => `<url><loc>${esc(loc)}</loc></url>`).join('');
   return `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${body}</urlset>`;
 }
 
