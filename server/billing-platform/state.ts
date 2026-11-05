@@ -29,9 +29,18 @@ export function addMonths(iso: string, months: number): string {
   return date.toISOString();
 }
 
-/** Días de acceso completo desde el alta, sin suscripción. El día 31 pasa a solo lectura. */
-export const SIGNUP_GRACE_DAYS = 30;
+/** Días de prueba gratis desde el alta, sin suscripción (Facundo, 5/11/2026). El cuarto día pasa a solo lectura. */
+export const SIGNUP_GRACE_DAYS = 3;
+/** Las cuentas creadas antes del cambio conservan los 30 días que se les prometieron al darse de alta. */
+export const LEGACY_SIGNUP_GRACE_DAYS = 30;
+/** Desde el 6/11/2026 a las 00:00 de Argentina, las altas nuevas tienen 3 días. */
+export const SHORT_TRIAL_FROM = Date.parse('2026-11-06T03:00:00.000Z');
 const DAY_MS = 86_400_000;
+
+/** Días de prueba que le tocan a una cuenta según cuándo se dio de alta. */
+export function signupGraceDays(createdAt: number): number {
+  return createdAt < SHORT_TRIAL_FROM ? LEGACY_SIGNUP_GRACE_DAYS : SIGNUP_GRACE_DAYS;
+}
 
 export function signupElapsedDays(createdAt: number, now: number): number {
   if (!Number.isFinite(createdAt)) return Number.POSITIVE_INFINITY;
@@ -41,14 +50,14 @@ export function signupElapsedDays(createdAt: number, now: number): number {
 
 export function signupGraceDaysLeft(createdAt: number | null, now: number): number | null {
   if (createdAt == null || !Number.isFinite(createdAt)) return null;
-  return Math.max(0, SIGNUP_GRACE_DAYS - signupElapsedDays(createdAt, now));
+  return Math.max(0, signupGraceDays(createdAt) - signupElapsedDays(createdAt, now));
 }
 
 export function signupGraceUntil(createdAt: number): string {
-  return new Date(createdAt + SIGNUP_GRACE_DAYS * DAY_MS).toISOString();
+  return new Date(createdAt + signupGraceDays(createdAt) * DAY_MS).toISOString();
 }
 
-/** El plan pago manda. Sin plan, los primeros 30 días desde el alta son acceso completo. */
+/** El plan pago manda. Sin plan, los días de prueba desde el alta son acceso completo. */
 export function platformWriteAccess(
   sub: { status: PlatformStatus; past_due_since: string | null; current_period_end: string | null } | null,
   createdAt: number | null,
@@ -57,7 +66,7 @@ export function platformWriteAccess(
   if (accessMode(sub, now) === 'full') return 'full';
   if (sub && sub.status !== 'pending') return 'read_only';
   if (createdAt == null || !Number.isFinite(createdAt)) return 'read_only';
-  return signupElapsedDays(createdAt, now) < SIGNUP_GRACE_DAYS ? 'full' : 'read_only';
+  return signupElapsedDays(createdAt, now) < signupGraceDays(createdAt) ? 'full' : 'read_only';
 }
 
 export function accessMode(sub: { status: PlatformStatus; past_due_since: string | null; current_period_end: string | null } | null, now: number): 'full' | 'read_only' {
