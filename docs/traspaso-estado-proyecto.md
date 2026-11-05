@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-05)
 
+5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Además busca cada alimento medible en SARA 2 y lo carga con calorías; lo demás queda como texto. Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
+
 5/11 · Claude · Ajustes › Tus datos › Descargar baja un .zip real: pacientes y turnos en Excel, la historia clínica de cada paciente en PDF (solo con permiso de atención, sin notas privadas) y un LEEME. Ruta `GET /api/ajustes/export`, funciona también en solo lectura. Rama `claude/project-thread-8m5643`, sin base, espera el ok visual. Detalle en `docs/panel-nutri-rediseno/exportar-datos-v29.md`.
 
 # Traspaso del proyecto (actualización vigente: 2026-11-03)
