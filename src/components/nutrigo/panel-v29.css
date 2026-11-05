@@ -3018,3 +3018,7 @@
 #pv-panel-v29 .top .crear-menu{position:absolute;right:0;top:40px;z-index:50;min-width:200px;padding:6px;display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line2);border-radius:12px;box-shadow:var(--shadow)}
 #pv-panel-v29 .top .crear-menu button{display:flex;gap:10px;align-items:center;padding:10px;border:0;background:none;color:var(--ink);text-align:left;border-radius:8px;cursor:pointer;font:inherit}
 #pv-panel-v29 .top .crear-menu button:hover{background:var(--app)}
+/* Contadores: degradé azul del logo; en la Ficha van en la esquina de arriba a la derecha de la palabra. */
+#pv-panel-v29 .nv .ct,#pv-panel-v29 .nv .ct.hot,#pv-panel-v29 .ftabs .n,#pv-panel-v29 .ftabs .n.hot{background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff}
+#pv-panel-v29 .ftabs button{gap:0}
+#pv-panel-v29 .ftabs .n,#pv-panel-v29 #ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:9.5px;line-height:13px;padding:0 5px;font-weight:500}

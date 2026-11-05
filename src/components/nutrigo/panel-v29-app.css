@@ -750,21 +750,21 @@
   padding: 0;
 }
 
-/* Acción principal: el degradé del isotipo. Secundarios (.sbtn, .chip) y la baja (.nd-danger) quedan como están. */
-#pv-panel-v29 :is(.cta, .sbtn.k, .pubcta, .dv-a .acts button.go, .dv-d .acts button.go) {
+/* Acción principal: el degradé del isotipo. «Nueva consulta» (.cta) vuelve al negro del boceto (Facundo, 5/11). Secundarios (.sbtn, .chip) y la baja (.nd-danger) quedan como están. */
+#pv-panel-v29 :is(.sbtn.k, .pubcta, .dv-a .acts button.go, .dv-d .acts button.go) {
   background: var(--nd-action);
   color: var(--nd-action-ink);
   border-color: transparent;
 }
-#pv-panel-v29 :is(.cta, .sbtn.k, .dv-a .acts button.go, .dv-d .acts button.go):hover {
+#pv-panel-v29 :is(.sbtn.k, .dv-a .acts button.go, .dv-d .acts button.go):hover {
   background: var(--nd-action-hover);
 }
-#pv-panel-v29 :is(.cta, .sbtn.k, .dv-a .acts button.go, .dv-d .acts button.go):focus-visible {
+#pv-panel-v29 :is(.sbtn.k, .dv-a .acts button.go, .dv-d .acts button.go):focus-visible {
   outline: 2px solid var(--nd-action-ring);
   outline-offset: 2px;
 }
-#pv-panel-v29 :is(.cta, .sbtn.k):disabled,
-#pv-panel-v29 :is(.cta, .sbtn.k)[disabled] {
+#pv-panel-v29 :is(.sbtn.k):disabled,
+#pv-panel-v29 :is(.sbtn.k)[disabled] {
   background: var(--nd-action);
   color: var(--nd-action-ink);
   opacity: 0.45;
