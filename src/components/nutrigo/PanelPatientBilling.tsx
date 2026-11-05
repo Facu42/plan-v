@@ -9,6 +9,7 @@ import {canLeaveWorkspace} from './unsaved-changes';
 import {localBillingDate} from '../../billing';
 import {FxCols,FxDk,FxKv,FxMedidor,FxPanel,FxStk} from './ficha-fx';
 import {PanelV29Icon} from './PanelV29Icon';
+import {FichaPaquete} from './FichaPaquete';
 import {diaYMes,montoCorto,pagosPorMes,rangoDeMeses,repartoPorMedio} from './ficha-cobros';
 export function PanelPatientBilling({patientId,onOpen}:{patientId:string;onOpen:()=>void}){
  const [result,setResult]=useState<{id:string;board:BillingBoard}|null>(null),[error,setError]=useState(''),[revision,setRevision]=useState(0),[manage,setManage]=useState(false);
@@ -31,6 +32,7 @@ export function PanelPatientBilling({patientId,onOpen}:{patientId:string;onOpen:
    <div className="fxp fxtile"><small>Pagó en total</small><div className="fxv"><b className="num">{formatPesos(total)}</b></div><span>{primero?`desde ${meses.find(m=>primero.paid_on.startsWith(m.clave))?.rotulo??formatFeeDate(primero.paid_on)}`:'sin pagos todavía'}</span></div>
   </div>
   <FxPanel titulo="Pagos por mes" meta={rangoDeMeses(meses)}><FxCols valores={meses.map(m=>m.total)} rotulos={meses.map(m=>m.rotulo)} max={pico?pico*1.1111:1} alto={120} tope={ultimo.total?montoCorto(ultimo.total):undefined}/></FxPanel>
+  <FichaPaquete patientId={patientId} onCobro={()=>setRevision(n=>n+1)}/>
   <FxPanel titulo="Movimientos" grande derecha={<button type="button" className="sbtn k cbtn" onClick={()=>setManage(true)}><PanelV29Icon name="plus" size={13}/>Registrar cobro</button>}>
    <div className="fxs"><ol className="fxtl">{movimientos.map(payment=><li key={payment.id}><i/><span><b>{payment.note||'Pago registrado'}</b><small>{PAYMENT_METHOD_LABELS[payment.method]}{payment.status!=='confirmed'?` · ${PAYMENT_STATUS_LABELS[payment.status]}`:''}</small></span><time><b className="num">{formatPesos(payment.amount)}</b> · {diaYMes(payment.paid_on)}</time>{payment.status==='reported'&&<button type="button" className="sbtn cbtn" onClick={()=>setManage(true)}>Revisar aviso</button>}</li>)}</ol>{!movimientos.length&&<p>Todavía no hay pagos registrados.</p>}</div>
   </FxPanel></div>

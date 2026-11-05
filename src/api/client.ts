@@ -8,6 +8,7 @@ import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroS
 import type { HubActivacion, HubBandeja, HubCobranza, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri, HubRiesgo, HubRiesgoMotivo, HubSeguimiento, HubTarea } from '../types/hub';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
+import type { PackSaleInput, PackUseInput, PatientPack } from '../types/packs';
 import type { HabitReminders } from '../habit-reminders';
 
 export { ApiError } from './error';
@@ -371,6 +372,17 @@ export const api = {
 
   setChargeWaived: (chargeId: string, waived: boolean) =>
     request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
+
+  /** Paquetes de consultas de una paciente (solo la nutricionista). */
+  getPatientPacks: (patientId: string) => request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs`),
+  sellPatientPack: (patientId: string, sale: PackSaleInput) =>
+    request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs`, { method: 'POST', body: JSON.stringify(sale) }),
+  usePatientPack: (patientId: string, use: PackUseInput) =>
+    request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs/uses`, { method: 'POST', body: JSON.stringify(use) }),
+  voidPatientPackUse: (patientId: string, useId: string) =>
+    request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs/uses/${useId}/void`, { method: 'POST' }),
+  closePatientPack: (patientId: string, packId: string) =>
+    request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs/${packId}/close`, { method: 'POST' }),
 
   updateGoal: (patientId: string, data: { goal: string; status: GoalStatus; progress: number; note?: string }) =>
     request<{ patient: Patient }>(`/api/patients/${patientId}/goal`, {
