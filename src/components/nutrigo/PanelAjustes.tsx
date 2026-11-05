@@ -6,8 +6,8 @@ import { EditarAviso, EditarMarca, EditarPlantilla, type ModoMarca } from './Aju
 import type { NutritionSettingsView } from '../../types/nutrition-capabilities';
 import { friendlyError } from '../../lib/error-messages';
 import { NutritionSettingsPanel } from './NutritionSettingsPanel';
-import { ConfigurationReports } from './ConfigurationReports';
-import { SectionTabs, SettingsDialog } from './EquipoAjustesShared';
+import { SectionTabs } from './EquipoAjustesShared';
+import { DescargarMisDatos } from './AjustesExportar';
 import { canLeaveWorkspace } from './unsaved-changes';
 import { AjustesAvisos, AjustesCuenta, AjustesIntegraciones, AjustesPlantillas, AjustesSeguridad, type TemaAjustes } from './PanelAjustesVistas';
 
@@ -15,7 +15,7 @@ const TABS = ['Mi cuenta', 'Plantillas', 'Avisos automáticos', 'Seguridad', 'In
 type Dialogo = { tipo: 'exportar' } | { tipo: 'marca'; modo: ModoMarca } | { tipo: 'plantilla'; modo: 'nueva' | 'editar' | 'cuando'; plantilla?: TemplateView } | { tipo: 'aviso'; clave: NoticeKey; titulo: string; cuando: string; texto: string; activo: boolean } | null;
 const reemplazar = <T extends { id?: string; key?: string }>(lista: T[] | null, nuevo: T) => { const base = lista ?? []; const i = base.findIndex(x => (x.id ?? x.key) === (nuevo.id ?? nuevo.key)); return i < 0 ? [...base, nuevo] : base.map((x, j) => j === i ? nuevo : x); };
 
-/** Ajustes v29: cada pestaña es una de las cinco vistas del boceto (`PanelAjustesVistas`); los diálogos reusan la edición de marca y los reportes que ya existían. */
+/** Ajustes v29: cada pestaña es una de las cinco vistas del boceto (`PanelAjustesVistas`); los diálogos reusan la edición de marca; «Tus datos» baja el .zip real (`AjustesExportar`). */
 export function PanelAjustes({ onOpen, onHeader, tema, onSecurity }: { onOpen: (href: string) => void; onHeader?: (actions: ReactNode) => void; tema?: TemaAjustes; onSecurity?: () => void }) {
   const [view, setView] = useState(0), [dialogo, setDialogo] = useState<Dialogo>(null), [data, setData] = useState<NutritionSettingsView | null>(null), [error, setError] = useState(''), [revision, setRevision] = useState(0);
   useEffect(() => { const c = new AbortController(); setError(''); nutritionCapabilityApi.settings(c.signal).then(d => { if (!c.signal.aborted) setData(d); }).catch(e => { if (!c.signal.aborted) setError(friendlyError(e)); }); return () => c.abort(); }, [revision]);
@@ -38,6 +38,6 @@ export function PanelAjustes({ onOpen, onHeader, tema, onSecurity }: { onOpen: (
     {dialogo?.tipo === 'marca' && data && <EditarMarca modo={dialogo.modo} data={data} onSaved={setData} onClose={() => setDialogo(null)}/>}
     {dialogo?.tipo === 'plantilla' && <EditarPlantilla modo={dialogo.modo} plantilla={dialogo.plantilla} onSaved={t => setPlantillas(l => reemplazar(l, t))} onEliminada={id => setPlantillas(l => (l ?? []).filter(x => x.id !== id))} onClose={() => setDialogo(null)}/>}
     {dialogo?.tipo === 'aviso' && <EditarAviso clave={dialogo.clave} titulo={dialogo.titulo} cuando={dialogo.cuando} texto={dialogo.texto} activo={dialogo.activo} onSaved={n => setAvisos(l => reemplazar(l, n))} onClose={() => setDialogo(null)}/>}
-    {dialogo?.tipo === 'exportar' && <SettingsDialog title="Descargar mis datos" onClose={() => setDialogo(null)}><ConfigurationReports onOpen={onOpen}/></SettingsDialog>}
+    {dialogo?.tipo === 'exportar' && <DescargarMisDatos onClose={() => setDialogo(null)}/>}
   </div>;
 }

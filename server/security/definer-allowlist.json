@@ -45,6 +45,7 @@
   "public.claim_ai_job(uuid)",
   "public.claim_meal_plan_email(uuid, integer)",
   "public.claim_recipe_cover(uuid, boolean)",
+  "public.close_patient_pack(uuid)",
   "public.complete_privacy_delete(uuid)",
   "public.complete_privacy_export(jsonb)",
   "public.confirm_appointment(jsonb)",
@@ -88,6 +89,7 @@
   "public.get_patient_ledger(uuid)",
   "public.get_patient_library(uuid, text)",
   "public.get_patient_meal_logs(uuid)",
+  "public.get_patient_packs(uuid)",
   "public.get_patient_progress(uuid, integer)",
   "public.get_privacy_package(uuid)",
   "public.get_shopping_list(uuid)",
@@ -133,6 +135,7 @@
   "public.ops_review_reminder_template(uuid, text, text, text)",
   "public.ops_set_campaign_optout(uuid, boolean)",
   "public.ops_set_preferences(uuid, text, boolean, boolean, text)",
+  "public.pack_sync_appointment(uuid, uuid, boolean)",
   "public.patient_has_full_access(uuid)",
   "public.patient_import_authorization_state(uuid)",
   "public.patient_import_external_allowed(uuid, text)",
@@ -210,6 +213,7 @@
   "public.scheduling_shared_patients(integer)",
   "public.scheduling_staff_roster(uuid)",
   "public.search_food_catalog(jsonb, integer, integer)",
+  "public.sell_patient_pack(uuid, text, integer, integer, date, integer, boolean)",
   "public.send_thread_attachment(jsonb)",
   "public.send_thread_message(jsonb)",
   "public.set_organization_subscription_status(uuid, text, text)",
@@ -224,5 +228,7 @@
   "public.submit_patient_intake(uuid, integer)",
   "public.toggle_favorite(uuid, text, text)",
   "public.transfer_patient_ownership(uuid, uuid, text)",
-  "public.unpublish_editorial_resource(uuid)"
+  "public.unpublish_editorial_resource(uuid)",
+  "public.use_patient_pack(uuid, uuid, date, text)",
+  "public.void_patient_pack_use(uuid)"
 ]

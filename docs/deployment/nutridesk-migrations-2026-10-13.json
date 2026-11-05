@@ -232,6 +232,11 @@
       "version": "20261103233000",
       "file": "20261103233000_platform_hub_ops.sql",
       "sha256": "7368eacdc1f36161f753fa475c07302a4f2069f1dfd70c01960ddfa8a12bf250"
+    },
+    {
+      "version": "20261105150000",
+      "file": "20261105150000_patient_packs.sql",
+      "sha256": "c94d569b37b307177054e0fcc27d26b9cf30c02009bdc5a4e4ece0d4875ea013"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

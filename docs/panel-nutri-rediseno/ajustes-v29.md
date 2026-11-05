@@ -8,7 +8,7 @@ Armado con el código del boceto (`ajV0` a `ajV4` de `design/panel-nutri/v29/pan
 - **Avisos automáticos:** cada interruptor y su «Cuándo» y mensaje se guardan en `notice_settings`; los tres de «Reglas de regreso» también. El texto «Así le llega» sale del mensaje guardado.
 - **Apariencia:** «Tema oscuro» (se guarda en la cuenta), «Letra más grande» (la regla `.app.ajbig .main` del boceto) y «Menos movimiento» (corta transiciones y animaciones). Las dos últimas se guardan en este dispositivo y se aplican al abrir el panel.
 - **Avisos para vos:** los tres canales reales (app, mail, push) con las preferencias de la profesional.
-- **Tus datos → Descargar:** abre los reportes y la descarga de indicadores que ya existían.
+- **Tus datos → Descargar:** baja un .zip con pacientes y turnos en Excel y la historia clínica de cada paciente en PDF (ver `exportar-datos-v29.md`).
 - **Obras sociales y reservas:** «Ir a Página pública» lleva a la página pública.
 - **Seguridad:** el estado de los dos pasos sale de Supabase (el interruptor abre su configuración); «Cambiar clave» manda el enlace de recuperación al mail; «Cerrar las demás» cierra las otras sesiones. «Copias de seguridad»: todos los días, 7 días (plan Pro de Supabase); «Última» queda en «Sin dato» porque no hay forma de leerla desde la app.
 - **Integraciones:** Google y Mercado Pago se conectan y desconectan de verdad; Balanzas explica cómo importar un informe.

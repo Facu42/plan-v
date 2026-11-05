@@ -410,10 +410,7 @@
 /* En el celular el título no se achica a cero: si no, tapa las tarjetas de arriba. */
 #pv-panel-v29.mob .main:has(#s-inicio) > .top { flex: 0 0 auto; height: auto; }
 #pv-panel-v29 #s-inicio .kpi .v small { display: inline; white-space: nowrap; font-size: 13.5px; }
-#pv-panel-v29 #s-inicio .kcols small { font-size: 8px; }
-#pv-panel-v29 #s-inicio .kring span { font-size: 8.5px; }
-#pv-panel-v29 #s-inicio .kweek small { font-size: 9.5px; }
-#pv-panel-v29 #s-inicio .klol small { font-size: 8.5px; }
+#pv-panel-v29 #s-inicio .kweek small { font-size: 11px; }
 #pv-panel-v29 #s-inicio .card { border-radius: 16px; background: var(--card); }
 #pv-panel-v29 #s-inicio .iup .li .ico { width: 28px; height: 28px; border-radius: 9px; }
 
@@ -552,7 +549,7 @@
 .ag-mas { display: flex; flex-direction: column; gap: 12px; align-items: stretch; max-height: 92dvh; overflow: auto; width: min(560px, calc(100vw - 36px)); }
 /* Mes: no está dibujado en el boceto; se arma con sus colores de turno. */
 #pv-panel-v29 .agm { display: grid; grid-template-columns: repeat(7, 1fr); grid-auto-rows: minmax(84px, 1fr); flex: 1; min-height: 0; overflow: auto; }
-#pv-panel-v29 .agm > span { padding: 8px 10px; font-size: 10.5px; color: var(--ink3); text-transform: uppercase; border-bottom: 1px solid var(--line); }
+#pv-panel-v29 .agm > span { padding: 8px 10px; font-size: 11px; color: var(--ink3); text-transform: uppercase; border-bottom: 1px solid var(--line); }
 #pv-panel-v29 .agm > div { padding: 6px 8px; border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-direction: column; gap: 3px; font-size: 11px; min-width: 0; }
 #pv-panel-v29 .agm > div:nth-child(7n+8) { border-left: 0; }
 #pv-panel-v29 .agm > div.o { opacity: .5; }
@@ -987,3 +984,5 @@
 #pv-panel-v29 .activacion-nutri p { margin: 0 18px 16px; color: var(--ink3); font-size: 12px; }
 /* Celular: la mini barra de semanas tapa el número cuando la tarjeta es angosta. */
 #pv-panel-v29.mob #s-inicio .kweek { display: none; }
+/* Celular: si el nombre de la tarjeta ocupa dos líneas, la tarjeta crece y no corta el pie. */
+#pv-panel-v29.mob #s-inicio .kpi { height: auto; min-height: 96px; }

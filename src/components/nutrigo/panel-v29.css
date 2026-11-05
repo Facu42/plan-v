@@ -5,7 +5,7 @@
 /* Layout: app flotante 1440×900 sobre fondo gris; menú lateral claro, encabezado, aviso, 5 números, consultas de hoy + próxima consulta, 4 tarjetas abajo. */
 #pv-panel-v29{
   --page:#E1E2E4; --app:#EFF0EB; --card:#FFFFFF; --side:#F8F9F5;
-  --ink:#101114; --ink2:#43464D; --ink3:#71747C; --line:#E1E3DD; --line2:#CFD2CA;
+  --ink:#101114; --ink2:#43464D; --ink3:#666972; --line:#E1E3DD; --line2:#CFD2CA;
   --hatch:#9CB85E; --hatch-a:#E0A93C;
   --lima:#D6EBA3; --lima-t:#E6F3C6; --lima-tt:#F3F9E2; --lima-ink:#3F5A0A;
   --azaf:#FFCB65; --azaf-t:#FFEDC6; --azaf-ink:#7A4E00;
@@ -16,14 +16,14 @@
 }
 @media (prefers-color-scheme: dark){#pv-panel-v29:not([data-theme="light"]){
   --page:#0C0D10; --app:#141519; --card:#1C1D22; --side:#17181C;
-  --ink:#F1F2EE; --ink2:#A7AAB1; --ink3:#6E717A; --line:#26272D; --line2:#2E3036;
+  --ink:#F1F2EE; --ink2:#A7AAB1; --ink3:#8C8F98; --line:#26272D; --line2:#2E3036;
   --lima-t:#2A321B; --lima-tt:#21261A; --lima-ink:#CFE2A6; --hatch:#B9CF8A; --hatch-a:#E8BE6A;
   --azaf-t:#3A2F18; --azaf-ink:#FFD58A; --rojo-t:#3A1F1D; --rojo-ink:#F2978D; --azul-t:#1E2638; --azul-ink:#9DB5EE;
   --dark:#F1F2EE; --dark2:#E4E6E0; --dark-ink:#141519; --dark-ink2:#5B5E66;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark}}
 #pv-panel-v29[data-theme="dark"]{
   --page:#0C0D10; --app:#141519; --card:#1C1D22; --side:#17181C;
-  --ink:#F1F2EE; --ink2:#A7AAB1; --ink3:#6E717A; --line:#26272D; --line2:#2E3036;
+  --ink:#F1F2EE; --ink2:#A7AAB1; --ink3:#8C8F98; --line:#26272D; --line2:#2E3036;
   --lima-t:#2A321B; --lima-tt:#21261A; --lima-ink:#CFE2A6; --hatch:#B9CF8A; --hatch-a:#E8BE6A;
   --azaf-t:#3A2F18; --azaf-ink:#FFD58A; --rojo-t:#3A1F1D; --rojo-ink:#F2978D; --azul-t:#1E2638; --azul-ink:#9DB5EE;
   --dark:#F1F2EE; --dark2:#E4E6E0; --dark-ink:#141519; --dark-ink2:#5B5E66;
@@ -44,9 +44,9 @@
 #pv-panel-v29 .fold{position:absolute;right:-12px;top:26px;width:24px;height:24px;border-radius:50%;background:var(--card);border:1px solid var(--line2);display:grid;place-items:center;color:var(--ink2);cursor:pointer;box-shadow:var(--shadow)}
 #pv-panel-v29 .fold svg{width:12px;height:12px}
 #pv-panel-v29 .srch{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line2);border-radius:10px;padding:8px 10px;color:var(--ink3)}
-#pv-panel-v29 .srch kbd{margin-left:auto;font:inherit;font-size:10.5px;border:1px solid var(--line2);border-radius:5px;padding:1px 5px}
+#pv-panel-v29 .srch kbd{margin-left:auto;font:inherit;font-size:11px;border:1px solid var(--line2);border-radius:5px;padding:1px 5px}
 #pv-panel-v29 .grp{display:flex;flex-direction:column;gap:1px}
-#pv-panel-v29 .grp h6{margin:0 0 4px;padding:0 8px;font-size:10.5px;font-weight:500;color:var(--ink3);text-transform:none;letter-spacing:0}
+#pv-panel-v29 .grp h6{margin:0 0 4px;padding:0 8px;font-size:11px;font-weight:500;color:var(--ink3);text-transform:none;letter-spacing:0}
 #pv-panel-v29 .nv{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:9px;color:var(--ink2);cursor:pointer;font-size:13px;border:0;background:none;width:100%;text-align:left}
 #pv-panel-v29 .nv:hover{background:var(--line)}
 #pv-panel-v29 .nv.on{background:var(--lima-t);color:var(--ink);font-weight:500}
@@ -118,7 +118,7 @@
 #pv-panel-v29 tr.done td{color:var(--ink3)}
 #pv-panel-v29 tr.now td{background:var(--lima-tt)}
 #pv-panel-v29 .who{display:flex;align-items:center;gap:9px}
-#pv-panel-v29 .who .av{width:26px;height:26px;font-size:10.5px}
+#pv-panel-v29 .who .av{width:26px;height:26px;font-size:11px}
 #pv-panel-v29 .who b{font-weight:500;display:block;font-size:12.5px;color:var(--ink)}
 #pv-panel-v29 tr.done .who b{color:var(--ink2)}
 #pv-panel-v29 .who small{color:var(--ink3);font-size:11px}
@@ -153,9 +153,9 @@
 #pv-panel-v29 .ns{display:grid;grid-template-columns:repeat(4,1fr);background:var(--dark2);border-radius:12px;overflow:hidden}
 #pv-panel-v29 .ns div{padding:9px 10px;display:flex;flex-direction:column;gap:3px;border-right:1px solid rgba(127,127,127,.18)}
 #pv-panel-v29 .ns div:last-child{border-right:0}
-#pv-panel-v29 .ns small{font-size:10.5px;color:var(--dark-ink2)}
+#pv-panel-v29 .ns small{font-size:11px;color:var(--dark-ink2)}
 #pv-panel-v29 .ns b{font-size:15.5px;font-weight:400;letter-spacing:-.02em}
-#pv-panel-v29 .ns em{font-style:normal;font-size:10.5px;color:var(--lima)}
+#pv-panel-v29 .ns em{font-style:normal;font-size:11px;color:var(--lima)}
 #pv-panel-v29[data-theme="dark"] .ns em{color:var(--lima-ink)}
 #pv-panel-v29 .note{font-size:12px;line-height:1.45;color:var(--dark-ink2);border-left:2px solid var(--lima);padding-left:9px}
 #pv-panel-v29 .note b{color:var(--dark-ink);font-weight:500}
@@ -214,7 +214,7 @@
 #pv-panel-v29 .goal{display:flex;flex-direction:column;gap:3px;width:110px}
 #pv-panel-v29 .goal .tr{height:5px;border-radius:9px;background:var(--line)}
 #pv-panel-v29 .goal .tr i{display:block;height:100%;border-radius:9px;background:var(--ink)}
-#pv-panel-v29 .goal small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .goal small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .dw{color:var(--lima-ink);font-size:11px;margin-left:4px}
 #pv-panel-v29 .dw.bad{color:var(--rojo-ink)}
 #pv-panel-v29 tr.open td{background:var(--lima-tt);border-bottom-color:transparent}
@@ -243,12 +243,12 @@
 #pv-panel-v29 .days div:first-child{border-left:0}
 #pv-panel-v29 .days b{font-size:17.5px;font-weight:300;color:var(--ink);letter-spacing:-.02em}
 #pv-panel-v29 .days .today b{background:var(--lima);color:#141519;border-radius:8px;padding:0 6px;font-weight:400}
-#pv-panel-v29 .days small{margin-left:auto;font-size:10.5px}
+#pv-panel-v29 .days small{margin-left:auto;font-size:11px}
 #pv-panel-v29 .hrs{position:relative;flex:1;display:grid;grid-template-columns:52px repeat(6,1fr)}
 #pv-panel-v29 .hcol{position:relative;border-left:1px solid var(--line)}
 #pv-panel-v29 .hcol.today{background:var(--lima-tt)}
 #pv-panel-v29 .hlab{position:relative}
-#pv-panel-v29 .hlab span{position:absolute;right:8px;font-size:10.5px;color:var(--ink3);transform:translateY(-6px)}
+#pv-panel-v29 .hlab span{position:absolute;right:8px;font-size:11px;color:var(--ink3);transform:translateY(-6px)}
 #pv-panel-v29 .gl{position:absolute;left:52px;right:0;border-top:1px solid var(--line)}
 #pv-panel-v29 .ev{position:absolute;left:4px;right:4px;border-radius:9px;padding:5px 8px;font-size:11px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;gap:1px;transition:transform .2s}
 #pv-panel-v29 .ev:hover{transform:translateY(-1px)}
@@ -268,7 +268,7 @@
 #pv-panel-v29 .mini .mh{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:500;margin-bottom:8px}
 #pv-panel-v29 .mg{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:11px}
 #pv-panel-v29 .mg span{padding:4px 0;border-radius:7px;color:var(--ink2);position:relative}
-#pv-panel-v29 .mg .wd{color:var(--ink3);font-size:10.5px;text-transform:uppercase}
+#pv-panel-v29 .mg .wd{color:var(--ink3);font-size:11px;text-transform:uppercase}
 #pv-panel-v29 .mg .o{color:var(--ink3);opacity:.5}
 #pv-panel-v29 .mg .wk{background:var(--lima-tt)}
 #pv-panel-v29 .mg .td{background:var(--lima);color:#141519;font-weight:500}
@@ -294,15 +294,15 @@
 #pv-panel-v29 .fst{display:flex;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--app)}
 #pv-panel-v29 .fst div{padding:7px 13px;border-right:1px solid var(--line);display:flex;flex-direction:column;gap:2px;min-width:0}
 #pv-panel-v29 .fst div:last-child{border-right:0}
-#pv-panel-v29 .fst small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .fst small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .fst b{font-size:13.5px;font-weight:500;white-space:nowrap}
-#pv-panel-v29 .fst em{font-style:normal;font-size:10.5px;color:var(--lima-ink);font-weight:500;margin-left:4px}
+#pv-panel-v29 .fst em{font-style:normal;font-size:11px;color:var(--lima-ink);font-weight:500;margin-left:4px}
 #pv-panel-v29 .ftabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);flex:none;padding:0 4px}
 #pv-panel-v29 .ftabs button{border:0;background:none;padding:10px 9px 11px;font-size:12.5px;color:var(--ink2);cursor:pointer;position:relative;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 #pv-panel-v29 .ftabs button:hover{color:var(--ink)}
 #pv-panel-v29 .ftabs button.on{color:var(--ink);font-weight:500}
 #pv-panel-v29 .ftabs button.on::after{content:"";position:absolute;left:8px;right:8px;bottom:-1px;height:2px;border-radius:2px;background:var(--ink)}
-#pv-panel-v29 .ftabs .n{font-size:10.5px;background:var(--line);color:var(--ink2);border-radius:999px;padding:0 6px;font-weight:400}
+#pv-panel-v29 .ftabs .n{font-size:11px;background:var(--line);color:var(--ink2);border-radius:999px;padding:0 6px;font-weight:400}
 #pv-panel-v29 .ftabs .n.hot{background:var(--azaf);color:#141519}
 #pv-panel-v29 .fbody{flex:1;min-height:0;display:grid;grid-auto-rows:minmax(0,1fr);gap:16px;animation:fin .25s ease}
 @keyframes fin{from{opacity:0;transform:translateY(4px)}}
@@ -330,7 +330,7 @@
 #pv-panel-v29 .wk7 div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
 #pv-panel-v29 .wk7 i{display:block;width:100%;border-radius:6px;background:var(--lima)}
 #pv-panel-v29 .wk7 i.lo{background:var(--azaf)}
-#pv-panel-v29 .wk7 small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .wk7 small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .dk{background:var(--dark);color:var(--dark-ink);border-radius:16px;padding:14px 15px;display:flex;flex-direction:column;gap:9px}
 #pv-panel-v29 .dk h3{margin:0;font-size:12.5px;font-weight:500;display:flex;align-items:center;gap:8px}
 #pv-panel-v29 .dk h3 span{color:var(--dark-ink2);font-weight:400}
@@ -362,7 +362,7 @@
 #pv-panel-v29 .bars .tr i.o{background:var(--azaf)}
 #pv-panel-v29 .tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:0 18px 15px}
 #pv-panel-v29 .tiles div{background:var(--app);border:1px solid var(--line);border-radius:11px;padding:9px 10px;display:flex;flex-direction:column;gap:3px}
-#pv-panel-v29 .tiles small{font-size:10.5px;color:var(--ink3);display:flex;align-items:center;gap:4px}
+#pv-panel-v29 .tiles small{font-size:11px;color:var(--ink3);display:flex;align-items:center;gap:4px}
 #pv-panel-v29 .tiles small svg{width:12px;height:12px}
 #pv-panel-v29 .tiles b{font-size:15.5px;font-weight:300}
 #pv-panel-v29 .rec{display:flex;align-items:center;gap:16px}
@@ -387,7 +387,7 @@
 #pv-panel-v29 .meal .k{font-size:12px;color:var(--ink2)}
 #pv-panel-v29 .ask{display:flex;align-items:center;gap:12px;background:var(--azaf-t);border-radius:11px;padding:9px 11px;font-size:12px;margin:0 15px 13px}
 #pv-panel-v29 .ask .sp{flex:1}
-#pv-panel-v29 .grid28{display:grid;grid-template-columns:34px repeat(4,1fr);gap:4px 6px;padding:0 15px 13px;font-size:10.5px;color:var(--ink3);align-items:center}
+#pv-panel-v29 .grid28{display:grid;grid-template-columns:34px repeat(4,1fr);gap:4px 6px;padding:0 15px 13px;font-size:11px;color:var(--ink3);align-items:center}
 #pv-panel-v29 .grid28 i{display:block;height:14px;border-radius:4px;background:var(--lima)}
 #pv-panel-v29 .grid28 i.no{background:var(--line)}
 #pv-panel-v29 .grid28 i.wa{background:var(--azaf)}
@@ -399,7 +399,7 @@
 #pv-panel-v29 .chat{display:flex;flex-direction:column;gap:9px;padding:14px 18px;overflow:auto;flex:1;min-height:0}
 #pv-panel-v29 .day{align-self:center;font-size:11px;color:var(--ink3);background:var(--app);border-radius:999px;padding:2px 9px}
 #pv-panel-v29 .bub{max-width:62%;padding:8px 11px;border-radius:14px;font-size:12.5px;line-height:1.45}
-#pv-panel-v29 .bub small{display:block;font-size:10.5px;color:var(--ink3);margin-top:3px}
+#pv-panel-v29 .bub small{display:block;font-size:11px;color:var(--ink3);margin-top:3px}
 #pv-panel-v29 .bub.in{background:var(--app);border:1px solid var(--line);align-self:flex-start;border-bottom-left-radius:5px}
 #pv-panel-v29 .bub.out{background:var(--lima-t);align-self:flex-end;border-bottom-right-radius:5px}
 #pv-panel-v29 .bub.file{display:flex;gap:9px;align-items:center}
@@ -446,7 +446,7 @@
 #pv-panel-v29 .gauge{width:58px;height:32px}
 #pv-panel-v29 .gauges small{font-size:11px;color:var(--ink3);margin-top:2px}
 #pv-panel-v29 .gauges b{font-size:16.5px;font-weight:400;letter-spacing:-.02em}
-#pv-panel-v29 .gauges em{font-style:normal;font-size:10.5px;color:var(--lima-ink)}
+#pv-panel-v29 .gauges em{font-style:normal;font-size:11px;color:var(--lima-ink)}
 #pv-panel-v29 tr.sum td{background:var(--app);font-weight:400}
 #pv-panel-v29 tr.sum b{font-weight:500}
 #pv-panel-v29 .kerr{display:flex;height:12px;border-radius:7px;overflow:hidden;gap:2px}
@@ -464,7 +464,7 @@
 #pv-panel-v29 .mood{display:grid;grid-template-columns:repeat(14,1fr);gap:5px;height:120px;padding:0 18px 15px}
 #pv-panel-v29 .mood div{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px}
 #pv-panel-v29 .mood i{display:block;width:100%;border-radius:5px}
-#pv-panel-v29 .mood small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .mood small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .tiles div small+b+small{color:var(--ink3)}
 #pv-panel-v29 .soap{display:flex;flex-direction:column;padding:0 15px;overflow:auto}
 #pv-panel-v29 .soap>div{display:grid;grid-template-columns:30px 1fr;gap:16px;padding:12px 0;border-top:1px solid var(--line)}
@@ -502,7 +502,7 @@
 #pv-panel-v29 .li.pick+.li.pick{box-shadow:0 -1px 0 var(--line)}
 #pv-panel-v29 .li.pick:hover{background:var(--lima-tt)}
 #pv-panel-v29 .li.pick.sel{background:var(--lima-t);box-shadow:none}#pv-panel-v29 .li.pick.sel+.li.pick{box-shadow:none}
-#pv-panel-v29 .li .kind{font-size:10.5px;color:var(--ink3);white-space:nowrap}
+#pv-panel-v29 .li .kind{font-size:11px;color:var(--ink3);white-space:nowrap}
 #pv-panel-v29 .next .hd .k{display:inline-flex;align-items:center;gap:6px}
 #pv-panel-v29 .next .lst2{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--dark-ink2)}
 #pv-panel-v29 .next .lst2 div{display:flex;justify-content:space-between;gap:12px;border-top:1px solid rgba(127,127,127,.18);padding-top:6px}
@@ -535,7 +535,7 @@
 #pv-panel-v29 .dv-a .big{display:flex;align-items:baseline;gap:6px}#pv-panel-v29 .dv-a .big b{font-size:30px;font-weight:300;letter-spacing:-.04em;line-height:1}#pv-panel-v29 .dv-a .big span{font-size:12px;color:#3C5210}
 #pv-panel-v29 .dv-a .dts.one{grid-template-columns:1fr}#pv-panel-v29 .dv-a .dts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 #pv-panel-v29 .dv-a .dt{background:rgba(255,255,255,.55);border-radius:11px;padding:7px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap}
-#pv-panel-v29 .dv-a .dt small{font-size:11px;color:#3C5210}#pv-panel-v29 .dv-a .dt b{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dv-a .dt>span{min-width:0;overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dv-a .dt small{flex:none}#pv-panel-v29 .dv-a .dt em{font-style:normal;font-size:10.5px;color:#3C5210;margin-left:5px}
+#pv-panel-v29 .dv-a .dt small{font-size:11px;color:#3C5210}#pv-panel-v29 .dv-a .dt b{font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dv-a .dt>span{min-width:0;overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dv-a .dt small{flex:none}#pv-panel-v29 .dv-a .dt em{font-style:normal;font-size:11px;color:#3C5210;margin-left:5px}
 #pv-panel-v29 .dv-a .nt{background:rgba(255,255,255,.4);border-radius:12px;padding:0;border:solid transparent;border-width:9px 11px}
 #pv-panel-v29 .dv-a .acts button{background:rgba(255,255,255,.6);color:#141519}#pv-panel-v29 .dv-a .acts button.go{background:#141519;color:#D6EBA3}
 /* B · Azafrán */
@@ -546,7 +546,7 @@
 #pv-panel-v29 .dv-b .ring svg{width:92px;height:92px;flex:none;transform:rotate(-90deg)}
 #pv-panel-v29 .dv-b .ring circle{fill:none;stroke-width:9}#pv-panel-v29 .dv-b .ring .bg{stroke:#F6E3B8}#pv-panel-v29 .dv-b .ring .fg{stroke:#F2A93B;stroke-linecap:round}
 #pv-panel-v29 .dv-b .ring .rv{position:absolute;width:92px;text-align:center}
-#pv-panel-v29 .dv-b .ring .rv b{display:block;font-size:21px;font-weight:400;letter-spacing:-.03em}#pv-panel-v29 .dv-b .ring .rv small{font-size:10px;line-height:1.1;display:block;padding:0 14px;color:#8A6A2E}
+#pv-panel-v29 .dv-b .ring .rv b{display:block;font-size:21px;font-weight:400;letter-spacing:-.03em}#pv-panel-v29 .dv-b .ring .rv small{font-size:11px;line-height:1.1;display:block;padding:0 14px;color:#8A6A2E}
 #pv-panel-v29 .dv-b .rows{display:flex;flex-direction:column;flex:1;min-width:0}
 #pv-panel-v29 .dv-b .rows div{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;padding:5px 0;border-bottom:1px dashed #EED6A2;font-size:12px}
 #pv-panel-v29 .dv-b .rows div:last-child{border-bottom:0}#pv-panel-v29 .dv-b .rows span{color:#8A6A2E;flex:none}#pv-panel-v29 .dv-b .rows b{overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dv-b .rows b{font-weight:500}
@@ -594,12 +594,12 @@
 #pv-panel-v29 .dv-d::before{content:"";position:absolute;inset:0 0 auto 0;height:5px;background:linear-gradient(90deg,#D6EBA3,#FFCB65)}
 #pv-panel-v29 .dv-d .hd{color:var(--ink3)}#pv-panel-v29 .dv-d .chipx{background:var(--lima-t);color:var(--lima-ink)}#pv-panel-v29 .dv-d .who small{color:var(--ink3)}
 #pv-panel-v29 .dv-d .pl{display:flex;flex-direction:column;gap:7px}
-#pv-panel-v29 .dv-d .pl h5,#pv-panel-v29 .dv-e h5{margin:0;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+#pv-panel-v29 .dv-d .pl h5,#pv-panel-v29 .dv-e h5{margin:0;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
 #pv-panel-v29 .dv-d .pc{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 11px}
 #pv-panel-v29 .dv-d .pc i{width:28px;height:28px;border-radius:9px;display:grid;place-items:center;flex:none;font-style:normal}
 #pv-panel-v29 .dv-d .pc b{font-size:13px;font-weight:500;display:block}#pv-panel-v29 .dv-d .pc small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .dv-d .pc.pa i{background:var(--azaf-t);color:var(--azaf-ink)}#pv-panel-v29 .dv-d .pc.pr i{background:var(--rojo-t);color:var(--rojo-ink)}#pv-panel-v29 .dv-d .pc.pb i{background:var(--azul-t);color:var(--azul-ink)}
-#pv-panel-v29 .dv-d .mini{display:flex;gap:8px}#pv-panel-v29 .dv-d .mini div{flex:1;background:var(--app);border-radius:10px;padding:7px 10px}#pv-panel-v29 .dv-d .mini small{font-size:10.5px;color:var(--ink3);display:block}#pv-panel-v29 .dv-d .mini b{font-size:13.5px;font-weight:500}
+#pv-panel-v29 .dv-d .mini{display:flex;gap:8px}#pv-panel-v29 .dv-d .mini div{flex:1;background:var(--app);border-radius:10px;padding:7px 10px}#pv-panel-v29 .dv-d .mini small{font-size:11px;color:var(--ink3);display:block}#pv-panel-v29 .dv-d .mini b{font-size:13.5px;font-weight:500}
 #pv-panel-v29 .dv-d .acts button{background:var(--app);color:var(--ink);border-color:var(--line)}#pv-panel-v29 .dv-d .acts button.go{background:var(--ink);color:var(--app);border-color:var(--ink)}
 /* E · Azul calmo en dos columnas */
 #pv-panel-v29 .dv-e{background:linear-gradient(170deg,#EEF3FD,#DCE6FA);color:#16244A;border:1px solid #CBD8F3}
@@ -621,7 +621,7 @@
 #pv-panel-v29 .dv-f .chk2{display:flex;flex-direction:column;gap:6px;font-size:12px;color:#C9CCD2}
 #pv-panel-v29 .dv-f .chk2 div{display:flex;gap:8px;align-items:flex-start}#pv-panel-v29 .dv-f .chk2 i{color:#D6EBA3;font-style:normal;flex:none}
 #pv-panel-v29 .dv-f .strip{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #26272D;border-bottom:1px solid #26272D}
-#pv-panel-v29 .dv-f .strip div{padding:8px 0}#pv-panel-v29 .dv-f .strip small{font-size:10.5px;color:#9EA1A8;display:block}#pv-panel-v29 .dv-f .strip b{font-size:15.5px;font-weight:300}
+#pv-panel-v29 .dv-f .strip div{padding:8px 0}#pv-panel-v29 .dv-f .strip small{font-size:11px;color:#9EA1A8;display:block}#pv-panel-v29 .dv-f .strip b{font-size:15.5px;font-weight:300}
 #pv-panel-v29 .dv-f .acts button{background:#1C1D22;border-color:#2E3036;color:#F4F5F0}#pv-panel-v29 .dv-f .acts button.go{background:#D6EBA3;border-color:#D6EBA3;color:#141519}
 
 /* Menú lateral: letra más grande, aire entre opciones, línea curva hacia cada submenú y movimiento suave */
@@ -654,7 +654,7 @@
 #pv-panel-v29 .si:hover{background:var(--line);color:var(--ink)}
 #pv-panel-v29 .si.on{color:var(--ink);font-weight:500;background:var(--lima-tt)}
 #pv-panel-v29 .si.on::before{border-color:var(--lima-ink)}
-#pv-panel-v29 .si b{margin-left:auto;min-width:22px;height:20px;border-radius:10px;background:var(--line);color:var(--ink2);font-size:10.5px;font-weight:500;display:grid;place-items:center;padding:0 6px}
+#pv-panel-v29 .si b{margin-left:auto;min-width:22px;height:20px;border-radius:10px;background:var(--line);color:var(--ink2);font-size:11px;font-weight:500;display:grid;place-items:center;padding:0 6px}
 #pv-panel-v29 .srch{font-size:13px}
 #pv-panel-v29 .lbl{white-space:nowrap;transition:opacity .2s ease}
 /* plegado a solo íconos */
@@ -709,7 +709,7 @@
 #pv-panel-v29 .pd-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:7px;flex:1;min-height:70px;align-items:end}
 #pv-panel-v29 .pd-bars div{display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
 #pv-panel-v29 .pd-bars i{width:100%;max-width:18px;border-radius:5px;background:var(--lima)}#pv-panel-v29 .pd-bars i.lo{background:var(--azaf)}
-#pv-panel-v29 .pd-bars small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .pd-bars small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .pd-bars div{position:relative}#pv-panel-v29 .pd-bars div::before{content:'';position:absolute;top:0;bottom:19px;width:100%;max-width:18px;border-radius:5px;background:var(--line);opacity:.55;z-index:0}#pv-panel-v29 .pd-bars i{position:relative;z-index:1}
 #pv-panel-v29 .pd-act{display:flex;flex-direction:column;gap:12px}
 #pv-panel-v29 .pd-next{background:var(--dark);color:var(--dark-ink);border-radius:12px;padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:baseline}
@@ -771,7 +771,7 @@
 #pv-panel-v29 .pd-bars .today i{background:var(--hatch)!important;box-shadow:none}
 #pv-panel-v29 .pd-bars .today i.lo{background:var(--hatch-a)!important}
 #pv-panel-v29 .pd-bars div::before{display:none}
-#pv-panel-v29 .pd-bars u{text-decoration:none;font-size:10.5px;font-weight:500;color:var(--ink)}
+#pv-panel-v29 .pd-bars u{text-decoration:none;font-size:11px;font-weight:500;color:var(--ink)}
 
 /* Tarjeta G (versión 2): datos como en las otras tarjetas sobre el degradé, con manzana, hoja y ramita. */
 #pv-panel-v29 .dv-g{padding:16px 18px;gap:10px}
@@ -791,7 +791,7 @@
 #pv-panel-v29 .dv-g .gdts{display:grid;grid-template-columns:1fr 1fr;gap:8px}#pv-panel-v29 .dv-g .gdts.one{grid-template-columns:1fr}
 #pv-panel-v29 .dv-g .gdt{background:rgba(12,18,6,.34);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:11px;padding:7px 11px;display:flex;justify-content:space-between;align-items:center;gap:8px;white-space:nowrap;min-width:0}
 #pv-panel-v29 .dv-g .gdt small{font-size:11px;color:rgba(244,248,234,.7);flex:none}#pv-panel-v29 .dv-g .gdt>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-#pv-panel-v29 .dv-g .gdt b{font-size:14px;font-weight:500;color:#fff}#pv-panel-v29 .dv-g .gdt em{font-style:normal;font-size:10.5px;color:#DDEBB8;margin-left:5px}
+#pv-panel-v29 .dv-g .gdt b{font-size:14px;font-weight:500;color:#fff}#pv-panel-v29 .dv-g .gdt em{font-style:normal;font-size:11px;color:#DDEBB8;margin-left:5px}
 #pv-panel-v29 .dv-g .gnt{background:rgba(12,18,6,.34);border:solid transparent;border-width:8px 11px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:12px;padding:0;font-size:12px;line-height:1.45;color:rgba(244,248,234,.85);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 #pv-panel-v29 .dv-g .gnt b{color:#fff;font-weight:500}
 #pv-panel-v29 .dv-g .gacts button{flex:1;justify-content:center;background:rgba(12,18,6,.3);white-space:nowrap}
@@ -823,13 +823,13 @@
 #pv-panel-v29 .dvx .xbig{flex:none;text-align:right}#pv-panel-v29 .dvx .xbig b{display:block;font-size:32px;font-weight:300;letter-spacing:-.045em;line-height:1}#pv-panel-v29 .dvx .xbig small{font-size:11px;color:var(--fg2)}
 #pv-panel-v29 .dvx .xrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--gline);border-bottom:1px solid var(--gline)}
 #pv-panel-v29 .dvx .xrow>div{padding:10px 0 10px 11px;border-left:1px solid var(--gline);min-width:0}#pv-panel-v29 .dvx .xrow>div:first-child{border-left:0;padding-left:0}
-#pv-panel-v29 .dvx small.l{display:block;font-size:10.5px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
+#pv-panel-v29 .dvx small.l{display:block;font-size:11px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px}
 #pv-panel-v29 .dvx .v{display:block;font-size:16px;font-weight:500;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-#pv-panel-v29 .dvx .e{display:block;font-style:normal;font-size:10.5px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+#pv-panel-v29 .dvx .e{display:block;font-style:normal;font-size:11px;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
 #pv-panel-v29 .dvx .xgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
 #pv-panel-v29 .dvx .xgrid>div{padding:8px 0;border-top:1px solid var(--gline);min-width:0}
 #pv-panel-v29 .dvx .xkv{display:flex;flex-direction:column}#pv-panel-v29 .dvx .xkv>div{display:flex;align-items:baseline;gap:8px;padding:6px 0;border-bottom:1px dashed var(--gline);font-size:12.5px;min-width:0}
-#pv-panel-v29 .dvx .xkv span{color:var(--fg2);flex:none}#pv-panel-v29 .dvx .xkv i{flex:1;min-width:6px}#pv-panel-v29 .dvx .xkv b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}#pv-panel-v29 .dvx .xkv em{font-style:normal;font-size:10.5px;color:var(--fg2);white-space:nowrap}
+#pv-panel-v29 .dvx .xkv span{color:var(--fg2);flex:none}#pv-panel-v29 .dvx .xkv i{flex:1;min-width:6px}#pv-panel-v29 .dvx .xkv b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:0 1 auto}#pv-panel-v29 .dvx .xkv em{font-style:normal;font-size:11px;color:var(--fg2);white-space:nowrap}
 #pv-panel-v29 .dvx .xlist{display:flex;flex-direction:column;border-top:1px solid var(--gline)}
 #pv-panel-v29 .dvx .xlist>div{display:grid;grid-template-columns:96px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid var(--gline);font-size:12px;min-width:0}
 #pv-panel-v29 .dvx .xlist span{color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}#pv-panel-v29 .dvx .xlist b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -845,7 +845,7 @@
 #pv-panel-v29 .dvx .xring .rg{position:relative;width:104px;height:104px}#pv-panel-v29 .dvx .xring svg{width:104px;height:104px;transform:rotate(-90deg)}
 #pv-panel-v29 .dvx .xring circle{fill:none}#pv-panel-v29 .dvx .xring .bg{stroke:var(--gline);stroke-width:9}#pv-panel-v29 .dvx .xring .fg{stroke-width:9}#pv-panel-v29 .dvx .xring .edge{stroke:var(--acc);stroke-width:1.4;stroke-linecap:round}
 #pv-panel-v29 .dvx .xring .hz{fill:var(--acc)}
-#pv-panel-v29 .dvx .xring .rv{position:absolute;inset:0;display:grid;place-content:center;text-align:center}#pv-panel-v29 .dvx .xring .rv b{font-size:24px;font-weight:300;letter-spacing:-.04em;line-height:1}#pv-panel-v29 .dvx .xring .rv small{font-size:10px;color:var(--fg2);max-width:70px}
+#pv-panel-v29 .dvx .xring .rv{position:absolute;inset:0;display:grid;place-content:center;text-align:center}#pv-panel-v29 .dvx .xring .rv b{font-size:24px;font-weight:300;letter-spacing:-.04em;line-height:1}#pv-panel-v29 .dvx .xring .rv small{font-size:11px;color:var(--fg2);max-width:70px}
 #pv-panel-v29 .dvx .xhero{display:flex;align-items:flex-end;gap:12px}#pv-panel-v29 .dvx .xhero b{font-size:48px;font-weight:300;letter-spacing:-.05em;line-height:.9}
 #pv-panel-v29 .dvx .xhero span{font-size:11.5px;color:var(--fg2);line-height:1.35;padding-bottom:4px}
 #pv-panel-v29 .dvx .xname{font-size:13px;color:var(--fg2)}#pv-panel-v29 .dvx .xname b{color:var(--fg);font-weight:500}
@@ -863,8 +863,8 @@
 #pv-panel-v29 .pw-g .ln{fill:none;stroke:var(--ch);stroke-width:2;stroke-linecap:round}
 #pv-panel-v29 .pw-g .dt{fill:var(--card);stroke:var(--ch);stroke-width:1.2}
 #pv-panel-v29 .pw-g .now{fill:var(--ch);stroke:var(--card);stroke-width:2.5}
-#pv-panel-v29 .pw-g .nt{font-size:9.5px;font-weight:600;fill:var(--ink)}
-#pv-panel-v29 .pw-g .goal{stroke:var(--ink3);stroke-width:1;stroke-dasharray:3 3;opacity:.7}#pv-panel-v29 .pw-g .gt{font-size:9px;fill:var(--ink3)}
+#pv-panel-v29 .pw-g .nt{font-size:11px;font-weight:600;fill:var(--ink)}
+#pv-panel-v29 .pw-g .goal{stroke:var(--ink3);stroke-width:1;stroke-dasharray:3 3;opacity:.7}#pv-panel-v29 .pw-g .gt{font-size:11px;fill:var(--ink3)}
 #pv-panel-v29 .pg{position:relative;width:170px;align-self:center;margin:auto 0 0}
 #pv-panel-v29 .pg-g{width:100%;height:auto;display:block;overflow:visible}
 #pv-panel-v29 .pg-g .tr{fill:none;stroke:var(--line);stroke-width:11;stroke-linecap:round}
@@ -881,8 +881,8 @@
 #pv-panel-v29 .pa7 i.lo{background:color-mix(in srgb,var(--ch-a) 70%,var(--card))}
 #pv-panel-v29 .pa7 .td i{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--ch)}
 #pv-panel-v29 .pa7 .td i.lo{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--ch-a)}
-#pv-panel-v29 .pa7 small{font-size:10.5px;color:var(--ink3)}#pv-panel-v29 .pa7 .td small{color:var(--ink);font-weight:600}
-#pv-panel-v29 .pa7 u{text-decoration:none;font-size:10.5px;font-weight:600;color:var(--ink)}
+#pv-panel-v29 .pa7 small{font-size:11px;color:var(--ink3)}#pv-panel-v29 .pa7 .td small{color:var(--ink);font-weight:600}
+#pv-panel-v29 .pa7 u{text-decoration:none;font-size:11px;font-weight:600;color:var(--ink)}
 #pv-panel-v29 .pa7 .avg{position:absolute;left:0;right:0;border-top:1px dashed var(--ink3);opacity:.7;z-index:0}
 #pv-panel-v29 .pa7 .avg em{display:none}
 
@@ -906,13 +906,13 @@
 #pv-panel-v29 .kcols{display:flex;gap:4px;align-items:flex-end;height:34px;top:34px!important}
 #pv-panel-v29 .kcols span{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:2px;height:100%}
 #pv-panel-v29 .kcols i{width:9px;border-radius:4px;background:var(--ch-t);display:block;flex:none;max-height:26px}#pv-panel-v29 .kcols span:last-child i{background:var(--ch)}
-#pv-panel-v29 .kcols small{font-size:8px;color:var(--ink3);line-height:1}
+#pv-panel-v29 .kcols small{font-size:11px;color:var(--ink3);line-height:1}
 #pv-panel-v29 .kring{display:flex;flex-direction:row;align-items:center;gap:6px}
 #pv-panel-v29 .kring svg{width:34px;height:34px;transform:rotate(-90deg)}
 #pv-panel-v29 .kring circle{fill:none;stroke-width:5}#pv-panel-v29 .kring .bg{stroke:var(--line)}#pv-panel-v29 .kring .fg{stroke:var(--ch);stroke-linecap:round}
-#pv-panel-v29 .kring span{font-size:8.5px;color:var(--ink3)}
+#pv-panel-v29 .kring span{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .kweek{width:84px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;top:36px!important}
-#pv-panel-v29 .kweek small{font-size:9.5px;color:var(--ink3);white-space:nowrap}
+#pv-panel-v29 .kweek small{font-size:11px;color:var(--ink3);white-space:nowrap}
 #pv-panel-v29 .kweek div{width:100%;height:9px;border-radius:5px;background:var(--line);display:flex;gap:2px;overflow:hidden}
 #pv-panel-v29 .kweek i{display:block;height:100%;background:var(--ch)}#pv-panel-v29 .kweek i:nth-child(1){opacity:.45}#pv-panel-v29 .kweek i:nth-child(2){opacity:.6}#pv-panel-v29 .kweek i:nth-child(3){opacity:.8}
 #pv-panel-v29 .kweek>span{display:none}
@@ -920,7 +920,7 @@
 #pv-panel-v29 .klol span{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative;width:12px}
 #pv-panel-v29 .klol i{flex:none;width:2px;background:color-mix(in srgb,var(--ch-a) 60%,var(--card));display:block;max-height:26px}
 #pv-panel-v29 .klol b{width:8px;height:8px;border-radius:50%;background:var(--ch-a);order:0;flex:none}#pv-panel-v29 .klol i{order:1}#pv-panel-v29 .klol small{order:2}
-#pv-panel-v29 .klol small{font-size:8.5px;color:var(--ink3);line-height:1;margin-top:2px}
+#pv-panel-v29 .klol small{font-size:11px;color:var(--ink3);line-height:1;margin-top:2px}
 #pv-panel-v29:focus-visible,#pv-panel-v29 :focus-visible{outline:2px solid var(--lima-ink);outline-offset:2px}
 #pv-panel-v29 .legend{max-width:1440px;margin:14px auto 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;font-size:13.5px;color:var(--ink2);line-height:1.5}
 #pv-panel-v29 .legend div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
@@ -942,7 +942,7 @@
 #pv-panel-v29 .fxsplit>.pg{margin:0;flex:none}
 #pv-panel-v29 .fxsplit>.fxkv,#pv-panel-v29 .fxsplit>.fxmini,#pv-panel-v29 .fxsplit>.fxgrid28{flex:1;min-width:0}
 #pv-panel-v29 .fxc{margin-top:0}
-#pv-panel-v29 .pw-g .xl{font-size:9px;fill:var(--ink3)}
+#pv-panel-v29 .pw-g .xl{font-size:11px;fill:var(--ink3)}
 #pv-panel-v29 .fxc.mini .ln{stroke-width:1.6;vector-effect:non-scaling-stroke}
 #pv-panel-v29 .fxc.wa,#pv-panel-v29 .fxg.wa{--ch:var(--rojo-ink)}
 #pv-panel-v29 .fxc.wa .s1{stop-opacity:.22}
@@ -1134,7 +1134,7 @@
 #pv-panel-v29 .fxmacros b{font-weight:500}#pv-panel-v29 .fxmacros small{font-size:11.5px;color:var(--ink3)}
 
 /* Registro */
-#pv-panel-v29 .fxgrid28{display:grid;grid-template-columns:16px repeat(4,1fr);gap:4px;align-items:center;font-size:10px;color:var(--ink3);text-align:center}
+#pv-panel-v29 .fxgrid28{display:grid;grid-template-columns:16px repeat(4,1fr);gap:4px;align-items:center;font-size:11px;color:var(--ink3);text-align:center}
 #pv-panel-v29 .fxgrid28 i{height:12px;border-radius:4px;background:var(--ch)}
 #pv-panel-v29 .fxgrid28 i.no{background:var(--line)}#pv-panel-v29 .fxgrid28 i.wa{background:var(--ch-a)}
 
@@ -1356,9 +1356,9 @@
 #pv-panel-v29 .mcv.un .mr b{font-weight:600}
 #pv-panel-v29 .mr small{flex:1;min-width:0;font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29 .mcv.un .mr small{color:var(--ink)}
-#pv-panel-v29 .mr time{margin-left:auto;font-size:10.5px;color:var(--ink3);flex:none}
+#pv-panel-v29 .mr time{margin-left:auto;font-size:11px;color:var(--ink3);flex:none}
 #pv-panel-v29 .mcv.un .mr time{color:var(--lima-ink);font-weight:500}
-#pv-panel-v29 .mr em{font-style:normal;font-size:10.5px;min-width:18px;height:18px;border-radius:9px;background:var(--dark);color:var(--dark-ink);display:grid;place-items:center;padding:0 5px;flex:none}
+#pv-panel-v29 .mr em{font-style:normal;font-size:11px;min-width:18px;height:18px;border-radius:9px;background:var(--dark);color:var(--dark-ink);display:grid;place-items:center;padding:0 5px;flex:none}
 #pv-panel-v29 .mstar{width:6px;height:6px;border-radius:50%;background:var(--azaf);flex:none}
 #pv-panel-v29 .mcv.arch{cursor:default}#pv-panel-v29 .mcv.arch:hover{background:none}
 #pv-panel-v29 .mempty{margin:18px 14px;font-size:12px;color:var(--ink3)}
@@ -1409,7 +1409,7 @@
 #pv-panel-v29 .mrec{font-size:12.5px;color:var(--rojo-ink);display:flex;gap:6px;align-items:center}
 #pv-panel-v29 .mrec::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--rojo-ink)}
 #pv-panel-v29 .mrec[hidden]{display:none}
-#pv-panel-v29 .mnote{margin:0;padding:0 16px 10px 60px;font-size:10.5px;color:var(--ink3);flex:none}
+#pv-panel-v29 .mnote{margin:0;padding:0 16px 10px 60px;font-size:11px;color:var(--ink3);flex:none}
 #pv-panel-v29 .mctx{gap:12px;flex:none}
 #pv-panel-v29 .mwho{display:flex;flex-direction:column;align-items:center;text-align:center;gap:3px;padding:4px 0 2px}
 #pv-panel-v29 .mwho .av{margin-bottom:5px}
@@ -1420,7 +1420,7 @@
 #pv-panel-v29 .mnum>div+div{border-left:1px solid var(--line)}
 #pv-panel-v29 .mnum small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .mnum b{font-size:18px;font-weight:300;letter-spacing:-.02em}
-#pv-panel-v29 .mnum em{font-style:normal;font-size:10.5px;color:var(--lima-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pv-panel-v29 .mnum em{font-style:normal;font-size:11px;color:var(--lima-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29 .mnum em.bad{color:var(--rojo-ink)}
 #pv-panel-v29 .macts{display:flex;gap:6px}
 #pv-panel-v29 .macts .sbtn{flex:1}
@@ -1442,7 +1442,7 @@
 #pv-panel-v29 .mnot>span{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
 #pv-panel-v29 .mnot b{font-size:12px;font-weight:500}
 #pv-panel-v29 .mnot small{font-size:12px;line-height:1.45;color:var(--ink2)}
-#pv-panel-v29 .mnot time{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .mnot time{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .mnl{font-style:normal;width:28px;height:28px;border-radius:8px;background:var(--lima);color:#141519;display:grid;place-items:center;font-size:13px;font-weight:600;flex:none}
 #pv-panel-v29 .mbig img{width:100%;height:auto;aspect-ratio:440/248;border-radius:14px;object-fit:cover;display:block}
 #pv-panel-v29 .ahint{margin:0;font-size:12px;color:var(--ink3)}
@@ -1514,7 +1514,7 @@
 #pv-panel-v29 .pc{display:flex;flex-direction:column;justify-content:space-between;gap:4px;text-align:left;font:inherit;color:inherit;background:var(--app);border:1px solid transparent;border-radius:10px;padding:8px 9px;cursor:pointer;min-height:0;overflow:hidden}
 #pv-panel-v29 .pc:hover{border-color:var(--line2)}
 #pv-panel-v29 .pc b{font-size:11.5px;font-weight:400;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-#pv-panel-v29 .pc em{font-style:normal;font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .pc em{font-style:normal;font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .pc.sel{background:var(--card);border-color:var(--ink)}
 #pv-panel-v29 .pc.swp{background:var(--azaf-t)}
 #pv-panel-v29 .pc.swp em::after{content:" · cambiada";color:var(--azaf-ink)}
@@ -1587,7 +1587,7 @@
 #pv-panel-v29 .pimeta small{font-size:11px;color:var(--ink3)}#pv-panel-v29 .pimeta b{font-size:12.5px;font-weight:500}
 #pv-panel-v29 .pind3 .fxcols{height:96px}
 #pv-panel-v29 .pdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-#pv-panel-v29 .pdays span{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .pdays span{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .pdays i{width:100%;height:30px;border-radius:7px;background:var(--app);border:1px solid var(--line)}
 #pv-panel-v29 .pdays .on i{background:var(--lima);border-color:transparent}
 #pv-panel-v29 .pind{flex:none}
@@ -1698,24 +1698,24 @@
 #pv-panel-v29 .pubhero{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;padding:12px 8px 12px;border-radius:18px;background:linear-gradient(160deg,#E6F3C6,#FFEDC6)}
 #pv-panel-v29 .pubhero .av{width:46px;height:46px;font-size:14px;background:#FFCB65;margin-bottom:4px;box-shadow:0 0 0 3px #fff}
 #pv-panel-v29 .pubhero b{font-size:13.5px;font-weight:600}
-#pv-panel-v29 .pubhero small{font-size:10.5px;color:#43464D}
+#pv-panel-v29 .pubhero small{font-size:11px;color:#43464D}
 #pv-panel-v29 .pubrt{display:inline-flex;align-items:center;gap:5px;margin-top:3px}
-#pv-panel-v29 .pubrt em{font-style:normal;font-size:10px;color:#43464D}
+#pv-panel-v29 .pubrt em{font-style:normal;font-size:11px;color:#43464D}
 #pv-panel-v29 .pubph .pubst i{color:#CFD2CA}#pv-panel-v29 .pubph .pubst i.on{color:#E0A93C}
 #pv-panel-v29 .pubtg{justify-content:center}
-#pv-panel-v29 .pubtg span{font-size:10px;padding:2px 8px;border-radius:999px;background:#F3F9E2;color:#3F5A0A}
+#pv-panel-v29 .pubtg span{font-size:11px;padding:2px 8px;border-radius:999px;background:#F3F9E2;color:#3F5A0A}
 #pv-panel-v29 .pubsec{display:flex;flex-direction:column;gap:5px}
-#pv-panel-v29 .pubsec h5{margin:0;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#71747C}
+#pv-panel-v29 .pubsec h5{margin:0;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#71747C}
 #pv-panel-v29 .pubsvc{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #E1E3DD;border-radius:11px;background:#fff}
 #pv-panel-v29 .pubsvc span{flex:1;min-width:0;display:flex;flex-direction:column}
 #pv-panel-v29 .pubsvc b{font-size:11.5px;font-weight:500}
-#pv-panel-v29 .pubsvc small{font-size:9.5px;color:#71747C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#pv-panel-v29 .pubsvc small{font-size:11px;color:#71747C;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29 .pubsvc em{font-style:normal;font-size:11.5px;font-weight:500}
 #pv-panel-v29 .pubsl{display:flex;gap:5px;flex-wrap:wrap}
-#pv-panel-v29 .pubsl span{font-size:10px;padding:4px 7px;border-radius:8px;border:1px solid #CFD2CA;background:#fff}
-#pv-panel-v29 .pubos{font-size:10.5px;color:#43464D}
+#pv-panel-v29 .pubsl span{font-size:11px;padding:4px 7px;border-radius:8px;border:1px solid #CFD2CA;background:#fff}
+#pv-panel-v29 .pubos{font-size:11px;color:#43464D}
 #pv-panel-v29 .pubq{margin:0;font-size:11px;line-height:1.45;color:#43464D}
-#pv-panel-v29 .pubq small{display:block;font-size:10px;color:#71747C;margin-top:2px}
+#pv-panel-v29 .pubq small{display:block;font-size:11px;color:#71747C;margin-top:2px}
 #pv-panel-v29 .pubcta{margin:8px 12px 12px;border-radius:12px;background:#141519;color:#D6EBA3;text-align:center;font-size:12px;font-weight:500;padding:10px 0;flex:none}
 #pv-panel-v29 .pubbig{display:flex;justify-content:center;height:640px}
 #pv-panel-v29 .pubbig .pubph{width:300px}
@@ -1812,7 +1812,7 @@
 #pv-panel-v29 .eqlv.l0{background:var(--lima-t);color:var(--lima-ink)}#pv-panel-v29 .eqlv.l1{background:var(--azul-t);color:var(--azul-ink)}#pv-panel-v29 .eqlv.l2{background:var(--line);color:var(--ink3)}
 #pv-panel-v29 .eqm{width:100%;border-collapse:collapse;font-size:12.5px}
 #pv-panel-v29 .eqm th{font-weight:400;text-align:left;padding:6px 8px 10px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:0;z-index:1}
-#pv-panel-v29 .eqm th small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .eqm th small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .eqm td{padding:5px 8px;border-bottom:1px solid var(--line)}
 #pv-panel-v29 .eqm td:first-child{font-weight:500;width:150px}
 #pv-panel-v29 .eqc{width:100%;border:1px solid transparent;border-radius:9px;padding:7px 8px;font:inherit;font-size:12px;cursor:pointer;transition:background .2s,border-color .2s}
@@ -1841,7 +1841,7 @@
 #pv-panel-v29 .ajplan b{font-size:18px;font-weight:500;letter-spacing:-.02em}
 #pv-panel-v29 .ajplan small{font-size:11.5px;color:var(--ink2)}
 #pv-panel-v29 .ajtps{display:flex;flex-direction:column;gap:4px}
-#pv-panel-v29 .ajtps>small{font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:6px 0 2px}
+#pv-panel-v29 .ajtps>small{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3);margin:6px 0 2px}
 #pv-panel-v29 .ajtps>small:first-child{margin-top:0}
 #pv-panel-v29 .ajtp{display:flex;align-items:center;gap:10px;width:100%;text-align:left;font:inherit;color:inherit;background:none;border:1px solid transparent;border-radius:10px;padding:8px 10px;cursor:pointer;transition:background .2s}
 #pv-panel-v29 .ajtp:hover{background:var(--app)}
@@ -1880,7 +1880,7 @@
 #pv-panel-v29 .ajav b{font-weight:500;font-size:12.5px}
 #pv-panel-v29 .ajav small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .ajch2{display:inline-flex;gap:4px}
-#pv-panel-v29 .ajch2 i{font-style:normal;font-size:10.5px;padding:2px 7px;border-radius:999px;background:var(--app);border:1px solid var(--line);color:var(--ink2)}
+#pv-panel-v29 .ajch2 i{font-style:normal;font-size:11px;padding:2px 7px;border-radius:999px;background:var(--app);border:1px solid var(--line);color:var(--ink2)}
 #pv-panel-v29 .ajmsg{display:flex;flex-direction:column;gap:6px;background:var(--app);border-radius:12px;padding:12px}
 #pv-panel-v29 .ajmsg small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .ajbub{align-self:flex-start;max-width:90%;background:var(--card);border:1px solid var(--line);border-radius:14px;border-bottom-left-radius:5px;padding:9px 12px;font-size:12.5px;line-height:1.45}
@@ -1922,7 +1922,7 @@
 #pv-panel-v29 .hcidx>button>span{flex:1;min-width:0;display:flex;flex-direction:column}
 #pv-panel-v29 .hcidx b{font-weight:500;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29 .hcidx small{font-size:11px;color:var(--ink3)}
-#pv-panel-v29 .hcidx em{font-style:normal;font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--lima-ink);background:var(--lima-t);border-radius:6px;padding:1px 5px}
+#pv-panel-v29 .hcidx em{font-style:normal;font-size:11px;font-weight:600;letter-spacing:.04em;color:var(--lima-ink);background:var(--lima-t);border-radius:6px;padding:1px 5px}
 #pv-panel-v29 .hcidx .st{width:7px;height:7px;border-radius:50%;flex:none;background:var(--lima-ink)}
 #pv-panel-v29 .hcidx .st.miss{background:var(--azaf)}#pv-panel-v29 .hcidx .st.na{background:var(--line2)}
 #pv-panel-v29 .hcidxf{margin-top:auto;padding:8px 9px 2px}
@@ -1962,7 +1962,7 @@
 #pv-panel-v29 .hcdi{display:flex;align-items:baseline;gap:10px;padding:5px 0;font-size:12.5px}
 #pv-panel-v29 .hcdi small{color:var(--ink3);font-size:11px}
 #pv-panel-v29 .hcdi.b s{color:var(--ink3)}
-#pv-panel-v29 .hctag{flex:none;font-size:10.5px;font-weight:500;border-radius:6px;padding:2px 7px;background:var(--app);border:1px solid var(--line);color:var(--ink2);white-space:nowrap}
+#pv-panel-v29 .hctag{flex:none;font-size:11px;font-weight:500;border-radius:6px;padding:2px 7px;background:var(--app);border:1px solid var(--line);color:var(--ink2);white-space:nowrap}
 #pv-panel-v29 .hcnote{display:flex;align-items:flex-start;gap:6px;padding:0}
 #pv-panel-v29 .hcnote svg{color:var(--lima-ink);flex:none;margin-top:1px}
 #pv-panel-v29 .hcsgl{display:flex;flex-direction:column;gap:8px}
@@ -1989,9 +1989,9 @@
 #pv-panel-v29 .lbch{display:flex;flex-direction:column;align-items:flex-start;gap:1px;font:inherit;color:inherit;background:none;border:0;padding:2px 6px;margin:-2px -6px;border-radius:7px;cursor:pointer;text-transform:none;letter-spacing:0}
 #pv-panel-v29 .lbch:hover{background:var(--card)}
 #pv-panel-v29 .lbch b{font-weight:500;font-size:11.5px;color:var(--ink)}
-#pv-panel-v29 .lbch small{font-size:10px;color:var(--ink3)}
+#pv-panel-v29 .lbch small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .lbt th.colsel,#pv-panel-v29 .lbt td.colsel{background:var(--lima-tt)}
-#pv-panel-v29 .lbt tr.lbg td{height:28px;font-size:10.5px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;background:var(--app);cursor:default}
+#pv-panel-v29 .lbt tr.lbg td{height:28px;font-size:11px;font-weight:500;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em;background:var(--app);cursor:default}
 #pv-panel-v29 .lbt tr.lbg:hover{background:none}
 #pv-panel-v29 .lbt tr[data-lbr] td{height:38px}
 #pv-panel-v29 .lbt tr[data-lbr].sel td{background:var(--lima-tt)}
@@ -2003,7 +2003,7 @@
 #pv-panel-v29 .lbt td.said{font-style:italic;text-decoration:underline dotted;text-underline-offset:3px}
 #pv-panel-v29 .lbchart{width:100%;height:auto;flex:none}
 #pv-panel-v29 .lbband{fill:var(--lima-tt)}
-#pv-panel-v29 .lbbt,#pv-panel-v29 .lbx,#pv-panel-v29 .lbevt,#pv-panel-v29 .lbpv{font-size:10px;fill:var(--ink3);font-family:inherit}
+#pv-panel-v29 .lbbt,#pv-panel-v29 .lbx,#pv-panel-v29 .lbevt,#pv-panel-v29 .lbpv{font-size:11px;fill:var(--ink3);font-family:inherit}
 #pv-panel-v29 .lbpv{fill:var(--ink);font-weight:500}
 #pv-panel-v29 .lbev{stroke:var(--azul-ink);stroke-dasharray:3 3;stroke-width:1}
 #pv-panel-v29 .lbevt{fill:var(--azul-ink)}
@@ -2018,7 +2018,7 @@
 #pv-panel-v29 .lbhist>div:first-child,#pv-panel-v29 .lbcmp>div:first-child{border-top:0}
 #pv-panel-v29 .lbhist time{color:var(--ink3);font-size:11.5px}
 #pv-panel-v29 .lbhist b,#pv-panel-v29 .lbcmp b{font-weight:500}
-#pv-panel-v29 .lbhist small,#pv-panel-v29 .lbcmp small{color:var(--ink3);font-size:10.5px;font-weight:400}
+#pv-panel-v29 .lbhist small,#pv-panel-v29 .lbcmp small{color:var(--ink3);font-size:11px;font-weight:400}
 #pv-panel-v29 .lbhist span{font-size:11px;color:var(--ink3);text-align:right}
 #pv-panel-v29 .lbhist .out b,#pv-panel-v29 .lbcmp .out b{color:var(--rojo-ink)}
 #pv-panel-v29 .lbcmp>div{grid-template-columns:1fr auto 104px}
@@ -2075,14 +2075,14 @@
 #pv-panel-v29 .iabar{display:flex;align-items:center;gap:14px;padding:6px 10px 8px 14px;border-top:1px solid var(--line)}
 #pv-panel-v29 .iabar .sp{flex:1}#pv-panel-v29 .iabar .lnk{gap:5px}#pv-panel-v29 .iabar .lnk.on{color:var(--rojo-ink)}
 #pv-panel-v29 .iafor{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:12px;color:var(--lima-ink);background:var(--lima-tt);border:1px solid var(--lima-t);border-radius:999px;padding:3px 10px 3px 3px;cursor:pointer;white-space:nowrap}
-#pv-panel-v29 .iafor .av{width:22px;height:22px;font-size:9.5px}#pv-panel-v29 .iafor svg{transform:rotate(90deg)}
+#pv-panel-v29 .iafor .av{width:22px;height:22px;font-size:11px}#pv-panel-v29 .iafor svg{transform:rotate(90deg)}
 #pv-panel-v29 .iaideas{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:11.5px;color:var(--ink3)}
 #pv-panel-v29 .iaideas button{font:inherit;font-size:11.5px;color:var(--ink2);background:var(--app);border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29 .iaideas button:hover{border-color:var(--line2);color:var(--ink)}
 #pv-panel-v29 .iaopts{display:grid;grid-template-columns:1fr 1fr;gap:12px 20px;padding-top:12px;border-top:1px solid var(--line)}
 #pv-panel-v29 .iaopts>div{display:flex;flex-direction:column;gap:6px;min-width:0}
 #pv-panel-v29 .iaopts>div.w{grid-column:1/-1}
-#pv-panel-v29 .iaopts h5{margin:0;font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
+#pv-panel-v29 .iaopts h5{margin:0;font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--ink3)}
 #pv-panel-v29 .iaopts h5 small{text-transform:none;letter-spacing:0;font-weight:400;margin-left:4px}
 #pv-panel-v29 .iaseg{display:inline-flex;align-self:flex-start;background:var(--app);border:1px solid var(--line);border-radius:10px;padding:2px;gap:2px;max-width:100%;overflow-x:auto;scrollbar-width:none}
 #pv-panel-v29 .iaseg button{font:inherit;font-size:11.5px;border:0;background:none;color:var(--ink2);padding:5px 10px;border-radius:8px;cursor:pointer;white-space:nowrap}
@@ -2106,11 +2106,11 @@
 #pv-panel-v29 .iactx>div{display:grid;grid-template-columns:1fr auto;gap:2px 8px;padding:8px 0;border-top:1px solid var(--line);align-items:center}
 #pv-panel-v29 .iactx>div:first-child{border-top:0}
 #pv-panel-v29 .iactx b{grid-column:1/-1;font-weight:500;font-size:12px;line-height:1.4}
-#pv-panel-v29 .iactx small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .iactx small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .iactx .lnk{grid-row:1;grid-column:2;font-size:11px}
 #pv-panel-v29 .iactx>div.off b,#pv-panel-v29 .iactx>div.off small{color:var(--ink3);text-decoration:line-through}
 #pv-panel-v29 .iactx>div.off .iasrc{opacity:.5}
-#pv-panel-v29 .iasrc{justify-self:start;grid-row:1;font-size:10px;font-weight:500;border-radius:6px;padding:1px 7px;background:var(--line);color:var(--ink2)}
+#pv-panel-v29 .iasrc{justify-self:start;grid-row:1;font-size:11px;font-weight:500;border-radius:6px;padding:1px 7px;background:var(--line);color:var(--ink2)}
 #pv-panel-v29 .iasrc.s-h{background:var(--azul-t);color:var(--azul-ink)}#pv-panel-v29 .iasrc.s-l{background:var(--rojo-t);color:var(--rojo-ink)}
 #pv-panel-v29 .iasrc.s-g{background:var(--lima-t);color:var(--lima-ink)}#pv-panel-v29 .iasrc.s-r,#pv-panel-v29 .iasrc.s-c{background:var(--azaf-t);color:var(--azaf-ink)}
 #pv-panel-v29 .iause{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}#pv-panel-v29 .iause b{font-size:18px;font-weight:300}#pv-panel-v29 .iause span{font-size:11.5px;color:var(--ink3)}
@@ -2124,7 +2124,7 @@
 #pv-panel-v29 .iactl .ok svg{color:var(--lima-ink);margin-top:2px}#pv-panel-v29 .iactl .wa svg{color:var(--azaf-ink);margin-top:2px}
 #pv-panel-v29 .iactl span{flex:1;display:flex;flex-direction:column;gap:2px}#pv-panel-v29 .iactl b{font-weight:500}#pv-panel-v29 .iactl small{font-size:11.5px;color:var(--ink3);line-height:1.4}
 #pv-panel-v29 .iaupd{display:flex;align-items:center;gap:6px;font-size:11px;background:var(--lima-tt);border-radius:8px;padding:5px 8px;margin:6px 0}
-#pv-panel-v29 .aphone em{display:block;font-style:normal;font-size:10.5px;color:var(--lima-ink);margin-top:2px}
+#pv-panel-v29 .aphone em{display:block;font-style:normal;font-size:11px;color:var(--lima-ink);margin-top:2px}
 /* asistente */
 #pv-panel-v29 .iadr{position:absolute;top:0;right:-24px;bottom:-18px;width:392px;background:var(--card);border-left:1px solid var(--line);box-shadow:-20px 0 40px rgba(20,21,25,.08);display:flex;flex-direction:column;transform:translateX(105%);transition:transform .26s cubic-bezier(.2,.7,.2,1);z-index:6;visibility:hidden}
 #pv-panel-v29 .iadr.open{transform:none;visibility:visible}
@@ -2144,11 +2144,11 @@
 #pv-panel-v29 .iaprop{margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:4px 10px 8px;display:flex;flex-direction:column}
 #pv-panel-v29 .iaprop>div:not(.iapa){display:flex;flex-direction:column;gap:1px;padding:6px 0;border-top:1px solid var(--line)}
 #pv-panel-v29 .iaprop>div:first-child{border-top:0}
-#pv-panel-v29 .iaprop small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .iaprop small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .iaprop s{font-size:12px;color:var(--rojo-ink);opacity:.8}
 #pv-panel-v29 .iaprop b{font-size:12px;font-weight:500;color:var(--lima-ink)}
 #pv-panel-v29 .iaprop b::before{content:"+ ";opacity:.7}#pv-panel-v29 .iaprop s::before{content:"− "}
-#pv-panel-v29 .iaprop em{font-style:normal;font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 .iaprop em{font-style:normal;font-size:11px;color:var(--ink3)}
 #pv-panel-v29 .iapa{display:flex;align-items:center;gap:6px;padding-top:6px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
 #pv-panel-v29 .iapa span{display:inline-flex;align-items:center;gap:4px;flex:1}#pv-panel-v29 .iapa svg{color:var(--lima-ink)}
 #pv-panel-v29 .iaprop.no{opacity:.6}
@@ -2222,7 +2222,7 @@
 #pv-panel-v29 .pedit>header h3:empty{display:none}
 #pv-panel-v29 .pedays{display:flex;gap:4px}
 #pv-panel-v29 .pedays button{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;min-width:46px;font:inherit;border:1px solid var(--line);background:var(--app);border-radius:11px;padding:4px 8px;cursor:pointer;color:var(--ink2);transition:background .2s,border-color .2s}
-#pv-panel-v29 .pedays button small{font-size:10.5px;color:var(--ink3)}#pv-panel-v29 .pedays button b{font-size:14px;font-weight:400}
+#pv-panel-v29 .pedays button small{font-size:11px;color:var(--ink3)}#pv-panel-v29 .pedays button b{font-size:14px;font-weight:400}
 #pv-panel-v29 .pedays button:hover{border-color:var(--line2)}
 #pv-panel-v29 .pedays button.on{background:var(--lima);border-color:var(--lima);color:#141519}#pv-panel-v29 .pedays button.on small{color:#2C3B07}
 #pv-panel-v29 .pedays button i{position:absolute;top:4px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--azaf)}
@@ -2270,23 +2270,23 @@
 #pv-panel-v29 .pemt2{display:flex;flex-direction:column;gap:7px}
 #pv-panel-v29 .pemt2>div{display:grid;grid-template-columns:92px 1fr 64px;grid-template-rows:auto auto;align-items:center;gap:1px 10px;font-size:12px}
 #pv-panel-v29 .pemt2 span{color:var(--ink2)}#pv-panel-v29 .pemt2 b{font-weight:500;text-align:right}
-#pv-panel-v29 .pemt2 small{grid-column:3;font-size:10.5px;color:var(--ink3);text-align:right}
+#pv-panel-v29 .pemt2 small{grid-column:3;font-size:11px;color:var(--ink3);text-align:right}
 #pv-panel-v29 .peplate{display:flex;align-items:center;gap:14px}
 #pv-panel-v29 .peplate svg{width:96px;height:96px;flex:none;transform:rotate(0deg)}
 #pv-panel-v29 .peplate>div{flex:1;display:flex;flex-direction:column;gap:4px}
 #pv-panel-v29 .peplate span{display:grid;grid-template-columns:8px 1fr auto;align-items:center;gap:2px 7px;font-size:11.5px;color:var(--ink2)}
 #pv-panel-v29 .peplate span i{width:8px;height:8px;border-radius:2px}#pv-panel-v29 .peplate b{font-weight:500}
-#pv-panel-v29 .peplate small{grid-column:2/-1;font-size:10px;color:var(--ink3);margin-top:-2px}
+#pv-panel-v29 .peplate small{grid-column:2/-1;font-size:11px;color:var(--ink3);margin-top:-2px}
 #pv-panel-v29 .peph{margin:0}#pv-panel-v29 .peph>div{max-width:none}
-#pv-panel-v29 .peph em{display:block;font-style:normal;font-size:10.5px;color:var(--ink3);margin-top:2px}
+#pv-panel-v29 .peph em{display:block;font-style:normal;font-size:11px;color:var(--ink3);margin-top:2px}
 #pv-panel-v29 .pepdf{background:var(--app);border-radius:12px;padding:14px;display:flex;justify-content:center}
-#pv-panel-v29 .pepg{width:220px;background:#fff;color:#141519;border-radius:4px;box-shadow:0 6px 18px rgba(20,21,25,.12);padding:12px;display:flex;flex-direction:column;gap:5px;font-size:9.5px}
+#pv-panel-v29 .pepg{width:220px;background:#fff;color:#141519;border-radius:4px;box-shadow:0 6px 18px rgba(20,21,25,.12);padding:12px;display:flex;flex-direction:column;gap:5px;font-size:11px}
 #pv-panel-v29 .pepg header{display:flex;flex-direction:column;gap:1px;padding-bottom:6px;border-bottom:2px solid #D6EBA3;margin-bottom:2px}
-#pv-panel-v29 .pepg .mk{width:18px;height:18px;border-radius:6px;background:#D6EBA3;display:grid;place-items:center;font-weight:600;font-size:10px}
-#pv-panel-v29 .pepg header b{font-size:11px;font-weight:600}#pv-panel-v29 .pepg header small{color:#71747C;font-size:8.5px}
+#pv-panel-v29 .pepg .mk{width:18px;height:18px;border-radius:6px;background:#D6EBA3;display:grid;place-items:center;font-weight:600;font-size:11px}
+#pv-panel-v29 .pepg header b{font-size:11px;font-weight:600}#pv-panel-v29 .pepg header small{color:#71747C;font-size:11px}
 #pv-panel-v29 .pepg>div{display:grid;grid-template-columns:52px 1fr;gap:6px;padding:3px 0;border-bottom:1px solid #EEE}
 #pv-panel-v29 .pepg>div span{color:#71747C}#pv-panel-v29 .pepg>div b{font-weight:500}
-#pv-panel-v29 .pepg footer{color:#9A9CA2;font-size:8px;text-align:right;margin-top:3px}
+#pv-panel-v29 .pepg footer{color:#9A9CA2;font-size:11px;text-align:right;margin-top:3px}
 #pv-panel-v29 .pepo{display:flex;flex-direction:column}
 #pv-panel-v29 .peshare{display:flex;flex-direction:column}
 #pv-panel-v29 .peshare>div{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--line)}
@@ -2336,11 +2336,13 @@
 #pv-panel-v29.mob .scr{height:auto;min-height:0;gap:12px}
 #pv-panel-v29.mob .scr>*{flex:none!important}
 #pv-panel-v29.mob .main *{max-height:none}
-#pv-panel-v29.mob .mnav{display:flex;flex:none;justify-content:space-around;border-top:1px solid var(--line);background:var(--side);padding:6px 6px 10px;z-index:3}
-#pv-panel-v29.mob .mnav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:0;font:inherit;font-size:10.5px;color:var(--ink3);padding:6px 0;border-radius:12px;cursor:pointer;transition:color .2s,background .2s}
+#pv-panel-v29.mob .mnav{display:flex;position:absolute;left:0;right:0;bottom:0;justify-content:space-around;gap:2px;border-top:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:color-mix(in srgb,var(--side) 68%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);padding:10px 10px calc(16px + env(safe-area-inset-bottom,0px));z-index:20}
+#pv-panel-v29.mob .main>*:last-child{padding-bottom:110px}
+#pv-panel-v29.mob .mnav button svg{width:24px;height:24px}
+#pv-panel-v29.mob .mnav button{position:relative;flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;background:none;border:0;font:inherit;font-size:12px;color:var(--ink3);padding:9px 0;border-radius:14px;cursor:pointer;transition:color .2s,background .2s}
 #pv-panel-v29.mob .mnav button.on{color:var(--ink);background:var(--lima-tt)}
 #pv-panel-v29.mob .mnav button.on svg{color:var(--lima-ink)}
-#pv-panel-v29.mob .mnav b{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--lima);color:#141519;font-size:10px;font-weight:600;display:grid;place-items:center;padding:0 4px}
+#pv-panel-v29.mob .mnav b{position:absolute;top:2px;left:calc(50% + 6px);min-width:16px;height:16px;border-radius:8px;background:var(--lima);color:#141519;font-size:11px;font-weight:600;display:grid;place-items:center;padding:0 4px}
 #pv-panel-v29.mob .side{position:absolute;top:0;left:0;bottom:0;width:286px;z-index:26;transform:translateX(-105%);transition:transform .26s cubic-bezier(.16,1,.3,1);box-shadow:0 20px 60px rgba(16,17,20,.25);overflow-y:auto;border-radius:0 22px 22px 0}
 #pv-panel-v29.mob .app.mdr .side{transform:none}
 #pv-panel-v29.mob .side .fold{display:none}
@@ -2464,7 +2466,7 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .prow2 .pstate small{display:none}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pacts2{margin-left:auto;gap:6px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pacts2 .sbtn{padding:8px 10px;min-height:34px}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pacts2 .pesaved{font-size:10.5px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pacts2 .pesaved{font-size:11px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .fxp{border-radius:18px;box-shadow:none}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedit{padding:18px;gap:14px;overflow:hidden}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedit>header{gap:12px;align-items:center}
@@ -2478,11 +2480,11 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;flex:1;min-width:0}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button{min-width:0;padding:7px 8px;gap:3px;border-radius:12px;background:var(--app);border-color:transparent}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button b{font-size:15px;font-weight:400}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button small{font-size:10.5px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button small{font-size:11px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button.on{background:var(--lima-t);border-color:var(--lima);color:var(--ink)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pedays button.on small{color:var(--lima-ink)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pewk{gap:4px;flex-wrap:wrap}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pewk>span{flex-basis:100%;font-size:10px;padding-left:2px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pewk>span{flex-basis:100%;font-size:11px;padding-left:2px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pewk button{width:26px;height:26px;border-radius:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .petot{padding:14px 16px;gap:8px 16px;background:var(--lima-tt);border:1px solid var(--lima-t);border-radius:14px;grid-template-columns:1fr}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .petot>div:first-child{gap:8px;flex-wrap:wrap}
@@ -2514,19 +2516,19 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-meal-toggle[aria-expanded=true]>svg{transform:rotate(-90deg)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-hour{width:50px;height:30px;border:1px solid var(--line);background:var(--app);color:var(--ink2);font:inherit;font-size:11.5px;text-align:center;border-radius:9px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-meal-kcal{display:flex;flex-direction:column;gap:2px;align-items:flex-end;min-width:34px;font-size:13px;font-weight:500;color:var(--ink)}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-meal-kcal small{font-size:10px;font-weight:400;color:var(--ink3)}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-meal-kcal small{font-size:11px;font-weight:400;color:var(--ink3)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pema{gap:3px;flex:none}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pema .ibtn{width:30px;height:30px;border:0;background:var(--app);color:var(--ink2);border-radius:50%}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .peis{padding-top:12px;margin-top:12px;border-top:1px solid var(--line)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .peis[hidden]{display:none!important}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei{display:grid;grid-template-columns:6px minmax(0,1fr) 56px 58px 42px 26px 26px;gap:8px;align-items:center}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head{font-size:9.5px;color:var(--ink3);padding-bottom:8px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head{font-size:11px;color:var(--ink3);padding-bottom:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ingredient-head>span:nth-child(5){text-align:right}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei{padding:10px 0;min-height:52px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei input,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei select{height:32px;padding:0 6px;border-color:var(--line);background:var(--app);border-radius:9px;font-size:11.5px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei input{background:var(--card);text-align:right}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pen b{font-size:12px;line-height:1.4;white-space:normal;overflow:visible}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pen small{font-size:10.5px;line-height:1.4;white-space:normal;overflow:visible;color:var(--ink2)}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pen small{font-size:11px;line-height:1.4;white-space:normal;overflow:visible;color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei em{font-size:11px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pei .ibtn{width:26px;height:30px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) #pwrap.pe-dia .fx>.c.per{gap:16px;padding-right:4px;overscroll-behavior:contain}
@@ -2542,7 +2544,7 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .iaseg button{flex:1}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .pemt2{gap:12px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .pemt2>div{grid-template-columns:82px 1fr 78px;gap:3px 8px;font-size:11.5px}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .pemt2 small{font-size:10px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .pemt2 small{font-size:11px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .plab{margin-top:2px;padding-top:14px;border-top:1px solid var(--line);font-size:11.5px;color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .peplate{gap:12px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-analysis .peplate svg{width:80px;height:80px}
@@ -2564,27 +2566,27 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iahero{align-items:flex-start;text-align:left;padding:2px 0 0;gap:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iahero h2{font-size:25px;font-weight:400;line-height:1.2;letter-spacing:-.035em}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iahero p{font-size:12.5px;line-height:1.6;max-width:52ch}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabadge{font-size:10.5px;padding:5px 9px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabadge{font-size:11px;padding:5px 9px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iafor{background:var(--app);border-color:var(--line);color:var(--ink2);padding:4px 10px 4px 4px;font-size:11.5px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabox{border-radius:16px;border-color:var(--line2);overflow:visible}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-prompt-label{display:block;padding:16px 16px 0;font-size:11.5px;font-weight:500;color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabox textarea{padding:10px 16px 12px;line-height:1.6;font-size:13px;min-height:112px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabar{gap:16px;padding:10px 16px;background:var(--app);border-radius:0 0 15px 15px;flex-wrap:wrap}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabar .lnk{font-size:11.5px;min-height:24px}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabar>small{font-size:10px;color:var(--ink3)}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iabar>small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iaideas{flex-wrap:wrap;overflow:visible;gap:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iaideas button{font-size:11px;padding:6px 10px;white-space:normal;text-align:left;line-height:1.4}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-duration{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal{padding:12px 14px;border-radius:14px;gap:12px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal>span{display:flex;flex-direction:column;gap:4px;min-width:0}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal b{font-size:12px;color:var(--ink)}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal small{font-size:10.5px;color:var(--ink2);line-height:1.5}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal em{display:flex;gap:6px;align-items:center;font-size:10.5px;margin-left:auto}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal small{font-size:11px;color:var(--ink2);line-height:1.5}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iagoal em{display:flex;gap:6px;align-items:center;font-size:11px;margin-left:auto}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ai-settings .pux-detail{border-radius:14px;background:var(--app)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-ai-settings .iaopts{border-top:0;padding-top:4px;gap:18px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iachips{gap:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iachips button{padding:7px 11px;font-size:11.5px;min-height:32px}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iaopts h5{font-size:10.5px;line-height:1.5}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iaopts h5{font-size:11px;line-height:1.5}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iago{padding-top:16px;gap:16px;margin-top:auto;align-items:center;justify-content:space-between}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iago small{max-width:29ch;font-size:11px;line-height:1.5;color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iago .cta{padding:12px 18px;min-height:40px}
@@ -2592,8 +2594,8 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pux-context-intro{font-size:11.5px;color:var(--ink2);line-height:1.6;margin:0}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx>div{padding:12px 0;gap:6px 8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx b{font-size:11.5px;font-weight:400;line-height:1.55}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx small{font-size:10.5px;line-height:1.5;color:var(--ink2)}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx .lnk{font-size:10.5px;min-height:24px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx small{font-size:11px;line-height:1.5;color:var(--ink2)}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iactx .lnk{font-size:11px;min-height:24px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iasrc.s-h,#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iasrc.s-l{background:var(--app);color:var(--ink2)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iadr{right:0;bottom:0;width:316px;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);transition:transform 240ms var(--pux-ease),opacity 200ms ease;opacity:0}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iadr.open{opacity:1}
@@ -2604,7 +2606,7 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iadr .iatab button[aria-selected=true]{background:var(--card)}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iascope{flex-direction:column;align-items:flex-start;padding:12px 16px;gap:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iascope .iaseg{max-width:100%;overflow:auto}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iascope .iaseg button{font-size:10.5px;padding:6px 8px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iascope .iaseg button{font-size:11px;padding:6px 8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iachat{padding:16px;gap:12px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iam{font-size:12px;line-height:1.6;padding:12px;border-radius:14px;max-width:100%}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iam.a{background:var(--app);border:0}
@@ -2612,7 +2614,7 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iain{padding:12px;gap:8px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iain input{height:40px;min-width:0;font-size:11.5px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iasug{gap:6px;padding-inline:12px}
-#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iasug button{font-size:10.5px;padding:6px 9px;text-align:left;line-height:1.4}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .iasug button{font-size:11px;padding:6px 9px;text-align:left;line-height:1.4}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) :is(button,summary,input,select,textarea):focus-visible{outline:2px solid var(--lima-ink);outline-offset:3px}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) button:disabled{cursor:default}
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) :is(button,.pux-detail>summary){transition:background-color 180ms ease,border-color 180ms ease,color 180ms ease,transform 140ms var(--pux-ease)}
@@ -2695,7 +2697,7 @@
 #pv-panel-v29 #s-planes:is(.pux-plan,.pux-create){--pux-ease:cubic-bezier(.2,.8,.2,1)}
 #pv-panel-v29 #s-planes.pux-plan .ppsel,#pv-panel-v29 #s-planes.pux-plan .pgoal{border-radius:16px;background:var(--card)}
 #pv-panel-v29 #s-planes.pux-plan .pgoal b{font-weight:400}
-#pv-panel-v29 #s-planes.pux-plan .pgoal .pcare span{border:0;border-radius:7px;background:var(--lima-tt);font-size:10.5px;padding:4px 7px}
+#pv-panel-v29 #s-planes.pux-plan .pgoal .pcare span{border:0;border-radius:7px;background:var(--lima-tt);font-size:11px;padding:4px 7px}
 #pv-panel-v29 #s-planes.pux-plan .fxp{border-radius:16px;padding:16px 18px}
 #pv-panel-v29 #s-planes.pux-plan .pedit{gap:12px}
 #pv-panel-v29 #s-planes.pux-plan .pux-editor-title h4{font-size:14px;font-weight:500}
@@ -2717,11 +2719,11 @@
 #pv-panel-v29 #s-planes.pux-plan .p28-energy{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:4px 0 14px;border-bottom:1px solid var(--line)}
 #pv-panel-v29 #s-planes.pux-plan .p28-energy>div:first-child{min-width:0;display:flex;flex-direction:column;gap:8px}
 #pv-panel-v29 #s-planes.pux-plan .p28-energy small{font-size:11.5px;color:var(--ink3)}
-#pv-panel-v29 #s-planes.pux-plan .p28-energy-note{font-size:10.5px;color:var(--ink2)}
+#pv-panel-v29 #s-planes.pux-plan .p28-energy-note{font-size:11px;color:var(--ink2)}
 #pv-panel-v29 #s-planes.pux-plan .p28-gauge{width:112px;flex:none}
 #pv-panel-v29 #s-planes.pux-plan .p28-gauge .pg{width:112px!important}
 #pv-panel-v29 #s-planes.pux-plan .p28-gauge .pg-v b{font-size:24px}
-#pv-panel-v29 #s-planes.pux-plan .p28-gauge .pg-v span{font-size:10.5px}
+#pv-panel-v29 #s-planes.pux-plan .p28-gauge .pg-v span{font-size:11px}
 #pv-panel-v29 #s-planes.pux-plan .p28-macros{display:flex;flex-direction:column;gap:12px}
 #pv-panel-v29 #s-planes.pux-plan .p28-macros>div{display:grid;grid-template-columns:1fr auto;gap:6px;font-size:11.5px}
 #pv-panel-v29 #s-planes.pux-plan .p28-macros span{color:var(--ink2)}
@@ -2729,7 +2731,7 @@
 #pv-panel-v29 #s-planes.pux-plan .p28-macros .fxb{grid-column:1/-1;height:5px}
 #pv-panel-v29 #s-planes.pux-plan .p28-week-head{display:flex;flex-direction:column;gap:4px;padding-top:14px;border-top:1px solid var(--line)}
 #pv-panel-v29 #s-planes.pux-plan .p28-week-head b{font-size:12px;font-weight:500}
-#pv-panel-v29 #s-planes.pux-plan .p28-week-head small{font-size:10.5px;color:var(--ink3)}
+#pv-panel-v29 #s-planes.pux-plan .p28-week-head small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 #s-planes.pux-plan .p28-week{height:74px;min-height:74px;flex:none;padding:0 4px;gap:12px}
 #pv-panel-v29 #s-planes.pux-plan .p28-week i{width:16px;border-radius:7px}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail{border:0;border-top:1px solid var(--line);border-radius:0}
@@ -2740,7 +2742,7 @@
 #pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut>div>svg{color:var(--ch)}
 #pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut span{display:flex;flex-direction:column;gap:4px}
 #pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut b{font-size:12.5px;font-weight:500}
-#pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut small{font-size:10.5px;color:var(--ink2)}
+#pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut small{font-size:11px;color:var(--ink2)}
 #pv-panel-v29 #s-planes.pux-plan .p28-ai-shortcut .sbtn{display:flex;align-items:center;justify-content:space-between;width:100%;border-radius:10px;padding:10px 12px;background:var(--ink);border-color:var(--ink);color:var(--app)}
 #pv-panel-v29 #s-planes.pux-plan .pux-detail{border-radius:12px}
 #pv-panel-v29 #s-planes.pux-plan .pux-detail>summary{padding:14px 16px}
@@ -2771,7 +2773,7 @@
 #pv-panel-v29 #s-planes.pux-create .p28-context-link>span{display:grid;grid-template-columns:auto 1fr;gap:4px 8px;align-items:center}
 #pv-panel-v29 #s-planes.pux-create .p28-context-link svg{color:var(--ch);grid-row:1/3}
 #pv-panel-v29 #s-planes.pux-create .p28-context-link b{font-size:12px;font-weight:500}
-#pv-panel-v29 #s-planes.pux-create .p28-context-link small{font-size:10.5px;color:var(--ink3);grid-column:2}
+#pv-panel-v29 #s-planes.pux-create .p28-context-link small{font-size:11px;color:var(--ink3);grid-column:2}
 #pv-panel-v29 #s-planes.pux-create .p28-context-link .sbtn{display:inline-flex;align-items:center;gap:8px;font-size:11.5px;border-radius:10px;padding:9px 12px}
 #pv-panel-v29 #s-planes.pux-create .p28-config{display:flex;flex-direction:column;gap:20px;min-width:0;min-height:0;overflow:auto;scrollbar-width:thin;border-left:1px solid var(--line);padding:2px 2px 8px 26px}
 #pv-panel-v29 #s-planes.pux-create .p28-config .pux-duration{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
@@ -2797,7 +2799,7 @@
 #pv-panel-v29 #s-planes.pux-create.pux-context-open .p28-ai-top h2{font-size:24px}
 #pv-panel-v29 #s-planes.pux-create .pux-context>.fxp{border-radius:16px}
 #pv-panel-v29 #s-planes.pux-create .pux-context>.fxp>header{flex-wrap:wrap}
-#pv-panel-v29 #s-planes.pux-create .pux-context>.fxp>header .m{font-size:10.5px}
+#pv-panel-v29 #s-planes.pux-create .pux-context>.fxp>header .m{font-size:11px}
 @media(hover:hover) and (pointer:fine){
  #pv-panel-v29 #s-planes.pux-plan .pema .ibtn:hover{background:var(--app);transform:translateY(-1px)}
  #pv-panel-v29 #s-planes.pux-create .iaideas button:hover{background:var(--lima-tt);border-color:var(--line2)}
@@ -2854,7 +2856,7 @@
 #pv-panel-v29 #s-planes .r29-tools{margin-left:auto;display:flex;align-items:center;gap:5px;flex:none}
 #pv-panel-v29 #s-planes .r29-tools .ibtn{width:32px;height:32px;border-radius:9px}
 #pv-panel-v29 #s-planes .r29-tools .sbtn{min-height:32px;display:flex;align-items:center;gap:6px}
-#pv-panel-v29 #s-planes .r29-tools .pesaved{margin-right:7px;font-size:10.5px;color:var(--ink3);white-space:nowrap}
+#pv-panel-v29 #s-planes .r29-tools .pesaved{margin-right:7px;font-size:11px;color:var(--ink3);white-space:nowrap}
 #pv-panel-v29 #s-planes .r29-tools details{position:relative}
 #pv-panel-v29 #s-planes .r29-tools summary{list-style:none;cursor:pointer;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card)}
 #pv-panel-v29 #s-planes .r29-tools summary::-webkit-details-marker{display:none}
@@ -2901,7 +2903,7 @@
 #pv-panel-v29 #s-planes .pux-analysis .p28-macros{gap:9px}
 #pv-panel-v29 #s-planes .pux-analysis .p28-macros>div{grid-template-columns:1fr auto}
 #pv-panel-v29 #s-planes .p28-ai-workspace .p28-compose textarea{min-height:210px!important}
-#pv-panel-v29 #s-planes .r29-proto{font-size:10.5px;color:var(--ink3);line-height:1.5}
+#pv-panel-v29 #s-planes .r29-proto{font-size:11px;color:var(--ink3);line-height:1.5}
 #pv-panel-v29 #r29-print{display:none}
 @media print{#pv-panel-v29>*{display:none!important}#pv-panel-v29>#r29-print{display:block!important;color:#111;background:#fff;font:12px/1.6 sans-serif}#pv-panel-v29 #r29-print section{break-inside:avoid;margin-bottom:18px}#pv-panel-v29 #r29-print h2{border-bottom:1px solid #ccc;padding-bottom:8px}#pv-panel-v29 #r29-print h3{margin:12px 0 4px}}
 #pv-panel-v29.mob #s-planes>.top{height:auto!important;min-height:70px!important;flex-wrap:wrap!important;flex-basis:auto}
@@ -2922,9 +2924,9 @@
 #pv-panel-v29.mob #s-planes .r29-menu{right:0}
 
 
-#pv-panel-v29 #s-planes .r29-instruction-field{display:flex;flex-direction:column;gap:8px}#pv-panel-v29 #s-planes .r29-instruction-field textarea{width:100%;min-height:112px;resize:vertical;font:inherit;font-size:12px;line-height:1.7;padding:12px;border:1px solid var(--line2);border-radius:10px;color:var(--ink);background:var(--app)}#pv-panel-v29 #s-planes .r29-instruction-field small{color:var(--ink3);font-size:10.5px}#pv-panel-v29 #s-planes .pind3{overflow-y:auto;scrollbar-width:thin}#pv-panel-v29 #s-planes .pedit>header{justify-content:space-between}#pv-panel-v29 #s-planes .pedit>header .pux-editor-title{margin-right:auto}#pv-panel-v29 #s-planes .pedit>header>h3:empty{display:none}#pv-panel-v29 #s-planes [hidden]{display:none!important}
+#pv-panel-v29 #s-planes .r29-instruction-field{display:flex;flex-direction:column;gap:8px}#pv-panel-v29 #s-planes .r29-instruction-field textarea{width:100%;min-height:112px;resize:vertical;font:inherit;font-size:12px;line-height:1.7;padding:12px;border:1px solid var(--line2);border-radius:10px;color:var(--ink);background:var(--app)}#pv-panel-v29 #s-planes .r29-instruction-field small{color:var(--ink3);font-size:11px}#pv-panel-v29 #s-planes .pind3{overflow-y:auto;scrollbar-width:thin}#pv-panel-v29 #s-planes .pedit>header{justify-content:space-between}#pv-panel-v29 #s-planes .pedit>header .pux-editor-title{margin-right:auto}#pv-panel-v29 #s-planes .pedit>header>h3:empty{display:none}#pv-panel-v29 #s-planes [hidden]{display:none!important}
 
-#pv-panel-v29 #s-planes .r29-care-toggle{display:none}#pv-panel-v29 #s-planes .r29-diet{max-width:135px}#pv-panel-v29.mob #s-planes>.top h1 span{display:inline!important;font-size:inherit}#pv-panel-v29.mob #s-planes>.top{min-height:80px!important;gap:10px!important}#pv-panel-v29.mob #s-planes .r29-context{padding:10px 12px;gap:10px;min-height:62px}#pv-panel-v29.mob #s-planes .r29-context small{font-size:10px}#pv-panel-v29.mob #s-planes .r29-context b{font-size:12px}#pv-panel-v29.mob #s-planes .r29-context .r29-care{display:none}#pv-panel-v29.mob #s-planes .r29-context .r29-care-toggle{display:block;font-size:10.5px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-context.r29-care-open .r29-care{display:flex}#pv-panel-v29.mob #s-planes .r29-context>.sbtn:last-child{margin-left:auto;font-size:10.5px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-patient{gap:8px}#pv-panel-v29.mob #s-planes .r29-patient .ppsel{min-height:56px;padding:10px 12px}#pv-panel-v29 #s-planes .r29-tools details[open]{z-index:55}#pv-panel-v29 #s-planes button:disabled{cursor:default;opacity:.42}
+#pv-panel-v29 #s-planes .r29-care-toggle{display:none}#pv-panel-v29 #s-planes .r29-diet{max-width:135px}#pv-panel-v29.mob #s-planes>.top h1 span{display:inline!important;font-size:inherit}#pv-panel-v29.mob #s-planes>.top{min-height:80px!important;gap:10px!important}#pv-panel-v29.mob #s-planes .r29-context{padding:10px 12px;gap:10px;min-height:62px}#pv-panel-v29.mob #s-planes .r29-context small{font-size:11px}#pv-panel-v29.mob #s-planes .r29-context b{font-size:12px}#pv-panel-v29.mob #s-planes .r29-context .r29-care{display:none}#pv-panel-v29.mob #s-planes .r29-context .r29-care-toggle{display:block;font-size:11px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-context.r29-care-open .r29-care{display:flex}#pv-panel-v29.mob #s-planes .r29-context>.sbtn:last-child{margin-left:auto;font-size:11px;padding:5px 7px}#pv-panel-v29.mob #s-planes .r29-patient{gap:8px}#pv-panel-v29.mob #s-planes .r29-patient .ppsel{min-height:56px;padding:10px 12px}#pv-panel-v29 #s-planes .r29-tools details[open]{z-index:55}#pv-panel-v29 #s-planes button:disabled{cursor:default;opacity:.42}
 
 #pv-panel-v29 #s-planes .pemeal,#pv-panel-v29 #s-planes .pemeal.ch{align-items:stretch;justify-content:flex-start}#pv-panel-v29 #s-planes .pemh,#pv-panel-v29 #s-planes .peis{width:100%}#pv-panel-v29 #s-planes .pedit>header>h3+.sp{display:none}#pv-panel-v29 #s-planes #iadr[aria-hidden="true"]{display:none!important}
 
@@ -2975,11 +2977,11 @@
 #pv-panel-v29.mob #s-alimentos .top .sxin input,#pv-panel-v29.mob #s-ayuda .top .sxin input{width:100%;min-width:0}
 #pv-panel-v29.mob .sxask textarea{height:84px}
 #pv-panel-v29 #sxchat article{background:var(--app);border-radius:14px;padding:12px 14px}
-#pv-panel-v29 #sxchat .sxfrom{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
+#pv-panel-v29 #sxchat .sxfrom{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
 #pv-panel-v29 .sxlib{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:10px;overflow:auto}
 #pv-panel-v29 .sxcard{border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-height:0;min-width:0;background:var(--card)}
 #pv-panel-v29 .sxcard.on{background:var(--lima-t);border-color:transparent}
-#pv-panel-v29 .sxcard .sxk{font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
+#pv-panel-v29 .sxcard .sxk{font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink3)}
 #pv-panel-v29 .sxcard b{font-weight:500;font-size:14px;letter-spacing:-.02em}
 #pv-panel-v29 .sxcard p{margin:0;color:var(--ink2);font-size:12px;line-height:1.4}
 #pv-panel-v29 .sxavs{display:flex;gap:4px;margin-top:auto}
@@ -2989,7 +2991,7 @@
 #pv-panel-v29 .sxol.sxguide{padding-left:0}
 #pv-panel-v29 .sxcard{cursor:pointer;font:inherit;color:inherit;text-align:left;width:100%}
 #pv-panel-v29 .sxlib>.sxcard{height:100%;overflow:hidden}
-#pv-panel-v29 .sxcard .av{width:22px;height:22px;font-size:9px}
+#pv-panel-v29 .sxcard .av{width:22px;height:22px;font-size:11px}
 #pv-panel-v29 .sxw .fxp>header h3{min-width:0;overflow:hidden;text-overflow:ellipsis}
 #pv-panel-v29.mob .sxlib{display:flex;flex-direction:column;flex:none;grid-template-rows:none}
 #pv-panel-v29.mob .sxlib>.sxcard{height:auto;overflow:visible}
@@ -3021,7 +3023,7 @@
 /* Contadores: degradé azul del logo; en la Ficha van en la esquina de arriba a la derecha de la palabra. */
 #pv-panel-v29 .nv .ct,#pv-panel-v29 .nv .ct.hot,#pv-panel-v29 .ftabs .n,#pv-panel-v29 .ftabs .n.hot{background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff}
 #pv-panel-v29 .ftabs button{gap:0}
-#pv-panel-v29 .ftabs .n,#pv-panel-v29 #ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:9.5px;line-height:13px;padding:0 5px;font-weight:500}
+#pv-panel-v29 .ftabs .n,#pv-panel-v29 #ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:11px;line-height:13px;padding:0 5px;font-weight:500}
 #pv-panel-v29 .logo img.mk{display:block;object-fit:cover;background:none;padding:0}
 #pv-panel-v29 .side .fold{bottom:84px}
 /* Ficha pulida (unslop, 5/11): lo que ya no repite o grita. */

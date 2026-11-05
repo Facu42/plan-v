@@ -3,6 +3,9 @@
 5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Además busca cada alimento medible en SARA 2 y lo carga con calorías; lo demás queda como texto. Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
 
 # Traspaso del proyecto (2026-11-03)
+5/11 · Claude · Ajustes › Tus datos › Descargar baja un .zip real: pacientes y turnos en Excel, la historia clínica de cada paciente en PDF (solo con permiso de atención, sin notas privadas) y un LEEME. Ruta `GET /api/ajustes/export`, funciona también en solo lectura. Rama `claude/project-thread-8m5643`, sin base, espera el ok visual. Detalle en `docs/panel-nutri-rediseno/exportar-datos-v29.md`.
+
+# Traspaso del proyecto (actualización vigente: 2026-11-03)
 
 3/11 · Cursor · El centro de `/admin` ahora también tiene riesgo de baja, cobranza, activación y un resumen del día. La bandeja puede usar WhatsApp y mail si están las credenciales; si no, queda apagada. Instagram está preparado y no envía. AFIP no se tocó. Hay una migración nueva, sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
 3/11 · Claude · Pedir el enlace de la cuota en la página pública ya no deja saber si un correo es de una paciente: sin cuota abierta, con débito o desconocido dan el mismo mensaje. La búsqueda del correo es exacta (antes el guion bajo valía como comodín) y esa ruta entra al límite estricto de 5 pedidos cada 15 minutos por conexión. Sigue pendiente: si el correo tiene cuota abierta, el enlace se muestra en pantalla; cerrarlo del todo pide mandarlo por mail, cuando los mails de Nutridash estén prendidos.
@@ -110,11 +113,20 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 5/11 · Paquetes de consultas (rama `claude/project-thread-vq6ihd`, PR en borrador)
+Ficha › Cobros suma el panel «Paquete de consultas» (piezas del boceto v29: fxP, medidor con fxkv, sbtn y cajón #act). La nutri vende un paquete de N consultas (con cobro suelto «Paquete: …» en Cobranzas o «ya está cobrado»), y cada consulta marcada como realizada descuenta una sola del paquete vigente más viejo; desmarcarla la devuelve. También se descuenta a mano, se deshace y se da de baja. Migración aditiva `20261105150000_patient_packs.sql` **sin aplicar** (espera la frase de Facundo). La paciente todavía no ve su saldo de consultas.
+
 ## 4/11 · Inicio pulido y menú lateral (desde el boceto v29)
 El boceto `design/panel-nutri/v29/panel-trabajo.html` se actualizó primero (Inicio con los números arriba, un solo gráfico, plata completa con un solo formato, botón «Crear» que junta Nuevo plan / Cargar pago / Mensaje, títulos de grupo sin mayúsculas, contadores del menú en gris y sin el número de Pacientes) y `panel-v29.css` se regeneró de ahí. La app lo copia: sin minigráficos de consultas, pacientes, adherencia y por cobrar (queda la barra de semanas de «Cobrado»), grilla de cinco tarjetas del boceto. No se tocó lo que producción ya tenía (animación GSAP de #266, botones menta, logo, riel «Hoy»). Ficha y Planes van en PRs aparte (Planes después de #277).
 
 ## 5/11 · Ficha pulida (mismo PR #280)
 Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, encabezado liso con etiquetas en un solo tono, «Avance al objetivo» con una barra en vez del medidor, listas sin franja de color, «Para hacer hoy» con acciones como enlaces y «Próximo turno» con los colores del logo. Contadores en degradé azul (menú y solapas). «Nueva consulta» vuelve al negro del boceto; logo vectorial de Nutridash y flecha de la barra sobre la caja de la cuenta.
+
+## 5/11 · Letra legible del panel
+En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
+
+## 5/11 · Barra de abajo del celular
+En el boceto v29 la barra `.mnav` del celular es más alta (íconos 24px, letra 12px) y flota sobre el contenido con fondo semitransparente y desenfoque; la pantalla suma 110px de espacio abajo para que nada quede tapado. Se regeneró `panel-v29.css`.
 
 ## 29/10 · Verificar la IA desde el panel de administrador
 Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
