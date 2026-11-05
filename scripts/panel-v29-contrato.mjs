@@ -67,7 +67,7 @@ export const PIEZAS_FICHA = [
   ['Fila', '#s-ficha .fxr > *', '', ['paddingTop', 'paddingLeft']],
   ['Título de la fila', '#s-ficha .fxr .t b', '', ['fontSize', 'fontWeight']],
   ['Tarjeta oscura', '#s-ficha .fxdk', '', ['borderTopLeftRadius', 'backgroundColor', 'paddingTop', 'paddingLeft']],
-  ['Medio círculo', '#s-ficha .pg', '', ['width']],
+  ['Avance con barra', '#s-ficha .dprog b', '', ['fontSize', 'fontWeight']],
   ['Datos en columna', '#s-ficha .fxkv > div', '', ['paddingTop', 'fontSize']],
 ];
 
