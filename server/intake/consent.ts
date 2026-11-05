@@ -74,9 +74,9 @@ const TEXTS: Array<Omit<ConsentText, 'text_hash'>> = [
   },
   {
     purpose: 'ai_menu_draft',
-    text_version: 'ai_menu_draft.v1',
+    text_version: 'ai_menu_draft.v2',
     title: 'Borradores de menú con IA',
-    text: 'Mi nutricionista puede usar IA para proponer menús o recetas. Nada se publica ni se me envía sin su revisión.',
+    text: 'Mi nutricionista puede usar IA para proponer menús o recetas. Para eso, Nutridash envía a un proveedor externo de IA datos de mi ficha: alergias, restricciones, objetivo, notas de condiciones, hábitos, peso y medidas, y valores de laboratorio ya revisados. No se envían mi nombre ni mis datos de contacto. Puede contener datos de salud. Nada se publica ni se me envía sin su revisión. Este permiso es opcional y puedo retirarlo.',
     required: false,
   },
   {

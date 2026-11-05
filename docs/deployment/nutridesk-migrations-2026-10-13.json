@@ -237,6 +237,11 @@
       "version": "20261105150000",
       "file": "20261105150000_patient_packs.sql",
       "sha256": "c94d569b37b307177054e0fcc27d26b9cf30c02009bdc5a4e4ece0d4875ea013"
+    },
+    {
+      "version": "20261106000000",
+      "file": "20261106000000_ai_menu_draft_consent_v2.sql",
+      "sha256": "d0f86dd850bf16d54482ae31ea75c3339c94d7e3faee4fc82ea39aa3cf67eb6e"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",
