@@ -112,8 +112,8 @@ tokens y costo; los créditos solo cuentan si salió bien. La nutri ve en Ajuste
 créditos, modelos ni costos (`GET /api/ai/uso`). El admin ve en /admin la vista «Uso de IA»: consumo por nutri, por consultorio y por
 función, y elige el modelo de cada función con sus precios de entrada y salida (`/api/admin/ai/uso` y `/api/admin/ai/modelos`).
 Sin elección guardada se sigue usando el modelo gratis. Un modelo pago solo se usa si el admin lo guardó, con tope de precio fijado ante
-OpenRouter y sin retención de datos. Migración `20261105120000_ai_usage_and_model_settings`: escrita, SIN aplicar (frase de Facundo);
-sin ella el medidor falla en silencio y guardar un modelo devuelve un aviso claro. Los topes por plan (400/1500/1700 créditos) y el plan
+OpenRouter y sin retención de datos. Migración `20261105120000_ai_usage_and_model_settings`: aplicada en la base el 5/11 (frase de Facundo);
+Antes de aplicarla el medidor fallaba en silencio. Los topes por plan (400/1500/1700 créditos) y el plan
 consultorio son propuestas, no precios vigentes. La calidad de Luna en español y recetas no está probada.
 
 ## 29/10 · Verificar la IA desde el panel de administrador
