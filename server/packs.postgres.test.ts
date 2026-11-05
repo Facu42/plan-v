@@ -148,6 +148,17 @@ describe('paquetes de consultas (PGlite)', () => {
     await expect(rpc(nutriA, 'pack_open_for', [patientA, await shift(0)])).rejects.toBeTruthy();
   });
 
+  it('la paciente ve su saldo sin precio ni notas, y nadie más usa esa vista', async () => {
+    const own = await rpc<Array<Record<string, unknown>>>(patientAUser, 'get_my_patient_packs', [patientA]);
+    expect(own.length).toBeGreaterThan(0);
+    const nuevo = own.find((p) => p.name === 'Nuevo')!;
+    expect(nuevo).toMatchObject({ sessions: 2, used: 1, closed: false });
+    expect(Object.keys(nuevo).sort()).toEqual(['closed', 'expires_on', 'id', 'name', 'sessions', 'starts_on', 'used']);
+    await expect(rpc(nutriA, 'get_my_patient_packs', [patientA])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(nutriB, 'get_my_patient_packs', [patientB])).rejects.toMatchObject({ code: '42501' });
+    await expect(rpc(patientAUser, 'get_my_patient_packs', [patientB])).rejects.toMatchObject({ code: '42501' });
+  });
+
   it('la cuenta de otra paciente queda sin paquetes', async () => {
     expect(await rpc(nutriB, 'get_patient_packs', [patientB])).toEqual([]);
   });
