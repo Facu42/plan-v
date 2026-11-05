@@ -11,6 +11,7 @@ import { generateRecipeDraft } from '../ai/recipe-draft.js';
 import { generateMenuDraft } from '../ai/menu-draft.js';
 import { AIUnavailableError } from '../ai/errors.js';
 import { resolveAiMode } from '../ai/mode.js';
+import { withAiAction } from '../ai/metering.js';
 import { resolveAiProvider } from '../ai/provider.js';
 import {
   assertJobTokenBudget,
@@ -395,7 +396,7 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
     let artifact: NonNullable<AiJobView['artifact']>;
     let warnings: string[];
     if (existing.job_type === 'recipe_draft') {
-      const result = await generateRecipeDraft(live.context as Parameters<typeof generateRecipeDraft>[0]);
+      const result = await withAiAction({ nutritionistId, feature: 'recipe_draft' }, () => generateRecipeDraft(live.context as Parameters<typeof generateRecipeDraft>[0]));
       artifact = { id: randomUUID(), kind: 'recipe_draft', payload: { ...result.recipe, id: base.recipe_id!, expected_revision: base.revision } as unknown as Record<string, unknown>, created_at: new Date().toISOString() };
       warnings = result.warnings;
     } else {
@@ -405,7 +406,7 @@ export async function runAiJob(nutritionistId: string, jobId: string, persistent
       const reservation = menuContext.assistant ? await reserveSpend(jobId, worstCaseMicroUsd(tokens, price)) : null;
       let result: Awaited<ReturnType<typeof generateMenuDraft>>;
       try {
-        result = await generateMenuDraft(menuContext, base.plan_id);
+        result = await withAiAction({ nutritionistId, feature: 'menu_draft' }, () => generateMenuDraft(menuContext, base.plan_id));
       } catch (error) {
         await reservation?.keepReserved();
         throw error;

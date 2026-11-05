@@ -56,7 +56,7 @@ async function requestRecipe(context: RecipeJobContext): Promise<RecipeOutput | 
   let last: RecipeOutput | null = null;
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const { output } = await generateText({
-      model: getAiModel(),
+      model: getAiModel('recipe_draft'),
       system: SYSTEM_PROMPT,
       prompt: JSON.stringify(providerJobContext(context)),
       output: Output.object({ schema: liveRecipeSchema }),

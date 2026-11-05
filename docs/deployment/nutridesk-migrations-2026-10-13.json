@@ -232,6 +232,11 @@
       "version": "20261103233000",
       "file": "20261103233000_platform_hub_ops.sql",
       "sha256": "7368eacdc1f36161f753fa475c07302a4f2069f1dfd70c01960ddfa8a12bf250"
+    },
+    {
+      "version": "20261105120000",
+      "file": "20261105120000_ai_usage_and_model_settings.sql",
+      "sha256": "ce5629b933b4aaba6ebef3add4b089ebd4a62cf51f54041dd61d9162aa108f20"
     }
   ],
   "hashScheme": "sha256-utf8-lf-v1",

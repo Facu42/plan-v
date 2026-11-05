@@ -84,7 +84,7 @@ export async function generateCopilotBrief(patient: AppStore['patients'][0]): Pr
 
   try {
     const { output } = await generateText({
-      model: getAiModel(),
+      model: getAiModel('copilot'),
       system: COPILOT_SYSTEM,
       prompt: context,
       output: Output.object({ schema: copilotBriefSchema }),

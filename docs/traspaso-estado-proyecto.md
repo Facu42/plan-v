@@ -106,6 +106,16 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 5/11 · Medidor de uso de IA y modelo por función
+Cada acción de IA (plan, receta, reemplazo, copiloto, foto, asistente del admin) se registra como un solo evento con función, modelo,
+tokens y costo; los créditos solo cuentan si salió bien. La nutri ve en Ajustes una barra de porcentaje y la fecha de renovación, nunca
+créditos, modelos ni costos (`GET /api/ai/uso`). El admin ve en /admin la vista «Uso de IA»: consumo por nutri, por consultorio y por
+función, y elige el modelo de cada función con sus precios de entrada y salida (`/api/admin/ai/uso` y `/api/admin/ai/modelos`).
+Sin elección guardada se sigue usando el modelo gratis. Un modelo pago solo se usa si el admin lo guardó, con tope de precio fijado ante
+OpenRouter y sin retención de datos. Migración `20261105120000_ai_usage_and_model_settings`: escrita, SIN aplicar (frase de Facundo);
+sin ella el medidor falla en silencio y guardar un modelo devuelve un aviso claro. Los topes por plan (400/1500/1700 créditos) y el plan
+consultorio son propuestas, no precios vigentes. La calidad de Luna en español y recetas no está probada.
+
 ## 29/10 · Verificar la IA desde el panel de administrador
 Nueva pestaña «Verificar IA» en /admin (`POST /api/admin/ai-check`, solo administrador). Hace una consulta corta al modelo gratis de
 OpenRouter y genera una foto de ejemplo con Cloudflare, sin usar cuentas ni datos de pacientes y sin guardar nada. Dice «Anda / No anda /

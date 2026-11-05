@@ -102,7 +102,7 @@ export async function analyzeMeal(input: {
 
   try {
     const { output } = await generateText({
-      model: getAiModel(),
+      model: getAiModel('meal_photo'),
       system: MEAL_SYSTEM,
       messages: [{ role: 'user', content: userParts }],
       output: Output.object({ schema: mealAnalysisSchema }),

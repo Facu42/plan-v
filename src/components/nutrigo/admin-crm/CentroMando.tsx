@@ -10,11 +10,12 @@ import { BandejaView, ConexionesView, FacturacionView, InicioView, NutrisHubView
 import { ActivacionView, CobranzaView, RiesgoView } from './hub-ops-views';
 import { useHubMotion } from './hub-motion';
 import { PlanesPrecios } from './PlanesPrecios';
+import { AdminIA } from './AdminIA';
 import { initials } from './centro-format';
 import { NdIcon } from './nd-icon';
 import './nd-styles.css';
 
-export const CENTRO_VIEWS = ['inicio', 'nutris', 'riesgo', 'pipeline', 'facturacion', 'cobranza', 'bandeja', 'conexiones', 'activacion', 'campanias', 'planes', 'salud', 'seguridad'] as const;
+export const CENTRO_VIEWS = ['inicio', 'nutris', 'riesgo', 'pipeline', 'facturacion', 'cobranza', 'bandeja', 'conexiones', 'activacion', 'campanias', 'planes', 'ia', 'salud', 'seguridad'] as const;
 export type CentroView = (typeof CENTRO_VIEWS)[number];
 
 const ALIAS: Record<string, CentroView> = {
@@ -38,6 +39,7 @@ const NAV: { group: string; items: { id: CentroView; label: string; icon: string
   ] },
   { group: 'Plataforma', items: [
     { id: 'planes', label: 'Planes y precios', icon: 'peso' },
+    { id: 'ia', label: 'Uso de IA', icon: 'bolt' },
   ] },
   { group: 'Sistema', items: [
     { id: 'salud', label: 'Salud', icon: 'bolt' },
@@ -57,6 +59,7 @@ const TITLES: Record<CentroView, [string, string]> = {
   activacion: ['Cuentas', 'Activación'],
   campanias: ['Comercial', 'Campañas'],
   planes: ['Plataforma', 'Planes y precios'],
+  ia: ['Plataforma', 'Uso de IA'],
   salud: ['Sistema', 'Salud'],
   seguridad: ['Sistema', 'Seguridad'],
 };
@@ -171,6 +174,8 @@ export function CentroMando({ adminName }: { adminName?: string }) {
       } else if (next === 'planes') {
         const row = await api.getPlanes();
         setData((current) => ({ ...current, planes: { plans: row.plans, changes: row.changes, testers: row.testers, editable: row.editable } }));
+      } else if (next === 'ia') {
+        // AdminIA pide sus propios datos.
       } else if (next === 'salud') {
         const salud = (await api.getCentroSalud()).salud;
         setData((current) => ({ ...current, salud }));
@@ -299,6 +304,7 @@ export function CentroMando({ adminName }: { adminName?: string }) {
   else if (view === 'conexiones' && data.conexiones) body = <ConexionesView data={data.conexiones} />;
   else if (view === 'campanias' && data.campaigns) body = <Campanias config={data.campaigns} />;
   else if (view === 'planes' && data.planes) body = <PlanesPrecios data={data.planes} onSaved={(planes) => setData((current) => ({ ...current, planes }))} />;
+  else if (view === 'ia') body = <AdminIA />;
   else if (view === 'salud' && data.salud) body = <SaludView data={data.salud} />;
   else if (view === 'seguridad' && data.seguridad) body = <SeguridadView data={data.seguridad} />;
   else body = <CentroState title="Cargando…" description="Estamos trayendo los datos reales del servicio." />;

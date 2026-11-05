@@ -174,6 +174,7 @@ visto bueno de Facundo.
 
 | Rango o archivo | Dueño | Estado |
 |---|---|---|
+| `20261105120000_ai_usage_and_model_settings` | Claude (hilo contenido con IA) | Medidor de uso de IA por nutri y modelo elegido por función. Dos tablas nuevas, solo servidor. Escrita. Sin aplicar. Hace falta la frase de Facundo |
 | `20261103233000_platform_hub_ops` | Cursor | Seguimientos de leads, avisos de cobranza, borradores, resumen del día y checklist que la nutri puede ocultar. Escrita. Sin aplicar. Hace falta la frase de Facundo |
 | `20261103180000_platform_hub` | Cursor | Leads, notas, tareas, hilos y mensajes del centro de gestión. Escrita. Sin aplicar. Hace falta la frase de Facundo |
 | `20261102233000_platform_plan_prices` | Cursor | Precios editables, historial y lista del plan de prueba. Escrita. Sin aplicar. Hace falta la frase de Facundo |

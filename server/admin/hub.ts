@@ -528,7 +528,7 @@ async function resumirDia(input: {
     const { generateText } = await import('ai');
     const { getAiModel } = await import('../ai/provider.js');
     const respuesta = await generateText({
-      model: getAiModel(),
+      model: getAiModel('admin_assistant'),
       prompt: `Reescribí en español rioplatense, en tres oraciones cortas y sin inventar cifras, este resumen de Nutridash: ${base.texto} Acciones: ${base.acciones.join(' ')}`,
       abortSignal: AbortSignal.timeout(12_000),
     });

@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { generateReplacement } from '../ai/replacements.js';
+import { nutritionistOfPatient, withAiAction } from '../ai/metering.js';
 import { AIUnavailableError } from '../ai/errors.js';
 import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import * as repo from '../care/repository.js';
@@ -43,7 +44,8 @@ export async function handleProcessingJob(job: ProcessingJob) {
     const consents = await currentCareConsents(patientId, persistent);
     if (!consents.consented.includes('ai_menu_draft')) throw new PermanentJobError('consent_revoked');
     const patient = persistent ? await sb.sbGetPatientById(patientId, 'professional') : getPatient(patientId);
-    const result = await generateReplacement(record.data, bundle.intake.payload, patient?.weekPlan ?? []);
+    const request = record.data;
+    const result = await withAiAction({ nutritionistId: await nutritionistOfPatient(patientId), feature: 'replacement' }, () => generateReplacement(request, bundle.intake.payload, patient?.weekPlan ?? []));
     await repo.saveReplacement({
       id: randomUUID(),
       patient_id: patientId,

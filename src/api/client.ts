@@ -1,3 +1,4 @@
+import type { AdminAiUsage, AiModelBoard, AiModelInput } from '../types/ai-usage';
 import { ApiError } from './error';
 import type { Brief, DemoNotice, GoalStatus, MealLog, Message, Patient, Stage } from '../types';
 import { getSessionToken } from '../lib/supabase';
@@ -301,6 +302,12 @@ export const api = {
     request<PlanesBoard & { source?: string }>(`/api/admin/planes/${code}`, { method: 'PUT', body: JSON.stringify(body) }),
   savePlanTesters: (emails: string[]) =>
     request<PlanesBoard & { source?: string }>('/api/admin/planes-testers', { method: 'PUT', body: JSON.stringify({ emails }) }),
+  getAdminAiUsage: () => request<{ usage: AdminAiUsage; source?: string }>('/api/admin/ai/uso'),
+  getAdminAiModels: () => request<AiModelBoard & { source?: string }>('/api/admin/ai/modelos'),
+  saveAdminAiModel: (feature: string, body: AiModelInput) =>
+    request<AiModelBoard & { source?: string }>(`/api/admin/ai/modelos/${feature}`, { method: 'PUT', body: JSON.stringify(body) }),
+  clearAdminAiModel: (feature: string) =>
+    request<AiModelBoard & { source?: string }>(`/api/admin/ai/modelos/${feature}`, { method: 'DELETE' }),
   getServiceBoard: () => request<{ board: ServiceBoard }>('/api/admin/service'),
   saveServiceSettings: (settings: ServiceSettings) =>
     request<{ settings: ServiceSettings }>('/api/admin/service/settings', { method: 'PUT', body: JSON.stringify(settings) }),

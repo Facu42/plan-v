@@ -2,6 +2,7 @@ import type { Hono, Context } from 'hono';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import { analysisOrUnavailable, analyzeMeal } from '../ai/meal-analyzer.js';
+import { nutritionistOfPatient, withAiAction } from '../ai/metering.js';
 import { hasFullPatientAccess } from '../../src/billing.js';
 import { currentCareConsents, requireCareConsent } from '../care/consents.js';
 import { validatePhoto } from '../care/repository.js';
@@ -195,12 +196,13 @@ export function registerDiaryRoutes(app: Hono) {
         };
       } else {
         try {
-          analysis = await analyzeMeal({
+          const mealNutritionistId = await nutritionistOfPatient(patientId);
+          analysis = await withAiAction({ nutritionistId: mealNutritionistId, feature: 'meal_photo' }, () => analyzeMeal({
             description: body.description,
             imageBase64: body.imageBase64,
             slot: body.slot,
             scheduledTitle: scheduled?.title,
-          });
+          }));
         } catch (error) {
           analysis = analysisOrUnavailable(error);
         }

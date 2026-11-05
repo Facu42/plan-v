@@ -18,6 +18,7 @@ import type { ModoMarca } from './AjustesEditores';
 import { CERTIFICATE_VARIABLES, NOTICE_KEYS, certificateVariables, type NoticeKey, type NoticeView, type TemplateView } from '../../types/ajustes';
 import type { ClinicBrand } from '../../types/nutrition-capabilities';
 import { PlanNutridash } from './PlanNutridash';
+import { AjustesUsoIA } from './AjustesUsoIA';
 
 type Icono = Parameters<typeof PanelV29Icon>[0]['name'];
 export type Marca = ClinicBrand | null;
@@ -58,6 +59,7 @@ export function AjustesCuenta({ marca, cargando, tema, onEditar, onExportar, onO
       <FxPanel titulo="Tu servicio de Nutridash">
         <PlanNutridash />
       </FxPanel>
+      <AjustesUsoIA />
       <FxPanel titulo="Obras sociales y reservas" meta="se configuran en tu página pública" grande>
         <FxKv filas={[['Obras sociales', '—'], ['Reservas', '—'], ['Cancelar', '—']]} />
         <div className="fxfoot"><Boton texto="Ir a Página pública" icono="globe" onClick={() => onOpen('/crm/agenda?agenda=publica')} /><Boton texto="Planilla por obra social" icono="dl" disabled /></div>

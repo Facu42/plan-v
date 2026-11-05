@@ -26,6 +26,7 @@ import { registerDiaryRoutes } from './diary/routes.js';
 import { registerMessageRoutes } from './messages/routes.js';
 import { registerAppointmentRoutes } from './appointments/routes.js';
 import { registerAiJobRoutes } from './ai-jobs/routes.js';
+import { registerAiUsageRoutes } from './ai/usage-routes.js';
 import { registerPrivacyRoutes } from './privacy/routes.js';
 import { registerShoppingRoutes } from './shopping/routes.js';
 import { registerFeeRoutes } from './fees/routes.js';
@@ -55,6 +56,7 @@ import { cors } from 'hono/cors';
 import { secureHeaders } from 'hono/secure-headers';
 import type { ZodType } from 'zod';
 import { generateCopilotBrief } from './ai/copilot.js';
+import { withAiAction } from './ai/metering.js';
 import { AIUnavailableError } from './ai/errors.js';
 import { readRuntimeConfig } from './config/runtime.js';
 import { persistDemoState, startDemoState } from './demo/state.js';
@@ -133,6 +135,7 @@ import {
   getInviteById,
   getPatient,
   getStore,
+  DEMO_NUTRITIONIST_ID,
   provisionNutritionistMemory,
   revokePatientInvite,
   renewPatientInvite,
@@ -326,6 +329,7 @@ registerDiaryRoutes(app);
 registerMessageRoutes(app);
 registerAppointmentRoutes(app);
 registerAiJobRoutes(app);
+registerAiUsageRoutes(app);
 registerPrivacyRoutes(app);
 registerShoppingRoutes(app);
 registerFeeRoutes(app);
@@ -554,7 +558,8 @@ app.post('/api/patients/:id/copilot', async (c) => {
   if (!patient) return c.notFound();
 
   if ('userId' in auth && isSupabaseEnabled()) await requireCareConsent(patientId, true, 'ai_followup');
-  const brief = await generateCopilotBrief(patient as Parameters<typeof generateCopilotBrief>[0]);
+  const copilotNutriId = 'userId' in auth && isSupabaseEnabled() ? await sb.sbGetNutritionistId(auth.userId) : DEMO_NUTRITIONIST_ID;
+  const brief = await withAiAction({ nutritionistId: copilotNutriId, feature: 'copilot' }, () => generateCopilotBrief(patient as Parameters<typeof generateCopilotBrief>[0]));
 
   if ('userId' in auth && isSupabaseEnabled()) {
     const nutriId = await sb.sbGetNutritionistId(auth.userId);
