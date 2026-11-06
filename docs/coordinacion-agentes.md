@@ -187,7 +187,7 @@ visto bueno de Facundo.
 | `20261015100000_habit_symptoms` | Claude | PR #112, en main desde el 14/10. Aplicada en la base el 14/10 con la frase de Facundo (el historial la anota como `20261014215543`) |
 | `20261015210000_activity_kcal` | Claude | PR #122, en main `9c56854`; ya observada aplicada con alias `20261015173356`. Se conserva como base exacta, no pendiente |
 | `20261015*` en adelante | Claude | Se anotan acá al crearlas |
-| `20261106100000_appointment_locations` | Claude | Sede de cada turno que agenda la nutri. Escrita el 5/11. Sin aplicar. Hace falta la frase de Facundo |
+| `20261106100000_appointment_locations` | Claude | Sede de cada turno que agenda la nutri. Escrita el 5/11. **Aplicada en la base el 6/11** con la frase de Facundo («aplicá sedes de turnos en la base»); verificada: RLS activa, 4 políticas, 0 filas. Falta el ok visual para juntar el PR #295 a main |
 | `20261020120000_patient_subscriptions` | Cursor | Escrita el 19/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261030120000_platform_billing` | Cursor | Cobro de Nutridash a la nutri. Escrita el 30/10. Sin aplicar. Hace falta la frase de Facundo |
 | `20261031180000_habit_reminders` | Cursor | Recordatorios de comer, agua y dormir. Escrita el 31/10. Sin aplicar. Hace falta la frase de Facundo |
