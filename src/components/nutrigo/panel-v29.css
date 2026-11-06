@@ -2750,9 +2750,9 @@
 #pv-panel-v29 #s-planes .dmf button:hover{text-decoration:underline;text-underline-offset:3px}
 #pv-panel-v29 #s-planes .dmf button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6}
 #pv-panel-v29 #s-planes .dmf .k{color:var(--ink3);margin-left:auto;font-size:11.5px}
-#pv-panel-v29 #s-planes [data-iaa="dr"],#pv-panel-v29 #s-planes [data-iaa="go"],#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"]{background:linear-gradient(100deg,#0042B0 0%,#0054D3 45%,#0096E6 100%)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(0,66,176,.25)}
-#pv-panel-v29 #s-planes [data-iaa="dr"] svg,#pv-panel-v29 #s-planes [data-iaa="go"] svg,#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"] svg{stroke:#fff;color:#fff}
-#pv-panel-v29 #s-planes [data-iaa="dr"]:hover,#pv-panel-v29 #s-planes [data-iaa="go"]:hover:not([disabled]),#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"]:hover{background:linear-gradient(100deg,#003A9C 0%,#004CC0 45%,#0088D4 100%)!important}
+#pv-panel-v29 #s-planes [data-iaa="dr"],#pv-panel-v29 #s-planes [data-iaa="go"],#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"],#pv-panel-v29 #s-planes .pstart .sbtn.k{background:linear-gradient(100deg,#0042B0 0%,#0054D3 45%,#0096E6 100%)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(0,66,176,.25)}
+#pv-panel-v29 #s-planes [data-iaa="dr"] svg,#pv-panel-v29 #s-planes [data-iaa="go"] svg,#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"] svg,#pv-panel-v29 #s-planes .pstart .sbtn.k svg{stroke:#fff;color:#fff}
+#pv-panel-v29 #s-planes [data-iaa="dr"]:hover,#pv-panel-v29 #s-planes [data-iaa="go"]:hover:not([disabled]),#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"]:hover,#pv-panel-v29 #s-planes .pstart .sbtn.k:hover{background:linear-gradient(100deg,#003A9C 0%,#004CC0 45%,#0088D4 100%)!important}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail{border:0;border-top:1px solid var(--line);border-radius:0}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail>summary{padding:12px 0 0;min-height:48px}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail>.pux-detail-body{padding:16px 0 0}
