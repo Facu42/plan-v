@@ -3063,3 +3063,47 @@
 #pv-panel-v29 #s-ficha .fxdk::after{display:none}
 #pv-panel-v29 #s-ficha .fxdk>small,#pv-panel-v29 #s-ficha .fxdk>span,#pv-panel-v29 #s-ficha .fxdk .fxdk2 span{color:rgba(244,245,240,.72)}
 #pv-panel-v29 #s-ficha .fxdk .fxdk2{border-top-color:rgba(255,255,255,.18)}
+/* ===== Movimiento: CSS puro, 200-320 ms, apagado con "reducir movimiento" ===== */
+#pv-panel-v29{--mv:cubic-bezier(.16,1,.3,1);--mva:cubic-bezier(.25,.8,.25,1)}
+@keyframes mvIn{from{opacity:0;transform:translateY(8px)}}
+@keyframes mvBar{from{transform:scaleX(0)}}
+@keyframes mvPop{from{opacity:0;transform:scale(.97)}}
+@keyframes mvSheet{from{transform:translateY(100%)}}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*){animation:mvIn .5s var(--mva) backwards;animation-delay:calc(var(--mi,0)*50ms)}
+#pv-panel-v29 .scr:not([hidden]) .kpis>*{animation-delay:calc(var(--mi,0)*90ms)}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(2){--mi:1}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(3){--mi:2}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(4){--mi:3}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(5){--mi:4}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(6){--mi:5}
+#pv-panel-v29 .scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(n+7){--mi:6}
+#pv-panel-v29 .scr:not([hidden]) :is(.dprog .tr i,.fxstk i,.sxdays i.on){transform-origin:left center;animation:mvBar .9s var(--mva) backwards;animation-delay:.25s}
+#pv-panel-v29:is(.cta,.chip,.sbtn,.ibtn,.tg2):active,#pv-panel-v29 :is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:.97}
+#pv-panel-v29:is(.cta,.chip,.sbtn,.ibtn,.tg2),#pv-panel-v29 :is(.cta,.chip,.sbtn,.ibtn,.tg2){-webkit-tap-highlight-color:transparent}
+#pv-panel-v29 #act{will-change:transform}
+#pv-panel-v29 #atoast{transition:opacity .22s var(--mv),transform .26s var(--mv)}
+#pv-panel-v29.mob .mhd{background:color-mix(in srgb,var(--side) 78%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);position:relative}
+#pv-panel-v29.mob .mnav{padding-left:12px;padding-right:12px}
+#pv-panel-v29.mob .mnav::before{content:"";position:absolute;top:10px;left:12px;height:calc(100% - 26px - env(safe-area-inset-bottom,0px));width:calc((100% - 24px)/5);border-radius:16px;background:var(--lima-tt);transform:translateX(0);transition:transform .34s var(--mv);pointer-events:none}
+#pv-panel-v29.mob .mnav:has(button:nth-child(2).on)::before{transform:translateX(100%)}
+#pv-panel-v29.mob .mnav:has(button:nth-child(3).on)::before{transform:translateX(200%)}
+#pv-panel-v29.mob .mnav:has(button:nth-child(4).on)::before{transform:translateX(300%)}
+#pv-panel-v29.mob .mnav:has(button:nth-child(5).on)::before{transform:translateX(400%)}
+#pv-panel-v29.mob .mnav:not(:has(button.on))::before{opacity:0}
+#pv-panel-v29.mob .mnav button.on{background:none}
+#pv-panel-v29.mob .mnav button svg{transition:transform .3s var(--mv)}
+#pv-panel-v29.mob .mnav button.on svg{transform:translateY(-1px) scale(1.08)}
+#pv-panel-v29.mob .mnav button:active svg{transform:scale(.9)}
+#pv-panel-v29.mob .main{padding:16px 16px 18px;gap:14px;scroll-behavior:smooth}
+#pv-panel-v29.mob .scr{gap:14px}
+#pv-panel-v29.mob .fxp,#pv-panel-v29.mob .card{border-radius:20px}
+#pv-panel-v29.mob .fxr>*{min-height:52px}
+#pv-panel-v29.mob :is(.chip,.sbtn,.cta){min-height:40px}
+#pv-panel-v29.mob .top h1{font-size:25px;letter-spacing:-.025em}
+#pv-panel-v29.mob .kpi .ft{white-space:normal;flex-wrap:wrap;row-gap:2px}
+#pv-panel-v29.mob .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#pv-panel-v29.mob .kpis>.kpi{height:auto;min-height:104px}
+#pv-panel-v29.mob .kpis>:last-child:nth-child(odd){grid-column:1/-1!important}
+#pv-panel-v29.mob #act::before{content:"";display:block;width:40px;height:4px;border-radius:99px;background:var(--line2);margin:8px auto 0;flex:none}
+#pv-panel-v29.mob #actw.on #act{animation:mvSheet .38s var(--mv)}
+@media (prefers-reduced-motion:reduce){#pv-panel-v29 .scr :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*,.dprog .tr i,.fxstk i,.sxdays i.on){animation:none!important}#pv-panel-v29.mob .mnav::before,#pv-panel-v29.mob .mnav button svg,#pv-panel-v29 #atoast{transition:none}#pv-panel-v29.mob #actw.on #act{animation:none}#pv-panel-v29:is(.cta,.chip,.sbtn,.ibtn,.tg2):active,#pv-panel-v29 :is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:1}}

@@ -518,3 +518,5 @@ Fase 1 del [plan aprobado](panel-nutri-rediseno/plan.md) entregada por Codex en 
 - Equipo (v29): tres vistas armadas con el código del boceto, PR en borrador (ver docs/panel-nutri-rediseno/equipo-v29.md).
 
 - 6/11 Ficha contra el boceto v29 (contrato `panel:contrato:v29`, tema claro, demo): las 270 piezas de la Ficha y sus solapas coinciden. Única diferencia hallada: el botón «Armar con el asistente» de «Cómo empezar el plan» salía azul en la app y negro en el boceto; el boceto ahora lo declara azul (`#s-planes .pstart .sbtn.k`) y la app dejó de usar `data-pa="nuevo"` ahí. Falta correr el tema oscuro (el contrato corta en la Ficha con datos demo; se corrió con las esperas de la Ficha tolerantes).
+
+- 6/11 Movimiento y celular del panel (boceto v29 primero, CSS puro, sin GSAP): entradas escalonadas de tarjetas y filas, barras que se llenan, botones que responden al apretar, hoja de acción con agarre y resorte, barra de abajo del celular con indicador que se desliza, cabecera translúcida, tarjetas más grandes y textos de las tarjetas de Inicio sin cortarse. Todo apagado con «reducir movimiento».
