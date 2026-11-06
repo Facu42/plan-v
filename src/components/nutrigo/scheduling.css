@@ -54,3 +54,21 @@
 .pub-horarios dt{flex:none}.pub-horarios dd{flex:1;min-width:0}
 .pub-mapa{background:var(--nv-bg)}
 @media(max-width:600px){.pub-horarios>div{flex-wrap:wrap;gap:2px}.pub-horarios dd{text-align:left;flex-basis:100%}}
+/* Portada con color propio, datos en vivo y acciones. */
+.scheduling-panel .pub-hero{--pa:var(--pub-accent,#C2E66E);color:#fff;border:0;background:radial-gradient(120% 120% at 90% 0%,color-mix(in srgb,var(--pa) 85%,#fff) 0%,color-mix(in srgb,var(--pa) 45%,#10200a) 38%,#0f1a09 78%);box-shadow:0 24px 60px -30px #0008}
+.scheduling-panel .pub-hero p,.scheduling-panel .pub-hero a{color:inherit}
+.scheduling-panel .pub-hero li{background:#ffffff26;border-color:transparent;color:#fff;backdrop-filter:blur(6px)}
+.scheduling-panel .pub-hero .pub-verif{background:var(--pa);color:#1a2605}
+.scheduling-panel .pub-vivo{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}
+.scheduling-panel .pub-vivo span{display:inline-flex;align-items:center;gap:8px}
+.scheduling-panel .pub-vivo i{width:9px;height:9px;border-radius:50%;background:var(--pa)}
+.scheduling-panel .pub-vivo .pub-abierto i{background:#3ccb5a;box-shadow:0 0 0 0 #3ccb5a99;animation:pubpulso 1.8s ease-out 3}
+.scheduling-panel .pub-vivo .pub-cerrado-ahora i{background:#ffffff80}
+@keyframes pubpulso{to{box-shadow:0 0 0 10px #3ccb5a00}}
+.scheduling-panel .pub-acciones{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:6px!important}
+.scheduling-panel .pub-hero .pub-cta{display:inline-flex;align-items:center;min-height:48px;padding:0 26px;border-radius:999px;background:#fff;color:#1a2605;font-weight:700;text-decoration:none;transition:transform .2s ease}
+.scheduling-panel .pub-hero .pub-cta:hover{transform:translateY(-2px)}
+.scheduling-panel .pub-hero .pub-resenas{font-weight:600;text-decoration:underline;text-underline-offset:4px}
+@media(max-width:600px){.scheduling-panel .pub-hero .pub-cta{position:fixed;left:16px;right:16px;bottom:16px;z-index:20;justify-content:center;box-shadow:0 12px 30px #0006;background:var(--pa)}}
+@media(prefers-reduced-motion:reduce){.scheduling-panel .pub-vivo i,.scheduling-panel .pub-hero .pub-cta{animation:none;transition:none}}
+.scheduling-panel .pub-nd{margin-bottom:8px}@media(max-width:600px){.scheduling-panel .pub-nd{margin-bottom:88px}}

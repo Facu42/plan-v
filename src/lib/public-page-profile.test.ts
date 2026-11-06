@@ -27,6 +27,8 @@ describe('perfil público de la nutri', () => {
       specialties: ['Embarazo'], area: 'Palermo', license: 'MN 1', modality: 'presencial',
       consult_price_minor: 4000000, booking_url: 'https://turno.example', color: '#010203',
       photo: 'data:image/png;base64,xx',
+      // El link de reseñas de Google es público a propósito; lo demás de page_extras no sale.
+      reviews_url: 'https://g.page/ana-nutri',
     });
     expect(perfil).not.toHaveProperty('insurers');
     expect(perfil).not.toHaveProperty('photo_sha256');

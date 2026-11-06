@@ -50,5 +50,6 @@ export function publicPageProfile(extras: PageExtras | undefined, photo = ''): P
     color: extras?.color,
     accent: extras?.accent,
     photo,
+    ...(extras?.google_business_url?.trim() ? { reviews_url: extras.google_business_url.trim() } : {}),
   };
 }

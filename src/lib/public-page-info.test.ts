@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { filasHorarios, urlMapa, dineroPublico } from './public-page-info';
+import { filasHorarios, urlMapa, dineroPublico, estadoAtencion, etiquetaTurno, esReseñaGoogle } from './public-page-info';
 
 describe('información pública de /slug', () => {
   it('ordena de lunes a domingo, une tramos pegados y marca los días cerrados', () => {
@@ -23,5 +23,28 @@ describe('información pública de /slug', () => {
   it('precio en pesos o «Consultar»', () => {
     expect(dineroPublico(4500000)).toBe('$45.000');
     expect(dineroPublico(0)).toBe('Consultar');
+  });
+  const horas = [{ weekday: 1, start: '09:00', end: '13:00' }, { weekday: 1, start: '15:00', end: '19:00' }, { weekday: 3, start: '09:00', end: '12:00' }];
+  // Lunes 9/11/2026 a las 10:00 en Argentina = 13:00 UTC.
+  it('abierto ahora dentro de un tramo y con la hora de cierre', () => {
+    expect(estadoAtencion(horas, new Date('2026-11-09T13:00:00Z'))).toEqual({ abierto: true, texto: 'Abierto ahora · atiende hasta las 13:00' });
+  });
+  it('cerrado entre tramos dice cuándo abre hoy, y de noche el próximo día con atención', () => {
+    expect(estadoAtencion(horas, new Date('2026-11-09T16:00:00Z'))?.texto).toBe('Cerrado ahora · abre hoy a las 15:00');
+    expect(estadoAtencion(horas, new Date('2026-11-09T23:00:00Z'))?.texto).toBe('Cerrado ahora · abre miércoles a las 09:00');
+  });
+  it('sin horarios no muestra estado', () => {
+    expect(estadoAtencion(undefined)).toBeNull();
+  });
+  it('etiqueta del próximo turno: hoy, mañana o el día', () => {
+    const ahora = new Date('2026-11-09T13:00:00Z');
+    expect(etiquetaTurno('2026-11-09T19:30:00Z', ahora)).toBe('hoy 16:30');
+    expect(etiquetaTurno('2026-11-10T13:00:00Z', ahora)).toBe('mañana 10:00');
+    expect(etiquetaTurno('2026-11-12T13:00:00Z', ahora)).toBe('jueves 12 10:00');
+  });
+  it('las reseñas solo se enlazan con https', () => {
+    expect(esReseñaGoogle('https://g.page/r/abc')).toBe(true);
+    expect(esReseñaGoogle('javascript:alert(1)')).toBe(false);
+    expect(esReseñaGoogle(undefined)).toBe(false);
   });
 });

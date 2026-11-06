@@ -39,6 +39,8 @@ export const publicPageProfileSchema=z.object({
  color:brandHex.optional(),
  accent:brandHex.optional(),
  photo:z.string(),
+ /** Link de Google para ver y dejar reseñas (solo https de Google). */
+ reviews_url:z.string().optional(),
 }).strict();
 export type PublicPageProfile=z.infer<typeof publicPageProfileSchema>;
 export const schedulingSettingsSchema=z.object({

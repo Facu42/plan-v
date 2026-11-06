@@ -32,4 +32,17 @@ describe('encabezado público /slug', () => {
     expect(html).not.toContain('Reservar turno');
     expect(html).not.toContain('mailto:');
   });
+
+  it('con servicios suma el botón a la reserva, el estado en vivo y las reseñas de Google', () => {
+    const html = renderToStaticMarkup(<PublicProfessionalHeader proximo="mañana 10:00" page={{
+      page: page.page, profile: { ...publicPageProfile({ ...page.page_extras, booking_url: '' }), reviews_url: 'https://g.page/r/ana' },
+      calendars: page.calendars, timezone: page.timezone, transfer_alias: '', mercado_pago_connected: false,
+      types: [{ id: '00000000-0000-4000-a000-0000000000aa', name: 'Consulta', calendar_id: page.calendars[0].id, duration_min: 40, channel: 'video', price_minor: 100, deposit_minor: 0 }],
+      hours: [{ weekday: 1, start: '09:00', end: '13:00' }],
+    }} />);
+    expect(html).toContain('href="#reservar"');
+    expect(html).toContain('Próximo turno libre: mañana 10:00');
+    expect(html).toContain('https://g.page/r/ana');
+    expect(html).toMatch(/abre|Abierto ahora|Cerrado ahora/);
+  });
 });
