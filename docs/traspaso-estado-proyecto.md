@@ -128,6 +128,9 @@ Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, en
 ## 5/11 · Letra legible del panel
 En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
 
+## 6/11 · Seguimiento: cola de fotos con el código del boceto
+La cola «Comidas con foto» usa ahora el mismo HTML y clases del boceto v29 (`.l` > `.sxmeal` con avatar, miniatura `.sxpic` de 36px y texto, y `.sxacts` con botones `.chip`), en lugar de la fila propia de 60px. Se conservan las tres acciones reales: Confirmar, Ajustar y Comentar. Se sacó el estilo `cola-*` de `panel-v29-app.css` (quedan vacío, error y carga).
+
 ## 6/11 · Editor de planes más cómodo (boceto aprobado por Facundo)
 Seis cambios, primero en el boceto v29 y después en `PanelPlanEditor.tsx`: cada día muestra sus calorías debajo de la fecha (sin gráfico semanal), los macros se ven una sola vez (resumen de la derecha), comidas más compactas, «Agregar alimento» y «Cambiar plato» escritos al pie de la comida abierta, sin el medidor del porcentaje, y «Asistente IA» (y «Crear con el asistente») con el degradé azul del logo. Estilos en `panel-trabajo.html` (`#s-planes .dkc`, `.dmf`, `[data-iaa]`) y `panel-v29.css` regenerado.
 
