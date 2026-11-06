@@ -90,3 +90,16 @@ Reglas de uso:
    concreto. Si ya hay una tarea, se ignora ese saludo y se trabaja.
 5. No se instalaron `emil-design-eng`, `apple-design` ni `prototype` (empujan una estética propia),
    ni los hooks, agentes ni el resto de las habilidades de ECC.
+
+## Habilidad de landings sumada el 2026-11-06 (elayadesign)
+
+Pedido de Facundo, 2026-11-06. Se copió `landing-page-design` de
+[elayadesign/ai-design-skills](https://github.com/elayadesign/ai-design-skills) (MIT, copia en
+`.claude/LICENSE-elayadesign-ai-design-skills`) a `.claude/skills/landing-page-design/`, sin scripts ni
+la otra habilidad del repositorio (`figma-designer`). Solo se cambió su descripción.
+
+1. **Vale solo para las landings públicas de Nutridash y el login.** No se usa en el panel de la nutri
+   (manda el código del boceto v29, que usa Inter) ni en la app de la paciente (manda Nutrigo en Figma).
+2. Su regla de no inventar datos se suma a la nuestra: precios, testimonios y números salen de Facundo;
+   lo que falta va marcado como ejemplo.
+3. Las imágenes de las landings se generan con Higgsfield desde el conector, con el saldo de Facundo.

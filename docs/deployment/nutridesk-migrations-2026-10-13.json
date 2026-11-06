@@ -244,6 +244,11 @@
       "sha256": "90235a9cb3f695f151c79b7fb00eac04712e7812d2968f2735488b95f4ac8ef8"
     },
     {
+      "version": "20261106000000",
+      "file": "20261106000000_ai_menu_draft_consent_v2.sql",
+      "sha256": "d0f86dd850bf16d54482ae31ea75c3339c94d7e3faee4fc82ea39aa3cf67eb6e"
+    },
+    {
       "version": "20261106100000",
       "file": "20261106100000_appointment_locations.sql",
       "sha256": "3c7a3bb73a776eda86b2a2c48374b5ab230c078d985d3c6b0b4c717d7835a067"

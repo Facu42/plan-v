@@ -46,7 +46,7 @@ const realDeps: FullCheckDeps = {
       schema: RECIPE_PROMPT_VERSION,
       allergies: { state: 'none', items: [] },
       restrictions: { state: 'none', items: [] },
-      patient_profile: { goal: '', conditions_note: '', hydration_glasses: null, sleep_hours: null, energy: null },
+      patient_profile: { goal: '', conditions_note: '', hydration_glasses: null, sleep_hours: null, energy: null, measurements: [], labs: [] },
       cooking_time_minutes: 30,
       title_hint: 'Ensalada de lentejas con verduras',
     });
