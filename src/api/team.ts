@@ -2,6 +2,8 @@ import {request} from './client';
 import type {SchedulingBooking,BookingChange} from '../types/scheduling';
 import type {PatientLedger,PaymentInput,PaymentDecision,ChargeInput} from '../types/fees';
 import type {OrganizationView,CareLinkView} from '../types/orgs';
+/** Invitación de secretaria: el código, el enlace para abrir y si el mail salió. */
+export type StaffInvite={token:string;expires_in_days:number;link:string|null;mail:'enviado'|'apagado'|'fallo'};
 export type Workplace={nutritionist_id:string;name:string;owner:boolean};
 export type ContactCard={id:string;name:string;email:string;phone:string;revision:number};
 export type TeamOperations={contacts:ContactCard[];has_more_contacts:boolean;bookings:SchedulingBooking[];has_more:boolean;transfers:Array<{id:string;booking_id:string;amount_minor:number;reference:string}>};
@@ -12,7 +14,7 @@ const json=(method:string,data:unknown)=>({method,body:JSON.stringify(data)}),ba
 export const teamApi={
  workplaces:()=>request<{workplaces:Workplace[]}>('/api/team'),
  accept:(token:string)=>request('/api/team/accept',json('POST',{token})),
- invite:(nid:string,email:string)=>request<{token:string;expires_in_days:number}>(`${base(nid)}/invites`,json('POST',{email})),
+ invite:(nid:string,email:string,mail=true)=>request<StaffInvite>(`${base(nid)}/invites`,json('POST',{email,mail})),
  members:(nid:string)=>request<{members:Array<{user_id:string;email:string;revoked:boolean}>}>(`${base(nid)}/members`),
  revoke:(nid:string,userId:string)=>request(`${base(nid)}/members/${encodeURIComponent(userId)}`,{method:'DELETE'}),
  operations:(nid:string,offset=0)=>request<TeamOperations>(`${base(nid)}/operations?offset=${offset}`),

@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState, type FormEvent, type KeyboardEvent as TeclaEvento, type ReactNode } from 'react';
 import { api } from '../../api/client';
 import { useAppStore } from '../../store/useAppStore';
+import { consultorioApi } from '../../api/consultorio';
+import { friendlyError } from '../../lib/error-messages';
 import type { Patient } from '../../types';
 import type { SchedulingBooking, SchedulingSettings } from '../../types/scheduling';
-import { agendaDay, argentinaStamp, bookingHref, buildPanelAgendaEvents, dayHeading, depositMode, monthGrid, monthLabel, nowFraction, shiftDay, weekDays, withHalfDeposit, type AgendaView, type PanelAgendaEvent } from '../../lib/panel-agenda';
+import { agendaDay, argentinaStamp, bookingHref, buildPanelAgendaEvents, eventosDeSede, dayHeading, depositMode, monthGrid, monthLabel, nowFraction, shiftDay, weekDays, withHalfDeposit, type AgendaView, type PanelAgendaEvent } from '../../lib/panel-agenda';
 import { secureMeetUrl } from './ShowroomConsultations';
 import { GoogleReviewControl } from './GoogleReviewControl';
 import { PanelConnections, type ConnectionKey } from './PanelConnections';
@@ -13,6 +15,7 @@ import { claseDeEvento, consultasDelDia, encabezadoAgenda, etiquetaDeEvento, fra
 import { argentinaStart, inVideoCallWindow } from '../../lib/video-call-window';
 import { OfertaGrabarAudioDelTurno } from './MeetAudioBar';
 import { useUnsavedChanges } from './unsaved-changes';
+import { agregarSede, cambiarSede, MAX_SEDES, MODALIDADES, quitarSede, type SedeModalidad } from '../../lib/sedes';
 import { usePanelScheduling } from './use-panel-scheduling';
 import { marcarHechoSiCorresponde } from '../../lib/hoy-sesion';
 import './panel-fase5.css';
@@ -34,12 +37,13 @@ const DIAS_MES = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 const INICIALES_SEMANA = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 const ESTE_PERIODO: Record<AgendaView, string> = { dia: 'este día', semana: 'esta semana', mes: 'este mes' };
 
-function Acciones({ view, busy, loading, onView, onShift, onBlock, onManage }: { view: AgendaView; busy: boolean; loading: boolean; onView: (view: AgendaView) => void; onShift: (delta: number) => void; onBlock: () => void; onManage: () => void }) {
+function Acciones({ view, busy, loading, onView, onShift, onBlock, onManage, sedes = [], sede = '', onSede }: { view: AgendaView; busy: boolean; loading: boolean; onView: (view: AgendaView) => void; onShift: (delta: number) => void; onBlock: () => void; onManage: () => void; sedes?: SchedulingSettings['calendars']; sede?: string; onSede?: (sede: string) => void }) {
   const periodo = { dia: 'día', semana: 'la semana', mes: 'el mes' }[view];
   return <>
     <div className="tabs" role="group" aria-label="Vista de la agenda">{VISTAS.map(([id, label]) => <button type="button" key={id} className={view === id ? 'on' : undefined} aria-pressed={view === id} onClick={() => onView(id)}>{label}</button>)}</div>
     <button className="ibtn" type="button" aria-label={`${PERIODO[view]} anterior`} title={view === 'dia' ? 'Ir al día anterior' : `Ir a ${periodo} anterior`} onClick={() => onShift(-1)}><PanelV29Icon name="left" /></button>
     <button className="ibtn" type="button" aria-label={`${PERIODO[view]} siguiente`} title={view === 'dia' ? 'Ir al día siguiente' : `Ir a ${periodo} siguiente`} onClick={() => onShift(1)}><PanelV29Icon name="right" /></button>
+    {sedes.length > 1 && onSede ? <label className="chip ag-sede"><PanelV29Icon name="pin" /><select aria-label="Ver la agenda de la sede" value={sede} onChange={event => onSede(event.target.value)}><option value="">Todas las sedes</option>{sedes.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label> : null}
     <button className="chip" type="button" onClick={onBlock} disabled={busy || loading}><PanelV29Icon name="lock" />Bloquear horario</button>
     <button className="cta" type="button" onClick={onManage}><PanelV29Icon name="plus" />Nuevo turno</button>
   </>;
@@ -47,7 +51,7 @@ function Acciones({ view, busy, loading, onView, onShift, onBlock, onManage }: {
 
 const iniciar = (nombre: string) => inicialesDe(nombre);
 
-export function PanelAgendaView({ view, anchor = '', days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onPickSlot, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor, transfers = [], bookings = [], moreBookings = false, morePatients = false, onReviewTransfer, onSync, onReconcile, onMoreBookings, onMorePatients, onDisconnect, libres = [], recordatorio, onPickDay, onMonth, onHeader }: {
+export function PanelAgendaView({ view, anchor = '', days, today, now, events, pending, types, page, connections, status, busy, loading, error, focus, onView, onShift, onToday, onManage, onPickSlot, onCopy, onConnect, onConfirm, onCancel, onReschedule, onBlock, onRetry, patients, editor, transfers = [], bookings = [], moreBookings = false, morePatients = false, onReviewTransfer, onSync, onReconcile, onMoreBookings, onMorePatients, onDisconnect, libres = [], recordatorio, onPickDay, onMonth, onHeader, sedes = [], sede = '', onSede }: {
   title?: string; subtitle?: string; view: AgendaView; anchor?: string; days: string[]; today: string; now: Date; events: PanelAgendaEvent[];
   pending: SchedulingBooking[]; types: SchedulingSettings['types']; page?: SchedulingSettings['page'];
   connections: Record<ConnectionKey, boolean>; status: string; busy: boolean; loading: boolean; error: string; focus: string | null;
@@ -57,6 +61,7 @@ export function PanelAgendaView({ view, anchor = '', days, today, now, events, p
   transfers?: Array<{ id: string; amount_minor: number; reference: string }>; bookings?: SchedulingBooking[]; moreBookings?: boolean; morePatients?: boolean;
   onReviewTransfer?: (id: string, decision: 'confirm' | 'reject') => void; onSync?: (id: string) => void; onReconcile?: (id: string) => void; onMoreBookings?: () => void; onMorePatients?: () => void; onDisconnect?: (key: 'google' | 'mercadopago') => void;
   libres?: LugarLibre[]; recordatorio?: boolean; onPickDay?: (day: string) => void; onMonth?: (delta: number) => void; onHeader?: (header: AgendaHeader | null) => void;
+  sedes?: SchedulingSettings['calendars']; sede?: string; onSede?: (sede: string) => void;
 }) {
   const [seccion, setSeccion] = useState<Seccion | null>(focus === 'horarios' || focus === 'pagos' || focus === 'conexiones' ? focus : null);
   const ancla = anchor || days[0] || today;
@@ -64,8 +69,8 @@ export function PanelAgendaView({ view, anchor = '', days, today, now, events, p
   const filas = franja.end - franja.start;
   const proximo = useMemo(() => proximoEvento(events, now), [events, now]);
   const encabezado = encabezadoAgenda(view, ancla, days, events, libres.length, pending.length);
-  const acciones = <Acciones view={view} busy={busy} loading={loading} onView={onView} onShift={onShift} onBlock={onBlock} onManage={onManage} />;
-  const claveEncabezado = `${encabezado.sufijo}|${encabezado.cuando}|${view}|${busy}|${loading}`;
+  const acciones = <Acciones view={view} busy={busy} loading={loading} onView={onView} onShift={onShift} onBlock={onBlock} onManage={onManage} sedes={sedes} sede={sede} onSede={onSede} />;
+  const claveEncabezado = `${encabezado.sufijo}|${encabezado.cuando}|${view}|${busy}|${loading}|${sede}|${sedes.map(item => item.name).join(',')}`;
   useEffect(() => { onHeader?.({ sufijo: encabezado.sufijo, cuando: encabezado.cuando, actions: acciones }); }, [claveEncabezado]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => () => onHeader?.(null), []); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (focus === 'horarios' || focus === 'pagos' || focus === 'conexiones') setSeccion(focus); }, [focus]);
@@ -185,18 +190,31 @@ function Pedido({ booking, types, patients, busy, morePatients, onMorePatients, 
 function HoursEditor({ config, busy, googleConnected, onChange, onSave }: { config: SchedulingSettings; busy: boolean; googleConnected: boolean; onChange: (next: SchedulingSettings) => void; onSave: () => void }) {
   const mode = depositMode(config.types);
   const setTypes = (types: SchedulingSettings['types']) => onChange({ ...config, types });
+  const variasSedes = config.calendars.length > 1;
+  const elegirSede = (valor: string, cambiar: (id: string) => void) => <label>Sede<select value={valor} onChange={event => cambiar(event.target.value)}>{config.calendars.map(sede => <option key={sede.id} value={sede.id}>{sede.name}</option>)}</select></label>;
   return <section className="p5-card" id="pn-horarios"><header><h3>Horarios y precios</h3></header>
+    <h4 id="pn-sedes">Sedes</h4>
+    <p>Cada sede tiene sus días de atención y sus tipos de consulta. En la página pública la paciente elige la sede antes que el horario.</p>
+    {config.calendars.map((sede, index) => <fieldset key={sede.id} className="pn-sede"><legend>{index === 0 ? `${sede.name || 'Sede'} · principal` : sede.name || 'Sede'}</legend>
+      <label>Nombre<input aria-label={`Nombre de la sede ${index + 1}`} maxLength={80} required value={sede.name} onChange={event => onChange(cambiarSede(config, sede.id, { name: event.target.value }))} /></label>
+      <label>Dirección<input aria-label={`Dirección de la sede ${index + 1}`} maxLength={200} placeholder="Calle, número y ciudad" value={sede.address ?? ''} onChange={event => onChange(cambiarSede(config, sede.id, { address: event.target.value }))} /></label>
+      <label>Modalidad<select aria-label={`Modalidad de la sede ${index + 1}`} value={sede.modality ?? 'presencial'} onChange={event => onChange(cambiarSede(config, sede.id, { modality: event.target.value as SedeModalidad }))}>{MODALIDADES.map(([id, texto]) => <option key={id} value={id}>{texto}</option>)}</select></label>
+      {variasSedes && <button type="button" className="p5-btn" onClick={() => { if (window.confirm(`¿Quitar la sede ${sede.name || index + 1}? Sus horarios y tipos de consulta pasan a ${config.calendars.find(item => item.id !== sede.id)?.name ?? 'la primera sede'}.`)) onChange(quitarSede(config, sede.id)); }}>Quitar sede</button>}
+    </fieldset>)}
+    <button type="button" className="p5-btn" disabled={config.calendars.length >= MAX_SEDES} onClick={() => onChange(agregarSede(config))}>Agregar sede</button>
+    <h4>Tipos de consulta</h4>
     {config.types.map(type => <fieldset key={type.id}><legend>{type.name || 'Consulta'}</legend>
       <label>Nombre<input value={type.name} maxLength={80} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, name: event.target.value } : item))} /></label>
       <label>Minutos<input type="number" min={10} max={180} value={type.duration_min} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, duration_min: Number(event.target.value) } : item))} /></label>
       <label>Precio<input type="number" min={0} step="1" value={type.price_minor / 100} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, price_minor: Math.round(Number(event.target.value) * 100) } : item))} /></label>
       <label>Seña en pesos<input type="number" min={0} step="1" value={type.deposit_minor / 100} onChange={event => { const deposit = Math.round(Number(event.target.value) * 100); setTypes(config.types.map(item => item.id === type.id ? { ...item, deposit_minor: Math.min(deposit, item.price_minor) } : item)); }} /></label>
       <label>Modalidad<select value={type.channel} onChange={event => setTypes(config.types.map(item => item.id === type.id ? { ...item, channel: event.target.value as 'video' | 'presencial' } : item))}><option value="presencial">Consultorio</option><option value="video">Online</option></select></label>
+      {variasSedes && elegirSede(type.calendar_id, id => setTypes(config.types.map(item => item.id === type.id ? { ...item, calendar_id: id } : item)))}
       <button type="button" className="p5-btn" onClick={() => setTypes(config.types.filter(item => item.id !== type.id))}>Quitar</button>
     </fieldset>)}
     <button type="button" className="p5-btn" disabled={config.types.length >= 30} onClick={() => setTypes([...config.types, { id: crypto.randomUUID(), name: 'Consulta', calendar_id: config.calendars[0].id, duration_min: 45, channel: 'video', price_minor: 0, deposit_minor: 0 }])}>Agregar tipo</button>
     <h4>Días de atención</h4>
-    {config.weekly.map((row, index) => <div className="p5-li" key={`${row.calendar_id}-${index}`}><label>Día<select value={row.weekday} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, weekday: Number(event.target.value) } : item) })}>{['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((name, weekday) => <option key={name} value={weekday}>{name}</option>)}</select></label><label>Desde<input type="time" value={row.start} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, start: event.target.value } : item) })} /></label><label>Hasta<input type="time" value={row.end} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, end: event.target.value } : item) })} /></label><button type="button" className="p5-btn" onClick={() => onChange({ ...config, weekly: config.weekly.filter((_, itemIndex) => itemIndex !== index) })}>Quitar</button></div>)}
+    {config.weekly.map((row, index) => <div className="p5-li" key={`${row.calendar_id}-${index}`}>{variasSedes && elegirSede(row.calendar_id, id => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, calendar_id: id } : item) }))}<label>Día<select value={row.weekday} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, weekday: Number(event.target.value) } : item) })}>{['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'].map((name, weekday) => <option key={name} value={weekday}>{name}</option>)}</select></label><label>Desde<input type="time" value={row.start} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, start: event.target.value } : item) })} /></label><label>Hasta<input type="time" value={row.end} onChange={event => onChange({ ...config, weekly: config.weekly.map((item, itemIndex) => itemIndex === index ? { ...item, end: event.target.value } : item) })} /></label><button type="button" className="p5-btn" onClick={() => onChange({ ...config, weekly: config.weekly.filter((_, itemIndex) => itemIndex !== index) })}>Quitar</button></div>)}
     <button type="button" className="p5-btn" onClick={() => onChange({ ...config, weekly: [...config.weekly, { calendar_id: config.calendars[0].id, weekday: 1, start: '09:00', end: '13:00' }] })}>Agregar horario</button>
     {config.blocks.map(block => <div className="p5-li" key={block.id}><div className="p5-tx"><b>{block.label || 'Bloqueo'}</b></div><button type="button" className="p5-btn" onClick={() => onChange({ ...config, blocks: config.blocks.filter(item => item.id !== block.id) })}>Quitar bloqueo</button></div>)}
     {mode === 'mixed' ? <p>La seña cambia según el tipo de consulta.</p> : mode !== 'none' && <div className="p5-li"><div className="p5-tx"><b>Pedir seña al reservar</b><span>{mode === 'on' ? '50% del precio' : 'Sin seña'}</span></div><button type="button" className={`p5-switch${mode === 'on' ? ' on' : ''}`} aria-pressed={mode === 'on'} onClick={() => setTypes(withHalfDeposit(config.types, mode !== 'on'))}><span className="p5-sr">Pedir seña al reservar</span></button></div>}
@@ -204,8 +222,6 @@ function HoursEditor({ config, busy, googleConnected, onChange, onSave }: { conf
     <label>Comprobar Google al ofrecer horarios<input type="checkbox" checked={config.google_enabled} disabled={!googleConnected} onChange={event => onChange({ ...config, google_enabled: event.target.checked })} /></label>
     <label>Crear un enlace de Meet por consulta<input type="checkbox" checked={config.create_meet} onChange={event => onChange({ ...config, create_meet: event.target.checked })} /></label>
     <label>Alias de transferencia<input maxLength={100} value={config.transfer_alias} onChange={event => onChange({ ...config, transfer_alias: event.target.value })} /></label>
-    {config.calendars.map(calendar => <label key={calendar.id}>Agenda<input maxLength={80} value={calendar.name} onChange={event => onChange({ ...config, calendars: config.calendars.map(item => item.id === calendar.id ? { ...item, name: event.target.value } : item) })} /></label>)}
-    <button type="button" className="p5-btn" disabled={config.calendars.length >= 10} onClick={() => onChange({ ...config, calendars: [...config.calendars, { id: crypto.randomUUID(), name: 'Otra agenda' }] })}>Agregar agenda</button>
     <button type="button" className="p5-btn p5-ink" disabled={busy} onClick={onSave}>Guardar horarios</button>
   </section>;
 }
@@ -220,15 +236,26 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
   const [creatingAppt, setCreatingAppt] = useState(false);
   const [savingAppt, setSavingAppt] = useState(false);
   const [apptError, setApptError] = useState('');
-  const [newAppt, setNewAppt] = useState({ patientId: '', day: agendaDay(now), time: '10:00', duration: 45, channel: 'video' as 'video' | 'presencial', meetUrl: '' });
+  const [newAppt, setNewAppt] = useState({ patientId: '', day: agendaDay(now), time: '10:00', duration: 45, channel: 'video' as 'video' | 'presencial', meetUrl: '', sede: '' });
+  const [sede, setSede] = useState('');
+  const [sedeDeTurno, setSedeDeTurno] = useState<Record<string, string>>({});
+  const [sedesInstaladas, setSedesInstaladas] = useState(true);
   const config = draft ?? scheduling.config;
+  const sedes = config.calendars;
+  useEffect(() => {
+    const control = new AbortController();
+    consultorioApi.sedesDeTurnos(undefined, control.signal).then(r => { if (!control.signal.aborted) { setSedeDeTurno(r.turnos); setSedesInstaladas(r.instalada); } }).catch(() => { /* Sin el dato, cada turno queda en la sede principal: la agenda sigue andando. */ });
+    return () => control.abort();
+  }, []);
+  useEffect(() => { if (sede && !sedes.some(item => item.id === sede)) setSede(''); }, [sede, sedes]);
   const loaded = Boolean(scheduling.snapshot);
   const days = useMemo(() => view === 'dia' ? [anchor] : weekDays(anchor), [view, anchor]);
   const month = useMemo(() => monthGrid(anchor), [anchor]);
   const verDias = view === 'mes' ? month : days;
   // Se arman una sola vez para todo el mes: la grilla, el mes chico y los lugares libres salen de los mismos turnos.
-  const events = useMemo(() => loaded ? buildPanelAgendaEvents(patients, config, scheduling.snapshot?.bookings ?? [], now, month) : [], [loaded, patients, config, scheduling.snapshot, now, month]);
-  const libres = useMemo(() => loaded ? lugaresLibres(config, events, now, verDias) : [], [loaded, config, events, now, verDias]);
+  const events = useMemo(() => loaded ? eventosDeSede(buildPanelAgendaEvents(patients, config, scheduling.snapshot?.bookings ?? [], now, month, sedeDeTurno), sedes, sede) : [], [loaded, patients, config, scheduling.snapshot, now, month, sedeDeTurno, sedes, sede]);
+  const configDeSede = useMemo(() => sede ? { ...config, weekly: config.weekly.filter(row => row.calendar_id === sede), types: config.types.filter(type => type.calendar_id === sede) } : config, [config, sede]);
+  const libres = useMemo(() => loaded ? lugaresLibres(configDeSede, events, now, verDias) : [], [loaded, configDeSede, events, now, verDias]);
   const patientOptions = useMemo(() => {
     const seen = new Map<string, string>();
     for (const p of patients) if (p.id && p.name) seen.set(p.id, p.name);
@@ -269,6 +296,7 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
       duration: config.types[0]?.duration_min ?? 45,
       channel: config.types[0]?.channel === 'presencial' ? 'presencial' : 'video',
       meetUrl: '',
+      sede: sede || config.calendars[0]?.id || '',
     });
     setCreatingAppt(true);
   };
@@ -297,9 +325,15 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
       });
       useAppStore.getState().addPatient(result.patient);
       await marcarHechoSiCorresponde(newAppt.patientId, 'turno').catch(() => undefined);
+      const turnoId = result.patient.appointment?.id;
+      let aviso = '';
+      if (turnoId && sedes.length > 1 && newAppt.sede) {
+        try { await consultorioApi.guardarSede(turnoId, newAppt.sede); setSedeDeTurno(actual => ({ ...actual, [turnoId]: newAppt.sede })); }
+        catch (error) { aviso = ` La sede no se guardó: ${friendlyError(error)}`; }
+      }
       setAnchor(newAppt.day);
       setCreatingAppt(false);
-      scheduling.setStatus('Turno agendado.');
+      scheduling.setStatus(`Turno agendado.${aviso}`);
     } catch (error) {
       setApptError(error instanceof Error ? error.message : 'No pudimos agendar el turno. Intentá de nuevo.');
     } finally {
@@ -310,12 +344,12 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
   const saveBlock = (event: FormEvent) => {
     event.preventDefault();
     if (!scheduling.snapshot || block.end <= block.start) { scheduling.setStatus('El bloqueo tiene que terminar después de empezar.'); return; }
-    const next = { ...config, blocks: [...config.blocks, { id: crypto.randomUUID(), calendar_id: config.calendars[0].id, label: block.label.trim(), start: argentinaStamp(block.day, block.start), end: argentinaStamp(block.day, block.end) }] };
+    const next = { ...config, blocks: [...config.blocks, { id: crypto.randomUUID(), calendar_id: sede || config.calendars[0].id, label: block.label.trim(), start: argentinaStamp(block.day, block.start), end: argentinaStamp(block.day, block.end) }] };
     void scheduling.save(next, 'Horario bloqueado.').then(ok => { if (ok) setBlocking(false); });
   };
 
   return <>
-    <PanelAgendaView view={view} anchor={anchor} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago) }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} libres={libres} recordatorio={loaded ? config.reminders_enabled !== false : undefined} onHeader={onHeader} onView={setView} onShift={delta => view === 'mes' ? moverMes(delta) : setAnchor(current => shiftDay(current, view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onPickDay={day => { setAnchor(day); if (view === 'mes') setView('dia'); }} onMonth={moverMes} onManage={() => abrirNuevoTurno()} onPickSlot={slot => abrirNuevoTurno(slot)} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={loaded ? <HoursEditor config={config} busy={scheduling.busy} googleConnected={Boolean(scheduling.snapshot?.connections.google)} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} transfers={scheduling.snapshot?.transfers ?? []} bookings={scheduling.snapshot?.bookings ?? []} moreBookings={scheduling.bookingMore} morePatients={scheduling.patientMore} onReviewTransfer={(id, decision) => void scheduling.reviewTransfer(id, decision)} onSync={id => void scheduling.syncBooking(id)} onReconcile={id => void scheduling.reconcileBooking(id)} onMoreBookings={() => void scheduling.loadMoreBookings()} onMorePatients={() => void scheduling.loadMorePatients()} onDisconnect={key => void scheduling.disconnect(key)} />
+    <PanelAgendaView sedes={sedes} sede={sede} onSede={setSede} view={view} anchor={anchor} days={days} today={agendaDay(now)} now={now} events={events} pending={pending} types={config.types} page={loaded ? config.page : undefined} connections={{ google: Boolean(scheduling.snapshot?.connections.google), mercadopago: Boolean(scheduling.snapshot?.connections.mercadopago) }} status={scheduling.status} busy={scheduling.busy} loading={!loaded && !scheduling.error} error={scheduling.error} focus={section} libres={libres} recordatorio={loaded ? config.reminders_enabled !== false : undefined} onHeader={onHeader} onView={setView} onShift={delta => view === 'mes' ? moverMes(delta) : setAnchor(current => shiftDay(current, view === 'dia' ? delta : delta * 7))} onToday={() => setAnchor(agendaDay(now))} onPickDay={day => { setAnchor(day); if (view === 'mes') setView('dia'); }} onMonth={moverMes} onManage={() => abrirNuevoTurno()} onPickSlot={slot => abrirNuevoTurno(slot)} onCopy={() => { if (!config.page.enabled) return; const href = bookingHref(window.location.origin, config.page.slug); void navigator.clipboard?.writeText(href).then(() => scheduling.setStatus('Link copiado.'), () => scheduling.setStatus(href)); }} onConnect={key => void scheduling.connect(key)} onConfirm={(booking, patientId) => void scheduling.confirm(booking, patientId)} onCancel={booking => void scheduling.changeBooking(booking, 'cancel')} onReschedule={(booking, startsAt) => void scheduling.changeBooking(booking, 'reschedule', startsAt)} onBlock={() => setBlocking(true)} onRetry={() => void scheduling.load()} patients={scheduling.patients} editor={loaded ? <HoursEditor config={config} busy={scheduling.busy} googleConnected={Boolean(scheduling.snapshot?.connections.google)} onChange={setDraft} onSave={() => void scheduling.save(config, 'Horarios guardados.').then(ok => { if (ok) setDraft(null); })} /> : undefined} transfers={scheduling.snapshot?.transfers ?? []} bookings={scheduling.snapshot?.bookings ?? []} moreBookings={scheduling.bookingMore} morePatients={scheduling.patientMore} onReviewTransfer={(id, decision) => void scheduling.reviewTransfer(id, decision)} onSync={id => void scheduling.syncBooking(id)} onReconcile={id => void scheduling.reconcileBooking(id)} onMoreBookings={() => void scheduling.loadMoreBookings()} onMorePatients={() => void scheduling.loadMorePatients()} onDisconnect={key => void scheduling.disconnect(key)} />
     {scheduling.snapshot?.bookings.some(booking => booking.google_sync_status === 'uncertain') && <div className="p5-card">{scheduling.snapshot.bookings.filter(booking => booking.google_sync_status === 'uncertain').map(booking => <GoogleReviewControl key={booking.id} kind="booking" targetId={booking.id} revision={booking.revision} disabled={scheduling.busy} onResolved={async () => { await scheduling.load(); }} />)}</div>}
     {creatingAppt && <div className="p5-dialog" role="dialog" aria-modal="true" aria-labelledby="p5-new-appt-title"><form onSubmit={saveNewAppt}><h3 id="p5-new-appt-title">Nuevo turno</h3>
       <label>Paciente<select aria-label="Paciente" required value={newAppt.patientId} onChange={event => setNewAppt(current => ({ ...current, patientId: event.target.value }))}><option value="">Elegí una paciente…</option>{patientOptions.map(patient => <option key={patient.id} value={patient.id}>{patient.name}</option>)}</select></label>
@@ -323,6 +357,8 @@ export function PanelAgenda({ patients, now, section, onManage: _onManage, onHea
       <label>Hora<input aria-label="Hora" type="time" required value={newAppt.time} onChange={event => setNewAppt(current => ({ ...current, time: event.target.value }))} /></label>
       <label>Duración<select aria-label="Duración" value={newAppt.duration} onChange={event => setNewAppt(current => ({ ...current, duration: Number(event.target.value) }))}>{DURACIONES_TURNO.map(duration => <option key={duration} value={duration}>{duration} min</option>)}</select></label>
       <label>Modalidad<select aria-label="Modalidad" value={newAppt.channel} onChange={event => setNewAppt(current => ({ ...current, channel: event.target.value as 'video' | 'presencial' }))}><option value="presencial">Consultorio</option><option value="video">Videollamada</option></select></label>
+      {sedes.length > 1 && <label>Sede<select aria-label="Sede" value={newAppt.sede || sedes[0].id} onChange={event => setNewAppt(current => ({ ...current, sede: event.target.value }))}>{sedes.map(item => <option key={item.id} value={item.id}>{item.name}</option>)}</select></label>}
+      {sedes.length > 1 && !sedesInstaladas && <p className="ag-aviso">Para guardar la sede de cada turno falta instalar una tabla nueva en la base. El turno se guarda igual, en la sede principal.</p>}
       {newAppt.channel === 'video' && <label>Enlace de videollamada (opcional)<input aria-label="Enlace de videollamada" type="url" maxLength={500} placeholder="https://…" value={newAppt.meetUrl} onChange={event => setNewAppt(current => ({ ...current, meetUrl: event.target.value }))} /></label>}
       {apptError && <p className="ag-aviso" role="alert">{apptError}</p>}
       <div className="p5-row"><button type="button" className="p5-btn" disabled={savingAppt} onClick={() => setCreatingAppt(false)}>Volver</button><button className="p5-btn p5-pri" disabled={savingAppt}>{savingAppt ? 'Guardando…' : 'Guardar turno'}</button></div>

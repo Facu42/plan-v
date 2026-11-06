@@ -28,7 +28,7 @@ test('Equipo: pestañas, invitación real, error y registro pendiente', async ({
   const response = page.waitForResponse(r => r.url().includes('/invites') && r.request().method() === 'POST');
   await dialog.getByRole('button', { name: 'Preparar invitación' }).click();
   expect((await response).ok()).toBe(true);
-  await expect(dialog.getByRole('status')).toContainText('No se envió un mail');
+  await expect(dialog.getByRole('status')).toContainText('El correo de Nutridash todavía no está prendido');
   await expect(dialog.getByText('Código de invitación:', { exact: false })).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('button', { name: 'Invitar a alguien' })).toBeFocused();

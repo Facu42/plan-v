@@ -665,6 +665,25 @@
 #pv-panel-v29 #s-cobranzas .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 #pv-panel-v29 #s-cobranzas .chip { font-size: 12.5px; font-weight: 400; padding: 7px 11px; background: var(--card); color: var(--ink2); border: 1px solid var(--line2); }
 
+/* Estadísticas usa el armado de Cobranzas del boceto (`COB()`): mismas reglas de columna, de filas y de celular. */
+#pv-panel-v29:not(.mob) .main:has(#s-estadisticas) { height: 100%; overflow: hidden; }
+#pv-panel-v29:not(.mob) #pv-panel:has(#s-estadisticas) { flex: 1; min-height: 0; }
+#pv-panel-v29.mob .main:has(#s-estadisticas) > .top { flex: 0 0 auto; height: auto; flex-wrap: wrap; }
+#pv-panel-v29.mob #pv-panel:has(#s-estadisticas),
+#pv-panel-v29.mob #s-estadisticas,
+#pv-panel-v29.mob #s-estadisticas > #ewrap,
+#pv-panel-v29.mob #s-estadisticas .fx { flex: none; height: auto; min-height: auto; }
+#pv-panel-v29.mob #s-estadisticas .fx { grid-template-columns: 1fr !important; align-content: start; }
+#pv-panel-v29 #s-estadisticas,
+#pv-panel-v29 #s-estadisticas .fx,
+#pv-panel-v29 #s-estadisticas .c,
+#pv-panel-v29 #s-estadisticas .tabs { min-width: 0; max-width: 100%; }
+#pv-panel-v29 #ewrap .fx { padding-top: 0; }
+#pv-panel-v29 #ewrap .fxtb td { height: 52px; }
+#pv-panel-v29 #ewrap .fxr > .r .t b { color: var(--ink); }
+#pv-panel-v29 #ewrap .fxr .cm { color: var(--ink); }
+#pv-panel-v29 #ewrap .fxr > .r .cm { color: var(--rojo-ink); }
+
 /* Página pública llena la columna: las tres columnas del boceto se desplazan adentro. En el celular se apilan. */
 #pv-panel-v29:not(.mob) .main:has(#s-publica) { height: 100%; overflow: hidden; }
 #pv-panel-v29:not(.mob) #pv-panel:has(#s-publica) { flex: 1; min-height: 0; }
@@ -987,6 +1006,10 @@
 /* Celular: si el nombre de la tarjeta ocupa dos líneas, la tarjeta crece y no corta el pie. */
 #pv-panel-v29.mob #s-inicio .kpi { height: auto; min-height: 96px; }
 
+/* Sedes: el filtro de la Agenda es un chip del encabezado (mismo alto y letra que «Bloquear horario») con un select sin bordes adentro. */
+#pv-panel-v29 .chip.ag-sede { display: inline-flex; align-items: center; gap: 6px; }
+#pv-panel-v29 .chip.ag-sede select { appearance: none; -webkit-appearance: none; border: 0; background: transparent; font: inherit; color: inherit; padding: 0; margin: 0; height: auto; min-height: 0; line-height: inherit; box-shadow: none; cursor: pointer; max-width: 150px; }
+#pv-panel-v29 .chip.ag-sede:focus-within { outline: 2px solid var(--ink); outline-offset: 2px; }
 /* Ventana «Agregar a la comida» del editor de planes: mismo estilo que el panel lateral del boceto
    (#act: tarjeta con borde, campos .ai, botón principal negro .cta y secundario .sbtn). */
 #pv-panel-v29 dialog.plan-recipe-picker { width: min(860px, calc(100vw - 48px)); max-height: calc(100dvh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 18px; background: var(--card); color: var(--ink); box-shadow: 0 18px 50px rgba(16,17,20,.16); font-size: 13px; overflow: auto; }

@@ -214,7 +214,7 @@ export function AjustesSeguridad({ onOpen, onSecurity }: { onOpen: (href: string
     </div>
     <div className="c">
       <FxPanel titulo="Copias de seguridad" meta="automáticas"><FxKv filas={[['Frecuencia', 'Todos los días'], ['Se guardan', '7 días'], ['Última', SIN_DATO]]} /></FxPanel>
-      <FxPanel titulo="Datos de salud"><div className="pubpide">{['Las fichas se comparten por asignación explícita', 'Recepción no accede a las notas clínicas', 'No compartas claves ni datos de pacientes por canales públicos'].map(t => <div key={t}><PanelV29Icon name="shield" size={13} /><span>{t}</span></div>)}</div></FxPanel>
+      <FxPanel titulo="Datos de salud"><div className="pubpide">{['Las fichas se comparten por asignación explícita', 'La secretaria no accede a las notas clínicas', 'No compartas claves ni datos de pacientes por canales públicos'].map(t => <div key={t}><PanelV29Icon name="shield" size={13} /><span>{t}</span></div>)}</div></FxPanel>
       <FxPanel titulo="Consentimientos" derecha={<Boton texto="Pedir firma" clase="k" disabled />} grande>
         <div className="publk"><Vacio texto="Todavía no hay un resumen de firmas." /></div>
         <small className="nthint">Los consentimientos se revisan en la ficha de cada paciente.</small>

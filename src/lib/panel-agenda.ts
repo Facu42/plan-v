@@ -19,6 +19,8 @@ export type PanelAgendaEvent = {
   patientId?: string;
   bookingId?: string;
   meetUrl?: string;
+  /** Sede del turno (id de la agenda). Sin dato, el turno es de la sede principal. */
+  calendarId?: string;
 };
 
 export const agendaDay = (date: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: AGENDA_ZONE }).format(date);
@@ -103,7 +105,7 @@ function eventFromRange(id: string, tone: AgendaTone, title: string, subtitle: s
   return { id, tone, title, subtitle, day, startMin, endMin: startMin + durationMin, ...extra };
 }
 
-export function buildPanelAgendaEvents(patients: readonly Patient[], settings: Pick<SchedulingSettings, 'types' | 'blocks'> | null, bookings: readonly SchedulingBooking[], now: Date, days: readonly string[]): PanelAgendaEvent[] {
+export function buildPanelAgendaEvents(patients: readonly Patient[], settings: Pick<SchedulingSettings, 'types' | 'blocks'> | null, bookings: readonly SchedulingBooking[], now: Date, days: readonly string[], sedeDeTurno: Readonly<Record<string, string>> = {}): PanelAgendaEvent[] {
   if (!days.length) return [];
   const from = days[0];
   const to = days[days.length - 1];
@@ -118,7 +120,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
     if (!inRange(day)) continue;
     const type = settings?.types.find(item => item.id === booking.type_id);
     const tone = booking.status === 'requested' ? 'pendiente' : toneFor(type?.channel ?? 'presencial', type?.name ?? '', false);
-    const event = eventFromRange(`book:${booking.id}`, tone, booking.contact_name, type?.name || (booking.status === 'requested' ? 'Por confirmar' : 'Consulta'), at, booking.duration_min, { patientId: booking.patient_id ?? undefined, bookingId: booking.id, meetUrl: type?.channel === 'video' ? meetLink(booking.meet_url) || undefined : undefined });
+    const event = eventFromRange(`book:${booking.id}`, tone, booking.contact_name, type?.name || (booking.status === 'requested' ? 'Por confirmar' : 'Consulta'), at, booking.duration_min, { patientId: booking.patient_id ?? undefined, bookingId: booking.id, calendarId: booking.calendar_id, meetUrl: type?.channel === 'video' ? meetLink(booking.meet_url) || undefined : undefined });
     if (!event) continue;
     events.push(event);
     if (booking.patient_id) covered.add(`${booking.patient_id}:${day}:${event.startMin}`);
@@ -135,7 +137,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
         const day = agendaDay(at);
         const startMin = agendaClock(at).minutes;
         if (inRange(day) && !covered.has(`${patient.id}:${day}:${startMin}`)) {
-          const event = eventFromRange(`appt:${patient.id}`, toneFor(appointment.channel, appointment.when, first), patient.name, appointment.channel === 'video' ? 'Online' : 'Consultorio', at, appointment.duration, { patientId: patient.id, meetUrl: appointment.channel === 'video' ? meetLink(appointment.meet_url) || undefined : undefined });
+          const event = eventFromRange(`appt:${patient.id}`, toneFor(appointment.channel, appointment.when, first), patient.name, appointment.channel === 'video' ? 'Online' : 'Consultorio', at, appointment.duration, { patientId: patient.id, calendarId: appointment.id ? sedeDeTurno[appointment.id] : undefined, meetUrl: appointment.channel === 'video' ? meetLink(appointment.meet_url) || undefined : undefined });
           if (event) events.push(event);
         }
       }
@@ -145,7 +147,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
       const time = entry.when.split(' · ')[1];
       if (!timeOk(time)) continue;
       const at = new Date(`${entry.dateId}T${time}:00-03:00`);
-      const event = eventFromRange(`hist:${entry.id}`, toneFor(entry.channel, entry.when, false), patient.name, 'Ya pasó', at, entry.duration, { patientId: patient.id });
+      const event = eventFromRange(`hist:${entry.id}`, toneFor(entry.channel, entry.when, false), patient.name, 'Ya pasó', at, entry.duration, { patientId: patient.id, calendarId: sedeDeTurno[entry.id] });
       if (event && !events.some(item => item.patientId === patient.id && item.day === event.day && item.startMin === event.startMin)) events.push(event);
     }
   }
@@ -154,7 +156,7 @@ export function buildPanelAgendaEvents(patients: readonly Patient[], settings: P
     for (const day of days) {
       const clip = clipBlock(block, day);
       if (!clip) continue;
-      events.push({ id: `block:${block.id}:${day}`, tone: 'bloqueo', title: 'Bloqueado', subtitle: block.label || 'No disponible', day, startMin: clip.startMin, endMin: clip.endMin });
+      events.push({ id: `block:${block.id}:${day}`, tone: 'bloqueo', title: 'Bloqueado', subtitle: block.label || 'No disponible', day, startMin: clip.startMin, endMin: clip.endMin, calendarId: block.calendar_id });
     }
   }
 
@@ -216,4 +218,17 @@ export function bookingHref(origin: string, slug: string): string {
 
 export function argentinaStamp(day: string, time: string): string {
   return new Date(`${day}T${time}:00-03:00`).toISOString();
+}
+
+/**
+ * Turnos de una sede. Lo que no tiene sede guardada es de la sede principal (la primera).
+ * Con `sede` vacío devuelve todo; con más de una sede, el subtítulo suma el nombre de la sede.
+ */
+export function eventosDeSede(events: readonly PanelAgendaEvent[], sedes: SchedulingSettings['calendars'], sede: string): PanelAgendaEvent[] {
+  const principal = sedes[0]?.id;
+  const nombres = new Map(sedes.map(item => [item.id, item.name]));
+  const valida = (id: string | undefined) => (id && nombres.has(id) ? id : principal);
+  return events
+    .filter(event => !sede || valida(event.calendarId) === sede)
+    .map(event => sedes.length > 1 && event.tone !== 'bloqueo' ? { ...event, subtitle: `${event.subtitle} · ${nombres.get(valida(event.calendarId) ?? '') ?? ''}` } : event);
 }

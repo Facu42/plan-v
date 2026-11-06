@@ -31,6 +31,7 @@ export function panelNavGroups(patients: readonly Patient[], unread: number, opt
         { label: 'Vencidas', href: '/crm/cobranzas?filtro=deben' },
         { label: 'Recordatorios', href: '/crm/cobranzas?filtro=deben&recordatorios=1' },
       ] },
+      { label: 'Estadísticas', glyph: 'trend', href: '/crm/desarrollo?modulo=estadisticas' },
       { label: 'Página pública', glyph: 'globe', href: '/crm/agenda?agenda=publica' },
     ] },
     { title: 'Acompañamiento', items: [

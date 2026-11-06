@@ -113,6 +113,9 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
+## 5/11 · Secretaria, sedes y estadísticas (rama `claude/project-thread-447kpm`, espera ok)
+Varias sedes en Agenda › Horarios (dirección y modalidad, filtro en la agenda, sede en «Nuevo turno» y en la página pública), Menú › Estadísticas (ausencias, pacientes nuevas, ingresos, por sede, exportar) e invitación de secretaria por mail con enlace, sin ocupar lugar de profesional. Migración aditiva `20261106100000_appointment_locations.sql` **sin aplicar** (**aplicada en la base el 6/11** con la frase de Facundo; falta su ok visual para main). [Nota](panel-nutri-rediseno/secretaria-sedes-estadisticas.md).
+
 ## 5/11 · Paquetes de consultas (PR #287 en main; saldo de la paciente en PR #289)
 Ficha › Cobros suma el panel «Paquete de consultas» (piezas del boceto v29: fxP, medidor con fxkv, sbtn y cajón #act). La nutri vende un paquete de N consultas (con cobro suelto «Paquete: …» en Cobranzas o «ya está cobrado»), y cada consulta marcada como realizada descuenta una sola del paquete vigente más viejo; desmarcarla la devuelve. También se descuenta a mano, se deshace y se da de baja. Migración `20261105150000_patient_packs.sql` aplicada en producción. PR #289: la paciente ve «Tus consultas» en Pagos (cuántas le quedan y hasta cuándo, sin precio ni notas) con la función `get_my_patient_packs`; migración `20261105210000_patient_packs_own.sql` **sin aplicar** (espera la frase de Facundo).
 
