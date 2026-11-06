@@ -3160,6 +3160,14 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 :is(tr,.li):has(.pill.p-wait) .av,#alist .li:has(.why[style*="azaf"]) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--hatch-a)}
 :is(tr,.li):has(.pill.p-bad) .av,#alist .li:has(.why[style*="rojo"]) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--rojo-ink)}
 @media (prefers-reduced-motion:reduce){.adh .tr{animation:none}}
+
+/* Degradé oscuro de la tarjeta grande de Inicio (azul profundo a verde lima) en Nueva consulta, Abrir ficha y Próximo turno */
+:root{--grad-dk:linear-gradient(100deg,#0A1636 0%,#0B2A7A 26%,#0042B0 50%,#0096E6 74%,#00D5FD 89%,#6DF895 100%);--grad-dk-h:linear-gradient(100deg,#0D1D44 0%,#0E328D 26%,#0049C4 50%,#00A3F5 74%,#0FDEFF 89%,#7FFAA6 100%);--card-dk:radial-gradient(90% 130% at 100% 115%,rgba(109,248,149,.5),transparent 62%),radial-gradient(120% 140% at 100% 0%,rgba(0,213,253,.38),transparent 55%),linear-gradient(160deg,#0A1636 0%,#0B1F4D 48%,#0042B0 100%)}
+:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go){background:var(--grad-dk)!important;color:#fff!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,20,80,.3)}
+:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go):hover:not([disabled]){background:var(--grad-dk-h)!important}
+:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go) svg{color:#fff}
+:is(.pd-next,#s-ficha .fxdk){background:var(--card-dk)!important;color:#F4F5F0}
+.pd-next small,.pd-next span{color:rgba(244,245,240,.74)}
 </style>
 </head>
 <body>
@@ -3215,7 +3223,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
     <details class="crear"><summary class="chip" data-ic="plus">Crear<svg viewBox="0 0 24 24" class="i car" aria-hidden="true" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg></summary>
       <div class="crear-menu"><button type="button" data-go="planes" data-ic="clip">Nuevo plan</button><button type="button" data-go="cobranzas" data-ic="coin">Cargar pago</button><button type="button" data-go="mensajes" data-ic="chat">Mensaje</button></div></details>
     <button class="ibtn" type="button" aria-label="Avisos" data-ic="bell"><i></i></button>
-    <button class="cta" type="button" data-ic="plus">Nueva consulta</button>
+    <button class="cta gdk" type="button" data-ic="plus">Nueva consulta</button>
   </div>
 
   <section class="kpis">
@@ -3658,7 +3666,7 @@ archivos:()=>`<div class="fbody" style="grid-template-columns:1.6fr 1fr">
  </div></div>`,
 
 consultas:()=>`<div class="fbody" style="grid-template-columns:1.55fr 1fr">
- <div class="col">${card('Consultas de Sofía','7',sb('Nueva consulta','k','plus'),`<div class="tsc"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Nota</th><th>Estado</th><th></th></tr></thead><tbody>${[['Hoy 21/10','10:30','Seguimiento · consultorio','Por hacer','Próxima','p-now',1],['14/10','10:00','Seguimiento · videollamada','Grabada','Realizada','p-conf'],['16/09','10:00','Seguimiento · consultorio','Grabada','Realizada','p-conf'],['19/08','10:00','Seguimiento · consultorio','Avisó tarde','Faltó','p-bad'],['18/08','17:00','Seguimiento · videollamada','Escrita','Realizada','p-conf'],['15/04','10:00','Seguimiento · consultorio','Escrita','Realizada','p-conf'],['12/03','09:00','Primera consulta · consultorio','Grabada','Realizada','p-conf']].map(([f,h,t,n,s,c,now])=>`<tr style="height:48px" class="${now?'now':''}"><td class="num">${f}</td><td class="num">${h}</td><td style="color:var(--ink2)">${t}</td><td style="color:var(--ink3)">${n}</td><td>${pill(s,c)}</td><td>${now?sb('Preparar','k'):'<button class="lnk" type="button" data-ft="notas">Ver nota</button>'}</td></tr>`).join('')}</tbody></table></div>`,'grow')}</div>
+ <div class="col">${card('Consultas de Sofía','7',sb('Nueva consulta','k gdk','plus'),`<div class="tsc"><table><thead><tr><th>Fecha</th><th>Hora</th><th>Tipo</th><th>Nota</th><th>Estado</th><th></th></tr></thead><tbody>${[['Hoy 21/10','10:30','Seguimiento · consultorio','Por hacer','Próxima','p-now',1],['14/10','10:00','Seguimiento · videollamada','Grabada','Realizada','p-conf'],['16/09','10:00','Seguimiento · consultorio','Grabada','Realizada','p-conf'],['19/08','10:00','Seguimiento · consultorio','Avisó tarde','Faltó','p-bad'],['18/08','17:00','Seguimiento · videollamada','Escrita','Realizada','p-conf'],['15/04','10:00','Seguimiento · consultorio','Escrita','Realizada','p-conf'],['12/03','09:00','Primera consulta · consultorio','Grabada','Realizada','p-conf']].map(([f,h,t,n,s,c,now])=>`<tr style="height:48px" class="${now?'now':''}"><td class="num">${f}</td><td class="num">${h}</td><td style="color:var(--ink2)">${t}</td><td style="color:var(--ink3)">${n}</td><td>${pill(s,c)}</td><td>${now?sb('Preparar','k'):'<button class="lnk" type="button" data-ft="notas">Ver nota</button>'}</td></tr>`).join('')}</tbody></table></div>`,'grow')}</div>
  <div class="col">
   ${card('Cerrar la consulta de hoy','','',`<div class="chk pad">${[['Marcar como realizada',1],['Enviar el resumen a Sofía',1],['Actualizar el plan',0],['Pedir análisis de hierro',0]].map(([t,o])=>`<div><i class="${o?'on':''}"></i>${t}</div>`).join('')}</div><div class="kv"><span>Próximo turno</span><b>Martes 18/11 · 10:30 · consultorio</b></div><div class="pad">${sb('Cerrar consulta','k','check')}</div>`)}
   ${card('Asistencia','desde marzo','',`<div class="stat4" style="grid-template-columns:repeat(3,1fr)"><div><small>Realizadas</small><b class="num">6</b></div><div><small>Faltas</small><b class="num">1</b></div><div><small>Asistencia</small><b class="num">86%</b></div></div>`,'grow')}
