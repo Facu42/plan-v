@@ -29,7 +29,7 @@ function Avatar({ name, initials, tone }: { name: string; initials: string; tone
 }
 
 function Foto({ url }: { url: string | null }) {
-  return <span className="sxpic cola-foto">{url ? <img src={url} alt="" /> : <PanelV29Icon name="img" size={14} />}</span>;
+  return <span className="sxpic" title="Foto del plato">{url ? <img src={url} alt="" /> : <PanelV29Icon name="img" size={14} />}</span>;
 }
 
 function Barras({ on }: { on: number | null }) {
@@ -41,13 +41,12 @@ function Tarjeta({ titulo, meta, children, clase = '' }: { titulo: string; meta:
 }
 
 function EsqueletoCola() {
-  return <ul className="cola" aria-busy="true" aria-label="Cargando platos">
-    {[0, 1, 2].map(indice => <li className="cola-fila cola-skel" key={indice}>
-      <span className="sxpic cola-foto sk" />
-      <span className="cola-txt"><b className="sk" /><small className="sk" /></span>
-      <span className="cola-acts"><span className="sk" /><span className="sk" /></span>
-    </li>)}
-  </ul>;
+  return <div className="fxs cola-skel" aria-busy="true" aria-label="Cargando platos"><div className="fxr">
+    {[0, 1, 2].map(indice => <div className="l" key={indice}>
+      <span className="sxmeal"><span className="av sk" /><span className="sxpic sk" /><span className="sxwho"><b className="sk" /><small className="sk" /></span></span>
+      <span className="sxacts"><span className="chip sk" /><span className="chip sk" /></span>
+    </div>)}
+  </div></div>;
 }
 
 export function PanelSeguimientoVista({
@@ -81,27 +80,25 @@ export function PanelSeguimientoVista({
     : estado === 'error'
       ? <p className="cola-estado" role="alert">No pudimos traer las fotos. Volvé a intentar en un rato.</p>
       : comidas.length
-        ? <ul className="cola" aria-label={tab === 'pend' ? 'Cola de fotos por revisar' : 'Fotos ya revisadas'}>
+        ? <div className="fxs"><div className="fxr" aria-label={tab === 'pend' ? 'Cola de fotos por revisar' : 'Fotos ya revisadas'}>
           {comidas.map(comida => {
-            const detalle = [comida.title, comida.slot, comida.age || comida.when, comida.kcal ?? 'Sin estimación'].filter(Boolean).join(' · ');
-            return <li className="cola-fila" key={`${tab}:${comida.patientId}:${comida.id}`}>
-              <Foto url={comida.photoUrl} />
-              <span className="cola-txt">
-                <b>{comida.name}</b>
-                <small>
-                  <span>{detalle}</span>
-                  {tab === 'pend' ? <button type="button" className="cola-link" aria-label={`Comentar la comida de ${comida.name}`} onClick={() => onComment(comida)}>Comentar</button> : null}
-                </small>
+            const detalle = [comida.name, comida.slot, comida.age || comida.when, comida.kcal ?? 'Sin estimación'].filter(Boolean).join(' · ');
+            return <div className="l" key={`${tab}:${comida.patientId}:${comida.id}`}>
+              <span className="sxmeal">
+                <Avatar name={comida.name} initials={comida.initials} tone={comida.tone} />
+                <Foto url={comida.photoUrl} />
+                <span className="sxwho"><b>{comida.title}</b><small>{detalle}</small></span>
               </span>
-              <span className="cola-acts">{tab === 'pend'
+              <span className="sxacts">{tab === 'pend'
                 ? <>
-                  <button type="button" className="cola-pri" aria-label={`Confirmar la comida de ${comida.name}`} onClick={() => onConfirm(comida)}>Confirmar</button>
-                  <button type="button" className="cola-sec" aria-label={`Ajustar la comida de ${comida.name}`} onClick={() => onAdjust(comida)}>Ajustar</button>
+                  <button type="button" className="chip" aria-label={`Confirmar la comida de ${comida.name}`} onClick={() => onConfirm(comida)}>Confirmar</button>
+                  <button type="button" className="chip" aria-label={`Ajustar la comida de ${comida.name}`} onClick={() => onAdjust(comida)}>Ajustar</button>
+                  <button type="button" className="chip" aria-label={`Comentar la comida de ${comida.name}`} onClick={() => onComment(comida)}>Comentar</button>
                 </>
-                : <button type="button" className="cola-sec" aria-label={`Ver la comida de ${comida.name}`} onClick={() => onVer(comida)}>Ver</button>}</span>
-            </li>;
+                : <button type="button" className="chip" aria-label={`Ver la comida de ${comida.name}`} onClick={() => onVer(comida)}>Ver</button>}</span>
+            </div>;
           })}
-        </ul>
+        </div></div>
         : tab === 'pend'
           ? <p className="cola-vacio"><b>Todo al día</b><span>No hay platos por revisar</span></p>
           : <p className="cola-vacio"><b>Todo al día</b><span>No hay platos revisados en estos días.</span></p>;
@@ -109,7 +106,7 @@ export function PanelSeguimientoVista({
     {editor}
     <div className="fx" data-mk="1" style={{ gridTemplateColumns: '1.22fr .9fr' }}>
       <div className="c">
-        <Tarjeta clase="cola-fxp" titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={tab === 'pend' ? `Cola fotos · ${pendientes} por revisar · la foto sale de la app` : `${pendientes} por revisar · la foto sale de la app`}>
+        <Tarjeta clase="cola-fxp" titulo={tab === 'pend' ? 'Comidas con foto' : 'Ya revisadas'} meta={tab === 'pend' ? `${pendientes} por revisar · la foto sale de la app` : `${pendientes} por revisar · la foto sale de la app`}>
           {filas}{mas && tab === 'pend' ? <p className="cola-estado">Hay más por revisar. Seguí en la ficha.</p> : null}
         </Tarjeta>
       </div>
