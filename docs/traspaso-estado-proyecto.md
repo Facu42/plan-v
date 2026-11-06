@@ -8,6 +8,7 @@
 
 3/11 · Cursor · El centro de `/admin` ahora también tiene riesgo de baja, cobranza, activación y un resumen del día. La bandeja puede usar WhatsApp y mail si están las credenciales; si no, queda apagada. Instagram está preparado y no envía. AFIP no se tocó. Hay una migración nueva, sin aplicar. Rama `cursor/hub-gestion-admin-d879`. Sin producción ni merge. [Nota](hub-gestion.md).
 3/11 · Claude · Pedir el enlace de la cuota en la página pública ya no deja saber si un correo es de una paciente: sin cuota abierta, con débito o desconocido dan el mismo mensaje. La búsqueda del correo es exacta (antes el guion bajo valía como comodín) y esa ruta entra al límite estricto de 5 pedidos cada 15 minutos por conexión. Sigue pendiente: si el correo tiene cuota abierta, el enlace se muestra en pantalla; cerrarlo del todo pide mandarlo por mail, cuando los mails de Nutridash estén prendidos.
+3/11 · Claude · En el editor de planes de la nutri, «Agregar alimento», «Cambiar plato» y «Agregar colación» ya andan: abren el buscador de alimentos (SARA 2), recetas o intercambios y dejan lo elegido en el borrador, que se guarda solo. Antes decían «Próximamente». Sin migraciones. Las barras de hidratos, proteínas y grasas ahora usan los gramos de la meta de la paciente (antes un 45/25/30 fijo); sin meta cargada siguen con ese reparto. «Ajustar metas» sigue cambiando solo las calorías. Sigue en «Próximamente»: duplicar la semana completa.
 3/11 · Cursor · El cobro de Nutridash a las nutricionistas puede usar la clave real de Mercado Pago solo si `MP_PLATFORM_LIVE=1`. Si no, sigue exigiendo la de prueba. La salud de la API dice si está en prueba o en vivo, sin mostrar la clave. Rama `cursor/mp-platform-live-65b4`. Sin producción ni merge.
 3/11 · Cursor · Quien administra la plataforma y entra con Google ya no se queda en «Tu cuenta todavía no está vinculada». Si no tiene consultorio, pasa a `/admin`. Si también es nutri, se queda en el panel y ve Admin. La vuelta de Google no sale de este sitio. Rama `cursor/admin-google-al-centro-4fb6`. Sin producción ni merge. [Nota](admin-ingreso-google.md).
 
@@ -126,6 +127,9 @@ Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, en
 
 ## 5/11 · Letra legible del panel
 En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
+
+## 5/11 · Ventana «Agregar a la comida» con el estilo del boceto
+El editor de planes (#277: agregar y cambiar alimentos, recetas e intercambios) reusa los buscadores del editor viejo; su ventana ahora se ve como el panel lateral del boceto v29 (tarjeta con borde, campos `.ai`, botón principal negro `.cta`, secundario `.sbtn`, pestañas en píldora). Estilos solo en `panel-v29-app.css` bajo `#pv-panel-v29 dialog.plan-recipe-picker`. Regla de Facundo: todo elemento nuevo sigue el estilo del boceto.
 
 ## 5/11 · Barra de abajo del celular
 En el boceto v29 la barra `.mnav` del celular es más alta (íconos 24px, letra 12px) y flota sobre el contenido con fondo semitransparente y desenfoque; la pantalla suma 110px de espacio abajo para que nada quede tapado. Se regeneró `panel-v29.css`.
