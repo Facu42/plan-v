@@ -10,7 +10,7 @@ import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { writeOpsLog } from '../ops/log.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
-import { notifyPatientPush } from '../push/push.js';
+import { notifyNutritionistPush, notifyPatientPush } from '../push/push.js';
 import { trackServer } from '../ops/telemetry.js';
 import { ARCHIVED_ACCOUNT_NOTICE } from '../../src/lib/account-archive.js';
 import { CareError } from '../care/errors.js';
@@ -86,6 +86,7 @@ export function registerMessageRoutes(app: Hono) {
         filename: body.filename,
       }, true);
       if (actor.role === 'nutri') notifyPatientPush(patientId, 'message');
+      else if (actor.role === 'paciente') notifyNutritionistPush(patientId, 'nutri_message');
       trackServer('message.sent');
       await enqueueOutboxBestEffort({
         patient_id: patientId,

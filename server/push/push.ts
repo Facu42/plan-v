@@ -8,7 +8,7 @@ import { writeOpsLog } from '../ops/log.js';
  * Mozilla, así que nunca llevan datos de salud: solo un texto genérico y la pantalla que abren.
  * Sin las tres variables VAPID_* en el servidor, todo queda apagado y no se manda nada.
  */
-export type PushKind = 'message' | 'plan' | 'resource' | 'appointment' | 'reminder' | 'subscription' | 'habit_meal' | 'habit_water' | 'habit_sleep';
+export type PushKind = 'message' | 'plan' | 'resource' | 'appointment' | 'reminder' | 'subscription' | 'habit_meal' | 'habit_water' | 'habit_sleep' | 'charge' | 'nutri_message' | 'nutri_appointment' | 'nutri_payment';
 export type PushPayload = { title: string; body: string; url: string; tag: string };
 
 export const PUSH_TEXTS: Record<PushKind, PushPayload> = {
@@ -21,6 +21,11 @@ export const PUSH_TEXTS: Record<PushKind, PushPayload> = {
   habit_meal: { title: 'Hora de comer', body: 'Registrá tu comida en Nutridash.', url: '/app/diario', tag: 'plan-v-habit-meal' },
   habit_water: { title: 'Hora de tomar agua', body: 'Un vaso ahora. Abrí Nutridash si querés anotarlo.', url: '/app/inicio', tag: 'plan-v-habit-water' },
   habit_sleep: { title: 'Hora de dormir', body: 'Cuando puedas, andá a descansar.', url: '/app/inicio', tag: 'plan-v-habit-sleep' },
+  charge: { title: 'Tenés un cobro nuevo', body: 'Mirá el detalle en Pagos, en Nutridash.', url: '/app/pagos', tag: 'plan-v-charge' },
+  // Avisos a la nutricionista: sin nombre de la paciente ni datos de salud, solo qué pasó y dónde verlo.
+  nutri_message: { title: 'Una paciente te escribió', body: 'Abrí Mensajes en Nutridash para leerlo.', url: '/crm/mensajes', tag: 'plan-v-nutri-message' },
+  nutri_appointment: { title: 'Una paciente cambió su consulta', body: 'Mirá la agenda en Nutridash.', url: '/crm/agenda', tag: 'plan-v-nutri-appointment' },
+  nutri_payment: { title: 'Una paciente avisó que pagó', body: 'Confirmalo en Cobranzas, en Nutridash.', url: '/crm/cobranzas', tag: 'plan-v-nutri-payment' },
 };
 
 export type PushConfig = { publicKey: string; privateKey: string; subject: string };
@@ -57,6 +62,8 @@ export type StoredSubscription = { endpoint: string; p256dh: string; auth: strin
 
 export type PushStore = {
   patientUser(patientId: string): Promise<string | null>;
+  /** Usuaria de la nutricionista a cargo de la paciente. */
+  nutritionistUser(patientId: string): Promise<string | null>;
   forUser(userId: string): Promise<StoredSubscription[]>;
   save(userId: string, subscription: StoredSubscription): Promise<void>;
   remove(endpoint: string, userId?: string): Promise<void>;
@@ -70,6 +77,12 @@ export function supabasePushStore(): PushStore {
       const { data, error } = await privilegedDb().from('patients').select('user_id').eq('id', patientId).maybeSingle();
       if (error) throw error;
       return (data as { user_id: string | null } | null)?.user_id ?? null;
+    },
+    async nutritionistUser(patientId) {
+      const { data, error } = await privilegedDb().from('patients').select('nutritionists(user_id)').eq('id', patientId).maybeSingle();
+      if (error) throw error;
+      const owner = (data as { nutritionists: { user_id: string | null } | { user_id: string | null }[] | null } | null)?.nutritionists;
+      return (Array.isArray(owner) ? owner[0]?.user_id : owner?.user_id) ?? null;
     },
     async forUser(userId) {
       const { data, error } = await table().select('endpoint,p256dh,auth').eq('user_id', userId).limit(10);
@@ -107,12 +120,12 @@ const GONE = new Set([404, 410]);
 export function createPushNotifier(deps: { config: () => PushConfig | null; store: () => PushStore; send?: PushSender }) {
   const send = deps.send ?? webPushSender;
   /** Manda el aviso a todos los teléfonos de la paciente. Devuelve cuántos lo recibieron. Nunca lanza. */
-  async function notifyPatient(patientId: string, kind: PushKind, authorize?:()=>Promise<boolean>, override?:PushPayload): Promise<number> {
+  async function deliver(findUser: (store: PushStore) => Promise<string | null>, kind: PushKind, authorize?:()=>Promise<boolean>, override?:PushPayload): Promise<number> {
     const config = deps.config();
     if (!config) return 0;
     try {
       const store = deps.store();
-      const userId = await store.patientUser(patientId);
+      const userId = await findUser(store);
       if (!userId) return 0;
       const subscriptions = await store.forUser(userId);
       const payload = JSON.stringify(override??PUSH_TEXTS[kind]);
@@ -135,7 +148,14 @@ export function createPushNotifier(deps: { config: () => PushConfig | null; stor
       return 0;
     }
   }
-  return { notifyPatient };
+  function notifyPatient(patientId: string, kind: PushKind, authorize?:()=>Promise<boolean>, override?:PushPayload): Promise<number> {
+    return deliver(store => store.patientUser(patientId), kind, authorize, override);
+  }
+  /** Igual, pero a los teléfonos de la nutricionista que atiende a esa paciente. */
+  function notifyNutritionist(patientId: string, kind: PushKind): Promise<number> {
+    return deliver(store => store.nutritionistUser(patientId), kind);
+  }
+  return { notifyPatient, notifyNutritionist };
 }
 
 export const pushNotifier = createPushNotifier({ config: () => pushConfig(), store: supabasePushStore });
@@ -144,4 +164,10 @@ export const pushNotifier = createPushNotifier({ config: () => pushConfig(), sto
 export function notifyPatientPush(patientId: string, kind: PushKind): void {
   if (!isSupabaseEnabled() || !pushConfig()) return;
   void pushNotifier.notifyPatient(patientId, kind);
+}
+
+/** Aviso de fondo a la nutricionista de la paciente. Mismo cuidado que el de la paciente. */
+export function notifyNutritionistPush(patientId: string, kind: PushKind): void {
+  if (!isSupabaseEnabled() || !pushConfig()) return;
+  void pushNotifier.notifyNutritionist(patientId, kind);
 }

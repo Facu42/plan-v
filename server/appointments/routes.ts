@@ -9,7 +9,7 @@ import { toPatientSelfView, type PatientAction } from '../security/contracts.js'
 import { getPatient } from '../store.js';
 import * as repo from './repository.js';
 import { enqueueOutboxBestEffort } from '../outbox/repository.js';
-import { notifyPatientPush } from '../push/push.js';
+import { notifyNutritionistPush, notifyPatientPush } from '../push/push.js';
 import { randomUUID } from 'node:crypto';
 
 const access = {
@@ -90,6 +90,7 @@ export function registerAppointmentRoutes(app: Hono) {
       if (!actor) return c.json({ error: 'Prohibido' }, 403);
       await repo.rescheduleAppointment(patientId, parsedBody.data, true);
       if (actor.role === 'nutri') notifyPatientPush(patientId, 'appointment');
+      else if (actor.role === 'paciente') notifyNutritionistPush(patientId, 'nutri_appointment');
       await enqueueOutboxBestEffort({
         patient_id: patientId,
         event_type: 'appointment_rescheduled',
@@ -126,6 +127,7 @@ export function registerAppointmentRoutes(app: Hono) {
       const actor = await authorize(auth.userId, patientId, 'confirm_appointment');
       if (!actor) return c.json({ error: 'Prohibido' }, 403);
       await repo.confirmAppointmentReply(patientId, parsedBody.data.reply, true);
+      if (actor.role === 'paciente') notifyNutritionistPush(patientId, 'nutri_appointment');
       await enqueueOutboxBestEffort({
         patient_id: patientId,
         event_type: 'appointment_confirmed',

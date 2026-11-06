@@ -17,6 +17,7 @@ import { AjustesWhatsappEstado } from './FichaWhatsappEstado';
 import type { ModoMarca } from './AjustesEditores';
 import { CERTIFICATE_VARIABLES, NOTICE_KEYS, certificateVariables, type NoticeKey, type NoticeView, type TemplateView } from '../../types/ajustes';
 import type { ClinicBrand } from '../../types/nutrition-capabilities';
+import { AvisosTelefonoNutri } from './AvisosTelefonoNutri';
 import { PlanNutridash } from './PlanNutridash';
 
 type Icono = Parameters<typeof PanelV29Icon>[0]['name'];
@@ -167,6 +168,7 @@ export function AjustesAvisos({ avisos, error, irAIntegraciones, onGuardar, onEd
         <div className="ajmsg"><small>Así le llega</small><div className="ajbub">{textoDeEjemplo(actual.texto)}</div></div>
         <small className="nthint">Guardamos tu elección. Cada aviso empieza a salir cuando se conecta su envío.</small>
       </FxPanel>
+      <FxPanel titulo="Avisos para vos" meta="en este dispositivo"><AvisosTelefonoNutri Interruptor={Interruptor} /></FxPanel>
       <FxPanel titulo="Últimos enviados" grande><div className="fxs"><Vacio texto="Todavía no hay envíos registrados." /></div></FxPanel>
       <div className="fxai"><PanelV29Icon name="spark" size={14} /><span><b>El mail</b> se activa cuando conectes Brevo en <button type="button" className="lnk" onClick={irAIntegraciones}>Integraciones</button>. Mientras tanto, todos los avisos llegan a la app.</span></div>
     </div>
