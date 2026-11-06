@@ -4,3 +4,5 @@
 .nv-standalone :is(input,select,textarea){max-width:100%;color:var(--nv-ink);background:var(--nv-card)}
 .nv-standalone .scheduling-panel{width:100%;overflow-wrap:anywhere}
 @media(max-width:600px){.nv-app.nv-standalone{padding:16px}}
+
+.nv-app.nv-standalone:has(.pub-hero)>main,.nv-app.nv-standalone:has(.pub-hero)>header{max-width:1040px}

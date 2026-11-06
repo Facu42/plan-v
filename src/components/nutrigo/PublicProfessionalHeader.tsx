@@ -9,10 +9,10 @@ export function PublicProfessionalHeader({ page }: { page: PublicSchedulingPage 
   const detalle = [page.page.location, page.profile.area, modalidad, page.profile.license, page.page.contact].filter(Boolean).join(' · ');
   const tinta = page.profile.color && /^#[0-9A-Fa-f]{6}$/.test(page.profile.color) ? page.profile.color : undefined;
   const acento = page.profile.accent && /^#[0-9A-Fa-f]{6}$/.test(page.profile.accent) ? page.profile.accent : undefined;
-  return <header className="pub-pro" style={{ color: tinta, ['--pub-accent' as string]: acento }}>
+  return <header className="pub-pro pub-hero" style={{ color: tinta, ['--pub-accent' as string]: acento }}>
     {foto ? <img src={foto} alt="" width={96} height={96} /> : null}
     <h1>{page.page.title}</h1>
-    {page.verified_license ? <p className="pub-verif">Matrícula verificada por Nutridash · {page.verified_license}</p> : null}
+    {page.verified_license ? <p className="pub-verif"><span aria-hidden="true">✓</span> Matrícula verificada por Nutridash · {page.verified_license}</p> : null}
     {page.page.bio ? <p>{page.page.bio}</p> : null}
     {detalle ? <p>{detalle}</p> : null}
     {page.profile.specialties.length ? <ul>{page.profile.specialties.map(item => <li key={item}>{item}</li>)}</ul> : null}

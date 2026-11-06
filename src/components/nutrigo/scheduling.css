@@ -26,3 +26,31 @@
 .pub-dir-lista>li>a.pub-pro img{width:56px;height:56px;border-radius:14px}
 .pub-dir-lista>li>a.pub-pro>ul{grid-column:1/-1}
 .pub-dir-av{display:grid;place-items:center;width:56px;height:56px;border-radius:14px;background:#C2E66E;color:#2C3B07;font-weight:700}
+/* Información útil en /slug: precios, horarios y mapa. */
+.scheduling-panel .pub-info{display:grid;gap:16px;margin:0 0 20px}
+.scheduling-panel .pub-card{margin:0;padding:20px;border:1px solid var(--nv-border);border-radius:16px;background:var(--nv-card)}
+.scheduling-panel .pub-card h2{margin:0 0 12px;font-size:16px}
+.scheduling-panel .pub-card small{color:var(--nv-muted,#5c6b62)}
+.pub-precios{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.pub-precios li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--nv-border)}
+.pub-precios li:last-child{border:0;padding-bottom:0}
+.pub-precios span{display:grid;gap:2px;min-width:0}.pub-precios strong{white-space:nowrap}
+.pub-horarios{display:grid;gap:6px;margin:0 0 8px}
+.pub-horarios>div{display:flex;justify-content:space-between;gap:12px;font-size:14px}.pub-horarios dt{font-weight:600}.pub-horarios dd{margin:0;text-align:right}
+.pub-cerrado{color:var(--nv-muted,#5c6b62)}
+.pub-modos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:0;list-style:none}
+.pub-modos li{padding:4px 10px;border-radius:999px;border:1px solid var(--nv-border);font-size:13px}
+.pub-modos .pub-si{background:#C2E66E;color:#2C3B07;border-color:transparent;font-weight:600}
+.pub-mapa{width:100%;height:240px;border:0;border-radius:12px;margin:8px 0}
+.pub-como{display:inline-block;font-weight:600;color:inherit}
+@media(min-width:900px){.scheduling-panel .pub-info{grid-template-columns:1fr 1fr}.scheduling-panel .pub-lugar{grid-column:1/-1}}
+/* Portada de /slug. */
+.scheduling-panel .pub-hero{grid-template-columns:auto 1fr;align-items:start;gap:6px 20px;margin:0 0 16px;padding:28px;border:1px solid var(--nv-border);border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--pub-accent,#C2E66E) 22%,var(--nv-card)),var(--nv-card) 60%)}
+.scheduling-panel .pub-hero>*{grid-column:2;margin:0}
+.scheduling-panel .pub-hero>img{grid-column:1;grid-row:1/span 6;width:128px;height:128px;border-radius:28px}
+.scheduling-panel .pub-hero h1{font-size:clamp(24px,4vw,34px);line-height:1.15;letter-spacing:-.02em}
+.scheduling-panel .pub-hero .pub-verif{justify-self:start;padding:4px 12px;border-radius:999px;background:#C2E66E;color:#2C3B07;font-size:13px}
+@media(max-width:600px){.scheduling-panel .pub-hero{grid-template-columns:1fr;padding:20px}.scheduling-panel .pub-hero>*,.scheduling-panel .pub-hero>img{grid-column:1;grid-row:auto}.scheduling-panel .pub-hero>img{width:96px;height:96px}}
+.pub-horarios dt{flex:none}.pub-horarios dd{flex:1;min-width:0}
+.pub-mapa{background:var(--nv-bg)}
+@media(max-width:600px){.pub-horarios>div{flex-wrap:wrap;gap:2px}.pub-horarios dd{text-align:left;flex-basis:100%}}
