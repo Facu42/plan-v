@@ -48,6 +48,16 @@ export function registerPackRoutes(app: Hono) {
     return c.json({ packs: await repo.listPacks(id, persistent) });
   });
 
+  // La paciente ve su propio saldo de consultas (en demo, con ?audience=patient).
+  app.get('/api/patients/:id/packs/own', async (c) => {
+    const id = c.req.param('id');
+    const auth = c.get('auth');
+    if (!('userId' in auth) || !isSupabaseEnabled()) return c.json({ packs: await repo.listOwnPacks(id, false) });
+    const actor = await authorizePatientAction(auth.userId, id, 'read_patient', { getActor: sb.sbGetActor, getPatientResource: sb.sbGetPatientResource });
+    if (!actor || actor.role !== 'paciente') throw new repo.CareError(403, 'No tenés permiso para esta acción.');
+    return c.json({ packs: await repo.listOwnPacks(id, true) });
+  });
+
   // Vender un paquete; con charge = true queda el cobro suelto en Cobranzas.
   app.post('/api/patients/:id/packs', async (c) => {
     const id = c.req.param('id');

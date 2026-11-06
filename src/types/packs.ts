@@ -23,3 +23,13 @@ export function currentPack(packs: readonly PatientPack[], today: string): Patie
   const activos = packs.filter(p => packStatus(p, today) === 'activo').sort((a, b) => a.starts_on.localeCompare(b.starts_on) || a.created_at.localeCompare(b.created_at));
   return activos[0] ?? [...packs].sort((a, b) => b.starts_on.localeCompare(a.starts_on) || b.created_at.localeCompare(a.created_at))[0] ?? null;
 }
+
+/** Lo que ve la paciente de su paquete: sin precio ni notas de la nutricionista. */
+export type OwnPack = { id: string; name: string; sessions: number; used: number; starts_on: string; expires_on: string | null; closed: boolean };
+
+/** El paquete que se le muestra a la paciente: el vigente más viejo con consultas; si no hay, ninguno. */
+export function ownCurrentPack(packs: readonly OwnPack[], today: string): OwnPack | null {
+  return [...packs]
+    .filter(p => !p.closed && p.used < p.sessions && (!p.expires_on || p.expires_on >= today))
+    .sort((a, b) => a.starts_on.localeCompare(b.starts_on))[0] ?? null;
+}
