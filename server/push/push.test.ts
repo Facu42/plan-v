@@ -10,10 +10,11 @@ import { registerPushRoutes } from './routes.js';
 const CONFIG = { VAPID_PUBLIC_KEY: 'pub', VAPID_PRIVATE_KEY: 'priv', VAPID_SUBJECT: 'mailto:hola@planv.test' };
 const PHONE: StoredSubscription = { endpoint: 'https://fcm.googleapis.com/fcm/send/abc', p256dh: 'BKey', auth: 'aut' };
 
-function memoryStore(rows: Array<StoredSubscription & { user_id: string }> = [], patients: Record<string, string | null> = { p1: 'u1' }) {
+function memoryStore(rows: Array<StoredSubscription & { user_id: string }> = [], patients: Record<string, string | null> = { p1: 'u1' }, nutris: Record<string, string | null> = { p1: 'n1' }) {
   const removed: string[] = [];
   const store: PushStore = {
     patientUser: async id => patients[id] ?? null,
+    nutritionistUser: async id => nutris[id] ?? null,
     forUser: async user => rows.filter(row => row.user_id === user),
     save: async (user, sub) => { rows.splice(0, rows.length, ...rows.filter(row => row.endpoint !== sub.endpoint), { ...sub, user_id: user }); },
     remove: async (endpoint, user) => {
@@ -94,8 +95,26 @@ describe('createPushNotifier', () => {
     const notifier = createPushNotifier({ config: () => pushConfig(CONFIG), store: () => store, send });
     expect(await notifier.notifyPatient('p1', 'appointment')).toBe(0);
     expect(removed).toEqual([]);
-    const broken: PushStore = { ...store, patientUser: async () => { throw new Error('sin base'); } };
+    const broken: PushStore = { ...store, patientUser: async () => { throw new Error('sin base'); }, nutritionistUser: async () => { throw new Error('sin base'); } };
     await expect(createPushNotifier({ config: () => pushConfig(CONFIG), store: () => broken, send }).notifyPatient('p1', 'plan')).resolves.toBe(0);
+  });
+
+  it('avisa a los teléfonos de la nutri, no a los de la paciente', async () => {
+    const send = vi.fn().mockResolvedValue(undefined);
+    const { store } = memoryStore([{ ...PHONE, user_id: 'n1' }, { ...PHONE, endpoint: 'https://web.push.apple.com/p', user_id: 'u1' }]);
+    const notifier = createPushNotifier({ config: () => pushConfig(CONFIG), store: () => store, send });
+    expect(await notifier.notifyNutritionist('p1', 'nutri_message')).toBe(1);
+    expect(send).toHaveBeenCalledTimes(1);
+    expect(send.mock.calls[0][0].endpoint).toBe(PHONE.endpoint);
+    expect(JSON.parse(send.mock.calls[0][1])).toMatchObject({ url: '/crm/mensajes' });
+  });
+
+  it('nutri sin cuenta o sin claves: no manda nada', async () => {
+    const send = vi.fn();
+    const { store } = memoryStore([], { p1: 'u1' }, { p1: null });
+    expect(await createPushNotifier({ config: () => pushConfig(CONFIG), store: () => store, send }).notifyNutritionist('p1', 'nutri_payment')).toBe(0);
+    expect(await createPushNotifier({ config: () => null, store: () => store, send }).notifyNutritionist('p1', 'nutri_payment')).toBe(0);
+    expect(send).not.toHaveBeenCalled();
   });
 
   it('paciente sin cuenta vinculada: no hay a quién avisar', async () => {

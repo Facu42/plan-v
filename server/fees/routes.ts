@@ -5,6 +5,7 @@ import type { PatientAction } from '../security/contracts.js';
 import * as sb from '../db/supabase-repo.js';
 import { isSupabaseEnabled } from '../db/supabase-client.js';
 import * as repo from './repository.js';
+import { notifyNutritionistPush, notifyPatientPush } from '../push/push.js';
 
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refine((value) => !Number.isNaN(Date.parse(`${value}T12:00:00Z`)));
 const amountSchema = z.number().int().min(1).max(100_000_000);
@@ -105,7 +106,9 @@ export function registerFeeRoutes(app: Hono) {
     const { persistent, role } = await patientActor(c, id, 'edit_billing');
     if (role !== 'nutri') throw new repo.CareError(403, 'No tenés permiso para esta acción.');
     const input = await body(c, chargeSchema);
-    return c.json({ ledger: await repo.addCharge(id, input, persistent), source: source(persistent) }, 201);
+    const ledger = await repo.addCharge(id, input, persistent);
+    notifyPatientPush(id, 'charge');
+    return c.json({ ledger, source: source(persistent) }, 201);
   });
 
   // Asignar programa: la cuota de la paciente toma el monto del programa; program_id null la quita.
@@ -136,7 +139,9 @@ export function registerFeeRoutes(app: Hono) {
     const { persistent, role } = await patientActor(c, id, 'read_patient');
     const input = await body(c, paymentSchema);
     if (role === 'paciente') {
-      return c.json({ ledger: await repo.reportPayment(id, input, persistent), source: source(persistent) }, 201);
+      const ledger = await repo.reportPayment(id, input, persistent);
+      notifyNutritionistPush(id, 'nutri_payment');
+      return c.json({ ledger, source: source(persistent) }, 201);
     }
     if (persistent) await patientActor(c, id, 'edit_billing');
     return c.json({ ledger: await repo.recordPayment(id, input, persistent), source: source(persistent) }, 201);

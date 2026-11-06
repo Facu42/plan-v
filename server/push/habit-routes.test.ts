@@ -15,6 +15,7 @@ const PHONE: StoredSubscription = { endpoint: 'https://fcm.googleapis.com/fcm/se
 function app(user: string | null, rows: StoredSubscription[] = [], now = () => 1_000) {
   const store: PushStore = {
     patientUser: async () => null,
+    nutritionistUser: async () => null,
     forUser: async () => rows,
     save: async () => undefined,
     remove: async () => undefined,
