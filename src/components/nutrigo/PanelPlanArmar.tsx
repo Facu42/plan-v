@@ -265,7 +265,7 @@ export function PanelPlanArmar({
         </div>
         <footer className="iago">
           <small><PanelV29Icon name="file" size={15} /><span><b>Primero, una propuesta para revisar.</b> {nombre} no recibe nada hasta que lo publiques.</span></small>
-          <button type="button" className="cta" disabled={armando} onClick={crear}><PanelV29Icon name="spark" size={14} />{armando ? 'Armando propuesta…' : 'Crear propuesta del plan'}</button>
+          <button type="button" className="cta" data-iaa="go" disabled={armando} onClick={crear}><PanelV29Icon name="spark" size={14} />{armando ? 'Armando propuesta…' : 'Crear propuesta del plan'}</button>
         </footer>
       </section>
     </div>

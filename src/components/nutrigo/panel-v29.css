@@ -2734,6 +2734,25 @@
 #pv-panel-v29 #s-planes.pux-plan .p28-week-head small{font-size:11px;color:var(--ink3)}
 #pv-panel-v29 #s-planes.pux-plan .p28-week{height:74px;min-height:74px;flex:none;padding:0 4px;gap:12px}
 #pv-panel-v29 #s-planes.pux-plan .p28-week i{width:16px;border-radius:7px}
+/* Editor de planes cómodo (Facundo, 5/11): calorías por día, macros una sola vez, comidas compactas, acciones al pie, sin medidor, Asistente en degradé azul */
+#pv-panel-v29 #s-planes .pedays button .dkc{display:block;font-style:normal;font-size:11px;color:var(--ink3);font-variant-numeric:tabular-nums;margin-top:1px}
+#pv-panel-v29 #s-planes .pedays button .dkc.off{color:var(--azaf-ink)}
+#pv-panel-v29 #s-planes .pedays button.on .dkc{color:var(--ink2)}
+#pv-panel-v29 #s-planes .p28-week-head,#pv-panel-v29 #s-planes .p28-week,#pv-panel-v29 #s-planes .p28-gauge{display:none!important}
+#pv-panel-v29 #s-planes .petot .pemc,#pv-panel-v29 #s-planes .petot .pemb2{display:none!important}
+#pv-panel-v29 #s-planes .pemeals{gap:6px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pemeals{gap:6px}
+#pv-panel-v29 #s-planes:is(.pux-plan,.pux-create) .pemeal,#pv-panel-v29 #s-planes.pux-plan .pemeal{padding:8px 12px}
+#pv-panel-v29 #s-planes .pemh>img{width:32px!important;height:32px!important;border-radius:10px!important}
+#pv-panel-v29 #s-planes .pemeal .pema .ibtn{width:30px;height:30px}
+#pv-panel-v29 #s-planes .dmf{display:flex;gap:16px;align-items:center;padding:10px 4px 2px}
+#pv-panel-v29 #s-planes .dmf button{border:0;background:none;padding:0;font:inherit;font-size:12.5px;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+#pv-panel-v29 #s-planes .dmf button:hover{text-decoration:underline;text-underline-offset:3px}
+#pv-panel-v29 #s-planes .dmf button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6}
+#pv-panel-v29 #s-planes .dmf .k{color:var(--ink3);margin-left:auto;font-size:11.5px}
+#pv-panel-v29 #s-planes [data-iaa="dr"],#pv-panel-v29 #s-planes [data-iaa="go"],#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"]{background:linear-gradient(100deg,#0042B0 0%,#0054D3 45%,#0096E6 100%)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(0,66,176,.25)}
+#pv-panel-v29 #s-planes [data-iaa="dr"] svg,#pv-panel-v29 #s-planes [data-iaa="go"] svg,#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"] svg{stroke:#fff;color:#fff}
+#pv-panel-v29 #s-planes [data-iaa="dr"]:hover,#pv-panel-v29 #s-planes [data-iaa="go"]:hover:not([disabled]),#pv-panel-v29 #s-planes .sbtn.k[data-pa="nuevo"]:hover{background:linear-gradient(100deg,#003A9C 0%,#004CC0 45%,#0088D4 100%)!important}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail{border:0;border-top:1px solid var(--line);border-radius:0}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail>summary{padding:12px 0 0;min-height:48px}
 #pv-panel-v29 #s-planes.pux-plan .pux-analysis>.pux-detail>.pux-detail-body{padding:16px 0 0}

@@ -125,6 +125,9 @@ Boceto primero, app después. Resumen de la Ficha: medidas sin mini gráfico, en
 ## 5/11 · Letra legible del panel
 En el boceto v29 ningún texto baja de 11px (había 118 reglas de 8 a 10,5px) y el gris de apoyo `--ink3` sube a #666972 en claro y #8C8F98 en oscuro (contraste mínimo 4,5:1). `panel-v29.css` se regeneró del boceto y una prueba (`panel-v29-legible.test.ts`) impide volver atrás. En el celular la tarjeta de Inicio crece si el nombre ocupa dos líneas.
 
+## 6/11 · Editor de planes más cómodo (boceto aprobado por Facundo)
+Seis cambios, primero en el boceto v29 y después en `PanelPlanEditor.tsx`: cada día muestra sus calorías debajo de la fecha (sin gráfico semanal), los macros se ven una sola vez (resumen de la derecha), comidas más compactas, «Agregar alimento» y «Cambiar plato» escritos al pie de la comida abierta, sin el medidor del porcentaje, y «Asistente IA» (y «Crear con el asistente») con el degradé azul del logo. Estilos en `panel-trabajo.html` (`#s-planes .dkc`, `.dmf`, `[data-iaa]`) y `panel-v29.css` regenerado.
+
 ## 5/11 · Ventana «Agregar a la comida» con el estilo del boceto
 El editor de planes (#277: agregar y cambiar alimentos, recetas e intercambios) reusa los buscadores del editor viejo; su ventana ahora se ve como el panel lateral del boceto v29 (tarjeta con borde, campos `.ai`, botón principal negro `.cta`, secundario `.sbtn`, pestañas en píldora). Estilos solo en `panel-v29-app.css` bajo `#pv-panel-v29 dialog.plan-recipe-picker`. Regla de Facundo: todo elemento nuevo sigue el estilo del boceto.
 

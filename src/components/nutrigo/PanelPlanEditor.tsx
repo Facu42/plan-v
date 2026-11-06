@@ -275,6 +275,7 @@ export function PanelPlanEditor({
   const metaKcal = version?.nutrition_target?.kcal ?? (kcal.trim() ? Number(kcal) : null);
   const comidas = comidasDelDia(items, fecha, horas);
   const delDia = sumarMacros(comidas.flatMap(comida => comida.lineas.map(linea => linea.macros)));
+  const kcalDelDia = (iso: string) => comidasDelDia(items, iso, horas).some(comida => comida.lineas.length) ? sumarMacros(comidasDelDia(items, iso, horas).flatMap(comida => comida.lineas.map(linea => linea.macros))).kcal : null;
   const nombreDia = DIAS_LARGOS[indiceLunes(fecha)];
   const tituloDia = nombreDia.charAt(0).toLocaleUpperCase('es-AR') + nombreDia.slice(1);
   const primer = paciente.name.split(/\s+/)[0] || 'la paciente';
@@ -637,7 +638,7 @@ export function PanelPlanEditor({
       <div className="c"><section className="fxp g">
         <header><h3>{primer} todavía no tiene plan</h3><span className="m">elegí cómo empezar; queda en borrador hasta que lo publiques</span><span className="sp" /></header>
         <div className="pstart">
-          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" disabled={armando} onClick={() => void armarConAsistente()}>{armando ? 'Armando propuesta…' : 'Armar con el asistente'}</button></div>
+          <div><PanelV29Icon name="spark" size={16} /><b>Con el asistente</b><p>Arma una primera semana con lo que cargaste en la ficha de {primer}.</p><button type="button" className="sbtn k" data-pa="nuevo" disabled={armando} onClick={() => void armarConAsistente()}>{armando ? 'Armando propuesta…' : 'Armar con el asistente'}</button></div>
           <div><PanelV29Icon name="clip" size={16} /><b>Desde una plantilla</b><p>Por ejemplo «Descenso 1.600 kcal» o «Sin gluten 1.800 kcal».</p><button type="button" className="sbtn" onClick={() => setReutilizar('elegir')}>Elegir plantilla</button></div>
           <div><PanelV29Icon name="copy" size={16} /><b>Copiar de otra paciente</b><p>Partí del plan de una paciente parecida. Sus datos no se copian.</p><button type="button" className="sbtn" onClick={() => setCopiando(true)}>Elegir paciente</button></div>
           <div><PanelV29Icon name="pen" size={16} /><b>Desde cero</b><p>Semana vacía con las cinco comidas para completar.</p><button type="button" className="sbtn" onClick={empezarVacio}>Empezar vacío</button></div>
@@ -677,7 +678,7 @@ export function PanelPlanEditor({
             setItems(siguiente);
             void guardar(siguiente);
           }}><PanelV29Icon name="redo" size={14} /></button>
-          <button type="button" className="sbtn" onClick={abrirCajon}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
+          <button type="button" className="sbtn k cbtn" data-iaa="dr" onClick={abrirCajon}><PanelV29Icon name="spark" size={13} />{armando ? 'Armando…' : 'Asistente IA'}</button>
           <button type="button" className="sbtn" onClick={() => setReutilizar('guardar')}><PanelV29Icon name="copy" size={13} />Guardar como plantilla</button>
           <button type="button" className="sbtn" onClick={() => setReutilizar('copiar')}><PanelV29Icon name="users" size={13} />Copiar a otra paciente</button>
           <button type="button" className="sbtn" onClick={() => { if (version?.nutrition_target) setMeta(true); else onAviso('La meta diaria no está cargada en este plan.'); }}><PanelV29Icon name="trend" size={13} />Ajustar metas</button>
@@ -698,6 +699,7 @@ export function PanelPlanEditor({
             <div className="pedays" aria-label="Elegir día">
               {fechas.map((iso, indice) => <button type="button" key={iso} className={indice === dia ? 'on' : undefined} aria-pressed={indice === dia} onClick={() => setDia(indice)}>
                 <small>{DIAS_CORTOS[indiceLunes(iso)]}</small><b className="num">{Number(iso.slice(8, 10))}</b>
+                <em className={`dkc num${metaKcal && kcalDelDia(iso) != null && Math.abs(kcalDelDia(iso)! / metaKcal - 1) > 0.05 ? ' off' : ''}`} title={metaKcal && kcalDelDia(iso) != null ? `${Math.round(kcalDelDia(iso)! / metaKcal * 100)}% de la meta` : 'Sin calorías cargadas'}>{kcalDelDia(iso) == null ? '—' : numero(kcalDelDia(iso)!)}</em>
                 {items.some(item => item.for_date === iso) ? <i /> : null}
               </button>)}
             </div>
@@ -754,6 +756,11 @@ export function PanelPlanEditor({
                     <button type="button" className="ibtn" aria-label={`Quitar ${linea.nombre}`} onClick={() => aplicar(quitarLinea(items, linea.clave))}><PanelV29Icon name="x" size={12} /></button>
                     {nota === linea.clave ? <input aria-label={`Nota de ${linea.nombre}`} defaultValue={linea.nota} onBlur={evento => { const siguiente = cambiarNota(items, linea.clave, evento.target.value); setNota(null); aplicar(siguiente); }} /> : null}
                   </div>)}
+                </div> : null}
+                {abierta ? <div className="dmf">
+                  <button type="button" onClick={() => setSumar({ fecha, slot: comida.slot, modo: 'sumar' })}><PanelV29Icon name="plus" size={13} />Agregar alimento</button>
+                  <button type="button" onClick={() => setSumar({ fecha, slot: comida.slot, modo: 'cambiar' })}><PanelV29Icon name="swap" size={13} />Cambiar plato</button>
+                  <span className="k">Tab pasa a la cantidad siguiente</span>
                 </div> : null}
               </section>;
             })}
