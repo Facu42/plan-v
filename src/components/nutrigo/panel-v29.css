@@ -3100,6 +3100,13 @@
 #pv-panel-v29.mob :is(.chip,.sbtn,.cta){min-height:40px}
 #pv-panel-v29.mob .top h1{font-size:25px;letter-spacing:-.025em}
 #pv-panel-v29.mob .kpi .ft{white-space:normal;flex-wrap:wrap;row-gap:2px}
+#pv-panel-v29.mob .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+#pv-panel-v29.mob .kpis>.kpi{height:auto;min-height:104px}
+#pv-panel-v29.mob .kpis>:last-child:nth-child(odd){grid-column:1/-1!important}
+#pv-panel-v29.mob .kpis>.kpi:nth-child(2){background:var(--lima-t);border-color:transparent}
+#pv-panel-v29.mob .kpis>.kpi:nth-child(3){background:var(--azul-t);border-color:transparent}
+#pv-panel-v29.mob .kpis>.kpi:nth-child(4){background:var(--azaf-t);border-color:transparent}
+#pv-panel-v29.mob .kpis>.kpi:nth-child(5){background:var(--rojo-t);border-color:transparent}
 #pv-panel-v29.mob #act::before{content:"";display:block;width:40px;height:4px;border-radius:99px;background:var(--line2);margin:8px auto 0;flex:none}
 #pv-panel-v29.mob #actw.on #act{animation:mvSheet .38s var(--mv)}
 @media (prefers-reduced-motion:reduce){#pv-panel-v29 .scr :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*,.dprog .tr i,.fxstk i,.sxdays i.on){animation:none!important}#pv-panel-v29.mob .mnav::before,#pv-panel-v29.mob .mnav button svg,#pv-panel-v29 #atoast{transition:none}#pv-panel-v29.mob #actw.on #act{animation:none}#pv-panel-v29:is(.cta,.chip,.sbtn,.ibtn,.tg2):active,#pv-panel-v29 :is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:1}}

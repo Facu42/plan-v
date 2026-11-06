@@ -3115,6 +3115,13 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .mob :is(.chip,.sbtn,.cta){min-height:40px}
 .mob .top h1{font-size:25px;letter-spacing:-.025em}
 .mob .kpi .ft{white-space:normal;flex-wrap:wrap;row-gap:2px}
+.mob .kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mob .kpis>.kpi{height:auto;min-height:104px}
+.mob .kpis>:last-child:nth-child(odd){grid-column:1/-1!important}
+.mob .kpis>.kpi:nth-child(2){background:var(--lima-t);border-color:transparent}
+.mob .kpis>.kpi:nth-child(3){background:var(--azul-t);border-color:transparent}
+.mob .kpis>.kpi:nth-child(4){background:var(--azaf-t);border-color:transparent}
+.mob .kpis>.kpi:nth-child(5){background:var(--rojo-t);border-color:transparent}
 .mob #act::before{content:"";display:block;width:40px;height:4px;border-radius:99px;background:var(--line2);margin:8px auto 0;flex:none}
 .mob #actw.on #act{animation:mvSheet .38s var(--mv)}
 @media (prefers-reduced-motion:reduce){.scr :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*,.dprog .tr i,.fxstk i,.sxdays i.on){animation:none!important}.mob .mnav::before,.mob .mnav button svg,#atoast{transition:none}.mob #actw.on #act{animation:none}:is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:1}}
