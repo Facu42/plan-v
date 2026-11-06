@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import type { Patient } from '../../types';
 import { AvisoBoceto } from './panel-v29-boceto';
 import { FxCols } from './ficha-fx';
@@ -133,7 +133,7 @@ function Fila({ fila, activa, persona, adherencia, onElegir }: { fila: GlobalPat
   return <button type="button" className={activa ? 'l on' : 'l'} aria-pressed={activa} onClick={onElegir}>
     <span className="av" style={{ background: fondoAvatar(persona?.tone) }}>{inicialesDe(fila.patient_name, persona?.initials)}</span>
     <span className="sxwho"><b>{fila.patient_name}</b><small>{lineaLista(fila)}</small></span>
-    {adherencia === null ? <span className="sxsub">Sin dato</span> : <span className="adh"><span className="tr"><i className={adherencia < 60 ? 'lo' : undefined} style={{ width: `${adherencia}%` }} /></span>{adherencia}%</span>}
+    {adherencia === null ? <span className="sxsub">Sin dato</span> : <span className="adh" style={{ '--v': adherencia } as CSSProperties}><span className="tr"><i className={adherencia < 60 ? 'lo' : undefined} style={{ width: `${adherencia}%` }} /></span>{adherencia}%</span>}
     <span className={`pill ${etiqueta.clase}`}>{etiqueta.texto}</span>
     <span className="chip">Evolución</span>
   </button>;

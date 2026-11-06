@@ -257,7 +257,7 @@ export function PanelHomeView({ patients, now, data, loading, error, onRefresh, 
             <td className="num">{fila.dia ? `${fila.dia} · ` : ''}{fila.hora}</td>
             <td><a className="rowlink" href={fila.href} onClick={abrir(fila.href)}><div className="who"><span className="av" style={{ background: fila.fondo }}>{fila.iniciales}</span><div><b>{fila.nombre}</b></div></div></a></td>
             <td>{fila.consulta}</td><td><span className="mod"><PanelV29Icon name={fila.video ? 'video' : 'door'} size={13} />{fila.modalidad}</span></td>
-            <td>{fila.adherencia == null ? <span style={{ color: 'var(--ink3)' }}>Sin dato</span> : <div className="adh"><span className="tr"><i className={fila.adherencia < 70 ? 'lo' : undefined} style={{ width: `${fila.adherencia}%` }} /></span><span className="num">{fila.adherencia}%</span></div>}</td>
+            <td>{fila.adherencia == null ? <span style={{ color: 'var(--ink3)' }}>Sin dato</span> : <div className="adh" style={{ '--v': fila.adherencia } as CSSProperties}><span className="tr"><i className={fila.adherencia < 70 ? 'lo' : undefined} style={{ width: `${fila.adherencia}%` }} /></span><span className="num">{fila.adherencia}%</span></div>}</td>
             <td style={{ color: fila.cuotaHoy ? 'var(--azaf-ink)' : 'var(--ink2)' }}>{fila.cuota}</td>
             <td><span className={`pill ${fila.pill}`}>{fila.estado}</span></td></tr>)
             : <tr><td colSpan={7} style={{ color: 'var(--ink3)' }}>{rango === 'hoy' ? 'No tenés consultas programadas para hoy.' : rango === 'manana' ? 'No tenés consultas programadas para mañana.' : 'No tenés consultas programadas esta semana.'}</td></tr>}</tbody>

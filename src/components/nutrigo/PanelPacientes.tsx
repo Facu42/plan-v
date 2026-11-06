@@ -188,7 +188,7 @@ export function PanelPacientes({ pacientes, ahora, board, billingError, previews
         ? (patologias.get(p.id) ?? []).map(t => <span key={t.texto} className={`pat ${clasePatologia(t.texto)}`}>{t.texto}</span>)
         : <span className="pat p0">Sin declarar</span>}</div></td>
       <td>{avance ? <div className="goal"><span className="tr"><i style={{ width: `${avance.pct}%` }} /></span><small className="num">{avance.texto}</small></div> : <span style={{ color: 'var(--ink3)' }}>Sin medir</span>}</td>
-      <td>{conAdherencia ? <div className="adh"><span className="tr"><i className={p.adherence_score < 70 ? 'lo' : undefined} style={{ width: `${Math.max(0, Math.min(100, p.adherence_score))}%` }} /></span><span className="num">{Math.round(p.adherence_score)} %</span></div> : <span style={{ color: 'var(--ink3)' }}>—</span>}</td>
+      <td>{conAdherencia ? <div className="adh" style={{ '--v': Math.max(0, Math.min(100, p.adherence_score)) } as CSSProperties}><span className="tr"><i className={p.adherence_score < 70 ? 'lo' : undefined} style={{ width: `${Math.max(0, Math.min(100, p.adherence_score))}%` }} /></span><span className="num">{Math.round(p.adherence_score)} %</span></div> : <span style={{ color: 'var(--ink3)' }}>—</span>}</td>
       <td><div className="nx"><b className="num">{proximaConsulta(p, ahora)}</b><small style={{ color: registro.viejo ? 'var(--azaf-ink)' : 'var(--ink3)' }}>último registro: {registro.texto}</small></div></td>
       <td><span className={`pill ${estado.pill}`}>{estado.texto}</span>{estado.cuota ? <small className="cuo">{estado.cuota}</small> : billingError ? <small className="cuo">Cuota sin consultar</small> : null}</td>
     </tr>;
