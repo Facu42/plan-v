@@ -48,6 +48,15 @@ describe('paquetes de consultas en modo demo', () => {
     expect((await send('/api/patients/pat-sofia/packs?audience=patient', 'GET')).status).toBe(403);
   });
 
+  it('la paciente ve su saldo en su app sin precio ni notas', async () => {
+    const response = await send('/api/patients/pat-sofia/packs/own?audience=patient', 'GET');
+    expect(response.status).toBe(200);
+    const { packs } = await response.json() as { packs: Array<Record<string, unknown>> };
+    expect(packs[0]).toMatchObject({ name: 'Paquete de 3 seguimientos', sessions: 3, used: 1, closed: false });
+    expect(packs[0]).not.toHaveProperty('amount');
+    expect(packs[0]).not.toHaveProperty('uses');
+  });
+
   it('rechaza datos inválidos', async () => {
     for (const bad of [
       { name: '', sessions: 3, amount: 1000, starts_on: today(), valid_days: null, charge: false },

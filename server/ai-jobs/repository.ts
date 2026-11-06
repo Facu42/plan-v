@@ -4,6 +4,8 @@ import { getRequestDb } from '../db/supabase-client.js';
 import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
 import { requireCareConsent } from '../care/consents.js';
+import { listMeasurements } from '../care/repository.js';
+import { clinicalSnapshot } from '../clinical-workspace/repository.js';
 import { saveRecipeDraft } from '../recipes/repository.js';
 import { getProfessionalMealPlan, saveMealPlanDraft } from '../plans/repository.js';
 import { listProfessionalRecipes } from '../recipes/repository.js';
@@ -15,6 +17,8 @@ import { resolveAiProvider } from '../ai/provider.js';
 import {
   assertJobTokenBudget,
   buildMenuJobContext,
+  labSlices,
+  measurementSlices,
   buildRecipeJobContext,
   estimateTokens,
   hashAiContext,
@@ -158,13 +162,25 @@ function monthStart(now = new Date()) {
   return `${parts}-01`;
 }
 
+/** Medidas y laboratorios revisados que la paciente ya permitió compartir; sin permiso o sin datos, quedan vacíos. */
+async function clinicalSlicesFor(patientId: string, nutritionistId: string, persistent: boolean) {
+  const optional = async <T>(read: () => Promise<T>, empty: T) => {
+    try { return await read(); } catch (error) { if (error instanceof CareError && error.status === 403) return empty; throw error; }
+  };
+  return {
+    measurements: measurementSlices(await optional(() => listMeasurements(patientId, persistent), [])),
+    labs: labSlices(await optional(async () => (await clinicalSnapshot(patientId, nutritionistId, persistent)).records, [])),
+  };
+}
+
 async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, persistent: boolean) {
   const bundle = await requireCareConsent(input.patient_id, persistent, 'ai_menu_draft');
   const intake = bundle.intake.payload;
   const validity = bundle.intake.revision ? { intake_revision: bundle.intake.revision,
     consent_event_id: bundle.consents.filter((entry) => entry.purpose === 'ai_menu_draft').slice(-1)[0]?.id ?? null } : undefined;
+  const clinical = await clinicalSlicesFor(input.patient_id, nutritionistId, persistent);
   if (input.job_type === 'recipe_draft') {
-    return { ...buildRecipeJobContext({ intake, titleHint: input.title_hint }), ...(validity ? { validity } : {}) };
+    return { ...buildRecipeJobContext({ intake, titleHint: input.title_hint, clinical }), ...(validity ? { validity } : {}) };
   }
   const catalog = await listProfessionalRecipes(nutritionistId, persistent);
   const target = await getTarget(input.patient_id, persistent);
@@ -179,6 +195,7 @@ async function buildContext(nutritionistId: string, input: AiJobEnqueueInput, pe
     : undefined;
   return { ...buildMenuJobContext({
     assistant,
+    clinical,
     intake,
     periodStart: input.period_start,
     periodEnd: input.period_end,

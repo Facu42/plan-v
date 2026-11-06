@@ -12,13 +12,14 @@ import {
 } from './planes-asistente';
 import {
   AVISO_DEMASIADAS, AVISO_ERROR_DICTADO, AVISO_LIMITE_REFERENCIA, AVISO_SIN_DICTADO, MAX_REFERENCIAS,
-  agregarTexto, leerReferencia, reconocimientoDelNavegador, textoDictado, type Reconocimiento, type Referencia,
+  agregarTexto, reconocimientoDelNavegador, textoDictado, type Reconocimiento, type Referencia,
 } from './planes-referencia';
+import { ARCHIVOS_PLAN_ANTERIOR, AVISO_LOCAL, AVISO_SIN_COMIDAS, leerPlanAnterior, resumenImportado, type PlanImportado } from './planes-importar';
 
 type Persona = Pick<Patient, 'id' | 'name' | 'initials' | 'tone' | 'goal' | 'plan_b' | 'next_focus' | 'sensitive_hours'>;
 
 export function PanelPlanArmar({
-  pacientes, pacienteId, kcal, hoy, armando, onPaciente, onAviso, onCrear,
+  pacientes, pacienteId, kcal, hoy, armando, onPaciente, onAviso, onCrear, onImportar,
 }: {
   pacientes: Persona[];
   pacienteId: string;
@@ -28,6 +29,8 @@ export function PanelPlanArmar({
   onPaciente: (id: string) => void;
   onAviso: (texto: string) => void;
   onCrear: (preferencias: string[], duracion: DuracionArmado) => void;
+  /** Guarda el plan anterior como borrador; devuelve `false` si no se pudo (el aviso ya lo explica). */
+  onImportar?: (plan: PlanImportado) => Promise<boolean>;
 }) {
   const paciente = pacientes.find(persona => persona.id === pacienteId) ?? pacientes[0];
   const [uso, setUso] = useState<AiMonthlyUsage | null | undefined>(undefined);
@@ -52,6 +55,9 @@ export function PanelPlanArmar({
   }, [pacienteId, armando]);
   const [pedido, setPedido] = useState('');
   const [referencias, setReferencias] = useState<Referencia[]>([]);
+  const [importado, setImportado] = useState<{ nombre: string; plan: PlanImportado } | null>(null);
+  const [leyendo, setLeyendo] = useState(false);
+  const [importando, setImportando] = useState(false);
   const [escuchando, setEscuchando] = useState(false);
   const selector = useRef<HTMLInputElement>(null);
   const dictado = useRef<Reconocimiento | null>(null);
@@ -98,12 +104,28 @@ export function PanelPlanArmar({
     evento.target.value = '';
     if (!archivo) return;
     if (referencias.length >= MAX_REFERENCIAS) { onAviso(AVISO_DEMASIADAS); return; }
+    setLeyendo(true);
     try {
-      const referencia = await leerReferencia(archivo);
-      setReferencias(actuales => [...actuales, referencia]);
-      onAviso(AVISO_LIMITE_REFERENCIA);
+      const { texto, plan } = await leerPlanAnterior(archivo, onAviso);
+      setReferencias(actuales => [...actuales, { nombre: archivo.name, texto }]);
+      if (plan.comidas && onImportar) {
+        setImportado({ nombre: archivo.name, plan });
+        onAviso(`Reconocí el plan de ${archivo.name}. ${AVISO_LOCAL}`);
+      } else onAviso(plan.comidas ? AVISO_LIMITE_REFERENCIA : AVISO_SIN_COMIDAS);
     } catch (error) {
       onAviso(error instanceof Error ? error.message : 'No se pudo leer el archivo.');
+    } finally {
+      setLeyendo(false);
+    }
+  }
+
+  async function usarComoBorrador() {
+    if (!importado || !onImportar || importando) return;
+    setImportando(true);
+    try {
+      if (await onImportar(importado.plan)) setImportado(null);
+    } finally {
+      setImportando(false);
     }
   }
 
@@ -197,13 +219,17 @@ export function PanelPlanArmar({
             <div className="iabox">
               <label className="pux-prompt-label" htmlFor="iatxt">¿Qué plan querés crear?</label>
               <textarea id="iatxt" rows={8} aria-label="Qué plan querés" placeholder={`Por ejemplo: una semana de comidas fáciles para ${nombre}. Desayunos rápidos, viandas para llevar al trabajo y cenas livianas.`} value={pedido} onChange={evento => setPedido(evento.target.value)} />
-              {referencias.length ? <div className="iafiles">{referencias.map((referencia, indice) => <span key={`${referencia.nombre}${indice}`}><PanelV29Icon name="file" size={12} />{referencia.nombre}<button type="button" aria-label={`Quitar ${referencia.nombre}`} onClick={() => setReferencias(actuales => actuales.filter((_, i) => i !== indice))}><PanelV29Icon name="x" size={10} /></button></span>)}</div> : null}
+              {referencias.length ? <div className="iafiles">{referencias.map((referencia, indice) => <span key={`${referencia.nombre}${indice}`}><PanelV29Icon name="file" size={12} />{referencia.nombre}<button type="button" aria-label={`Quitar ${referencia.nombre}`} onClick={() => {
+                setReferencias(actuales => actuales.filter((_, i) => i !== indice));
+                if (importado?.nombre === referencia.nombre) setImportado(null);
+              }}><PanelV29Icon name="x" size={10} /></button></span>)}</div> : null}
               <div className="iabar">
-                <button type="button" className="lnk" onClick={() => selector.current?.click()}><PanelV29Icon name="clip" size={13} />Adjuntar referencia</button>
+                <button type="button" className="lnk" disabled={leyendo} onClick={() => selector.current?.click()}><PanelV29Icon name="clip" size={13} />{leyendo ? 'Leyendo archivo…' : 'Adjuntar referencia'}</button>
                 <button type="button" className={`lnk${escuchando ? ' on' : ''}`} aria-pressed={escuchando} onClick={dictar}><PanelV29Icon name="mic" size={13} />{escuchando ? 'Escuchando…' : 'Dictar pedido'}</button>
-                <input ref={selector} type="file" hidden accept=".pdf,.txt,.csv,.md,application/pdf,text/*" aria-label="Elegir archivo de referencia" onChange={event => void adjuntar(event)} />
+                <input ref={selector} type="file" hidden accept={ARCHIVOS_PLAN_ANTERIOR} aria-label="Elegir archivo de referencia" onChange={event => void adjuntar(event)} />
               </div>
             </div>
+            {importado ? <PlanAnteriorReconocido nombre={nombre} plan={importado.plan} importando={importando} onUsar={() => void usarComoBorrador()} onDescartar={() => setImportado(null)} /> : null}
             <div className="iaideas"><span>Para empezar</span>{IDEAS_ARMADO.map(idea => <button type="button" key={idea} onClick={() => setPedido(idea)}>{idea}</button>)}</div>
             <div className="p28-context-link">
               <span><PanelV29Icon name="file" size={14} /><b>{activas} datos de la ficha</b><small>se usan como contexto</small></span>
@@ -260,6 +286,19 @@ export function PanelPlanArmar({
           ? `de ${dolares(uso.limit_micros)} · bolsa compartida de Nutridash · ${uso.month}. Incluye reservas pendientes. ${uso.source === 'memory' ? 'Demo local; no es gasto real del proveedor.' : 'Registro del servidor; no es una factura del proveedor.'}`
           : 'No pudimos consultar el registro mensual de IA. No se informa un gasto ni un tope sin verificar.'}</span></div>
       </section>
+    </div>
+  </div>;
+}
+
+/** Tarjeta del plan anterior reconocido, con las clases del boceto v29 (`p28-context-link`, `iabar`, `sbtn k`). */
+export function PlanAnteriorReconocido({ nombre, plan, importando, onUsar, onDescartar }: {
+  nombre: string; plan: PlanImportado; importando: boolean; onUsar: () => void; onDescartar: () => void;
+}) {
+  return <div className="p28-context-link" role="status">
+    <span><PanelV29Icon name="file" size={14} /><b>Plan anterior: {resumenImportado(plan)}</b><small>{AVISO_LOCAL} Reemplaza el borrador de {nombre}; su plan publicado se conserva.</small></span>
+    <div className="iabar">
+      <button type="button" className="sbtn k" disabled={importando} onClick={onUsar}>{importando ? 'Creando borrador…' : 'Usar como borrador'}</button>
+      <button type="button" className="sbtn" disabled={importando} onClick={onDescartar}>Solo como referencia</button>
     </div>
   </div>;
 }

@@ -1,5 +1,7 @@
 # Traspaso del proyecto (actualización vigente: 2026-11-05)
 
+5/11 · Claude · La prueba gratis de la nutri pasa de 30 a 3 días (decisión de Facundo del 5/11): las altas desde el 6/11 a las 00:00 de Argentina tienen 3 días con todo abierto y el cuarto día el panel queda en solo lectura hasta que paga Base o Pro por Mercado Pago. Las cuentas creadas antes conservan sus 30 días. El contador viejo del servicio manual (`platform_settings.trial_days`, el de /admin) sigue en la base: se cambia aparte con su frase. Rama `claude/project-thread-y6mog9`, sin migraciones.
+5/11 · Claude · Planes: «Adjuntar referencia» de Armar con IA lee el plan anterior en PDF, foto, Word, Excel o texto en el navegador (sin IA) y lo deja como borrador editable con «Usar como borrador». Además busca cada alimento medible en SARA 2 y lo carga con calorías; lo demás queda como texto. Sin migraciones ni producción. [Nota](panel-nutri-rediseno/planes-importar-plan-anterior.md).
 5/11 · Claude · Ajustes › Tus datos › Descargar baja un .zip real: pacientes y turnos en Excel, la historia clínica de cada paciente en PDF (solo con permiso de atención, sin notas privadas) y un LEEME. Ruta `GET /api/ajustes/export`, funciona también en solo lectura. Rama `claude/project-thread-8m5643`, sin base, espera el ok visual. Detalle en `docs/panel-nutri-rediseno/exportar-datos-v29.md`.
 
 # Traspaso del proyecto (actualización vigente: 2026-11-03)
@@ -111,8 +113,8 @@
 
 19/10 · Cursor · Fase 5 y fase 4 quedaron en main. WhatsApp salió del panel. La ficha de #154 convive con Agenda, Cobranzas y Página pública. Sin SQL remoto.
 
-## 5/11 · Paquetes de consultas (rama `claude/project-thread-vq6ihd`, PR en borrador)
-Ficha › Cobros suma el panel «Paquete de consultas» (piezas del boceto v29: fxP, medidor con fxkv, sbtn y cajón #act). La nutri vende un paquete de N consultas (con cobro suelto «Paquete: …» en Cobranzas o «ya está cobrado»), y cada consulta marcada como realizada descuenta una sola del paquete vigente más viejo; desmarcarla la devuelve. También se descuenta a mano, se deshace y se da de baja. Migración aditiva `20261105150000_patient_packs.sql` **sin aplicar** (espera la frase de Facundo). La paciente todavía no ve su saldo de consultas.
+## 5/11 · Paquetes de consultas (PR #287 en main; saldo de la paciente en PR #289)
+Ficha › Cobros suma el panel «Paquete de consultas» (piezas del boceto v29: fxP, medidor con fxkv, sbtn y cajón #act). La nutri vende un paquete de N consultas (con cobro suelto «Paquete: …» en Cobranzas o «ya está cobrado»), y cada consulta marcada como realizada descuenta una sola del paquete vigente más viejo; desmarcarla la devuelve. También se descuenta a mano, se deshace y se da de baja. Migración `20261105150000_patient_packs.sql` aplicada en producción. PR #289: la paciente ve «Tus consultas» en Pagos (cuántas le quedan y hasta cuándo, sin precio ni notas) con la función `get_my_patient_packs`; migración `20261105210000_patient_packs_own.sql` **sin aplicar** (espera la frase de Facundo).
 
 ## 4/11 · Inicio pulido y menú lateral (desde el boceto v29)
 El boceto `design/panel-nutri/v29/panel-trabajo.html` se actualizó primero (Inicio con los números arriba, un solo gráfico, plata completa con un solo formato, botón «Crear» que junta Nuevo plan / Cargar pago / Mensaje, títulos de grupo sin mayúsculas, contadores del menú en gris y sin el número de Pacientes) y `panel-v29.css` se regeneró de ahí. La app lo copia: sin minigráficos de consultas, pacientes, adherencia y por cobrar (queda la barra de semanas de «Cobrado»), grilla de cinco tarjetas del boceto. No se tocó lo que producción ya tenía (animación GSAP de #266, botones menta, logo, riel «Hoy»). Ficha y Planes van en PRs aparte (Planes después de #277).

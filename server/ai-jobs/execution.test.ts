@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mocks = vi.hoisted(() => ({ consent: vi.fn(), generate: vi.fn(), rpc: vi.fn(), save: vi.fn() }));
-vi.mock('../care/consents.js', () => ({ requireCareConsent: mocks.consent }));
+vi.mock('../care/consents.js', () => ({ requireCareConsent: mocks.consent, currentCareConsents: async () => ({ consented: [] }) }));
+vi.mock('../care/repository.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../care/repository.js')>()), listMeasurements: async () => [] }));
+vi.mock('../clinical-workspace/repository.js', async (importOriginal) => ({ ...(await importOriginal<typeof import('../clinical-workspace/repository.js')>()), clinicalSnapshot: async () => ({ records: [] }) }));
 vi.mock('../ai/recipe-draft.js', () => ({ generateRecipeDraft: mocks.generate }));
 vi.mock('../recipes/repository.js', () => ({ resetRecipeMemory: vi.fn(), listProfessionalRecipes: vi.fn().mockResolvedValue([]), saveRecipeDraft: mocks.save }));
 vi.mock('../db/supabase-client.js', () => ({ getRequestDb: () => ({ rpc: mocks.rpc }) }));

@@ -7,7 +7,7 @@ import { CareError } from '../care/errors.js';
 import { getPatient } from '../store.js';
 import { localBillingDate } from '../../src/billing.js';
 import { addCharge } from '../fees/repository.js';
-import { packLeft, type PackSaleInput, type PackUse, type PackUseInput, type PatientPack } from '../../src/types/packs.js';
+import { packLeft, type OwnPack, type PackSaleInput, type PackUse, type PackUseInput, type PatientPack } from '../../src/types/packs.js';
 
 export { CareError } from '../care/errors.js';
 
@@ -102,6 +102,23 @@ export async function listPacks(patientId: string, persistent: boolean): Promise
   if (persistent) return call('get_patient_packs', { target: patientId });
   memoryPatient(patientId);
   return memoryList(patientId);
+}
+
+/** La paciente ve su propio paquete: nombre, total, usadas y fechas (sin precio ni notas). */
+export async function listOwnPacks(patientId: string, persistent: boolean): Promise<OwnPack[]> {
+  if (persistent) {
+    const { data, error } = await getRequestDb().rpc('get_my_patient_packs', { target: patientId });
+    packsDbError(error);
+    return ((data as Record<string, unknown>[] | null) ?? []).map((row) => ({
+      id: String(row.id), name: String(row.name), sessions: Number(row.sessions), used: Number(row.used),
+      starts_on: String(row.starts_on), expires_on: row.expires_on ? String(row.expires_on) : null, closed: Boolean(row.closed),
+    }));
+  }
+  memoryPatient(patientId);
+  return memoryList(patientId).map((pack) => ({
+    id: pack.id, name: pack.name, sessions: pack.sessions, used: pack.uses.length,
+    starts_on: pack.starts_on, expires_on: pack.expires_on, closed: Boolean(pack.closed_at),
+  }));
 }
 
 export async function sellPack(patientId: string, input: PackSaleInput, persistent: boolean): Promise<PatientPack[]> {

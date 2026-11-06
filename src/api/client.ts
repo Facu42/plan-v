@@ -8,7 +8,7 @@ import type { CentroCobros, CentroNutri, CentroPacientes, CentroResumen, CentroS
 import type { HubActivacion, HubBandeja, HubCobranza, HubConexiones, HubFacturacion, HubFicha, HubInicio, HubLead, HubLeadSource, HubLeadStage, HubNutri, HubRiesgo, HubRiesgoMotivo, HubSeguimiento, HubTarea } from '../types/hub';
 import type { AiCheck, AiFullCheck, NutritionistCreateInput, ServiceBoard, ServiceNutritionist, ServiceOverride, ServicePaymentInput, ServiceSettings, TestAccount, TestAccountsInput, TestAccountsResult } from '../types/service';
 import type { BillingBoard, BillingProgram, ChargeInput, PatientFee, PatientLedger, PatientLedgerView, PaymentDecision, PaymentInput, PaymentSettings } from '../types/fees';
-import type { PackSaleInput, PackUseInput, PatientPack } from '../types/packs';
+import type { OwnPack, PackSaleInput, PackUseInput, PatientPack } from '../types/packs';
 import type { HabitReminders } from '../habit-reminders';
 
 export { ApiError } from './error';
@@ -374,6 +374,8 @@ export const api = {
     request<{ ledger: PatientLedger }>(`/api/charges/${chargeId}`, { method: 'PATCH', body: JSON.stringify({ waived }) }),
 
   /** Paquetes de consultas de una paciente (solo la nutricionista). */
+  /** La paciente: su propio saldo de consultas. */
+  getOwnPacks: (patientId: string) => request<{ packs: OwnPack[] }>(`/api/patients/${patientId}/packs/own`),
   getPatientPacks: (patientId: string) => request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs`),
   sellPatientPack: (patientId: string, sale: PackSaleInput) =>
     request<{ packs: PatientPack[] }>(`/api/patients/${patientId}/packs`, { method: 'POST', body: JSON.stringify(sale) }),
