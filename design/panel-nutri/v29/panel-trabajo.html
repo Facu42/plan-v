@@ -3163,11 +3163,17 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 
 /* Degradé oscuro de la tarjeta grande de Inicio (azul profundo a verde lima) en Nueva consulta, Abrir ficha y Próximo turno */
 :root{--grad-dk:linear-gradient(100deg,#0A1636 0%,#0B2A7A 26%,#0042B0 50%,#0096E6 74%,#00D5FD 89%,#6DF895 100%);--grad-dk-h:linear-gradient(100deg,#0D1D44 0%,#0E328D 26%,#0049C4 50%,#00A3F5 74%,#0FDEFF 89%,#7FFAA6 100%);--card-dk:radial-gradient(90% 130% at 100% 115%,rgba(109,248,149,.5),transparent 62%),radial-gradient(120% 140% at 100% 0%,rgba(0,213,253,.38),transparent 55%),linear-gradient(160deg,#0A1636 0%,#0B1F4D 48%,#0042B0 100%)}
-:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go){background:var(--grad-dk)!important;color:#fff!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,20,80,.3)}
-:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go):hover:not([disabled]){background:var(--grad-dk-h)!important}
-:is(.cta.gdk,.sbtn.k.gdk,.pd-acts .go) svg{color:#fff}
+:is(.cta.gdk,.sbtn.k.gdk){background:var(--grad-dk)!important;color:#fff!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,20,80,.3)}
+:is(.cta.gdk,.sbtn.k.gdk):hover:not([disabled]){background:var(--grad-dk-h)!important}
+:is(.cta.gdk,.sbtn.k.gdk) svg{color:#fff}
 :is(.pd-next,#s-ficha .fxdk){background:var(--card-dk)!important;color:#F4F5F0}
 .pd-next small,.pd-next span{color:rgba(244,245,240,.74)}
+
+/* Iniciar consulta y Abrir ficha: verde lima con degradé a más claro */
+:root{--grad-lm:linear-gradient(100deg,#86D94F 0%,#A9EA74 52%,#D6F8B0 100%);--grad-lm-h:linear-gradient(100deg,#7ACF42 0%,#9DE166 52%,#CBF3A2 100%);--grad-lm-ink:#1B3305}
+:is(.cta.glm,.pd-acts .go,.sbtn.k.glm){background:var(--grad-lm)!important;color:var(--grad-lm-ink)!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(40,90,10,.2),0 6px 16px rgba(110,190,60,.22);text-shadow:none}
+:is(.cta.glm,.pd-acts .go,.sbtn.k.glm):hover:not([disabled]){background:var(--grad-lm-h)!important}
+:is(.cta.glm,.pd-acts .go,.sbtn.k.glm) svg{color:var(--grad-lm-ink)}
 </style>
 </head>
 <body>
@@ -3353,7 +3359,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
     <div class="appst"><b><i></i>App conectada · hoy 8:10</b>Anamnesis 86% · consentimiento firmado</div>
     <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:var(--grad);color:#fff;border-radius:999px;padding:0 6px;font-size:11px">1</span></button>
     <button class="chip" type="button" data-ic="cal">Agendar</button>
-    <button class="cta" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
+    <button class="cta glm" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
   </div>
   <div class="ftabs" id="ftabs"></div>
   <div id="fwrap" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
