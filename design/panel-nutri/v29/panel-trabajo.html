@@ -3078,6 +3078,46 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 #s-ficha .fxdk::after{display:none}
 #s-ficha .fxdk>small,#s-ficha .fxdk>span,#s-ficha .fxdk .fxdk2 span{color:rgba(244,245,240,.72)}
 #s-ficha .fxdk .fxdk2{border-top-color:rgba(255,255,255,.18)}
+/* ===== Movimiento: CSS puro, 200-320 ms, apagado con "reducir movimiento" ===== */
+:root{--mv:cubic-bezier(.16,1,.3,1)}
+@keyframes mvIn{from{opacity:0;transform:translateY(8px)}}
+@keyframes mvBar{from{transform:scaleX(0)}}
+@keyframes mvPop{from{opacity:0;transform:scale(.97)}}
+@keyframes mvSheet{from{transform:translateY(100%)}}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*){animation:mvIn .32s var(--mv) backwards;animation-delay:calc(var(--mi,0)*42ms)}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(2){--mi:1}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(3){--mi:2}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(4){--mi:3}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(5){--mi:4}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(6){--mi:5}
+.scr:not([hidden]) :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*):nth-child(n+7){--mi:6}
+.scr:not([hidden]) :is(.dprog .tr i,.fxstk i,.sxdays i.on){transform-origin:left center;animation:mvBar .7s var(--mv) backwards;animation-delay:.18s}
+:is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:.97}
+:is(.cta,.chip,.sbtn,.ibtn,.tg2){-webkit-tap-highlight-color:transparent}
+#act{will-change:transform}
+#atoast{transition:opacity .22s var(--mv),transform .26s var(--mv)}
+.mob .mhd{background:color-mix(in srgb,var(--side) 78%,transparent);-webkit-backdrop-filter:blur(16px) saturate(1.4);backdrop-filter:blur(16px) saturate(1.4);position:relative}
+.mob .mnav{padding-left:12px;padding-right:12px}
+.mob .mnav::before{content:"";position:absolute;top:10px;left:12px;height:calc(100% - 26px - env(safe-area-inset-bottom,0px));width:calc((100% - 24px)/5);border-radius:16px;background:var(--lima-tt);transform:translateX(0);transition:transform .34s var(--mv);pointer-events:none}
+.mob .mnav:has(button:nth-child(2).on)::before{transform:translateX(100%)}
+.mob .mnav:has(button:nth-child(3).on)::before{transform:translateX(200%)}
+.mob .mnav:has(button:nth-child(4).on)::before{transform:translateX(300%)}
+.mob .mnav:has(button:nth-child(5).on)::before{transform:translateX(400%)}
+.mob .mnav:not(:has(button.on))::before{opacity:0}
+.mob .mnav button.on{background:none}
+.mob .mnav button svg{transition:transform .3s var(--mv)}
+.mob .mnav button.on svg{transform:translateY(-1px) scale(1.08)}
+.mob .mnav button:active svg{transform:scale(.9)}
+.mob .main{padding:16px 16px 18px;gap:14px;scroll-behavior:smooth}
+.mob .scr{gap:14px}
+.mob .fxp,.mob .card{border-radius:20px}
+.mob .fxr>*{min-height:52px}
+.mob :is(.chip,.sbtn,.cta){min-height:40px}
+.mob .top h1{font-size:25px;letter-spacing:-.025em}
+.mob .kpi .ft{white-space:normal;flex-wrap:wrap;row-gap:2px}
+.mob #act::before{content:"";display:block;width:40px;height:4px;border-radius:99px;background:var(--line2);margin:8px auto 0;flex:none}
+.mob #actw.on #act{animation:mvSheet .38s var(--mv)}
+@media (prefers-reduced-motion:reduce){.scr :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*,.dprog .tr i,.fxstk i,.sxdays i.on){animation:none!important}.mob .mnav::before,.mob .mnav button svg,#atoast{transition:none}.mob #actw.on #act{animation:none}:is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:1}}
 </style>
 </head>
 <body>
