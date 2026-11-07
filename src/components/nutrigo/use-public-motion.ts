@@ -11,7 +11,8 @@ export function usePublicMotion(raiz: RefObject<HTMLElement | null>, listo: bool
     if (!listo || !el) return;
     if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const ctx = gsap.context(() => {
-      gsap.from('.pub-hero > *', { y: 18, opacity: 0, duration: 0.55, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
+      gsap.from('.pub-hero-txt > *', { y: 18, opacity: 0, duration: 0.55, stagger: 0.07, ease: 'power3.out', clearProps: 'all' });
+      gsap.from('.pub-stack > *', { y: 40, opacity: 0, scale: 0.94, duration: 0.7, stagger: 0.12, ease: 'power3.out', delay: 0.15, clearProps: 'opacity,scale,y' });
       const tarjetas = gsap.utils.toArray<HTMLElement>('.pub-card');
       if (typeof IntersectionObserver === 'undefined') return;
       gsap.set(tarjetas, { y: 24, opacity: 0 });

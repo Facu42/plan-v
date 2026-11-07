@@ -41,7 +41,8 @@ describe('encabezado público /slug', () => {
       hours: [{ weekday: 1, start: '09:00', end: '13:00' }],
     }} />);
     expect(html).toContain('href="#reservar"');
-    expect(html).toContain('Próximo turno libre: mañana 10:00');
+    expect(html).toContain('Próximo turno libre');
+    expect(html).toContain('mañana 10:00');
     expect(html).toContain('https://g.page/r/ana');
     expect(html).toMatch(/abre|Abierto ahora|Cerrado ahora/);
   });

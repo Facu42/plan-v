@@ -9,14 +9,14 @@ export function PublicProfessionalInfo({ page }: { page: PublicSchedulingPage })
   const presencial = modalidad !== 'online' && page.page.location.trim() !== '';
   const online = modalidad === 'online' || modalidad === 'ambas' || page.types.some(t => t.channel === 'video');
   return <div className="pub-info">
-    {page.types.length ? <section className="pub-card" aria-labelledby="pub-precios">
+    {page.types.length ? <section className="pub-card pub-precios-card" aria-labelledby="pub-precios">
       <h2 id="pub-precios">Servicios y precios</h2>
       <ul className="pub-precios">{page.types.map(t => <li key={t.id}>
         <span><b>{t.name}</b><small>{t.channel === 'video' ? 'Videollamada' : 'Presencial'} · {t.duration_min} min</small></span>
         <strong>{dineroPublico(t.price_minor)}</strong>
       </li>)}</ul>
     </section> : null}
-    {filas.length ? <section className="pub-card" aria-labelledby="pub-horarios">
+    {filas.length ? <section className="pub-card pub-horarios-card" aria-labelledby="pub-horarios">
       <h2 id="pub-horarios">Horarios de atención</h2>
       <dl className="pub-horarios">{filas.map(f => <div key={f.dia}><dt>{f.dia}</dt><dd className={f.tramos === 'Cerrado' ? 'pub-cerrado' : undefined}>{f.tramos}</dd></div>)}</dl>
       <small>Horario de Argentina.</small>

@@ -26,49 +26,60 @@
 .pub-dir-lista>li>a.pub-pro img{width:56px;height:56px;border-radius:14px}
 .pub-dir-lista>li>a.pub-pro>ul{grid-column:1/-1}
 .pub-dir-av{display:grid;place-items:center;width:56px;height:56px;border-radius:14px;background:#C2E66E;color:#2C3B07;font-weight:700}
-/* Información útil en /slug: precios, horarios y mapa. */
-.scheduling-panel .pub-info{display:grid;gap:16px;margin:0 0 20px}
-.scheduling-panel .pub-card{margin:0;padding:20px;border:1px solid var(--nv-border);border-radius:16px;background:var(--nv-card)}
-.scheduling-panel .pub-card h2{margin:0 0 12px;font-size:16px}
-.scheduling-panel .pub-card small{color:var(--nv-muted,#5c6b62)}
-.pub-precios{display:grid;gap:10px;margin:0;padding:0;list-style:none}
-.pub-precios li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--nv-border)}
-.pub-precios li:last-child{border:0;padding-bottom:0}
-.pub-precios span{display:grid;gap:2px;min-width:0}.pub-precios strong{white-space:nowrap}
-.pub-horarios{display:grid;gap:6px;margin:0 0 8px}
-.pub-horarios>div{display:flex;justify-content:space-between;gap:12px;font-size:14px}.pub-horarios dt{font-weight:600}.pub-horarios dd{margin:0;text-align:right}
-.pub-cerrado{color:var(--nv-muted,#5c6b62)}
-.pub-modos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:0;list-style:none}
-.pub-modos li{padding:4px 10px;border-radius:999px;border:1px solid var(--nv-border);font-size:13px}
-.pub-modos .pub-si{background:#C2E66E;color:#2C3B07;border-color:transparent;font-weight:600}
-.pub-mapa{width:100%;height:240px;border:0;border-radius:12px;margin:8px 0}
-.pub-como{display:inline-block;font-weight:600;color:inherit}
-@media(min-width:900px){.scheduling-panel .pub-info{grid-template-columns:1fr 1fr}.scheduling-panel .pub-lugar{grid-column:1/-1}}
-/* Portada de /slug. */
-.scheduling-panel .pub-hero{grid-template-columns:auto 1fr;align-items:start;gap:6px 20px;margin:0 0 16px;padding:28px;border:1px solid var(--nv-border);border-radius:24px;background:linear-gradient(135deg,color-mix(in srgb,var(--pub-accent,#C2E66E) 22%,var(--nv-card)),var(--nv-card) 60%)}
-.scheduling-panel .pub-hero>*{grid-column:2;margin:0}
-.scheduling-panel .pub-hero>img{grid-column:1;grid-row:1/span 6;width:128px;height:128px;border-radius:28px}
-.scheduling-panel .pub-hero h1{font-size:clamp(24px,4vw,34px);line-height:1.15;letter-spacing:-.02em}
-.scheduling-panel .pub-hero .pub-verif{justify-self:start;padding:4px 12px;border-radius:999px;background:#C2E66E;color:#2C3B07;font-size:13px}
-@media(max-width:600px){.scheduling-panel .pub-hero{grid-template-columns:1fr;padding:20px}.scheduling-panel .pub-hero>*,.scheduling-panel .pub-hero>img{grid-column:1;grid-row:auto}.scheduling-panel .pub-hero>img{width:96px;height:96px}}
-.pub-horarios dt{flex:none}.pub-horarios dd{flex:1;min-width:0}
-.pub-mapa{background:var(--nv-bg)}
-@media(max-width:600px){.pub-horarios>div{flex-wrap:wrap;gap:2px}.pub-horarios dd{text-align:left;flex-basis:100%}}
-/* Portada con color propio, datos en vivo y acciones. */
-.scheduling-panel .pub-hero{--pa:var(--pub-accent,#C2E66E);color:#fff;border:0;background:radial-gradient(120% 120% at 90% 0%,color-mix(in srgb,var(--pa) 85%,#fff) 0%,color-mix(in srgb,var(--pa) 45%,#10200a) 38%,#0f1a09 78%);box-shadow:0 24px 60px -30px #0008}
-.scheduling-panel .pub-hero p,.scheduling-panel .pub-hero a{color:inherit}
-.scheduling-panel .pub-hero li{background:#ffffff26;border-color:transparent;color:#fff;backdrop-filter:blur(6px)}
-.scheduling-panel .pub-hero .pub-verif{background:var(--pa);color:#1a2605}
-.scheduling-panel .pub-vivo{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px}
-.scheduling-panel .pub-vivo span{display:inline-flex;align-items:center;gap:8px}
-.scheduling-panel .pub-vivo i{width:9px;height:9px;border-radius:50%;background:var(--pa)}
-.scheduling-panel .pub-vivo .pub-abierto i{background:#3ccb5a;box-shadow:0 0 0 0 #3ccb5a99;animation:pubpulso 1.8s ease-out 3}
-.scheduling-panel .pub-vivo .pub-cerrado-ahora i{background:#ffffff80}
 @keyframes pubpulso{to{box-shadow:0 0 0 10px #3ccb5a00}}
+/* Portada de /slug: pila de tarjetas inclinadas sobre fondo punteado (patrón «hero social app» de uilayouts, MIT) con los colores de Nutridash. */
+.scheduling-panel .pub-hero{--pa:var(--pub-accent,#C2E66E);position:relative;overflow:hidden;display:grid;grid-template-columns:1.15fr 1fr;gap:24px;align-items:center;margin:0 0 16px;padding:36px;border:0;border-radius:28px;color:#fff;background:radial-gradient(90% 80% at 85% 0%,color-mix(in srgb,var(--pa) 55%,#0f1a09) 0%,#0f1a09 70%);box-shadow:0 24px 60px -30px #0008}
+.scheduling-panel .pub-hero::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(#ffffff2e 1px,transparent 1px) 0 0/18px 18px,repeating-linear-gradient(135deg,#ffffff0d 0 1px,transparent 1px 14px);-webkit-mask-image:radial-gradient(70% 90% at 80% 40%,#000 0%,transparent 75%);mask-image:radial-gradient(70% 90% at 80% 40%,#000 0%,transparent 75%)}
+.scheduling-panel .pub-hero-txt{position:relative;display:grid;gap:10px;justify-items:start}
+.scheduling-panel .pub-hero-txt>*{margin:0}
+.scheduling-panel .pub-hero p,.scheduling-panel .pub-hero a{color:inherit}
+.scheduling-panel .pub-hero h1{font-size:clamp(30px,4.6vw,52px);line-height:1.04;letter-spacing:-.03em}
+.scheduling-panel .pub-hero .pub-bio{font-size:16px;opacity:.92;max-width:46ch}
+.scheduling-panel .pub-hero li{background:#ffffff26;border-color:transparent;color:#fff;backdrop-filter:blur(6px)}
+.scheduling-panel .pub-hero .pub-verif{padding:4px 12px;border-radius:999px;background:var(--pa);color:#1a2605;font-size:13px}
 .scheduling-panel .pub-acciones{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:6px!important}
 .scheduling-panel .pub-hero .pub-cta{display:inline-flex;align-items:center;min-height:48px;padding:0 26px;border-radius:999px;background:#fff;color:#1a2605;font-weight:700;text-decoration:none;transition:transform .2s ease}
 .scheduling-panel .pub-hero .pub-cta:hover{transform:translateY(-2px)}
 .scheduling-panel .pub-hero .pub-resenas{font-weight:600;text-decoration:underline;text-underline-offset:4px}
-@media(max-width:600px){.scheduling-panel .pub-hero .pub-cta{position:fixed;left:16px;right:16px;bottom:16px;z-index:20;justify-content:center;box-shadow:0 12px 30px #0006;background:var(--pa)}}
-@media(prefers-reduced-motion:reduce){.scheduling-panel .pub-vivo i,.scheduling-panel .pub-hero .pub-cta{animation:none;transition:none}}
-.scheduling-panel .pub-nd{margin-bottom:8px}@media(max-width:600px){.scheduling-panel .pub-nd{margin-bottom:88px}}
+.scheduling-panel .pub-stack{position:relative;min-height:340px;display:grid;place-items:center}
+.scheduling-panel .pub-foto{margin:0;width:min(240px,62%);aspect-ratio:4/5;border-radius:28px;overflow:hidden;transform:rotate(-4deg);background:linear-gradient(160deg,color-mix(in srgb,var(--pa) 70%,#fff),color-mix(in srgb,var(--pa) 60%,#10200a));display:grid;place-items:center;box-shadow:0 1px 1px #0003,0 12px 24px -8px #0006,0 40px 70px -20px #000a}
+.scheduling-panel .pub-foto img{width:100%;height:100%;object-fit:cover;border-radius:0;background:none}
+.scheduling-panel .pub-foto span{font-size:64px;font-weight:700;color:#1a2605}
+.scheduling-panel .pub-tarjeta{position:absolute;display:grid;gap:2px;padding:12px 16px;border-radius:18px;background:#fff;color:#16210a;font-size:13px;box-shadow:0 1px 1px #0003,0 12px 28px -8px #0007}
+.scheduling-panel .pub-tarjeta small{color:#667058;font-size:12px}.scheduling-panel .pub-tarjeta b{font-size:18px;letter-spacing:-.01em}
+.scheduling-panel .pub-prox{right:0;bottom:12%;transform:rotate(4deg)}
+.scheduling-panel .pub-est{left:0;top:10%;display:flex;align-items:center;gap:8px;transform:rotate(-3deg);font-weight:600}
+.scheduling-panel .pub-est i{width:9px;height:9px;border-radius:50%;background:#9aa58a;flex:none}
+.scheduling-panel .pub-est.pub-abierto{background:#e9f8d4;color:#1d4d12}
+.scheduling-panel .pub-est.pub-abierto i{background:#3ccb5a;box-shadow:0 0 0 0 #3ccb5a99;animation:pubpulso 1.8s ease-out 3}
+@keyframes pubpulso{to{box-shadow:0 0 0 10px #3ccb5a00}}
+@media(max-width:720px){.scheduling-panel .pub-hero{grid-template-columns:1fr;padding:24px 20px}.scheduling-panel .pub-stack{order:-1;min-height:260px}.scheduling-panel .pub-foto{width:min(170px,50%)}.scheduling-panel .pub-hero .pub-cta{position:fixed;left:16px;right:16px;bottom:16px;z-index:20;justify-content:center;box-shadow:0 12px 30px #0006;background:var(--pa)}.scheduling-panel .pub-nd{margin-bottom:88px}}
+@media(prefers-reduced-motion:reduce){.scheduling-panel .pub-est i,.scheduling-panel .pub-hero .pub-cta{animation:none;transition:none}}
+/* Información de /slug en bento (patrón «feature bento» de uilayouts, MIT): spans distintos, manchas difusas, chips de vidrio y un ícono que gira 45° al pasar. */
+.scheduling-panel .pub-info{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:0 0 20px}
+.scheduling-panel .pub-card{position:relative;overflow:hidden;margin:0;padding:22px;border:1px solid var(--nv-border);border-radius:24px;background:var(--nv-card);transition:transform .3s ease,box-shadow .3s ease}
+.scheduling-panel .pub-card:hover{transform:scale(1.012);box-shadow:0 18px 40px -22px #2c3b0788}
+.scheduling-panel .pub-card::before{content:"";position:absolute;width:220px;height:220px;right:-70px;top:-90px;border-radius:50%;background:#C2E66E;opacity:.35;filter:blur(60px);pointer-events:none}
+.scheduling-panel .pub-card::after{content:"+";position:absolute;right:18px;top:16px;width:32px;height:32px;display:grid;place-items:center;border-radius:50%;background:#ffffffb3;backdrop-filter:blur(6px);border:1px solid var(--nv-border);font-weight:600;transition:transform .35s ease}
+.scheduling-panel .pub-card:hover::after{transform:rotate(45deg)}
+.scheduling-panel .pub-card>*{position:relative}
+.scheduling-panel .pub-card h2{margin:0 0 14px;font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--nv-muted,#5c6b62)}
+.scheduling-panel .pub-card small{color:var(--nv-muted,#5c6b62)}
+.scheduling-panel .pub-precios-card{grid-column:span 2;background:linear-gradient(160deg,#eaf6c9,var(--nv-card))}
+.scheduling-panel .pub-horarios-card{grid-column:span 2;background:#0f1a09;color:#fff;border-color:transparent}
+.scheduling-panel .pub-horarios-card h2,.scheduling-panel .pub-horarios-card small{color:#b9c9a0}.scheduling-panel .pub-horarios-card::after{background:#ffffff22;border-color:#ffffff33;color:#fff}
+.scheduling-panel .pub-lugar{grid-column:span 4}
+.pub-precios{display:grid;gap:10px;margin:0;padding:0;list-style:none}
+.pub-precios li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding-bottom:10px;border-bottom:1px solid #2c3b0722}
+.pub-precios li:last-child{border:0;padding-bottom:0}
+.pub-precios span{display:grid;gap:2px;min-width:0}.pub-precios strong{white-space:nowrap;font-size:20px;letter-spacing:-.02em}
+.pub-horarios{display:grid;gap:6px;margin:0 0 8px}
+.pub-horarios>div{display:flex;justify-content:space-between;gap:12px;font-size:14px;padding-bottom:6px;border-bottom:1px solid #ffffff1f}.pub-horarios dt{flex:none;font-weight:600}.pub-horarios dd{flex:1;min-width:0;margin:0;text-align:right}
+.pub-cerrado{color:#8f9c7c}
+.pub-modos{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px;padding:0;list-style:none}
+.pub-modos li{padding:5px 12px;border-radius:999px;border:1px solid var(--nv-border);background:#ffffffb3;backdrop-filter:blur(6px);font-size:13px}
+.pub-modos .pub-si{background:#C2E66E;color:#2C3B07;border-color:transparent;font-weight:600}
+.pub-mapa{width:100%;height:260px;border:0;border-radius:18px;margin:8px 0;background:var(--nv-bg)}
+.pub-como{display:inline-block;font-weight:600;color:inherit}
+@media(max-width:900px){.scheduling-panel .pub-info{grid-template-columns:1fr}.scheduling-panel .pub-precios-card,.scheduling-panel .pub-horarios-card,.scheduling-panel .pub-lugar{grid-column:auto}.pub-horarios>div{flex-wrap:wrap;gap:2px}.pub-horarios dd{text-align:left;flex-basis:100%}}
+@media(prefers-reduced-motion:reduce){.scheduling-panel .pub-card,.scheduling-panel .pub-card::after{transition:none}}
