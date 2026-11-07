@@ -2765,9 +2765,9 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 #s-planes .dmf button:hover{text-decoration:underline;text-underline-offset:3px}
 #s-planes .dmf button svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.6}
 #s-planes .dmf .k{color:var(--ink3);margin-left:auto;font-size:11.5px}
-#s-planes [data-iaa="dr"],#s-planes [data-iaa="go"],#s-planes .sbtn.k[data-pa="nuevo"],#s-planes .pstart .sbtn.k{background:linear-gradient(100deg,#0042B0 0%,#0054D3 45%,#0096E6 100%)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(0,66,176,.25)}
+#s-planes [data-iaa="dr"],#s-planes [data-iaa="go"],#s-planes .sbtn.k[data-pa="nuevo"],#s-planes .pstart .sbtn.k{background:var(--grad)!important;color:#fff!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(0,66,176,.25)}
 #s-planes [data-iaa="dr"] svg,#s-planes [data-iaa="go"] svg,#s-planes .sbtn.k[data-pa="nuevo"] svg,#s-planes .pstart .sbtn.k svg{stroke:#fff;color:#fff}
-#s-planes [data-iaa="dr"]:hover,#s-planes [data-iaa="go"]:hover:not([disabled]),#s-planes .sbtn.k[data-pa="nuevo"]:hover,#s-planes .pstart .sbtn.k:hover{background:linear-gradient(100deg,#003A9C 0%,#004CC0 45%,#0088D4 100%)!important}
+#s-planes [data-iaa="dr"]:hover,#s-planes [data-iaa="go"]:hover:not([disabled]),#s-planes .sbtn.k[data-pa="nuevo"]:hover,#s-planes .pstart .sbtn.k:hover{background:var(--grad-h)!important}
 #s-planes.pux-plan .pux-analysis>.pux-detail{border:0;border-top:1px solid var(--line);border-radius:0}
 #s-planes.pux-plan .pux-analysis>.pux-detail>summary{padding:12px 0 0;min-height:48px}
 #s-planes.pux-plan .pux-analysis>.pux-detail>.pux-detail-body{padding:16px 0 0}
@@ -3055,7 +3055,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .top .crear-menu button{display:flex;gap:10px;align-items:center;padding:10px;border:0;background:none;color:var(--ink);text-align:left;border-radius:8px;cursor:pointer;font:inherit}
 .top .crear-menu button:hover{background:var(--app)}
 /* Contadores: degradé azul del logo; en la Ficha van en la esquina de arriba a la derecha de la palabra. */
-.nv .ct,.nv .ct.hot,.ftabs .n,.ftabs .n.hot{background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff}
+.nv .ct,.nv .ct.hot,.ftabs .n,.ftabs .n.hot{background:var(--grad);color:#fff}
 .ftabs button{gap:0}
 .ftabs .n,#ftabs.ftabs .n{align-self:flex-start;margin:-3px 0 0 2px;font-size:11px;line-height:13px;padding:0 5px;font-weight:500}
 .logo img.mk{display:block;object-fit:cover;background:none;padding:0}
@@ -3122,6 +3122,49 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 .mob #act::before{content:"";display:block;width:40px;height:4px;border-radius:99px;background:var(--line2);margin:8px auto 0;flex:none}
 .mob #actw.on #act{animation:mvSheet .38s var(--mv)}
 @media (prefers-reduced-motion:reduce){.scr :is(.kpis>*,.fx>.c>*,.fxr>*,.fxs>*,.fxfiles>*,.hcidx>*,.dprog .tr i,.fxstk i,.sxdays i.on){animation:none!important}.mob .mnav::before,.mob .mnav button svg,#atoast{transition:none}.mob #actw.on #act{animation:none}:is(.cta,.chip,.sbtn,.ibtn,.tg2):active{scale:1}}
+
+/* Degradé del logo (6/11, Facundo): los botones negros pasan al azul → celeste → verde lima del logo nuevo.
+   Un solo degradé en todo el panel (botones, Planes y contadores). El lima queda en la punta para que la letra blanca se lea. */
+:root{--grad:linear-gradient(100deg,#0054DB 0%,#005EDD 45%,#0096EC 70%,#00E6FD 88%,#9AFAB0 100%);--grad-h:linear-gradient(100deg,#004CCB 0%,#0057D4 45%,#008DE4 68%,#00DDF6 86%,#8FF4A6 100%);--grad-ink:#fff;--grad-sh:0 1px 2px rgba(0,60,170,.22),0 6px 16px rgba(0,84,219,.18)}
+:is(.cta,.sbtn.k,.compose .ibtn.go,.mcomp .ibtn.go,.iain .ibtn.go){background:var(--grad)!important;color:var(--grad-ink)!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,40,120,.22);transition:box-shadow .25s var(--mva),filter .25s var(--mva),scale .2s var(--mva)}
+:is(.cta,.sbtn.k,.compose .ibtn.go,.mcomp .ibtn.go,.iain .ibtn.go):hover:not([disabled]){background:var(--grad-h)!important;box-shadow:0 1px 2px rgba(0,60,170,.26),0 10px 22px rgba(0,84,219,.24)}
+:is(.cta,.sbtn.k,.compose .ibtn.go,.mcomp .ibtn.go,.iain .ibtn.go) svg{color:var(--grad-ink);stroke:var(--grad-ink)}
+
+/* Formas comunes (etapa 2, 6/11, Facundo eligió todas):
+   un mismo redondeo, tres niveles de sombra, etiquetas con ícono, anillos de adherencia y anillo de estado en las fotos. */
+@property --v{syntax:'<number>';inherits:true;initial-value:0}
+:root{--r-card:16px;--r-box:12px;--r-ctl:10px;--sh1:var(--shadow);--sh2:0 1px 2px rgba(20,21,25,.06),0 12px 28px rgba(20,21,25,.10);--sh3:0 2px 6px rgba(20,21,25,.08),0 24px 60px rgba(20,21,25,.16)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--sh2:0 1px 2px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.35);--sh3:0 2px 6px rgba(0,0,0,.45),0 24px 60px rgba(0,0,0,.5)}}
+:root[data-theme="dark"]{--sh2:0 1px 2px rgba(0,0,0,.4),0 12px 28px rgba(0,0,0,.35);--sh3:0 2px 6px rgba(0,0,0,.45),0 24px 60px rgba(0,0,0,.5)}
+/* Redondeo: tarjetas 16, cajas internas 12, controles y filas 10, píldoras 999 */
+:is(.card,.next,.dk,.pdin>section,.fxp,.fxdk,.ppsel,.pgoal,.ajic,.prow2,.dv,.mbox,.pubhero,.pux-detail,.iadr,.r29-context){border-radius:var(--r-card)!important}
+:is(.drop,.bub,.dbox,.fxai,.fxdrop,.adrop,.mnot,.ppm,.pstart>div,.ajbub,.iabox,.pemeal,.petot,.iagoal,.iam,.sxcard,.tiles div,.ask,.sug,.msug,.pubsvc,.pubkp>div,.pubins,.eqroles>div,.eqal,.hcsnap,.iaprop,.r29-search){border-radius:var(--r-box)!important}
+:is(.nv,.nvpill,.ico,.macro,.ev,.aslots button,.ppm input,.ppm button,.eqc,.hcq,.ptabs2 button,.pedays button,.dv .acts button,.iaseg button,.pux-hour,.pei input,.pei select,#ptabs button,.r29-tools .ibtn,.r29-tools summary){border-radius:var(--r-ctl)!important}
+/* Sombras: apoyada, levantada al pasar el mouse, flotante */
+:is(.kpi,.card.pick,.sxcard):hover{box-shadow:var(--sh2)!important}
+:is(#act,.mbox,.drop,.mnot,#atoast){box-shadow:var(--sh3)!important}
+/* Etiquetas de estado con ícono, que cambia en su lugar */
+.pill::before{width:10px;height:10px;border-radius:0;background:currentColor;-webkit-mask:var(--pi) center/contain no-repeat;mask:var(--pi) center/contain no-repeat}
+.pill{--pi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.3l2.3 2.3 4.7-5' fill='none' stroke='%23000' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
+.pill.p-wait{--pi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M6 3.6V6l1.6 1' fill='none' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E")}
+.pill.p-bad{--pi:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Ccircle cx='6' cy='6' r='4.6' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M6 3.5v3' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='6' cy='8.4' r='.85'/%3E%3C/svg%3E")}
+.pill.p-vid{--pi:none}
+.pill.p-vid::before{border-radius:50%;width:5px;height:5px;-webkit-mask:none;mask:none}
+/* Adherencia en anillo: un arco que se llena hasta el valor */
+.adh .tr,#s-pacientes .adh .tr{width:18px!important;height:18px!important;flex:none;border-radius:50%!important;background:conic-gradient(var(--rc,var(--hatch)) calc(var(--v)*1%),var(--line) 0)!important;-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 3.5px),#000 calc(100% - 3px));animation:mvRing .9s var(--mva) backwards;animation-delay:.2s}
+.adh .tr i{display:none!important}
+.adh:has(i.lo){--rc:var(--hatch-a)}
+@keyframes mvRing{from{--v:0}}
+/* Anillo de estado en la foto: lima al día, azafrán espera, rojo vencido */
+:is(tr,.li):has(:is(.pill.p-conf,.pill.p-now)) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--hatch)}
+:is(tr,.li):has(.pill.p-wait) .av,#alist .li:has(.why[style*="azaf"]) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--hatch-a)}
+:is(tr,.li):has(.pill.p-bad) .av,#alist .li:has(.why[style*="rojo"]) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--rojo-ink)}
+@media (prefers-reduced-motion:reduce){.adh .tr{animation:none}}
+
+/* Abrir ficha (fila abierta de Pacientes): acción principal, mismo degradé del logo */
+.pd-acts .go,.pd-acts .go:hover{background:var(--grad)!important;color:var(--grad-ink)!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,40,120,.22)}
+.pd-acts .go:hover{background:var(--grad-h)!important}
+.pd-acts .go svg{color:var(--grad-ink);stroke:var(--grad-ink)}
 </style>
 </head>
 <body>
@@ -3305,7 +3348,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
       <div class="tagsr"><span class="tg2">Celíaca</span><span class="tg2">Sin lactosa</span><span class="tg2 n">Hipotiroidismo</span><span class="tg2 n">Programa mensual</span><button class="tg2 add" type="button">+ etiqueta</button></div></div>
     <span class="sp"></span>
     <div class="appst"><b><i></i>App conectada · hoy 8:10</b>Anamnesis 86% · consentimiento firmado</div>
-    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:linear-gradient(135deg,#0042B0,#0054D3 55%,#0096E6);color:#fff;border-radius:999px;padding:0 6px;font-size:11px">1</span></button>
+    <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:var(--grad);color:#fff;border-radius:999px;padding:0 6px;font-size:11px">1</span></button>
     <button class="chip" type="button" data-ic="cal">Agendar</button>
     <button class="cta" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
   </div>
@@ -3365,7 +3408,7 @@ const R=[
 document.getElementById('rows').innerHTML=R.map(r=>`<tr class="${r[11]}"><td class="num">${r[0]}</td>
  <td><div class="who"><span class="av" style="background:${r[3]}">${r[2]}</span><div><b>${r[1]}</b></div></div></td>
  <td>${r[4]}</td><td><span class="mod">${svg(r[5],13)}${r[6]}</span></td>
- <td>${r[7]==null?'<span style="color:var(--ink3)">Primera vez</span>':`<div class="adh"><span class="tr"><i class="${r[7]<70?'lo':''}" style="width:${r[7]}%"></i></span><span class="num">${r[7]}%</span></div>`}</td>
+ <td>${r[7]==null?'<span style="color:var(--ink3)">Primera vez</span>':`<div class="adh" style="--v:${r[7]}"><span class="tr"><i class="${r[7]<70?'lo':''}" style="width:${r[7]}%"></i></span><span class="num">${r[7]}%</span></div>`}</td>
  <td style="color:${r[8]==='Vence hoy'?'var(--azaf-ink)':'var(--ink2)'}">${r[8]}</td>
  <td><span class="pill ${r[9]}">${r[10]}</span></td></tr>`).join('');
 
@@ -3481,7 +3524,7 @@ function rowP(p,i){return `<tr data-i="${i}" class="${i===0?'open':''}"><td>${sv
  <td><div class="who"><span class="av" style="background:${p[2]}">${p[1]}</span><div><b>${p[0]}</b><small>${p[3]} años · ${p[4]}</small></div></div></td>
  <td><div class="pats">${patH(PATP[i]||[])}</div></td>
  <td>${p[7]?`<div class="goal"><span class="tr"><i style="width:${p[7]}%"></i></span><small class="num">${p[7]} % · ${p[5]} kg <span class="dw${p[6].startsWith('+')?' bad':''}">${p[6]}</span></small></div>`:'<span style="color:var(--ink3)">Sin medir</span>'}</td>
- <td>${p[8]==null?'<span style="color:var(--ink3)">—</span>':`<div class="adh"><span class="tr"><i class="${p[8]<70?'lo':''}" style="width:${p[8]}%"></i></span><span class="num">${p[8]} %</span></div>`}</td>
+ <td>${p[8]==null?'<span style="color:var(--ink3)">—</span>':`<div class="adh" style="--v:${p[8]}"><span class="tr"><i class="${p[8]<70?'lo':''}" style="width:${p[8]}%"></i></span><span class="num">${p[8]} %</span></div>`}</td>
  <td><div class="nx"><b class="num">${p[10]}</b><small style="color:${/días|Sin/.test(p[9])?'var(--azaf-ink)':'var(--ink3)'}">último registro: ${p[9].toLowerCase()}</small></div></td>
  <td><span class="pill ${stCls[p[12]]}">${p[12]}</span>${p[11]!=='Al día'?`<small class="cuo">${p[11]}</small>`:''}</td></tr>${i===0?detRow(p,0):''}`;}
 const pb=document.getElementById('prows');pb.innerHTML=P.map(rowP).join('');
@@ -6363,7 +6406,7 @@ function sxProgreso(){
  const fil=tabs('pfil',SX.prog.fil,[['todas','Todas'],['con','Con registros'],['sin','Sin registros']]);
  const ord=tabs('pord',SX.prog.ord,[['nombre','Nombre'],['com','Más comidas'],['chg','Cambio de peso'],['adh','Adherencia']]);
  const tag=r=>r.st==='sin'?pill('Sin registros','p-wait'):r.chg<0?pill('Baja','p-conf'):r.chg>0?pill('Sube','p-wait'):pill('Sin peso','p-ok');
- const body=rows.length?rows.map(r=>`<button type="button" class="l${r.n===SX.prog.who?' on':''}" data-sx="evo" data-who="${ESC(r.n)}">${whoLine(r.n,r.peso+' · '+r.chgT)}${r.adh==null?'<span class="sxsub">Sin dato</span>':`<span class="adh"><span class="tr"><i class="${r.adh<60?'lo':''}" style="width:${r.adh}%"></i></span>${r.adh}%</span>`}${tag(r)}<span class="chip">Evolución</span></button>`).join(''):'<p class="sxsub">Ninguna paciente en este filtro.</p>';
+ const body=rows.length?rows.map(r=>`<button type="button" class="l${r.n===SX.prog.who?' on':''}" data-sx="evo" data-who="${ESC(r.n)}">${whoLine(r.n,r.peso+' · '+r.chgT)}${r.adh==null?'<span class="sxsub">Sin dato</span>':`<span class="adh" style="--v:${r.adh}"><span class="tr"><i class="${r.adh<60?'lo':''}" style="width:${r.adh}%"></i></span>${r.adh}%</span>`}${tag(r)}<span class="chip">Evolución</span></button>`).join(''):'<p class="sxsub">Ninguna paciente en este filtro.</p>';
  const mirar=ATN.map(a=>`<button type="button" class="chip" data-sx="atn" data-who="${ESC(a.n)}">${ESC(a.n.split(' ')[0])}</button>`).join('');
  const movs=MOV.map((m,i)=>`<button type="button" class="chip" data-sx="mov" data-i="${i}">${m.k} ${ESC(m.n.split(' ')[0])}</button>`).join('');
  document.getElementById('sxw-progreso').innerHTML=`<div class="fx" style="grid-template-columns:.82fr 1.28fr"><div class="c">

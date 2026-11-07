@@ -115,7 +115,7 @@ describe('progreso, el dibujo', () => {
       data: datos([laura, sofia]), quien: 'sofia',
       pacientes: [{ id: 'sofia', name: 'Sofía Gómez', initials: 'SG', tone: 'mint', created_at: '2026-08-01T15:00:00.000Z', adherence_score: 86, meal_logs: [] }],
     });
-    expect(html).toContain('<span class="adh"><span class="tr"><i style="width:86%"></i></span>86%</span>');
+    expect(html).toContain('<span class="adh" style="--v:86"><span class="tr"><i style="width:86%"></i></span>86%</span>');
     expect(html).toContain('86% · 1 bajan');
   });
 
