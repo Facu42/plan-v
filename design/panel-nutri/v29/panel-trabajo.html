@@ -3161,11 +3161,10 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
 :is(tr,.li):has(.pill.p-bad) .av,#alist .li:has(.why[style*="rojo"]) .av{box-shadow:0 0 0 2px var(--card),0 0 0 3.5px var(--rojo-ink)}
 @media (prefers-reduced-motion:reduce){.adh .tr{animation:none}}
 
-/* Iniciar consulta y Abrir ficha: verde lima con degradé a más claro */
-:root{--grad-lm:linear-gradient(100deg,var(--lima) 0%,var(--lima-t) 55%,var(--lima-tt) 100%);--grad-lm-h:linear-gradient(100deg,color-mix(in srgb,var(--lima) 88%,#000) 0%,var(--lima) 55%,var(--lima-t) 100%);--grad-lm-ink:var(--lima-ink)}
-:is(.cta.glm,.pd-acts .go,.sbtn.k.glm){background:var(--grad-lm)!important;color:var(--grad-lm-ink)!important;border-color:transparent!important;box-shadow:0 1px 2px rgba(63,90,10,.16),0 6px 14px rgba(150,190,70,.2);text-shadow:none}
-:is(.cta.glm,.pd-acts .go,.sbtn.k.glm):hover:not([disabled]){background:var(--grad-lm-h)!important}
-:is(.cta.glm,.pd-acts .go,.sbtn.k.glm) svg{color:var(--grad-lm-ink);stroke:var(--grad-lm-ink)}
+/* Abrir ficha (fila abierta de Pacientes): acción principal, mismo degradé del logo */
+.pd-acts .go,.pd-acts .go:hover{background:var(--grad)!important;color:var(--grad-ink)!important;border-color:transparent!important;box-shadow:var(--grad-sh);text-shadow:0 1px 1px rgba(0,40,120,.22)}
+.pd-acts .go:hover{background:var(--grad-h)!important}
+.pd-acts .go svg{color:var(--grad-ink);stroke:var(--grad-ink)}
 </style>
 </head>
 <body>
@@ -3351,7 +3350,7 @@ tbody tr[hidden],.fxfiles>div[hidden]{display:none}
     <div class="appst"><b><i></i>App conectada · hoy 8:10</b>Anamnesis 86% · consentimiento firmado</div>
     <button class="chip" type="button" data-chat="open" data-ic="chat">Chat <span class="ct hot num" style="background:var(--grad);color:#fff;border-radius:999px;padding:0 6px;font-size:11px">1</span></button>
     <button class="chip" type="button" data-ic="cal">Agendar</button>
-    <button class="cta glm" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
+    <button class="cta" type="button" data-ft="consultas" data-ic="play">Iniciar consulta</button>
   </div>
   <div class="ftabs" id="ftabs"></div>
   <div id="fwrap" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>

@@ -48,7 +48,7 @@ export function PanelFichaCabecera({ patient, now, datos, etiquetasPropias = nul
         <button className="chip" type="button" onClick={onAgendar}><PanelV29Icon name="cal" />Agendar</button>
         <button className="ibtn" type="button" onClick={onEdit} aria-label={`Editar datos de ${patient.name}`}><PanelV29Icon name="pen" /></button>
         {bell}
-        {llamada ? <a className="cta glm" href={llamada} target="_blank" rel="noopener noreferrer"><PanelV29Icon name="play" />Iniciar consulta</a> : <button className="cta glm" type="button" onClick={onConsulta}><PanelV29Icon name="play" />Iniciar consulta</button>}
+        {llamada ? <a className="cta" href={llamada} target="_blank" rel="noopener noreferrer"><PanelV29Icon name="play" />Iniciar consulta</a> : <button className="cta" type="button" onClick={onConsulta}><PanelV29Icon name="play" />Iniciar consulta</button>}
       </div>
     </div>
     {editando && onGuardarEtiquetas ? <FichaEtiquetas nombre={patient.name.split(' ')[0] ?? patient.name} actuales={propias.map(t => t.label)} onGuardar={onGuardarEtiquetas} onClose={() => setEditando(false)} /> : null}
